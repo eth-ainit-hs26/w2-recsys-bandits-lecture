@@ -1,12 +1,19 @@
 # Two Engines · CAS AINIT FS26 Week 2
 
+### → **[https://eth-ainit-fs26.github.io/recsys_bandits_lecture/](https://eth-ainit-fs26.github.io/recsys_bandits_lecture/)** ←
+
+The live site is the entry point. It opens onto the slides PDF, all eighteen
+interactive visualizations grouped by lecture act, the narrative plan, and the
+archive. Everything browsable, everything linkable.
+
+---
+
 A 90-minute lecture on recommendation systems and bandits, taught to managers, framed as a single question: *what is the difference between **memory** and **prediction**?*
 
-This repo holds the slides, ten interactive visualizations, the narrative plan, and the data the lecture is built on.
-
-- **Live site (GitHub Pages):** `https://eth-ainit-fs26.github.io/recsys_bandits_lecture/`
 - **Lecturer:** Carlos Cotrini Jiménez, ETH Zürich
 - **Course:** [CAS AINIT FS26](https://cas-ainit.ethz.ch), Week 2
+- **Source:** [github.com/eth-ainit-fs26/recsys_bandits_lecture](https://github.com/eth-ainit-fs26/recsys_bandits_lecture)
+- **Deploy:** every push to `main` runs `.github/workflows/pages.yml`, which deploys the whole repo to GitHub Pages (enable once at *Settings → Pages → Source: GitHub Actions*).
 
 ## Quick start
 
