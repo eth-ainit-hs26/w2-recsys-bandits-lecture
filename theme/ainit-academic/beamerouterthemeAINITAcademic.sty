@@ -1,0 +1,68 @@
+% beamerouterthemeAINITAcademic.sty
+% Outer theme: frame title (serif, with thin oxblood underline),
+% generous margins, page furniture (page number lower-right,
+% lecture short-title lower-left, section indicator upper-right).
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{beamerouterthemeAINITAcademic}[2026/05/01 AINIT Academic outer]
+
+\RequirePackage{tikz}
+\RequirePackage{etoolbox}
+
+% --- Margins -------------------------------------------------------------
+% ~12% of slide width on each side.
+\setbeamersize{text margin left=0.12\paperwidth,
+               text margin right=0.12\paperwidth}
+
+% Section indicator macro — set this in the deck via
+%   \renewcommand{\AINITsection}{Act II — Prediction}
+\providecommand{\AINITsection}{}
+% Lecture short-title macro — set via
+%   \renewcommand{\AINITshorttitle}{Two engines}
+\providecommand{\AINITshorttitle}{}
+
+% --- Frame title with thin oxblood underline ----------------------------
+\setbeamertemplate{frametitle}{%
+  \nointerlineskip
+  \vspace{0.6em}%
+  \begin{beamercolorbox}[wd=\paperwidth, sep=0pt, leftskip=0.12\paperwidth, rightskip=0.12\paperwidth]{frametitle}%
+    \usebeamerfont{frametitle}\insertframetitle\par
+    \vspace{0.25em}%
+    {\color{accentOxblood}\rule{0.30\paperwidth}{0.4pt}}%
+  \end{beamercolorbox}%
+  \vspace{0.6em}%
+}
+
+% --- Headline (upper-right section indicator) ---------------------------
+\setbeamertemplate{headline}{%
+  \begin{tikzpicture}[remember picture, overlay]
+    \ifdefempty{\AINITsection}{}{%
+      \node[anchor=north east,
+            inner sep=0pt,
+            text=accentOxblood,
+            font=\sffamily\scshape\scriptsize\itshape] at ($(current page.north east) + (-0.06\paperwidth, -0.04\paperheight)$) {\AINITsection};
+    }
+  \end{tikzpicture}%
+}
+
+% --- Footline (lecture title left, page number right) -------------------
+\setbeamertemplate{footline}{%
+  \begin{tikzpicture}[remember picture, overlay]
+    \ifdefempty{\AINITshorttitle}{}{%
+      \node[anchor=south west,
+            inner sep=0pt,
+            text=mutedWarmGray,
+            font=\sffamily\itshape\scriptsize] at ($(current page.south west) + (0.06\paperwidth, 0.035\paperheight)$) {\AINITshorttitle};
+    }
+    \node[anchor=south east,
+          inner sep=0pt,
+          text=mutedWarmGray,
+          font=\sffamily\scriptsize] at ($(current page.south east) + (-0.06\paperwidth, 0.035\paperheight)$) {\insertframenumber};
+  \end{tikzpicture}%
+}
+
+% Disable any sidebars
+\setbeamertemplate{sidebar left}{}
+\setbeamertemplate{sidebar right}{}
+
+\endinput

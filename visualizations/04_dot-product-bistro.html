@@ -1,0 +1,498 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Dot-product bar bistro · W2 Recsys</title>
+  <link rel="stylesheet" href="shared/style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+  <style>
+    .bistro-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 280px;
+      gap: 24px;
+      align-items: start;
+    }
+    @media (max-width: 1024px) {
+      .bistro-grid { grid-template-columns: 1fr; }
+    }
+
+    .bistro-svg-wrap {
+      width: 100%;
+      max-width: 720px;
+      margin: 0 auto;
+    }
+    .bistro-svg-wrap svg {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    .bar-rect {
+      stroke: rgba(0,0,0,0.15);
+      stroke-width: 1;
+      transition: y 0.18s, height 0.18s, fill 0.18s;
+      cursor: ns-resize;
+    }
+    .row-label {
+      font-size: 14px;
+      font-weight: 500;
+      fill: var(--color-text);
+    }
+    .row-sub {
+      font-size: 11px;
+      fill: var(--color-text-muted);
+    }
+    .dim-label { font-size: 11px; fill: var(--color-text-muted); text-anchor: middle; }
+    .axis-line { stroke: var(--color-border); }
+    .axis-line.zero { stroke: var(--color-text-muted); stroke-width: 1.4; }
+    .bar-value {
+      font-size: 11px;
+      fill: var(--color-text);
+      text-anchor: middle;
+      font-variant-numeric: tabular-nums;
+      pointer-events: none;
+    }
+    .bar-value.muted { fill: var(--color-text-muted); }
+
+    .product-eqn {
+      font-size: 13px;
+      fill: var(--color-text-muted);
+      text-anchor: middle;
+    }
+
+    .sum-row {
+      margin-top: 10px;
+      padding: 14px 18px;
+      background: var(--color-neu-bg);
+      border-left: 4px solid var(--color-tech);
+      border-radius: 6px;
+      font-size: 1rem;
+    }
+    .sum-row .score {
+      font-size: 1.6rem;
+      font-weight: 600;
+      font-variant-numeric: tabular-nums;
+    }
+    .sum-row .score.pos { color: var(--color-pos); }
+    .sum-row .score.neg { color: var(--color-neg); }
+    .sum-row .score.neu { color: var(--color-text-muted); }
+    .sum-row .verdict {
+      display: inline-block;
+      margin-left: 12px;
+      padding: 3px 10px;
+      border-radius: 12px;
+      font-size: 0.85rem;
+      font-weight: 500;
+    }
+    .verdict.pos { background: var(--color-pos-bg); color: var(--color-pos); }
+    .verdict.neg { background: var(--color-neg-bg); color: var(--color-neg); }
+    .verdict.neu { background: var(--color-neu-bg); color: var(--color-text-muted); }
+
+    /* Side panel */
+    .side-card {
+      background: white;
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+      padding: 14px;
+      margin-bottom: 12px;
+    }
+    .side-card h3 {
+      margin: 0 0 8px;
+      font-size: 0.95rem;
+      font-weight: 500;
+    }
+    .side-card p {
+      margin: 0 0 8px;
+      font-size: 0.85rem;
+      color: var(--color-text-muted);
+    }
+    .preset-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .preset-row button {
+      padding: 5px 10px;
+      font-size: 0.82rem;
+      background: white;
+      color: var(--color-text);
+      border: 1px solid var(--color-border);
+      border-radius: 12px;
+      cursor: pointer;
+    }
+    .preset-row button:hover {
+      background: var(--color-neu-bg);
+    }
+    .preset-row button.active {
+      background: var(--color-tech);
+      color: white;
+      border-color: var(--color-tech);
+    }
+    .dim-toggle {
+      display: flex; gap: 6px; align-items: center;
+      font-size: 0.9rem;
+      color: var(--color-text);
+    }
+    .dim-toggle button {
+      padding: 4px 12px;
+      font-size: 0.85rem;
+      background: white;
+      border: 1px solid var(--color-border);
+      border-radius: 12px;
+      cursor: pointer;
+    }
+    .dim-toggle button.active {
+      background: var(--color-header-end);
+      color: white;
+      border-color: var(--color-header-end);
+    }
+
+    .formula-katex { padding: 8px 0; font-size: 0.95rem; }
+    .axis-color-simple { fill: var(--color-simple); }
+    .axis-color-tech   { fill: var(--color-tech); }
+    .axis-color-indoor { fill: var(--color-indoor); }
+    .axis-color-outdoor{ fill: var(--color-outdoor); }
+  </style>
+</head>
+<body>
+  <header class="eth-header">
+    <div class="eth-logo">ETH<em>zürich</em></div>
+    <nav><a href="index.html">← All visualizations</a></nav>
+  </header>
+  <main class="viz-container">
+    <h1>Dot-product bar bistro</h1>
+    <p class="lede">The mechanics of <em>u · v = u₁v₁ + u₂v₂ + …</em>: drag the bars, watch the products glow green or red, and see them sum into one taste score.</p>
+
+    <div class="viz-card">
+      <div class="bistro-grid">
+        <div>
+          <div class="bistro-svg-wrap">
+            <svg id="bistro" viewBox="0 0 720 460" preserveAspectRatio="xMidYMid meet"></svg>
+          </div>
+          <div class="formula-katex" id="formula-katex"></div>
+          <div class="sum-row" id="sum-row"></div>
+        </div>
+
+        <div>
+          <div class="side-card">
+            <h3>Dimensions</h3>
+            <p>Switch between a 2D toy and a 4D taste vector to see the formula scale.</p>
+            <div class="dim-toggle">
+              <button data-d="2" class="active">d = 2</button>
+              <button data-d="4">d = 4</button>
+            </div>
+          </div>
+          <div class="side-card">
+            <h3>User presets</h3>
+            <p>Snap u to a cluster centroid.</p>
+            <div class="preset-row" id="user-presets"></div>
+          </div>
+          <div class="side-card">
+            <h3>Item presets</h3>
+            <p>Snap v to one of the 16 items.</p>
+            <div class="preset-row" id="item-presets"></div>
+          </div>
+          <div class="side-card">
+            <h3>Tip</h3>
+            <p>Drag any bar up or down. Same-sign pairs make the product green and add to the score; opposite signs make it red and subtract.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <aside class="explainer">
+      <h2>What's happening?</h2>
+      <p>The score "how much will this user like this item?" is computed by lining up two vectors and multiplying matching coordinates, then adding everything together. <strong>That's it.</strong> No deep magic — just multiplying and adding numbers.</p>
+      <p>What makes those numbers <em>taste</em> is which features they encode. With <span class="swatch-simple">Simple</span>, <span class="swatch-tech">Tech</span>, <span class="swatch-indoor">Indoor</span>, <span class="swatch-outdoor">Outdoor</span> as the 4 dimensions, a positive product means user and item agree on that axis. The sum is the recommendation score.</p>
+    </aside>
+  </main>
+  <footer class="eth-footer">CAS AINIT FS26 · W2 Recsys</footer>
+
+  <script src="shared/data.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+  <script>
+  (function () {
+    // --------------------------------------------------------
+    // Dimension definitions
+    // --------------------------------------------------------
+    const DIMS_2 = [
+      { key: 'simple-tech', loLabel: 'Simple', hiLabel: 'Tech',
+        loColor: RECSYS.COLORS.simple, hiColor: RECSYS.COLORS.tech, axis: 0 },
+      { key: 'indoor-outdoor', loLabel: 'Indoor', hiLabel: 'Outdoor',
+        loColor: RECSYS.COLORS.indoor, hiColor: RECSYS.COLORS.outdoor, axis: 1 }
+    ];
+    const DIMS_4 = [
+      ...DIMS_2,
+      { key: 'cheap-luxury', loLabel: 'Cheap', hiLabel: 'Luxury',
+        loColor: '#999', hiColor: '#444', axis: 2 },
+      { key: 'useful-fun', loLabel: 'Useful', hiLabel: 'Fun',
+        loColor: '#888', hiColor: '#a44', axis: 3 }
+    ];
+
+    // --------------------------------------------------------
+    // State
+    // --------------------------------------------------------
+    let dim = 2;
+    let dims = DIMS_2;
+    let u = [-1, 1];
+    let v = [-1, 1];
+
+    // For d=4 we extend with sensible defaults; restoring on toggle.
+    function ensureLength(vec, n) {
+      const out = vec.slice();
+      while (out.length < n) out.push(0);
+      return out.slice(0, n);
+    }
+
+    // --------------------------------------------------------
+    // SVG layout
+    // --------------------------------------------------------
+    const svg = d3.select('#bistro');
+    const VB_W = 720, VB_H = 460;
+    const MARGIN = { top: 30, right: 20, bottom: 50, left: 100 };
+    const innerW = VB_W - MARGIN.left - MARGIN.right;
+
+    // Three rows: u, v, u*v ; row height divisions:
+    const rowH = 90;
+    const rowGap = 16;
+    const rows = [
+      { id: 'u',    y: MARGIN.top,                              label: 'User u',     subLabel: 'tastes' },
+      { id: 'v',    y: MARGIN.top + rowH + rowGap,              label: 'Item v',     subLabel: 'features' },
+      { id: 'prod', y: MARGIN.top + 2 * (rowH + rowGap),        label: 'Product',    subLabel: 'uᵢ × vᵢ' },
+    ];
+    // Bar value scale: half-row above & below baseline (each bar from -1 to 1 maps to ±rowH/2)
+    const halfH = rowH / 2;
+
+    const root = svg.append('g');
+
+    // Row label group
+    const labelG = root.append('g');
+    rows.forEach(r => {
+      labelG.append('text').attr('class', 'row-label')
+        .attr('x', 4).attr('y', r.y + halfH - 4).text(r.label);
+      labelG.append('text').attr('class', 'row-sub')
+        .attr('x', 4).attr('y', r.y + halfH + 12).text(r.subLabel);
+      // baseline (zero)
+      labelG.append('line').attr('class', 'axis-line zero')
+        .attr('x1', MARGIN.left).attr('x2', VB_W - MARGIN.right)
+        .attr('y1', r.y + halfH).attr('y2', r.y + halfH);
+      // top + bottom dashed
+      labelG.append('line').attr('class', 'axis-line')
+        .attr('x1', MARGIN.left).attr('x2', VB_W - MARGIN.right)
+        .attr('y1', r.y).attr('y2', r.y).attr('stroke-dasharray', '2 3');
+      labelG.append('line').attr('class', 'axis-line')
+        .attr('x1', MARGIN.left).attr('x2', VB_W - MARGIN.right)
+        .attr('y1', r.y + rowH).attr('y2', r.y + rowH).attr('stroke-dasharray', '2 3');
+    });
+
+    // Group for bars + dim labels (rebuilt on dim change)
+    const gContent = root.append('g');
+
+    // --------------------------------------------------------
+    // Drag behavior on bars: convert pointer y to value
+    // --------------------------------------------------------
+    function makeDrag(rowY, getter, setter) {
+      return d3.drag()
+        .on('drag', function (event) {
+          // event.y is pointer relative to drag-source's coordinate system.
+          // Use d3.pointer to be safe.
+          const [, py] = d3.pointer(event, root.node());
+          const center = rowY + halfH;
+          const v = (center - py) / halfH;
+          const clamped = Math.max(-1, Math.min(1, v));
+          setter(clamped);
+          render();
+        });
+    }
+
+    // --------------------------------------------------------
+    // Render
+    // --------------------------------------------------------
+    function valueColor(val, lo, hi) {
+      if (Math.abs(val) < 0.02) return '#cfd4da';
+      return val >= 0 ? hi : lo;
+    }
+    function productColor(p) {
+      if (Math.abs(p) < 0.02) return '#cfd4da';
+      return p > 0 ? RECSYS.COLORS.pos : RECSYS.COLORS.neg;
+    }
+
+    function render() {
+      // ensure vectors have correct length
+      u = ensureLength(u, dim);
+      v = ensureLength(v, dim);
+
+      // x scale across dims
+      const slot = innerW / dim;
+      const barW = Math.min(60, slot * 0.55);
+      const xCenter = i => MARGIN.left + slot * (i + 0.5);
+
+      // --- DIM labels (top of u row, bottom of prod row)
+      gContent.selectAll('.dim-label-text').remove();
+      dims.forEach((d, i) => {
+        gContent.append('text').attr('class', 'dim-label dim-label-text')
+          .attr('x', xCenter(i)).attr('y', rows[0].y - 8)
+          .text(`dim ${i+1}: ${d.loLabel}↔${d.hiLabel}`)
+          .attr('fill', d.hiColor);
+      });
+
+      // --- bars
+      const allBars = [];
+      for (let i = 0; i < dim; i++) {
+        allBars.push({ row: 'u', i, val: u[i], rowY: rows[0].y, dimDef: dims[i] });
+        allBars.push({ row: 'v', i, val: v[i], rowY: rows[1].y, dimDef: dims[i] });
+        allBars.push({ row: 'prod', i, val: u[i] * v[i], rowY: rows[2].y, dimDef: dims[i] });
+      }
+      const sel = gContent.selectAll('rect.bar-rect').data(allBars, d => d.row + ':' + d.i);
+      const enter = sel.enter().append('rect').attr('class', 'bar-rect');
+
+      enter.merge(sel)
+        .attr('x', d => xCenter(d.i) - barW / 2)
+        .attr('width', barW)
+        .attr('y', d => {
+          const center = d.rowY + halfH;
+          return d.val >= 0 ? center - halfH * d.val : center;
+        })
+        .attr('height', d => Math.abs(halfH * d.val))
+        .attr('fill', d => {
+          if (d.row === 'prod') return productColor(d.val);
+          return valueColor(d.val, d.dimDef.loColor, d.dimDef.hiColor);
+        })
+        .style('pointer-events', d => d.row === 'prod' ? 'none' : 'auto')
+        .each(function (d) {
+          const r = d3.select(this);
+          // (re)attach drag for u/v rows only
+          if (d.row === 'u') {
+            r.call(makeDrag(rows[0].y,
+              () => u[d.i],
+              (val) => { u[d.i] = val; }));
+          } else if (d.row === 'v') {
+            r.call(makeDrag(rows[1].y,
+              () => v[d.i],
+              (val) => { v[d.i] = val; }));
+          }
+        });
+
+      sel.exit().remove();
+
+      // --- value labels
+      const valData = allBars.map(b => ({...b, key: b.row + ':val:' + b.i }));
+      const valSel = gContent.selectAll('text.bar-value').data(valData, d => d.key);
+      valSel.enter().append('text').attr('class', 'bar-value')
+        .merge(valSel)
+        .attr('x', d => xCenter(d.i))
+        .attr('y', d => {
+          const center = d.rowY + halfH;
+          if (Math.abs(d.val) < 0.05) return center - 4;
+          return d.val >= 0 ? center - halfH * d.val - 4 : center + halfH * Math.abs(d.val) + 12;
+        })
+        .text(d => d.val.toFixed(2))
+        .classed('muted', d => Math.abs(d.val) < 0.05);
+      valSel.exit().remove();
+
+      // --- equation under product row: "u_i × v_i"
+      gContent.selectAll('.product-eqn').remove();
+      for (let i = 0; i < dim; i++) {
+        gContent.append('text').attr('class', 'product-eqn')
+          .attr('x', xCenter(i))
+          .attr('y', rows[2].y + rowH + 24)
+          .text(`${u[i].toFixed(2)} × ${v[i].toFixed(2)}`);
+      }
+
+      // --- sum row
+      let total = 0;
+      for (let i = 0; i < dim; i++) total += u[i] * v[i];
+      const cls = total > 0.05 ? 'pos' : (total < -0.05 ? 'neg' : 'neu');
+      const verdict = cls === 'pos' ? 'Likely 👍' : (cls === 'neg' ? 'Likely 👎' : 'Indifferent');
+      const sumEl = document.getElementById('sum-row');
+      sumEl.innerHTML = `<span>Score &nbsp;<em>u·v</em> = </span><span class="score ${cls}">${total.toFixed(2)}</span><span class="verdict ${cls}">${verdict}</span>`;
+
+      // --- KaTeX formula
+      const fEl = document.getElementById('formula-katex');
+      const terms = [];
+      for (let i = 0; i < dim; i++) {
+        terms.push(`${formatNum(u[i])}\\cdot ${formatNum(v[i])}`);
+      }
+      try {
+        katex.render(
+          `u\\cdot v = ${terms.join(' + ')} = ${total.toFixed(2)}`,
+          fEl, { throwOnError: false, displayMode: true }
+        );
+      } catch (e) {
+        fEl.textContent = `u·v = ${terms.join(' + ').replace(/\\cdot/g, '×')} = ${total.toFixed(2)}`;
+      }
+    }
+    function formatNum(x) {
+      const s = x.toFixed(2);
+      // wrap negatives in parentheses for clarity
+      return x < 0 ? `(${s})` : s;
+    }
+
+    // --------------------------------------------------------
+    // Side controls
+    // --------------------------------------------------------
+    document.querySelectorAll('.dim-toggle button').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const d = +btn.dataset.d;
+        dim = d;
+        dims = (d === 2) ? DIMS_2 : DIMS_4;
+        if (d === 4) {
+          u = ensureLength(u, 4);
+          v = ensureLength(v, 4);
+          // Provide some non-zero defaults if previously zero
+          if (u[2] === 0 && u[3] === 0) { u[2] = 0.5; u[3] = -0.5; }
+          if (v[2] === 0 && v[3] === 0) { v[2] = 0.4; v[3] = 0.7; }
+        } else {
+          u = u.slice(0, 2);
+          v = v.slice(0, 2);
+        }
+        document.querySelectorAll('.dim-toggle button').forEach(b => b.classList.toggle('active', +b.dataset.d === d));
+        render();
+      });
+    });
+
+    // User presets: cluster centroids ± named user
+    const userPresetTray = document.getElementById('user-presets');
+    const USER_PRESETS = [
+      { label: 'Michael (-1,  1)', val: [-1,  1] },
+      { label: 'Susan  ( 1,  1)',  val: [ 1,  1] },
+      { label: 'Alice  (-1, -1)',  val: [-1, -1] },
+      { label: 'Fabian ( 1, -1)',  val: [ 1, -1] },
+      { label: 'Tilted ( 0.6, 0.8)', val: [0.6, 0.8] },
+    ];
+    USER_PRESETS.forEach(p => {
+      const b = document.createElement('button');
+      b.textContent = p.label;
+      b.addEventListener('click', () => {
+        u = ensureLength(p.val.slice(), dim);
+        if (dim === 4 && p.val.length < 4) { u[2] = 0.0; u[3] = 0.0; }
+        render();
+      });
+      userPresetTray.appendChild(b);
+    });
+
+    // Item presets: each of the 16 items
+    const itemPresetTray = document.getElementById('item-presets');
+    RECSYS.ITEMS.forEach(it => {
+      const b = document.createElement('button');
+      b.textContent = `${it.icon} ${it.name}`;
+      b.addEventListener('click', () => {
+        v = ensureLength(it.embedding.slice(), dim);
+        // for d=4, fill extra dims with mild defaults based on the item's quadrant
+        if (dim === 4) {
+          // quick illustrative extras: cheap-luxury ~ tech axis amplified, useful-fun ~ outdoor
+          v[2] = it.embedding[0] * 0.6;
+          v[3] = it.embedding[1] * 0.5;
+        }
+        render();
+      });
+      itemPresetTray.appendChild(b);
+    });
+
+    render();
+  })();
+  </script>
+</body>
+</html>

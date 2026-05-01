@@ -1,0 +1,56 @@
+% beamercolorthemeAINITAcademic.sty
+% Color theme for the AINIT Academic Beamer theme.
+% Restrained palette: cream + ink, with two accent colors used sparingly
+% and never on the same slide. Oxblood for content emphasis,
+% Prussian blue for navigation/links only.
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{beamercolorthemeAINITAcademic}[2026/05/01 AINIT Academic colors]
+
+\RequirePackage{xcolor}
+
+% --- Palette --------------------------------------------------------------
+\definecolor{bgCream}{HTML}{FAF7F0}
+\definecolor{ink}{HTML}{1A1A1A}
+\definecolor{accentOxblood}{HTML}{722F37}
+\definecolor{accentPrussian}{HTML}{1B365D}
+\definecolor{mutedWarmGray}{HTML}{6E665C}
+
+% --- Beamer color assignments --------------------------------------------
+\setbeamercolor{background canvas}{bg=bgCream}
+\setbeamercolor{normal text}{fg=ink, bg=bgCream}
+\setbeamercolor{structure}{fg=ink}
+\setbeamercolor{alerted text}{fg=accentOxblood}
+\setbeamercolor{example text}{fg=accentPrussian}
+
+% Headings / titles
+\setbeamercolor{frametitle}{fg=ink, bg=}
+\setbeamercolor{title}{fg=ink}
+\setbeamercolor{subtitle}{fg=mutedWarmGray}
+\setbeamercolor{author}{fg=mutedWarmGray}
+\setbeamercolor{date}{fg=mutedWarmGray}
+\setbeamercolor{institute}{fg=mutedWarmGray}
+
+% Footers / chrome
+\setbeamercolor{page number in head/foot}{fg=mutedWarmGray}
+\setbeamercolor{footline}{fg=mutedWarmGray}
+
+% Itemize / enumerate markers — kept ink, no accent
+\setbeamercolor{itemize item}{fg=ink}
+\setbeamercolor{itemize subitem}{fg=ink}
+\setbeamercolor{enumerate item}{fg=ink}
+
+% Blocks — used only when forced; avoid in favor of plain prose
+\setbeamercolor{block title}{fg=accentOxblood, bg=}
+\setbeamercolor{block body}{fg=ink, bg=}
+
+% Section / nav
+\setbeamercolor{section in toc}{fg=ink}
+\setbeamercolor{subsection in toc}{fg=mutedWarmGray}
+
+% Hyperlinks (configured for the hyperref-aware beamer)
+\hypersetup{colorlinks=true, linkcolor=accentPrussian,
+            urlcolor=accentPrussian, citecolor=accentPrussian,
+            filecolor=accentPrussian}
+
+\endinput

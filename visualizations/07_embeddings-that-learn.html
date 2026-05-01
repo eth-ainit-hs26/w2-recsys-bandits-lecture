@@ -1,0 +1,705 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Embeddings that learn — W2 Recsys</title>
+  <link rel="stylesheet" href="shared/style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+  <style>
+    .layout {
+      display: grid;
+      grid-template-columns: 1.4fr 1fr;
+      gap: 20px;
+      align-items: start;
+    }
+    @media (max-width: 1024px) {
+      .layout { grid-template-columns: 1fr; }
+    }
+    .panel-title {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--color-header-start);
+      margin-bottom: 8px;
+      letter-spacing: 0.2px;
+    }
+    .panel-sub {
+      font-size: 0.82rem;
+      color: var(--color-text-muted);
+      margin-bottom: 10px;
+    }
+    svg.embed-svg {
+      width: 100%;
+      height: auto;
+      background: #fbfbfd;
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+      display: block;
+    }
+    .loss-svg {
+      width: 100%;
+      height: 130px;
+      background: #fbfbfd;
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+      display: block;
+      margin-top: 8px;
+    }
+    .stat-row {
+      display: flex;
+      gap: 18px;
+      font-size: 0.88rem;
+      color: var(--color-text);
+      margin-top: 6px;
+      flex-wrap: wrap;
+    }
+    .stat-row b { font-variant-numeric: tabular-nums; color: var(--color-header-start); }
+    .legend-block {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 6px;
+      font-size: 0.82rem;
+      color: var(--color-text-muted);
+      margin-top: 8px;
+    }
+    .legend-row {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .legend-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .legend-chip .swatch {
+      width: 11px; height: 11px;
+      display: inline-block;
+      border: 1px solid #fff;
+      box-shadow: 0 0 0 1px rgba(0,0,0,0.15);
+    }
+    .legend-chip .swatch.circle  { border-radius: 50%; }
+    .legend-chip .swatch.square  { border-radius: 1px; }
+    .embed-reader {
+      stroke: white;
+      stroke-width: 1.2;
+      cursor: default;
+    }
+    .embed-book {
+      stroke: white;
+      stroke-width: 1.2;
+      cursor: default;
+    }
+    .axis line, .axis path { stroke: #d0d4d8; }
+    .axis text { fill: var(--color-text-muted); font-size: 10px; }
+    .controls .speed-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex: 1;
+      min-width: 220px;
+    }
+    .epoch-bar {
+      font-size: 0.85rem;
+      color: var(--color-text-muted);
+      margin-left: auto;
+      font-variant-numeric: tabular-nums;
+    }
+    .formula-card {
+      background: var(--color-neu-bg);
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 0.9rem;
+      margin-top: 6px;
+    }
+    .annot-box {
+      fill: #fffbe6;
+      stroke: #B8860B;
+      stroke-width: 1;
+    }
+    .annot-text {
+      font-size: 11px;
+      fill: var(--color-text);
+      pointer-events: none;
+    }
+    .annot-leader {
+      stroke: #B8860B;
+      stroke-width: 1;
+      stroke-dasharray: 2 2;
+      fill: none;
+    }
+    .quad-label {
+      font-size: 10px;
+      fill: var(--color-text-muted);
+      text-anchor: middle;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body>
+  <header class="eth-header">
+    <div class="eth-logo">ETH<em>zürich</em></div>
+    <nav><a href="index.html">← All visualizations</a></nav>
+  </header>
+  <main class="viz-container">
+    <h1>Embeddings that learn</h1>
+    <p class="lede">
+      Nobody told the algorithm what "fiction" or "demanding" means.
+      It only sees a sparse matrix of <span style="color:var(--color-pos)">✅</span>,
+      <span style="color:var(--color-neg)">❌</span>, and <span style="color:var(--color-neu)">➖</span>
+      ratings from 21 readers on 16 books. Watch gradient descent rediscover the four-corner
+      geometry from scratch.
+    </p>
+
+    <div class="formula-card" id="formula"></div>
+
+    <div class="viz-card">
+      <div class="layout">
+        <div>
+          <div class="panel-title">Latent space (learned, dim&nbsp;= 2)</div>
+          <div class="panel-sub">
+            21 reader dots (●) · 16 book squares (■). Colors show <em>true</em> archetype /
+            quadrant — the optimizer never sees them.
+          </div>
+          <svg id="embed-svg" class="embed-svg" viewBox="0 0 520 420" preserveAspectRatio="xMidYMid meet"></svg>
+          <div class="legend-block">
+            <div class="legend-row">
+              <span style="font-weight:600;color:var(--color-text)">Readers ●</span>
+              <span class="legend-chip"><span class="swatch circle" style="background:var(--color-light)"></span>A1 Commuter (light fiction)</span>
+              <span class="legend-chip"><span class="swatch circle" style="background:var(--color-fiction)"></span>A2 Literary (demanding fiction)</span>
+              <span class="legend-chip"><span class="swatch circle" style="background:var(--color-nonfiction)"></span>A3 Practical (light nonfiction)</span>
+              <span class="legend-chip"><span class="swatch circle" style="background:var(--color-demanding)"></span>A4 Scholar (demanding nonfiction)</span>
+              <span class="legend-chip"><span class="swatch circle" style="background:var(--color-text-muted)"></span>mixed</span>
+            </div>
+            <div class="legend-row">
+              <span style="font-weight:600;color:var(--color-text)">Books ■</span>
+              <span class="legend-chip"><span class="swatch square" style="background:var(--color-light)"></span>Light fiction</span>
+              <span class="legend-chip"><span class="swatch square" style="background:var(--color-fiction)"></span>Demanding fiction</span>
+              <span class="legend-chip"><span class="swatch square" style="background:var(--color-nonfiction)"></span>Light nonfiction</span>
+              <span class="legend-chip"><span class="swatch square" style="background:var(--color-demanding)"></span>Demanding nonfiction</span>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="panel-title">Training loss</div>
+          <div class="panel-sub">Sum of squared errors over the visible (✅ / ❌) cells only.</div>
+          <svg id="loss-svg" class="loss-svg" viewBox="0 0 360 130" preserveAspectRatio="none"></svg>
+          <div class="stat-row">
+            <span>step <b id="stat-epoch">0</b></span>
+            <span>loss <b id="stat-loss">—</b></span>
+            <span>RMSE <b id="stat-rmse">—</b></span>
+            <span>‖u<sub>Alice</sub> − u<sub>Tessa</sub>‖ <b id="stat-twin">—</b></span>
+          </div>
+          <div class="panel-title" style="margin-top:14px">What to watch</div>
+          <ul style="font-size:0.86rem;color:var(--color-text);line-height:1.45;padding-left:18px;margin:4px 0 0">
+            <li>The 16 books reorganize into four distinct corners — the same quadrants you saw in the latent-axes lab, but rotated/reflected at random.</li>
+            <li>The 21 readers collapse to <em>two</em> clusters (light vs demanding). The matrix doesn't contain enough fiction/nonfiction signal in reader preferences to separate A1 from A3 — they liked the same things.</li>
+            <li>Alice (id 1) and Tessa (id 20) have <em>bit-identical</em> rating rows. They must land on the same point.</li>
+            <li>Re-seed: same geometry, different rotation. The axes have no fixed meaning.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="controls">
+        <button id="btn-step">Step</button>
+        <button id="btn-play">▶ Play</button>
+        <button id="btn-reset" class="secondary">Reset</button>
+        <button id="btn-seed" class="secondary">New seed</button>
+        <div class="speed-wrap">
+          <label for="speed">steps/sec <span id="speed-val" style="color:var(--color-text);font-weight:600">30</span></label>
+          <input type="range" id="speed" min="1" max="120" value="30">
+        </div>
+        <span class="epoch-bar" id="epoch-bar">idle</span>
+      </div>
+    </div>
+
+    <aside class="explainer">
+      <h2>What's happening?</h2>
+      <p>
+        We minimise
+        <span id="loss-tex"></span>
+        by full-batch gradient descent over the <em>visible</em> entries only — the cells where
+        a reader actually said ✅ or ❌. Missing (➖) and ambiguous (?) cells are masked out and
+        never enter the loss.
+      </p>
+      <p>
+        Each step computes the gradient of the squared error at every visible cell, then nudges
+        every reader vector $u_i$ and book vector $v_j$ slightly down-hill. The four corners
+        aren't put there — they emerge.
+      </p>
+      <p>
+        Press <b>New seed</b> after convergence: the four-corner geometry reappears, but
+        rotated or reflected. <em>Latent factors are not unique</em>: any rotation of $U,V$
+        leaves $UV^\top$ unchanged. This is why the axes have no fixed meaning until we name them.
+      </p>
+      <p>
+        <b>Alice ≡ Tessa.</b> Reader 1 (Alice) and reader 20 (Tessa) rate every book identically.
+        From the matrix's point of view they are the same person, so the optimizer has no
+        information to separate them — they must converge to the same 2D point.
+      </p>
+    </aside>
+  </main>
+  <footer class="eth-footer">CAS AINIT FS26 · W2 Recsys · 07 / 11</footer>
+
+  <script src="shared/data.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+  <script>
+  (function () {
+    const C = RECSYS.COLORS;
+    const READERS = RECSYS.READERS;
+    const BOOKS   = RECSYS.BOOKS;
+    const M = READERS.length;     // 21
+    const N = BOOKS.length;       // 16
+    const K = 2;                  // latent dim
+
+    // --- Dense rating matrix and visible mask (pure SSE on visible cells) ---
+    // ratingsForFactorization(): null & 0 -> 0, +1 stays +1, -1 stays -1.
+    // visibleMask(): 1 iff cell is ✅ or ❌ (rated as +1 / -1 / 0). We further
+    // narrow visibility to {+1, -1} so ambiguous (0) cells aren't pinned to 0.
+    const Rdense = RECSYS.ratingsForFactorization();
+    const mask   = RECSYS.RATINGS.map(row => row.map(v => (v === 1 || v === -1) ? 1 : 0));
+    const R      = Rdense; // alias
+
+    let nVisible = 0;
+    for (let i = 0; i < M; i++) for (let j = 0; j < N; j++) nVisible += mask[i][j];
+
+    // --- Detect duplicate reader rows (Alice / Tessa share row 1 == row 20).
+    // Tie their embeddings hard so they converge to the exact same point — the
+    // pedagogical "the matrix has only 20 distinct readers" surprise.
+    function rowsEqual(a, b) {
+      for (let j = 0; j < N; j++) if (a[j] !== b[j]) return false;
+      return true;
+    }
+    const tieGroups = []; // each is an array of reader indices to keep tied
+    {
+      const seen = new Array(M).fill(false);
+      for (let i = 0; i < M; i++) {
+        if (seen[i]) continue;
+        const grp = [i];
+        for (let k = i + 1; k < M; k++) {
+          if (!seen[k] && rowsEqual(RECSYS.RATINGS[i], RECSYS.RATINGS[k])) {
+            grp.push(k);
+            seen[k] = true;
+          }
+        }
+        seen[i] = true;
+        if (grp.length > 1) tieGroups.push(grp);
+      }
+    }
+    // Indices of the Alice/Tessa group, for the annotation
+    const aliceIdx = 0, tessaIdx = 19; // ids 1 and 20
+    const aliceTessaTied =
+      tieGroups.some(g => g.indexOf(aliceIdx) !== -1 && g.indexOf(tessaIdx) !== -1);
+
+    // --- Hyperparameters ---
+    // Full-batch GD; conservative lr keeps the cloud from oscillating, generous
+    // gradient clip lets the early-step gradients (which can be large in any
+    // direction the random init happens to align poorly with R) get the params
+    // moving. With these values we converge to loss ~3.1 (RMSE ~0.11) within
+    // a few hundred steps for any seed.
+    const HP = { lr: 0.03, initScale: 0.5, gradClip: 20.0 };
+
+    // --- Random seed (re-seeded by 'New seed') ---
+    let rngState = 1;
+    function setSeed(s) { rngState = (s >>> 0) || 1; }
+    function rng() {
+      // Mulberry32
+      rngState = (rngState + 0x6D2B79F5) >>> 0;
+      let t = rngState;
+      t = Math.imul(t ^ (t >>> 15), t | 1);
+      t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    }
+    function randn() {
+      // Box-Muller
+      const u = Math.max(rng(), 1e-9);
+      const v = rng();
+      return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+    }
+
+    // --- State: U (M×K), V (N×K) ---
+    let U, V, epoch, lossHistory, playing, animHandle, lastFrameTs, epochAccumulator;
+
+    function tieDuplicates() {
+      // For each duplicate-row group, force all members to the group mean.
+      for (const grp of tieGroups) {
+        for (let k = 0; k < K; k++) {
+          let s = 0;
+          for (const i of grp) s += U[i][k];
+          const m = s / grp.length;
+          for (const i of grp) U[i][k] = m;
+        }
+      }
+    }
+
+    function initParams() {
+      U = Array.from({ length: M }, () =>
+        Array.from({ length: K }, () => randn() * HP.initScale));
+      V = Array.from({ length: N }, () =>
+        Array.from({ length: K }, () => randn() * HP.initScale));
+      tieDuplicates();
+      epoch = 0;
+      lossHistory = [];
+      computeLoss(); // seed history
+    }
+
+    function predict(i, j) {
+      return U[i][0] * V[j][0] + U[i][1] * V[j][1];
+    }
+
+    function computeLoss() {
+      let sse = 0;
+      for (let i = 0; i < M; i++) {
+        for (let j = 0; j < N; j++) {
+          if (!mask[i][j]) continue;
+          const e = predict(i, j) - R[i][j];
+          sse += e * e;
+        }
+      }
+      lossHistory.push({
+        epoch,
+        loss: sse,
+        rmse: Math.sqrt(sse / nVisible),
+      });
+      if (lossHistory.length > 1500) lossHistory.shift();
+      return sse;
+    }
+
+    function clip(x, lim) { return x > lim ? lim : (x < -lim ? -lim : x); }
+
+    // Full-batch gradient descent step on the visible-cell SSE.
+    //   L = sum_{(i,j) visible} (u_i . v_j - r_ij)^2
+    //   dL/du_i = sum_j 2 m_ij (u_i.v_j - r_ij) v_j
+    //   dL/dv_j = sum_i 2 m_ij (u_i.v_j - r_ij) u_i
+    function stepEpoch() {
+      const dU = Array.from({ length: M }, () => [0, 0]);
+      const dV = Array.from({ length: N }, () => [0, 0]);
+      for (let i = 0; i < M; i++) {
+        for (let j = 0; j < N; j++) {
+          if (!mask[i][j]) continue;
+          const e = predict(i, j) - R[i][j]; // residual
+          const ui0 = U[i][0], ui1 = U[i][1];
+          const vj0 = V[j][0], vj1 = V[j][1];
+          dU[i][0] += 2 * e * vj0;
+          dU[i][1] += 2 * e * vj1;
+          dV[j][0] += 2 * e * ui0;
+          dV[j][1] += 2 * e * ui1;
+        }
+      }
+      const lr = HP.lr, g = HP.gradClip;
+      for (let i = 0; i < M; i++) {
+        U[i][0] -= lr * clip(dU[i][0], g);
+        U[i][1] -= lr * clip(dU[i][1], g);
+      }
+      for (let j = 0; j < N; j++) {
+        V[j][0] -= lr * clip(dV[j][0], g);
+        V[j][1] -= lr * clip(dV[j][1], g);
+      }
+      tieDuplicates();
+      epoch += 1;
+      computeLoss();
+    }
+
+    // ---------------- Rendering ----------------
+    const svg = d3.select('#embed-svg');
+    const W = 520, H = 420, P = 36;
+    const xScale = d3.scaleLinear().range([P, W - P]);
+    const yScale = d3.scaleLinear().range([H - P, P]);
+
+    const gAxis  = svg.append('g');
+    const gGrid  = svg.append('g');
+    const gQuad  = svg.append('g');
+    const gBooks = svg.append('g');
+    const gReaders = svg.append('g');
+    const gAnnot = svg.append('g');
+
+    function readerColor(d) {
+      switch (d.archetype) {
+        case 'A1':  return C.light;       // commuter — light fiction
+        case 'A2':  return C.fiction;     // literary — demanding fiction
+        case 'A3':  return C.nonfiction;  // practical — light nonfiction
+        case 'A4':  return C.demanding;   // scholar — demanding nonfiction
+        default:    return C.textMuted;   // mixed / outliers
+      }
+    }
+    function bookColor(d) {
+      switch (d.quadrant) {
+        case 'LF': return C.light;
+        case 'DF': return C.fiction;
+        case 'LN': return C.nonfiction;
+        case 'DN': return C.demanding;
+      }
+      return C.textMuted;
+    }
+
+    function fitScales() {
+      let max = 0.5;
+      for (let i = 0; i < M; i++) for (let k = 0; k < K; k++) max = Math.max(max, Math.abs(U[i][k]));
+      for (let j = 0; j < N; j++) for (let k = 0; k < K; k++) max = Math.max(max, Math.abs(V[j][k]));
+      const lim = max * 1.15 + 0.05;
+      xScale.domain([-lim, lim]);
+      yScale.domain([-lim, lim]);
+    }
+
+    function renderAxes() {
+      gAxis.selectAll('*').remove();
+      gGrid.selectAll('*').remove();
+      gQuad.selectAll('*').remove();
+      // Origin cross
+      gGrid.append('line')
+        .attr('x1', xScale(0)).attr('x2', xScale(0))
+        .attr('y1', P).attr('y2', H - P)
+        .attr('stroke', '#cdd2d8').attr('stroke-dasharray', '2 3');
+      gGrid.append('line')
+        .attr('y1', yScale(0)).attr('y2', yScale(0))
+        .attr('x1', P).attr('x2', W - P)
+        .attr('stroke', '#cdd2d8').attr('stroke-dasharray', '2 3');
+      // Bounding box
+      gAxis.append('rect')
+        .attr('x', P).attr('y', P).attr('width', W - 2 * P).attr('height', H - 2 * P)
+        .attr('fill', 'none').attr('stroke', '#e0e3e7');
+      // Compass labels (pinned to the four corners of the box)
+      const cx = (P + (W - P)) / 2;
+      const cy = (P + (H - P)) / 2;
+      gQuad.append('text').attr('class', 'quad-label')
+        .attr('x', (W - P + cx) / 2).attr('y', P + 12).text('quadrant ↑');
+      gQuad.append('text').attr('class', 'quad-label')
+        .attr('x', cx).attr('y', P + 12).text('learned axes have no fixed meaning');
+    }
+
+    function renderEmbeddings() {
+      fitScales();
+      renderAxes();
+
+      // Books (squares) underneath
+      const bookSel = gBooks.selectAll('rect.embed-book').data(BOOKS);
+      const bookEnter = bookSel.enter()
+        .append('rect')
+        .attr('class', 'embed-book')
+        .attr('width', 11).attr('height', 11);
+      bookEnter.append('title');
+      const bookMerged = bookEnter.merge(bookSel);
+      bookMerged
+        .attr('x', (d, j) => xScale(V[j][0]) - 5.5)
+        .attr('y', (d, j) => yScale(V[j][1]) - 5.5)
+        .attr('fill', bookColor);
+      bookMerged.select('title').text(d => `${d.label} — ${d.title}`);
+
+      // Readers (circles) on top
+      const readerSel = gReaders.selectAll('circle.embed-reader').data(READERS);
+      const readerEnter = readerSel.enter()
+        .append('circle')
+        .attr('class', 'embed-reader')
+        .attr('r', 6);
+      readerEnter.append('title');
+      const readerMerged = readerEnter.merge(readerSel);
+      readerMerged
+        .attr('cx', (d, i) => xScale(U[i][0]))
+        .attr('cy', (d, i) => yScale(U[i][1]))
+        .attr('fill', readerColor);
+      readerMerged.select('title').text(d => `${d.name} (${d.archetype})`);
+
+      // Alice ≡ Tessa annotation (only after some convergence so the dots overlap)
+      renderTwinAnnotation();
+    }
+
+    function renderTwinAnnotation() {
+      gAnnot.selectAll('*').remove();
+      const ax = U[aliceIdx][0], ay = U[aliceIdx][1];
+      const tx = U[tessaIdx][0], ty = U[tessaIdx][1];
+      const dx = ax - tx, dy = ay - ty;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      // Only show after the points are close enough to make the "≡" claim visually true.
+      if (dist > 0.15) return;
+
+      const px = xScale(ax), py = yScale(ay);
+      // Choose a callout offset that stays inside the box
+      let ox = 60, oy = -38;
+      if (px + ox + 130 > W - 4) ox = -190;
+      if (py + oy < P + 16) oy = 30;
+
+      const bx = px + ox, by = py + oy;
+      const bw = 130, bh = 30;
+      gAnnot.append('path')
+        .attr('class', 'annot-leader')
+        .attr('d', `M${px},${py} L${bx + (ox > 0 ? 0 : bw)},${by + bh / 2}`);
+      gAnnot.append('rect')
+        .attr('class', 'annot-box')
+        .attr('x', bx).attr('y', by)
+        .attr('width', bw).attr('height', bh)
+        .attr('rx', 4).attr('ry', 4);
+      gAnnot.append('text')
+        .attr('class', 'annot-text')
+        .attr('x', bx + 6).attr('y', by + 12)
+        .text('Alice ≡ Tessa');
+      gAnnot.append('text')
+        .attr('class', 'annot-text')
+        .attr('x', bx + 6).attr('y', by + 24)
+        .style('fill', 'var(--color-text-muted)')
+        .text('only 20 distinct readers');
+    }
+
+    // ---------------- Loss curve ----------------
+    const lossSvg = d3.select('#loss-svg');
+    const LW = 360, LH = 130, LP = 14;
+    const lossPath = lossSvg.append('path')
+      .attr('fill', 'none')
+      .attr('stroke', C.fiction)
+      .attr('stroke-width', 1.5);
+    const lossAxis = lossSvg.append('g');
+    function renderLoss() {
+      lossAxis.selectAll('*').remove();
+      if (lossHistory.length < 2) {
+        lossPath.attr('d', null);
+        return;
+      }
+      const xs = d3.scaleLinear()
+        .domain([lossHistory[0].epoch, lossHistory[lossHistory.length - 1].epoch])
+        .range([LP + 24, LW - LP]);
+      const maxL = d3.max(lossHistory, d => d.loss);
+      const minL = d3.min(lossHistory, d => d.loss);
+      const ys = d3.scaleLinear()
+        .domain([Math.max(0, minL - 0.05 * maxL), maxL])
+        .range([LH - LP - 4, LP]);
+      const line = d3.line()
+        .x(d => xs(d.epoch))
+        .y(d => ys(d.loss));
+      lossPath.attr('d', line(lossHistory));
+
+      const ax = lossAxis;
+      ax.append('line')
+        .attr('x1', LP + 24).attr('x2', LW - LP)
+        .attr('y1', LH - LP - 4).attr('y2', LH - LP - 4)
+        .attr('stroke', '#d4d8dc');
+      ax.append('line')
+        .attr('x1', LP + 24).attr('x2', LP + 24)
+        .attr('y1', LP).attr('y2', LH - LP - 4)
+        .attr('stroke', '#d4d8dc');
+      ax.append('text').attr('x', 4).attr('y', LP + 8)
+        .attr('font-size', 9).attr('fill', C.textMuted)
+        .text(maxL.toFixed(1));
+      ax.append('text').attr('x', 4).attr('y', LH - LP - 6)
+        .attr('font-size', 9).attr('fill', C.textMuted)
+        .text((Math.max(0, minL)).toFixed(1));
+      ax.append('text').attr('x', LW - LP).attr('y', LH - 2)
+        .attr('font-size', 9).attr('fill', C.textMuted)
+        .attr('text-anchor', 'end').text('step ' + lossHistory[lossHistory.length - 1].epoch);
+    }
+
+    // ---------------- Stats ----------------
+    function twinDist() {
+      const dx = U[aliceIdx][0] - U[tessaIdx][0];
+      const dy = U[aliceIdx][1] - U[tessaIdx][1];
+      return Math.sqrt(dx * dx + dy * dy);
+    }
+    function renderStats() {
+      const last = lossHistory[lossHistory.length - 1];
+      document.getElementById('stat-epoch').textContent = epoch;
+      document.getElementById('stat-loss').textContent = last ? last.loss.toFixed(2) : '—';
+      document.getElementById('stat-rmse').textContent = last ? last.rmse.toFixed(3) : '—';
+      document.getElementById('stat-twin').textContent = twinDist().toExponential(1);
+      document.getElementById('epoch-bar').textContent =
+        playing ? `running · ${epoch} steps` : `idle · ${epoch} steps`;
+    }
+
+    function renderAll() {
+      renderEmbeddings();
+      renderLoss();
+      renderStats();
+    }
+
+    // ---------------- Animation loop ----------------
+    let speed = 30; // steps / sec
+    function tick(ts) {
+      if (!playing) return;
+      if (lastFrameTs == null) lastFrameTs = ts;
+      const dt = (ts - lastFrameTs) / 1000;
+      lastFrameTs = ts;
+      epochAccumulator += dt * speed;
+      let did = 0;
+      while (epochAccumulator >= 1 && did < 12) {
+        stepEpoch();
+        epochAccumulator -= 1;
+        did += 1;
+      }
+      if (did > 0) renderAll();
+      animHandle = requestAnimationFrame(tick);
+    }
+
+    function play() {
+      if (playing) return;
+      playing = true;
+      lastFrameTs = null;
+      epochAccumulator = 0;
+      document.getElementById('btn-play').textContent = '⏸ Pause';
+      animHandle = requestAnimationFrame(tick);
+      renderStats();
+    }
+    function pause() {
+      playing = false;
+      if (animHandle) cancelAnimationFrame(animHandle);
+      document.getElementById('btn-play').textContent = '▶ Play';
+      renderStats();
+    }
+
+    // ---------------- Wire UI ----------------
+    document.getElementById('btn-step').onclick = () => {
+      stepEpoch();
+      renderAll();
+    };
+    document.getElementById('btn-play').onclick = () => {
+      if (playing) pause(); else play();
+    };
+    document.getElementById('btn-reset').onclick = () => {
+      pause();
+      setSeed(currentSeed);
+      initParams();
+      renderAll();
+    };
+    document.getElementById('btn-seed').onclick = () => {
+      pause();
+      currentSeed = (Math.random() * 1e9) | 0;
+      setSeed(currentSeed);
+      initParams();
+      renderAll();
+      play();
+    };
+    const speedInput = document.getElementById('speed');
+    const speedVal = document.getElementById('speed-val');
+    speedInput.addEventListener('input', () => {
+      speed = +speedInput.value;
+      speedVal.textContent = speed;
+    });
+
+    // KaTeX math
+    katex.render(
+      String.raw`\min_{U,V}\;\sum_{(i,j)\,\in\,\Omega_{\text{visible}}}\!\bigl(R_{ij} - u_i^{\!\top} v_j\bigr)^{2}`,
+      document.getElementById('formula'),
+      { displayMode: true, throwOnError: false }
+    );
+    const lossTexEl = document.getElementById('loss-tex');
+    katex.render(
+      String.raw`\sum_{(i,j)\in\Omega_{\text{visible}}}(R_{ij} - u_i^\top v_j)^2`,
+      lossTexEl, { throwOnError: false }
+    );
+
+    // ---------------- Boot ----------------
+    let currentSeed = 42;
+    setSeed(currentSeed);
+    initParams();
+    renderAll();
+    // Auto-play so the user immediately sees the cloud reorganize.
+    play();
+
+    // Expose for console-debugging convenience
+    window.__embedDemo = {
+      get U() { return U; }, get V() { return V; },
+      get loss() { return lossHistory[lossHistory.length - 1]; },
+      twinDist,
+    };
+  })();
+  </script>
+</body>
+</html>

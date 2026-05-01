@@ -1,0 +1,1258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Law of Large Numbers — Sample-path Funnel — CAS AINIT FS26</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+  onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]});"></script>
+<style>
+  :root {
+    --cream: #fdf6ee;
+    --warm-white: #fffaf4;
+    --sand: #f0e6d3;
+    --sand-dark: #e0cdb5;
+    --terra: #c17f4e;
+    --terra-dark: #a0623a;
+    --rust: #d4622a;
+    --ochre: #d49a3a;
+    --sage: #6a8f73;
+    --sage-light: #8fb098;
+    --ink: #2c2416;
+    --ink-light: #5a4a36;
+    --ink-muted: #8a7660;
+    --border: rgba(193, 127, 78, 0.2);
+    --shadow: 0 4px 24px rgba(44,36,22,0.08);
+    --shadow-lg: 0 8px 40px rgba(44,36,22,0.12);
+    /* Wong colorblind-safe palette */
+    --wong-blue:    #0072B2;
+    --wong-vermil:  #D55E00;
+    --wong-green:   #009E73;
+    --wong-purple:  #CC79A7;
+    --wong-ink:     #2c2416;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--cream);
+    color: var(--ink);
+    min-height: 100vh;
+    background-image:
+      radial-gradient(ellipse at 10% 0%, rgba(193,127,78,0.08) 0%, transparent 60%),
+      radial-gradient(ellipse at 90% 100%, rgba(106,143,115,0.06) 0%, transparent 60%);
+  }
+
+  .shell { display: flex; flex-direction: column; min-height: 100vh; }
+  .main { flex: 1; padding: 40px 56px; max-width: 1280px; margin: 0 auto; width: 100%; }
+
+  /* Typography */
+  .page-header { margin-bottom: 28px; }
+  .page-title {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--ink);
+    line-height: 1.2;
+    margin-bottom: 10px;
+  }
+  .page-subtitle {
+    font-size: 15px;
+    color: var(--ink-muted);
+    line-height: 1.6;
+    max-width: 780px;
+  }
+  h2.section-title {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 19px;
+    font-weight: 600;
+    color: var(--terra-dark);
+    margin: 28px 0 12px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  h2.section-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  /* Cards */
+  .card {
+    background: var(--warm-white);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 22px 24px;
+    margin-bottom: 18px;
+    box-shadow: var(--shadow);
+  }
+  .card-title {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 12px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .callout {
+    border-left: 3px solid var(--terra);
+    background: rgba(193,127,78,0.06);
+    padding: 14px 18px;
+    border-radius: 0 10px 10px 0;
+    margin: 16px 0;
+  }
+  .callout p { font-size: 14px; color: var(--ink-light); margin: 0; line-height: 1.65; }
+  .callout strong { color: var(--terra-dark); }
+  .info-box {
+    background: rgba(106,143,115,0.08);
+    border: 1px solid rgba(106,143,115,0.25);
+    border-radius: 12px;
+    padding: 14px 18px;
+    margin: 14px 0;
+  }
+  .info-box p { font-size: 13.5px; color: var(--ink-light); margin: 0; line-height: 1.65; }
+  .formula-box {
+    background: var(--sand);
+    border: 1px solid var(--sand-dark);
+    border-radius: 12px;
+    padding: 18px 22px;
+    margin: 14px 0;
+    text-align: center;
+    color: var(--ink);
+  }
+  .formula-label {
+    font-size: 11px;
+    color: var(--ink-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 8px;
+    font-weight: 600;
+  }
+
+  /* Buttons */
+  .btn {
+    padding: 9px 18px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all 0.18s;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    letter-spacing: 0.02em;
+  }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--terra), var(--rust));
+    color: white;
+    box-shadow: 0 3px 12px rgba(193,127,78,0.3);
+  }
+  .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 5px 16px rgba(193,127,78,0.4); }
+  .btn-secondary {
+    background: var(--sand);
+    color: var(--ink-light);
+    border: 1px solid var(--sand-dark);
+  }
+  .btn-secondary:hover { background: var(--sand-dark); }
+  .btn-ghost {
+    background: rgba(106,143,115,0.1);
+    color: var(--sage);
+    border: 1px solid rgba(106,143,115,0.3);
+  }
+  .btn-ghost:hover { background: rgba(106,143,115,0.2); }
+  .btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none !important; }
+
+  /* Controls */
+  .controls-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 14px 22px;
+    align-items: center;
+  }
+  .ctrl {
+    display: flex; flex-direction: column; gap: 4px;
+    font-size: 13px; color: var(--ink-muted);
+  }
+  .ctrl-row { display: flex; align-items: center; gap: 8px; }
+  .ctrl label { font-weight: 600; color: var(--ink-light); font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em; }
+  .ctrl input[type=range] { flex: 1; accent-color: var(--terra); }
+  .ctrl-val { font-family: 'Courier New', Courier, monospace; font-size: 13px; min-width: 56px; text-align: right; color: var(--ink); font-weight: 600; }
+
+  .ctrl-buttons {
+    display: flex; gap: 10px; flex-wrap: wrap; align-items: center;
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+  }
+
+  /* Toggle */
+  .toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    font-size: 13px;
+    color: var(--ink-light);
+    user-select: none;
+    font-weight: 500;
+  }
+  .toggle input { display: none; }
+  .toggle-track {
+    width: 36px; height: 20px;
+    background: var(--sand-dark);
+    border-radius: 20px;
+    position: relative;
+    transition: background 0.2s;
+    flex-shrink: 0;
+  }
+  .toggle-track::after {
+    content: '';
+    position: absolute;
+    top: 2px; left: 2px;
+    width: 16px; height: 16px;
+    background: var(--warm-white);
+    border-radius: 50%;
+    transition: transform 0.2s;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  }
+  .toggle input:checked + .toggle-track { background: var(--terra); }
+  .toggle input:checked + .toggle-track::after { transform: translateX(16px); }
+
+  /* Mode toggle (segmented) */
+  .seg {
+    display: inline-flex;
+    background: var(--sand);
+    border: 1px solid var(--sand-dark);
+    border-radius: 10px;
+    padding: 3px;
+    gap: 2px;
+  }
+  .seg button {
+    background: transparent;
+    border: none;
+    padding: 7px 14px;
+    border-radius: 7px;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--ink-light);
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.15s;
+    letter-spacing: 0.02em;
+  }
+  .seg button.active {
+    background: var(--warm-white);
+    color: var(--terra-dark);
+    box-shadow: 0 1px 4px rgba(44,36,22,0.08);
+  }
+  .seg button:hover:not(.active) { color: var(--ink); }
+
+  /* Canvas wrap */
+  .stage {
+    background: var(--sand);
+    border-radius: 14px;
+    padding: 16px 18px 12px;
+    position: relative;
+    overflow: hidden;
+  }
+  .stage canvas {
+    display: block;
+    width: 100%;
+    height: 460px;
+    border-radius: 10px;
+    background: var(--warm-white);
+    cursor: ew-resize;
+  }
+  .stage-foot {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 8px;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 11px;
+    color: var(--ink-muted);
+  }
+
+  /* Stats panel */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-top: 12px;
+  }
+  @media (max-width: 720px) {
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  .stat-cell {
+    background: var(--sand);
+    border-radius: 10px;
+    padding: 10px 12px;
+    text-align: center;
+  }
+  .stat-cell .lbl {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--ink-muted);
+    margin-bottom: 4px;
+    font-weight: 700;
+  }
+  .stat-cell .val {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--ink);
+    line-height: 1.1;
+  }
+  .stat-cell.highlight { background: rgba(0,158,115,0.12); border: 1px solid rgba(0,158,115,0.32); }
+  .stat-cell.highlight .val { color: #006e51; }
+
+  /* Legend */
+  .chart-legend {
+    display: flex;
+    gap: 18px;
+    flex-wrap: wrap;
+    font-size: 12px;
+    color: var(--ink-light);
+    margin-top: 10px;
+    padding: 10px 12px;
+    background: var(--warm-white);
+    border-radius: 8px;
+    border: 1px solid var(--border);
+  }
+  .chart-legend .legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .legend-swatch {
+    display: inline-block;
+    width: 22px; height: 12px;
+    border-radius: 2px;
+  }
+  .legend-swatch.swat-paths {
+    background: linear-gradient(180deg,
+      rgba(44,36,22,0.05),
+      rgba(44,36,22,0.35),
+      rgba(44,36,22,0.05));
+  }
+  .legend-swatch.swat-truth {
+    background: var(--wong-vermil);
+    height: 3px;
+    margin-top: 4px;
+    margin-bottom: 4px;
+  }
+  .legend-swatch.swat-band {
+    background: rgba(0,114,178,0.18);
+    border: 1px dashed var(--wong-blue);
+  }
+  .legend-swatch.swat-scrub {
+    background: var(--wong-green);
+    width: 4px;
+    height: 16px;
+    border-radius: 2px;
+  }
+
+  /* Animation status */
+  .status-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 10px;
+    padding: 8px 14px;
+    background: rgba(193,127,78,0.06);
+    border: 1px solid rgba(193,127,78,0.2);
+    border-radius: 8px;
+    font-size: 12px;
+    color: var(--ink-muted);
+  }
+  .status-bar .anim-progress {
+    flex: 1;
+    height: 4px;
+    background: var(--sand-dark);
+    border-radius: 4px;
+    margin: 0 14px;
+    overflow: hidden;
+  }
+  .status-bar .anim-fill {
+    height: 100%;
+    background: var(--terra);
+    border-radius: 4px;
+    width: 0%;
+    transition: width 0.05s linear;
+  }
+  .status-bar .anim-n {
+    font-family: 'Courier New', Courier, monospace;
+    font-weight: 600;
+    color: var(--ink);
+  }
+
+  .footer-note {
+    font-size: 12px;
+    color: var(--ink-muted);
+    text-align: center;
+    margin-top: 24px;
+    padding-top: 14px;
+    border-top: 1px solid var(--border);
+    line-height: 1.6;
+  }
+
+  .key-row {
+    display: flex;
+    gap: 14px;
+    margin-top: 12px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  @media (max-width: 768px) {
+    .main { padding: 24px 20px; }
+    .stage canvas { height: 380px; }
+  }
+</style>
+</head>
+<body>
+<div class="shell">
+<div class="main">
+
+  <div class="page-header">
+    <div class="page-title">The empirical estimator funnels into the truth</div>
+    <div class="page-subtitle">
+      One hidden coin with bias $p$. We run $K$ independent experiments in parallel,
+      each tracking its own running average $\hat p_n$ over $n$ tosses.
+      As $n$ grows, every trajectory is squeezed toward the true $p$ — and the width of
+      the funnel shrinks like $1/\sqrt{n}$. This is the law of large numbers, made visual.
+    </div>
+  </div>
+
+  <!-- Controls -->
+  <div class="card">
+    <div class="card-title">Setup</div>
+    <div class="controls-grid">
+      <div class="ctrl">
+        <label>True success probability $p$</label>
+        <div class="ctrl-row">
+          <input id="s-p" type="range" min="0" max="1" step="0.01" value="0.6">
+          <span class="ctrl-val" id="v-p">0.60</span>
+        </div>
+      </div>
+      <div class="ctrl">
+        <label>Steps per urn $N$</label>
+        <div class="ctrl-row">
+          <input id="s-N" type="range" min="10" max="10000" step="10" value="1000">
+          <span class="ctrl-val" id="v-N">1,000</span>
+        </div>
+      </div>
+      <div class="ctrl">
+        <label>Parallel urns $K$</label>
+        <div class="ctrl-row">
+          <input id="s-K" type="range" min="10" max="500" step="1" value="100">
+          <span class="ctrl-val" id="v-K">100</span>
+        </div>
+      </div>
+      <div class="ctrl">
+        <label>Animation speed</label>
+        <div class="ctrl-row">
+          <input id="s-speed" type="range" min="1" max="10" step="1" value="5">
+          <span class="ctrl-val" id="v-speed">5x</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="ctrl-buttons">
+      <div class="seg" role="tablist" aria-label="Mode">
+        <button id="m-animate" class="active" type="button">Animate</button>
+        <button id="m-static" type="button">Static</button>
+      </div>
+      <button id="btn-play" class="btn btn-primary" type="button">Play</button>
+      <button id="btn-reseed" class="btn btn-secondary" type="button">Reseed</button>
+      <label class="toggle" style="margin-left: 6px;">
+        <input type="checkbox" id="t-band" checked>
+        <span class="toggle-track"></span>
+        <span>Show 1/&radic;n band</span>
+      </label>
+      <span style="margin-left: auto; font-size: 11px; color: var(--ink-muted); font-family: 'Courier New', Courier, monospace;">
+        seed = <strong id="seed-readout" style="color: var(--ink);">42</strong>
+      </span>
+    </div>
+  </div>
+
+  <!-- Stage -->
+  <div class="card">
+    <div class="card-title">Spaghetti of $K$ running averages</div>
+    <div class="stage">
+      <canvas id="cv" width="1800" height="920" aria-label="Sample-path funnel chart"></canvas>
+      <div class="stage-foot">
+        <span>n = 1</span>
+        <span>drag the green line on the x-axis to inspect any step n*</span>
+        <span id="foot-N">n = N</span>
+      </div>
+    </div>
+
+    <div class="chart-legend">
+      <span class="legend-item">
+        <span class="legend-swatch swat-paths"></span>
+        <span>$K$ trajectories of $\hat p_n$ (low alpha — density = darkness)</span>
+      </span>
+      <span class="legend-item">
+        <span class="legend-swatch swat-truth"></span>
+        <span>true $p$ (solid)</span>
+      </span>
+      <span class="legend-item">
+        <span class="legend-swatch swat-band"></span>
+        <span>$p \pm 1/\sqrt{n}$ (dashed)</span>
+      </span>
+      <span class="legend-item">
+        <span class="legend-swatch swat-scrub"></span>
+        <span>scrubber at $n^*$</span>
+      </span>
+    </div>
+
+    <div class="status-bar">
+      <span>Frontier:</span>
+      <span class="anim-progress"><span class="anim-fill" id="anim-fill"></span></span>
+      <span class="anim-n" id="anim-n">n = N</span>
+    </div>
+  </div>
+
+  <!-- Snapshot at n* -->
+  <div class="card">
+    <div class="card-title">Snapshot at scrubber position $n^*$</div>
+    <p style="font-size: 13.5px; color: var(--ink-light); line-height: 1.6; margin-bottom: 6px;">
+      The inset histogram (top-right of the chart) shows the distribution of $\hat p_{n^*}$
+      across the $K$ urns. As you slide $n^*$ to the right, watch the histogram contract
+      toward the vermillion line at $p$.
+    </p>
+    <div class="stats-grid">
+      <div class="stat-cell">
+        <div class="lbl">$n^*$</div>
+        <div class="val" id="st-nstar">—</div>
+      </div>
+      <div class="stat-cell">
+        <div class="lbl">empirical mean</div>
+        <div class="val" id="st-mean">—</div>
+      </div>
+      <div class="stat-cell">
+        <div class="lbl">empirical std</div>
+        <div class="val" id="st-std">—</div>
+      </div>
+      <div class="stat-cell highlight">
+        <div class="lbl">within $\pm 1/\sqrt{n^*}$</div>
+        <div class="val" id="st-frac">—</div>
+      </div>
+    </div>
+    <p style="font-size: 12px; color: var(--ink-muted); margin-top: 10px; line-height: 1.55;">
+      The empirical std is roughly $\sqrt{p(1-p)/n^*}$, which for fixed $p$ shrinks as $1/\sqrt{n^*}$.
+      The fraction in the band is around 68% — Gaussian one-sigma — because the CLT kicks in fast.
+    </p>
+  </div>
+
+  <!-- Theory -->
+  <h2 class="section-title">The math behind the funnel</h2>
+
+  <div class="card">
+    <div class="formula-box">
+      <div class="formula-label">empirical estimator</div>
+      $$\hat{p}_n = \frac{1}{n}\sum_{i=1}^n x_i$$
+    </div>
+    <div class="formula-box">
+      <div class="formula-label">law of large numbers (convergence in probability)</div>
+      $$\hat{p}_n \xrightarrow{\mathbb{P}} p$$
+    </div>
+    <div class="formula-box">
+      <div class="formula-label">precise statement</div>
+      $$\mathbb{P}\bigl(|\hat{p}_n - p| > \delta\bigr) < \epsilon \quad \text{for } n \text{ sufficiently large.}$$
+    </div>
+    <div class="callout">
+      <p><strong>Reading the picture.</strong> Pick any horizontal slice $\delta > 0$ around the vermillion
+      line. For small $n$, plenty of trajectories live outside that slice. For large $n$, almost none do.
+      That's the LLN. The blue dashed band of half-width $1/\sqrt{n}$ shows the typical scale of fluctuation —
+      a one-line preview of the bound that powers UCB on the next slide.</p>
+    </div>
+  </div>
+
+  <div class="info-box">
+    <p><strong>Why this matters for bandits.</strong> A bandit algorithm has to decide which arm is best
+    based on its empirical mean reward. The funnel tells us how trustworthy that empirical mean is at step $n$.
+    UCB acts as if the truth lives somewhere inside a $1/\sqrt{n}$ band — exactly what you see here.</p>
+  </div>
+
+  <div class="footer-note">
+    CAS AINIT FS26 — Week 2 — Bandits — Slide 12 companion.
+  </div>
+
+</div>
+</div>
+
+<script>
+'use strict';
+
+/* ════════════════════════════════════════════════════════════════
+   STATE
+   ════════════════════════════════════════════════════════════════ */
+const state = {
+  p: 0.6,
+  N: 1000,
+  K: 100,
+  seed: 42,
+  showBand: true,
+  mode: 'animate', // 'animate' | 'static'
+  speed: 5,
+  paths: null,    // Float32Array K*N: paths[k*N + n] = pHat_{n+1}
+  nFrontier: 0,   // current animated frontier in steps (1..N)
+  playing: false,
+  nstar: 1000,    // scrubber position (1..N)
+  draggingScrub: false,
+  rafId: null,
+  lastFrameTime: 0,
+};
+
+/* ════════════════════════════════════════════════════════════════
+   RNG — Mulberry32 (seeded, deterministic, fast)
+   ════════════════════════════════════════════════════════════════ */
+function mulberry32(seed) {
+  let a = seed >>> 0;
+  return function () {
+    a = (a + 0x6D2B79F5) >>> 0;
+    let t = a;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+/* ════════════════════════════════════════════════════════════════
+   SIMULATION — pre-compute K trajectories
+   paths[k*N + n] = running average after (n+1) tosses
+   ════════════════════════════════════════════════════════════════ */
+function simulate() {
+  const { p, N, K, seed } = state;
+  const rand = mulberry32(seed);
+  const paths = new Float32Array(K * N);
+  for (let k = 0; k < K; k++) {
+    let s = 0;
+    const off = k * N;
+    for (let n = 0; n < N; n++) {
+      s += rand() < p ? 1 : 0;
+      paths[off + n] = s / (n + 1);
+    }
+  }
+  state.paths = paths;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   CANVAS / DPR
+   ════════════════════════════════════════════════════════════════ */
+const canvas = document.getElementById('cv');
+const ctx = canvas.getContext('2d');
+
+let plotL, plotT, plotR, plotB, plotW, plotH;
+let cssW = 800, cssH = 460;
+
+function resizeCanvas() {
+  const dpr = window.devicePixelRatio || 1;
+  const wrap = canvas.parentElement;
+  cssW = wrap.clientWidth - 36; // padding
+  cssH = Math.max(360, Math.min(520, cssW * 0.46));
+  canvas.style.width = cssW + 'px';
+  canvas.style.height = cssH + 'px';
+  canvas.width = Math.floor(cssW * dpr);
+  canvas.height = Math.floor(cssH * dpr);
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+  plotL = 56;
+  plotT = 24;
+  plotR = cssW - 22;
+  plotB = cssH - 38;
+  plotW = plotR - plotL;
+  plotH = plotB - plotT;
+}
+window.addEventListener('resize', () => { resizeCanvas(); render(); });
+
+function nToPx(n) {
+  // n in [1..N] mapped to [plotL..plotR]
+  return plotL + ((n - 1) / Math.max(1, state.N - 1)) * plotW;
+}
+function pxToN(px) {
+  const t = (px - plotL) / Math.max(1, plotW);
+  return Math.max(1, Math.min(state.N, Math.round(1 + t * (state.N - 1))));
+}
+function pToPy(pVal) {
+  // p in [0..1] mapped to [plotB..plotT] (zero at bottom)
+  return plotB - pVal * plotH;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   RENDER
+   ════════════════════════════════════════════════════════════════ */
+function clear() {
+  ctx.clearRect(0, 0, cssW, cssH);
+  // background
+  ctx.fillStyle = '#fffaf4';
+  ctx.fillRect(plotL, plotT, plotW, plotH);
+}
+
+function drawAxes() {
+  ctx.strokeStyle = 'rgba(44,36,22,0.18)';
+  ctx.lineWidth = 1;
+  // left vertical
+  ctx.beginPath();
+  ctx.moveTo(plotL, plotT);
+  ctx.lineTo(plotL, plotB);
+  ctx.stroke();
+  // bottom horizontal
+  ctx.beginPath();
+  ctx.moveTo(plotL, plotB);
+  ctx.lineTo(plotR, plotB);
+  ctx.stroke();
+
+  // Y ticks
+  ctx.fillStyle = '#8a7660';
+  ctx.font = '11px -apple-system, "Segoe UI", sans-serif';
+  ctx.textAlign = 'right';
+  ctx.textBaseline = 'middle';
+  for (let i = 0; i <= 5; i++) {
+    const y = plotT + (i / 5) * plotH;
+    const v = 1 - i / 5;
+    ctx.strokeStyle = 'rgba(44,36,22,0.08)';
+    ctx.beginPath();
+    ctx.moveTo(plotL, y);
+    ctx.lineTo(plotR, y);
+    ctx.stroke();
+    ctx.fillText(v.toFixed(1), plotL - 6, y);
+  }
+
+  // X ticks (logarithmic-feel: 1, N/4, N/2, 3N/4, N)
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'top';
+  const N = state.N;
+  const ticks = [1, Math.round(N / 4), Math.round(N / 2), Math.round(3 * N / 4), N];
+  for (const t of ticks) {
+    const x = nToPx(t);
+    ctx.strokeStyle = 'rgba(44,36,22,0.18)';
+    ctx.beginPath();
+    ctx.moveTo(x, plotB);
+    ctx.lineTo(x, plotB + 4);
+    ctx.stroke();
+    ctx.fillText(formatN(t), x, plotB + 6);
+  }
+
+  // Axis labels
+  ctx.fillStyle = '#5a4a36';
+  ctx.font = '12px -apple-system, "Segoe UI", sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'top';
+  ctx.fillText('step  n', (plotL + plotR) / 2, plotB + 22);
+
+  ctx.save();
+  ctx.translate(16, (plotT + plotB) / 2);
+  ctx.rotate(-Math.PI / 2);
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('running average  p̂ₙ', 0, 0);
+  ctx.restore();
+}
+
+function formatN(n) {
+  if (n >= 1000) return (n / 1000).toFixed(n >= 10000 ? 0 : 1).replace(/\.0$/, '') + 'k';
+  return String(n);
+}
+
+function drawBand() {
+  if (!state.showBand) return;
+  const { p, N } = state;
+  const samples = Math.min(N, Math.max(2, Math.floor(plotW)));
+
+  // Clip to plot area for the entire band drawing
+  ctx.save();
+  ctx.beginPath();
+  ctx.rect(plotL, plotT, plotW, plotH);
+  ctx.clip();
+
+  // Fill: closed polygon between upper and lower curves
+  ctx.fillStyle = 'rgba(0,114,178,0.12)';
+  ctx.beginPath();
+  for (let i = 0; i < samples; i++) {
+    const t = i / (samples - 1);
+    const n = 1 + t * (N - 1);
+    const x = plotL + t * plotW;
+    const upper = Math.min(1, p + 1 / Math.sqrt(n));
+    if (i === 0) ctx.moveTo(x, pToPy(upper));
+    else ctx.lineTo(x, pToPy(upper));
+  }
+  for (let i = samples - 1; i >= 0; i--) {
+    const t = i / (samples - 1);
+    const n = 1 + t * (N - 1);
+    const x = plotL + t * plotW;
+    const lower = Math.max(0, p - 1 / Math.sqrt(n));
+    ctx.lineTo(x, pToPy(lower));
+  }
+  ctx.closePath();
+  ctx.fill();
+
+  // Dashed boundary curves
+  ctx.strokeStyle = 'rgba(0,114,178,0.85)';
+  ctx.lineWidth = 1.25;
+  ctx.setLineDash([5, 4]);
+  // upper
+  ctx.beginPath();
+  for (let i = 0; i < samples; i++) {
+    const t = i / (samples - 1);
+    const n = 1 + t * (N - 1);
+    const x = plotL + t * plotW;
+    const upper = Math.min(1, p + 1 / Math.sqrt(n));
+    if (i === 0) ctx.moveTo(x, pToPy(upper));
+    else ctx.lineTo(x, pToPy(upper));
+  }
+  ctx.stroke();
+  // lower
+  ctx.beginPath();
+  for (let i = 0; i < samples; i++) {
+    const t = i / (samples - 1);
+    const n = 1 + t * (N - 1);
+    const x = plotL + t * plotW;
+    const lower = Math.max(0, p - 1 / Math.sqrt(n));
+    if (i === 0) ctx.moveTo(x, pToPy(lower));
+    else ctx.lineTo(x, pToPy(lower));
+  }
+  ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.restore();
+
+  // Label "p ± 1/√n" near right edge of the upper curve
+  const nLabel = state.N;
+  const upperLabelY = pToPy(Math.min(1, p + 1 / Math.sqrt(nLabel)));
+  ctx.fillStyle = '#0072B2';
+  ctx.font = '11px -apple-system, "Segoe UI", sans-serif';
+  ctx.textAlign = 'right';
+  ctx.textBaseline = 'bottom';
+  ctx.fillText('p ± 1/√n', plotR - 4, Math.max(plotT + 12, upperLabelY - 4));
+}
+
+function drawPaths(uptoN) {
+  const { paths, K, N } = state;
+  if (!paths) return;
+  // Clip to plot
+  ctx.save();
+  ctx.beginPath();
+  ctx.rect(plotL, plotT, plotW, plotH);
+  ctx.clip();
+
+  // Alpha decreases mildly with K so dense clouds don't go fully black
+  const alpha = Math.max(0.04, Math.min(0.18, 8 / K));
+  ctx.strokeStyle = 'rgba(44,36,22,' + alpha.toFixed(3) + ')';
+  ctx.lineWidth = 1;
+  ctx.lineJoin = 'round';
+
+  // Sub-sample n if N > plotW (no need to draw more points than pixels)
+  const stride = Math.max(1, Math.floor((N - 1) / Math.max(1, plotW * 1.5)));
+  const limit = Math.max(1, Math.min(N, uptoN));
+
+  for (let k = 0; k < K; k++) {
+    const off = k * N;
+    ctx.beginPath();
+    // First point
+    ctx.moveTo(nToPx(1), pToPy(paths[off]));
+    let n = 1 + stride;
+    for (; n <= limit; n += stride) {
+      ctx.lineTo(nToPx(n), pToPy(paths[off + n - 1]));
+    }
+    // ensure terminal point
+    if (n - stride !== limit) {
+      ctx.lineTo(nToPx(limit), pToPy(paths[off + limit - 1]));
+    }
+    ctx.stroke();
+  }
+  ctx.restore();
+}
+
+function drawTruth() {
+  const y = pToPy(state.p);
+  ctx.strokeStyle = '#D55E00';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(plotL, y);
+  ctx.lineTo(plotR, y);
+  ctx.stroke();
+
+  // Label
+  ctx.fillStyle = '#D55E00';
+  ctx.font = '12px Georgia, "Times New Roman", serif';
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(' p = ' + state.p.toFixed(2), plotR + 2, y);
+}
+
+function drawScrubber() {
+  const x = nToPx(state.nstar);
+  // vertical line
+  ctx.strokeStyle = '#009E73';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(x, plotT);
+  ctx.lineTo(x, plotB);
+  ctx.stroke();
+
+  // handle dot at top
+  ctx.fillStyle = '#009E73';
+  ctx.beginPath();
+  ctx.arc(x, plotT - 2, 6, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.strokeStyle = '#fffaf4';
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+
+  // handle dot at bottom (draggable hint)
+  ctx.fillStyle = '#009E73';
+  ctx.beginPath();
+  ctx.arc(x, plotB + 2, 6, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.strokeStyle = '#fffaf4';
+  ctx.stroke();
+
+  // n* label
+  ctx.fillStyle = '#006e51';
+  ctx.font = '11px "Courier New", Courier, monospace';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'bottom';
+  ctx.fillText('n* = ' + formatN(state.nstar), x, plotT - 10);
+}
+
+/* Inset histogram in top-right corner */
+function drawInsetHistogram() {
+  const { paths, K, N, nstar, p } = state;
+  if (!paths) return;
+
+  // collect samples at nstar (paths[k*N + nstar - 1])
+  const samples = new Float64Array(K);
+  for (let k = 0; k < K; k++) samples[k] = paths[k * N + (nstar - 1)];
+
+  // determine y-range adapted to data: center on p, ±max(1/√n*, observed range)
+  const dynW = 1 / Math.sqrt(nstar);
+  let minV = p - 3 * dynW;
+  let maxV = p + 3 * dynW;
+  // also expand to actual sample range a bit
+  let sMin = 1, sMax = 0;
+  for (let i = 0; i < K; i++) {
+    if (samples[i] < sMin) sMin = samples[i];
+    if (samples[i] > sMax) sMax = samples[i];
+  }
+  minV = Math.max(0, Math.min(minV, sMin - 0.02));
+  maxV = Math.min(1, Math.max(maxV, sMax + 0.02));
+  if (maxV - minV < 0.04) {
+    const c = (maxV + minV) / 2;
+    minV = Math.max(0, c - 0.02);
+    maxV = Math.min(1, c + 0.02);
+  }
+
+  // inset rectangle (top-right)
+  const insetW = Math.min(220, plotW * 0.32);
+  const insetH = Math.min(140, plotH * 0.36);
+  const ix0 = plotR - insetW - 12;
+  const iy0 = plotT + 12;
+  const ix1 = ix0 + insetW;
+  const iy1 = iy0 + insetH;
+
+  // background
+  ctx.fillStyle = 'rgba(255,250,244,0.96)';
+  ctx.strokeStyle = 'rgba(44,36,22,0.18)';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.rect(ix0, iy0, insetW, insetH);
+  ctx.fill();
+  ctx.stroke();
+
+  // bin samples
+  const nBins = 30;
+  const bins = new Int32Array(nBins);
+  for (let i = 0; i < K; i++) {
+    const t = (samples[i] - minV) / (maxV - minV);
+    let b = Math.floor(t * nBins);
+    if (b < 0) b = 0; else if (b >= nBins) b = nBins - 1;
+    bins[b]++;
+  }
+  let bMax = 1;
+  for (let i = 0; i < nBins; i++) if (bins[i] > bMax) bMax = bins[i];
+
+  // bars (gray ink at ~30% alpha)
+  const barW = (insetW - 12) / nBins;
+  const baseY = iy1 - 18;
+  const topY = iy0 + 18;
+  const barAreaH = baseY - topY;
+  ctx.fillStyle = 'rgba(44,36,22,0.32)';
+  for (let i = 0; i < nBins; i++) {
+    const h = (bins[i] / bMax) * barAreaH;
+    const x = ix0 + 6 + i * barW;
+    const y = baseY - h;
+    ctx.fillRect(x, y, Math.max(1, barW - 1), h);
+  }
+
+  // baseline
+  ctx.strokeStyle = 'rgba(44,36,22,0.35)';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(ix0 + 6, baseY);
+  ctx.lineTo(ix1 - 6, baseY);
+  ctx.stroke();
+
+  // vermillion vertical line at p
+  if (p >= minV && p <= maxV) {
+    const px = ix0 + 6 + ((p - minV) / (maxV - minV)) * (insetW - 12);
+    ctx.strokeStyle = '#D55E00';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(px, topY - 4);
+    ctx.lineTo(px, baseY + 4);
+    ctx.stroke();
+  }
+
+  // title
+  ctx.fillStyle = '#5a4a36';
+  ctx.font = '11px -apple-system, "Segoe UI", sans-serif';
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'top';
+  ctx.fillText('distribution of p̂ at n* = ' + formatN(state.nstar), ix0 + 6, iy0 + 4);
+
+  // axis ticks (min, mid, max)
+  ctx.fillStyle = '#8a7660';
+  ctx.font = '10px "Courier New", Courier, monospace';
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'top';
+  ctx.fillText(minV.toFixed(2), ix0 + 6, baseY + 4);
+  ctx.textAlign = 'right';
+  ctx.fillText(maxV.toFixed(2), ix1 - 6, baseY + 4);
+}
+
+/* Update stats panel */
+function updateStats() {
+  const { paths, K, N, nstar, p } = state;
+  if (!paths) {
+    setText('st-nstar', '—');
+    setText('st-mean', '—');
+    setText('st-std', '—');
+    setText('st-frac', '—');
+    return;
+  }
+  let sum = 0, sum2 = 0, inBand = 0;
+  const w = 1 / Math.sqrt(nstar);
+  for (let k = 0; k < K; k++) {
+    const v = paths[k * N + (nstar - 1)];
+    sum += v;
+    sum2 += v * v;
+    if (Math.abs(v - p) <= w) inBand++;
+  }
+  const mean = sum / K;
+  const variance = Math.max(0, sum2 / K - mean * mean);
+  const std = Math.sqrt(variance);
+  setText('st-nstar', formatN(nstar));
+  setText('st-mean', mean.toFixed(3));
+  setText('st-std', std.toFixed(3));
+  setText('st-frac', (100 * inBand / K).toFixed(0) + '%');
+}
+
+function setText(id, v) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = v;
+}
+
+/* Top-level render: redraw entire scene up to current frontier */
+function render() {
+  clear();
+  drawAxes();
+  drawBand();
+  const upTo = state.mode === 'animate' ? state.nFrontier : state.N;
+  drawPaths(upTo);
+  drawTruth();
+  drawScrubber();
+  drawInsetHistogram();
+  updateStats();
+  // status bar
+  const af = document.getElementById('anim-fill');
+  const an = document.getElementById('anim-n');
+  if (af && an) {
+    af.style.width = ((upTo / state.N) * 100).toFixed(1) + '%';
+    an.textContent = 'n = ' + formatN(upTo);
+  }
+}
+
+/* ════════════════════════════════════════════════════════════════
+   ANIMATION LOOP
+   ════════════════════════════════════════════════════════════════ */
+function startAnimation() {
+  if (state.mode !== 'animate') return;
+  state.playing = true;
+  state.lastFrameTime = performance.now();
+  document.getElementById('btn-play').textContent = 'Pause';
+  if (state.rafId) cancelAnimationFrame(state.rafId);
+  state.rafId = requestAnimationFrame(animTick);
+}
+
+function stopAnimation() {
+  state.playing = false;
+  document.getElementById('btn-play').textContent = state.nFrontier >= state.N ? 'Replay' : 'Play';
+  if (state.rafId) { cancelAnimationFrame(state.rafId); state.rafId = null; }
+}
+
+function animTick(now) {
+  state.rafId = null;
+  if (!state.playing) return;
+
+  const dt = Math.min(100, now - state.lastFrameTime);
+  state.lastFrameTime = now;
+
+  // Speed: at speed=5, traverse N in roughly 8 seconds; scale linearly
+  const stepsPerMs = (state.N / 8000) * (state.speed / 5);
+  state.nFrontier = Math.min(state.N, state.nFrontier + dt * stepsPerMs);
+
+  render();
+
+  if (state.nFrontier >= state.N) {
+    state.nFrontier = state.N;
+    stopAnimation();
+    return;
+  }
+  state.rafId = requestAnimationFrame(animTick);
+}
+
+/* ════════════════════════════════════════════════════════════════
+   INTERACTIONS
+   ════════════════════════════════════════════════════════════════ */
+function bindControls() {
+  const sP = document.getElementById('s-p');
+  const sN = document.getElementById('s-N');
+  const sK = document.getElementById('s-K');
+  const sSpeed = document.getElementById('s-speed');
+  const tBand = document.getElementById('t-band');
+  const btnPlay = document.getElementById('btn-play');
+  const btnReseed = document.getElementById('btn-reseed');
+  const mAnim = document.getElementById('m-animate');
+  const mStat = document.getElementById('m-static');
+
+  sP.addEventListener('input', () => {
+    state.p = parseFloat(sP.value);
+    document.getElementById('v-p').textContent = state.p.toFixed(2);
+    simulate(); afterParamChange();
+  });
+  sN.addEventListener('input', () => {
+    state.N = parseInt(sN.value, 10);
+    document.getElementById('v-N').textContent = state.N.toLocaleString();
+    document.getElementById('foot-N').textContent = 'n = ' + formatN(state.N);
+    state.nstar = Math.min(state.nstar, state.N);
+    simulate(); afterParamChange();
+  });
+  sK.addEventListener('input', () => {
+    state.K = parseInt(sK.value, 10);
+    document.getElementById('v-K').textContent = state.K.toLocaleString();
+    simulate(); afterParamChange();
+  });
+  sSpeed.addEventListener('input', () => {
+    state.speed = parseInt(sSpeed.value, 10);
+    document.getElementById('v-speed').textContent = state.speed + 'x';
+  });
+  tBand.addEventListener('change', () => {
+    state.showBand = tBand.checked;
+    render();
+  });
+  btnPlay.addEventListener('click', () => {
+    if (state.mode !== 'animate') {
+      // switching from static to animate via play
+      setMode('animate');
+    }
+    if (state.playing) {
+      stopAnimation();
+    } else {
+      if (state.nFrontier >= state.N) state.nFrontier = 0;
+      startAnimation();
+    }
+  });
+  btnReseed.addEventListener('click', () => {
+    state.seed = (Math.random() * 4294967295) >>> 0;
+    document.getElementById('seed-readout').textContent = state.seed;
+    simulate(); afterParamChange();
+  });
+  mAnim.addEventListener('click', () => setMode('animate'));
+  mStat.addEventListener('click', () => setMode('static'));
+
+  // Scrubber drag
+  const onPointer = (e) => {
+    const rect = canvas.getBoundingClientRect();
+    const x = (e.clientX !== undefined ? e.clientX : (e.touches && e.touches[0].clientX)) - rect.left;
+    state.nstar = pxToN(x);
+    render();
+  };
+  canvas.addEventListener('mousedown', (e) => {
+    state.draggingScrub = true;
+    onPointer(e);
+    e.preventDefault();
+  });
+  window.addEventListener('mousemove', (e) => {
+    if (!state.draggingScrub) return;
+    onPointer(e);
+  });
+  window.addEventListener('mouseup', () => { state.draggingScrub = false; });
+
+  canvas.addEventListener('touchstart', (e) => {
+    state.draggingScrub = true;
+    onPointer(e);
+    e.preventDefault();
+  }, { passive: false });
+  canvas.addEventListener('touchmove', (e) => {
+    if (!state.draggingScrub) return;
+    onPointer(e);
+    e.preventDefault();
+  }, { passive: false });
+  canvas.addEventListener('touchend', () => { state.draggingScrub = false; });
+}
+
+function setMode(m) {
+  state.mode = m;
+  document.getElementById('m-animate').classList.toggle('active', m === 'animate');
+  document.getElementById('m-static').classList.toggle('active', m === 'static');
+  if (m === 'static') {
+    stopAnimation();
+    state.nFrontier = state.N;
+    render();
+  } else {
+    // animate mode: start from 0 so the funnel grows
+    if (state.nFrontier >= state.N) state.nFrontier = 0;
+    render();
+  }
+  document.getElementById('btn-play').textContent =
+    (m === 'static') ? 'Replay (animate)' :
+    (state.playing ? 'Pause' : (state.nFrontier >= state.N ? 'Replay' : 'Play'));
+}
+
+function afterParamChange() {
+  state.nstar = Math.min(state.nstar, state.N);
+  if (state.mode === 'animate') {
+    stopAnimation();
+    state.nFrontier = 0;
+    render();
+    startAnimation();
+  } else {
+    state.nFrontier = state.N;
+    render();
+  }
+}
+
+/* ════════════════════════════════════════════════════════════════
+   INIT
+   ════════════════════════════════════════════════════════════════ */
+function init() {
+  resizeCanvas();
+  document.getElementById('seed-readout').textContent = state.seed;
+  document.getElementById('foot-N').textContent = 'n = ' + formatN(state.N);
+  simulate();
+  state.nstar = state.N;
+  state.nFrontier = 0;
+  bindControls();
+  render();
+  startAnimation();
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', init);
+} else {
+  init();
+}
+</script>
+
+</body>
+</html>

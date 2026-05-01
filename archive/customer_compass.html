@@ -1,0 +1,1057 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Customer Compass — Contextual Bandits in 2D</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<style>
+  :root {
+    --cream: #fdf6ee;
+    --warm-white: #fffaf4;
+    --sand: #f0e6d3;
+    --sand-dark: #e0cdb5;
+    --terra: #c17f4e;
+    --terra-dark: #a0623a;
+    --rust: #d4622a;
+    --ochre: #d49a3a;
+    --sage: #6a8f73;
+    --sage-light: #8fb098;
+    --ink: #2c2416;
+    --ink-light: #5a4a36;
+    --ink-muted: #8a7660;
+    --success: #4a9055;
+    --error: #c0392b;
+    --border: rgba(193, 127, 78, 0.2);
+    --shadow: 0 4px 24px rgba(44,36,22,0.08);
+    --shadow-lg: 0 8px 40px rgba(44,36,22,0.12);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--cream);
+    color: var(--ink);
+    min-height: 100vh;
+    background-image:
+      radial-gradient(ellipse at 10% 0%, rgba(193,127,78,0.08) 0%, transparent 60%),
+      radial-gradient(ellipse at 90% 100%, rgba(106,143,115,0.06) 0%, transparent 60%);
+  }
+
+  .shell { display: flex; flex-direction: column; min-height: 100vh; }
+  .main { flex: 1; padding: 40px 56px; max-width: 1100px; margin: 0 auto; width: 100%; }
+
+  /* ── TYPOGRAPHY ──────────────────────────── */
+  .page-header { margin-bottom: 36px; }
+  .page-title {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--ink);
+    line-height: 1.2;
+    margin-bottom: 10px;
+  }
+  .page-subtitle {
+    font-size: 15px;
+    color: var(--ink-muted);
+    line-height: 1.6;
+    max-width: 720px;
+  }
+
+  h2.section-title {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 19px;
+    font-weight: 600;
+    color: var(--terra-dark);
+    margin: 32px 0 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  h2.section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  p.prose {
+    font-size: 14.5px;
+    line-height: 1.75;
+    color: var(--ink-light);
+    margin-bottom: 16px;
+    max-width: 720px;
+  }
+
+  /* ── CARDS / CALLOUTS ────────────────────── */
+  .card {
+    background: var(--warm-white);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 20px;
+    box-shadow: var(--shadow);
+  }
+  .card-title {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .callout {
+    border-left: 3px solid var(--terra);
+    background: rgba(193,127,78,0.06);
+    padding: 14px 18px;
+    border-radius: 0 10px 10px 0;
+    margin: 16px 0;
+  }
+  .callout p { font-size: 14px; color: var(--ink-light); margin: 0; line-height: 1.65; }
+  .callout strong { color: var(--terra-dark); }
+
+  .info-box {
+    background: rgba(106,143,115,0.08);
+    border: 1px solid rgba(106,143,115,0.25);
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin: 16px 0;
+  }
+  .info-box p { font-size: 13.5px; color: var(--ink-light); margin: 0; line-height: 1.65; }
+  .info-box strong { color: var(--sage); }
+
+  .formula-box {
+    background: var(--sand);
+    border: 1px solid var(--sand-dark);
+    border-radius: 12px;
+    padding: 18px 22px;
+    margin: 14px 0;
+    text-align: center;
+    color: var(--ink);
+  }
+  .formula-label {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 12px;
+    color: var(--ink-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 8px;
+  }
+
+  /* ── SCENE LAYOUT ────────────────────────── */
+  .scene {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 280px;
+    gap: 24px;
+    align-items: start;
+  }
+  @media (max-width: 980px) {
+    .scene { grid-template-columns: 1fr; }
+  }
+
+  .canvas-wrap {
+    background: var(--sand);
+    border-radius: 16px;
+    padding: 16px;
+    box-shadow: var(--shadow);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  canvas#scene {
+    display: block;
+    background: var(--warm-white);
+    border-radius: 12px;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1 / 1;
+    max-width: 600px;
+  }
+
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px 20px;
+    justify-content: center;
+    margin-top: 14px;
+    font-size: 12.5px;
+    color: var(--ink-muted);
+  }
+  .legend-item { display: flex; align-items: center; gap: 6px; }
+  .legend-swatch {
+    width: 18px; height: 10px; border-radius: 3px; display: inline-block;
+  }
+  .legend-swatch.dot { width: 10px; height: 10px; border-radius: 50%; }
+
+  /* ── SIDEBAR ──────────────────────────────── */
+  .sidebar { display: flex; flex-direction: column; gap: 16px; }
+
+  .stats-card {
+    background: var(--warm-white);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 16px 18px;
+    box-shadow: var(--shadow);
+  }
+  .stats-card h3 {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--terra-dark);
+    margin-bottom: 10px;
+  }
+  .stat-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 6px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+  }
+  .stat-row:last-child { border-bottom: none; }
+  .stat-row .stat-label { color: var(--ink-muted); }
+  .stat-row .stat-val {
+    font-family: 'Courier New', Courier, monospace;
+    color: var(--ink);
+    font-weight: 600;
+  }
+  .stat-val.muted { color: var(--ink-muted); font-style: italic; font-weight: 400; }
+
+  /* ── CONTROLS ─────────────────────────────── */
+  .controls-card {
+    background: var(--warm-white);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 16px 18px;
+    box-shadow: var(--shadow);
+  }
+  .ctrl-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+  }
+  .ctrl-row:last-child { margin-bottom: 0; }
+
+  .btn {
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-size: 12.5px;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    transition: all 0.18s;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--terra), var(--rust));
+    color: white;
+    box-shadow: 0 3px 12px rgba(193,127,78,0.3);
+  }
+  .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 5px 16px rgba(193,127,78,0.4); }
+  .btn-secondary {
+    background: var(--sand);
+    color: var(--ink-light);
+    border: 1px solid var(--sand-dark);
+  }
+  .btn-secondary:hover { background: var(--sand-dark); }
+  .btn-sage {
+    background: rgba(106,143,115,0.12);
+    color: var(--sage);
+    border: 1px solid rgba(106,143,115,0.32);
+  }
+  .btn-sage:hover { background: rgba(106,143,115,0.22); }
+
+  .toggle-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    color: var(--ink-light);
+    padding: 6px 0;
+  }
+  .toggle-row input[type=checkbox] {
+    accent-color: var(--terra);
+    width: 16px; height: 16px;
+    cursor: pointer;
+  }
+
+  .slider-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 12.5px;
+    color: var(--ink-muted);
+    padding: 6px 0;
+  }
+  .slider-row label { white-space: nowrap; color: var(--ink-light); flex-shrink: 0; }
+  .slider-row input[type=range] {
+    flex: 1;
+    accent-color: var(--terra);
+  }
+  .slider-row .slider-val {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 12px;
+    color: var(--ink);
+    min-width: 38px;
+    text-align: right;
+  }
+
+  .ctrl-divider {
+    height: 1px;
+    background: var(--border);
+    margin: 12px 0;
+  }
+  .ctrl-section-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--ink-muted);
+    margin-bottom: 6px;
+  }
+
+  .lesson-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-top: 16px;
+  }
+  @media (max-width: 720px) {
+    .lesson-grid { grid-template-columns: 1fr; }
+  }
+  .lesson-card {
+    background: var(--warm-white);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 18px;
+    box-shadow: var(--shadow);
+  }
+  .lesson-card h4 {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 14px;
+    color: var(--terra-dark);
+    margin-bottom: 8px;
+  }
+  .lesson-card p { font-size: 13px; color: var(--ink-light); line-height: 1.6; }
+
+  .footer-note {
+    font-size: 12px;
+    color: var(--ink-muted);
+    text-align: center;
+    margin: 30px 0 12px;
+    line-height: 1.6;
+  }
+
+</style>
+</head>
+<body>
+
+<div class="shell">
+<main class="main">
+
+<div class="page-header">
+  <h1 class="page-title">Customer Compass</h1>
+  <p class="page-subtitle">A contextual bandit learns one customer's taste from clicks alone. Each item has a 2D embedding <em>z</em>; the customer has a hidden preference vector <em>z<sub>u</sub></em>. The click probability is <span id="formula-inline-p"></span>. Watch the solid blue estimate arrow rotate toward the dashed truth arrow as evidence accumulates.</p>
+</div>
+
+<div class="callout">
+  <p><strong>The lesson.</strong> The customer's taste is hidden. Only clicks reveal it. The algorithm sees no labels, no ratings, no descriptions — just a stream of zeros and ones. Try the cold-start mode: with no prior data, the first ~10 rounds look almost random, then a single click can collapse the estimate fast.</p>
+</div>
+
+<div class="scene">
+
+  <!-- ── CANVAS ────────────────────────────── -->
+  <div class="canvas-wrap">
+    <canvas id="scene" width="600" height="600"></canvas>
+    <div class="legend">
+      <div class="legend-item"><span class="legend-swatch dot" style="background:var(--warm-white);border:1.5px solid var(--ink)"></span> item embedding <em>z<sub>i</sub></em> (numbered)</div>
+      <div class="legend-item"><span class="legend-swatch" style="background:#0072B2"></span> estimate <em>ẑ<sub>u</sub></em> (solid)</div>
+      <div class="legend-item"><span class="legend-swatch" style="background:repeating-linear-gradient(90deg,#2c2416 0 6px,transparent 6px 10px)"></span> truth <em>z<sub>u</sub></em> (dashed, when revealed)</div>
+      <div class="legend-item"><span class="legend-swatch" style="background:rgba(213,94,0,0.12);border:1px solid #D55E00"></span> 95% confidence</div>
+      <div class="legend-item"><span style="font-weight:700;color:#009E73">&#10003;</span> click</div>
+      <div class="legend-item"><span style="font-weight:700;color:#D55E00">&#10007;</span> no click</div>
+    </div>
+  </div>
+
+  <!-- ── SIDEBAR ───────────────────────────── -->
+  <div class="sidebar">
+
+    <div class="controls-card">
+      <div class="ctrl-section-label">Playback</div>
+      <div class="ctrl-row">
+        <button class="btn btn-primary" id="btn-play">Play</button>
+        <button class="btn btn-secondary" id="btn-step">Step</button>
+        <button class="btn btn-secondary" id="btn-reset">Reset</button>
+      </div>
+
+      <div class="slider-row">
+        <label>Speed</label>
+        <input type="range" id="slider-speed" min="1" max="20" value="6">
+        <span class="slider-val" id="speed-val">6</span>
+      </div>
+
+      <div class="ctrl-divider"></div>
+
+      <div class="ctrl-section-label">Customer / scene</div>
+      <div class="ctrl-row">
+        <button class="btn btn-sage" id="btn-newcust">New customer</button>
+        <button class="btn btn-secondary" id="btn-rescatter">Re-scatter items</button>
+      </div>
+
+      <div class="ctrl-divider"></div>
+
+      <div class="ctrl-section-label">Reveal</div>
+      <div class="toggle-row">
+        <input type="checkbox" id="toggle-truth">
+        <label for="toggle-truth">Show truth (and click region)</label>
+      </div>
+
+      <div class="ctrl-divider"></div>
+
+      <div class="ctrl-section-label">LinUCB exploration <span style="text-transform:none;letter-spacing:0;color:var(--ink-light)">α</span></div>
+      <div class="slider-row">
+        <label>α</label>
+        <input type="range" id="slider-alpha" min="0" max="3" value="1.2" step="0.1">
+        <span class="slider-val" id="alpha-val">1.2</span>
+      </div>
+    </div>
+
+    <div class="stats-card">
+      <h3>Stats</h3>
+      <div class="stat-row"><span class="stat-label">Round</span><span class="stat-val" id="stat-round">0</span></div>
+      <div class="stat-row"><span class="stat-label">Total clicks</span><span class="stat-val" id="stat-clicks">0</span></div>
+      <div class="stat-row"><span class="stat-label">Click-through</span><span class="stat-val" id="stat-ctr">—</span></div>
+      <div class="stat-row"><span class="stat-label">Last action</span><span class="stat-val muted" id="stat-last">idle</span></div>
+      <div class="stat-row"><span class="stat-label">Angle error</span><span class="stat-val muted" id="stat-angle">hidden</span></div>
+    </div>
+
+  </div>
+</div>
+
+<h2 class="section-title">What's happening behind the scenes</h2>
+
+<div class="card">
+  <div class="card-title">The model</div>
+  <p class="prose">Each item <em>i</em> lives at a 2D point <em>z<sub>i</sub></em> on the unit disc — these come from an autoencoder over past behaviour. The customer's taste is another vector <em>z<sub>u</sub></em> in the same space. The probability that this customer clicks on item <em>i</em>, when shown, is the (clipped) inner product:</p>
+  <div class="formula-box">
+    <div class="formula-label">click model</div>
+    <div id="formula-p"></div>
+  </div>
+  <p class="prose">After each round we have a binary observation <em>y<sub>t</sub></em> ∈ {0, 1}. We update our point estimate of the customer's taste with ridge regression on the observations so far:</p>
+  <div class="formula-box">
+    <div class="formula-label">ridge update</div>
+    <div id="formula-ridge"></div>
+  </div>
+  <p class="prose">To pick the next item, the algorithm uses LinUCB: among all items, it shows the one whose <em>upper</em> plausible click probability is highest. The bonus term grows with our uncertainty in that direction, so under-explored corners of the embedding pull the algorithm toward them.</p>
+  <div class="formula-box">
+    <div class="formula-label">LinUCB action selection</div>
+    <div id="formula-ucb"></div>
+  </div>
+</div>
+
+<div class="lesson-grid">
+  <div class="lesson-card">
+    <h4>Mode A — Learn this customer</h4>
+    <p>Press <strong>Play</strong> and watch the solid blue estimate arrow rotate toward the (hidden) truth. The translucent ellipse around the arrow is our 95% confidence region — it shrinks as evidence builds. Toggle <strong>Show truth</strong> to compare against the dashed truth arrow.</p>
+  </div>
+  <div class="lesson-card">
+    <h4>Mode B — The cold-start cliff</h4>
+    <p>Press <strong>New customer</strong>. The estimate resets to zero; LinUCB must explore from scratch. The first 5–10 rounds look almost random — <em>this is the cold-start tax</em>. With representations from past customers, you'd already start much closer to the truth.</p>
+  </div>
+</div>
+
+<p class="footer-note">CAS AINIT FS26 · Week 2 · Bandits · Slide 22 companion</p>
+
+</main>
+</div>
+
+<script>
+/* ════════════════════════════════════════════════════════════════
+   ENGINE  —  ridge regression, LinUCB, 2x2 matrix algebra
+   ════════════════════════════════════════════════════════════════ */
+
+const LAMBDA = 1.0;     // ridge regularization
+const SIGMA2 = 0.25;    // noise variance for the ellipse
+const CHI2_95_2D = 5.991;
+
+// Random helpers
+function rand() { return Math.random(); }
+function randn() {
+  // Box-Muller
+  const u = Math.max(1e-9, Math.random());
+  const v = Math.random();
+  return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+}
+
+// 2x2 matrix helpers (matrices as [[a,b],[c,d]], vectors as [x,y])
+function matInv2(M) {
+  const a = M[0][0], b = M[0][1], c = M[1][0], d = M[1][1];
+  const det = a * d - b * c;
+  if (Math.abs(det) < 1e-12) {
+    // shouldn't happen because of ridge λI, but guard anyway
+    return [[1, 0], [0, 1]];
+  }
+  const inv = 1 / det;
+  return [[ d * inv, -b * inv], [-c * inv, a * inv]];
+}
+function matVec2(M, v) {
+  return [M[0][0] * v[0] + M[0][1] * v[1],
+          M[1][0] * v[0] + M[1][1] * v[1]];
+}
+function quad2(M, v) { // v^T M v
+  const Mv = matVec2(M, v);
+  return v[0] * Mv[0] + v[1] * Mv[1];
+}
+function dot2(a, b) { return a[0] * b[0] + a[1] * b[1]; }
+function norm2(v) { return Math.sqrt(v[0] * v[0] + v[1] * v[1]); }
+function unit2(v) {
+  const n = norm2(v);
+  if (n < 1e-9) return [0, 0];
+  return [v[0] / n, v[1] / n];
+}
+
+// 2x2 symmetric matrix eigendecomposition for ellipse axes.
+function eig2sym(M) {
+  const a = M[0][0], b = M[0][1], d = M[1][1];
+  const tr = a + d;
+  const det = a * d - b * b;
+  const disc = Math.max(0, tr * tr / 4 - det);
+  const s = Math.sqrt(disc);
+  const l1 = tr / 2 + s;
+  const l2 = tr / 2 - s;
+  // eigenvector for l1
+  let v1;
+  if (Math.abs(b) > 1e-9) {
+    v1 = [l1 - d, b];
+  } else {
+    v1 = (a >= d) ? [1, 0] : [0, 1];
+  }
+  v1 = unit2(v1);
+  return { l1, l2, v1 };
+}
+
+/* ── world state ─────────────────────────────────────────── */
+const STATE = {
+  items: [],          // array of {z:[x,y]} length ~12
+  z_u: [0, 0],        // hidden true preference (norm in [0.6, 1.0])
+  A: [[LAMBDA, 0], [0, LAMBDA]],   // X^T X + λI
+  Ainv: [[1 / LAMBDA, 0], [0, 1 / LAMBDA]],
+  bvec: [0, 0],       // X^T y
+  zhat: [0, 0],       // Ainv · b
+  round: 0,
+  clicks: 0,
+  shown: 0,
+  lastIdx: -1,
+  lastClick: null,
+  flashTimer: 0,      // for click/no-click flash
+  haloTimer: 0,       // for selected item halo
+};
+
+function makeItems(n = 12) {
+  // roughly even angular layout, slightly perturbed, on the unit disc
+  const items = [];
+  const baseAngle = Math.random() * 2 * Math.PI;
+  for (let i = 0; i < n; i++) {
+    const theta = baseAngle + (i / n) * 2 * Math.PI + (Math.random() - 0.5) * 0.25;
+    const r = 0.78 + Math.random() * 0.18; // 0.78 .. 0.96
+    items.push({ z: [Math.cos(theta) * r, Math.sin(theta) * r] });
+  }
+  return items;
+}
+
+function makeCustomer() {
+  const theta = Math.random() * 2 * Math.PI;
+  const r = 0.65 + Math.random() * 0.30;
+  STATE.z_u = [Math.cos(theta) * r, Math.sin(theta) * r];
+}
+
+function resetEstimate() {
+  STATE.A = [[LAMBDA, 0], [0, LAMBDA]];
+  STATE.Ainv = [[1 / LAMBDA, 0], [0, 1 / LAMBDA]];
+  STATE.bvec = [0, 0];
+  STATE.zhat = [0, 0];
+  STATE.round = 0;
+  STATE.clicks = 0;
+  STATE.shown = 0;
+  STATE.lastIdx = -1;
+  STATE.lastClick = null;
+  STATE.flashTimer = 0;
+  STATE.haloTimer = 0;
+}
+
+function fullReset() {
+  STATE.items = makeItems(12);
+  makeCustomer();
+  resetEstimate();
+}
+
+/* ── ridge update ────────────────────────────────────────── */
+function updateAfterObservation(z, y) {
+  // A <- A + z z^T,  b <- b + y z
+  STATE.A[0][0] += z[0] * z[0];
+  STATE.A[0][1] += z[0] * z[1];
+  STATE.A[1][0] += z[1] * z[0];
+  STATE.A[1][1] += z[1] * z[1];
+  STATE.bvec[0] += y * z[0];
+  STATE.bvec[1] += y * z[1];
+  STATE.Ainv = matInv2(STATE.A);
+  STATE.zhat = matVec2(STATE.Ainv, STATE.bvec);
+}
+
+/* ── LinUCB action selection ─────────────────────────────── */
+function chooseAction(alpha) {
+  let bestIdx = 0;
+  let bestScore = -Infinity;
+  for (let i = 0; i < STATE.items.length; i++) {
+    const z = STATE.items[i].z;
+    const mean = dot2(STATE.zhat, z);
+    const variance = quad2(STATE.Ainv, z);
+    const score = mean + alpha * Math.sqrt(Math.max(0, variance));
+    if (score > bestScore) { bestScore = score; bestIdx = i; }
+  }
+  return bestIdx;
+}
+
+/* ── one round ───────────────────────────────────────────── */
+function step(alpha) {
+  if (STATE.items.length === 0) return;
+  const idx = chooseAction(alpha);
+  const z = STATE.items[idx].z;
+  const p = Math.max(0, dot2(z, STATE.z_u));
+  const y = (Math.random() < p) ? 1 : 0;
+  updateAfterObservation(z, y);
+  STATE.round++;
+  STATE.shown++;
+  if (y) STATE.clicks++;
+  STATE.lastIdx = idx;
+  STATE.lastClick = !!y;
+  STATE.flashTimer = 1.0;
+  STATE.haloTimer = 1.0;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   RENDER
+   ════════════════════════════════════════════════════════════════ */
+
+const canvas = document.getElementById('scene');
+const ctx = canvas.getContext('2d');
+const W = canvas.width, H = canvas.height;
+// world coords: x in [-1.2, 1.2], y in [-1.2, 1.2], origin centered
+const RANGE = 1.2;
+function w2s(p) {
+  return [W / 2 + (p[0] / RANGE) * (W / 2 * 0.92),
+          H / 2 - (p[1] / RANGE) * (H / 2 * 0.92)];
+}
+function w2sScalar(d) { return d * (W / 2 * 0.92) / RANGE; }
+
+// pulled-in palette (mirror of CSS) + Wong color-blind-safe additions
+const PAL = {
+  warmWhite: '#fffaf4',
+  sand:      '#f0e6d3',
+  sandDark:  '#e0cdb5',
+  terra:     '#c17f4e',
+  terraDark: '#a0623a',
+  rust:      '#d4622a',
+  ochre:     '#d49a3a',
+  sage:      '#6a8f73',
+  sageLight: '#8fb098',
+  ink:       '#2c2416',
+  inkLight:  '#5a4a36',
+  inkMuted:  '#8a7660',
+  // Wong color-blind-safe palette
+  estimate:  '#0072B2',   // blue — estimate arrow
+  truth:     '#2c2416',   // ink — truth arrow (dashed; pattern is primary signal)
+  vermillion:'#D55E00',   // confidence ellipse, halfplane wash, no-click flash
+  cbGreen:   '#009E73',   // click flash
+};
+
+function drawAxes() {
+  // soft circular grid
+  ctx.save();
+  ctx.translate(W / 2, H / 2);
+  ctx.strokeStyle = 'rgba(193,127,78,0.18)';
+  ctx.lineWidth = 1;
+  for (const r of [0.25, 0.5, 0.75, 1.0]) {
+    ctx.beginPath();
+    ctx.arc(0, 0, w2sScalar(r), 0, 2 * Math.PI);
+    ctx.stroke();
+  }
+  ctx.strokeStyle = 'rgba(44,36,22,0.10)';
+  ctx.beginPath();
+  ctx.moveTo(-w2sScalar(RANGE), 0); ctx.lineTo(w2sScalar(RANGE), 0);
+  ctx.moveTo(0, -w2sScalar(RANGE)); ctx.lineTo(0, w2sScalar(RANGE));
+  ctx.stroke();
+  ctx.restore();
+}
+
+function drawHalfplane(z_u) {
+  // shade the half-plane where z·z_u > 0  (true click region)
+  const n = norm2(z_u);
+  if (n < 1e-6) return;
+  const u = [z_u[0] / n, z_u[1] / n];
+  // the boundary passes through origin perpendicular to u; on the +u side we shade.
+  // We'll fill a big polygon: take 4 corners of the world square, keep those with z·u > 0,
+  // plus the two points where the boundary crosses the world square.
+  ctx.save();
+  ctx.fillStyle = 'rgba(213,94,0,0.06)';     // very light vermillion wash (Wong)
+  ctx.beginPath();
+  // boundary line is perpendicular to u, through origin, so direction = (-u_y, u_x).
+  const t = 2.0; // far enough beyond [-1.2, 1.2]
+  const p1 = [-u[1] * t,  u[0] * t];
+  const p2 = [ u[1] * t, -u[0] * t];
+  // far point along +u
+  const farU = [u[0] * t, u[1] * t];
+  // polygon: p1 -> farU side corners... easier: boundary line + far arc on +u side via two corner pts
+  const sp1 = w2s(p1), sp2 = w2s(p2);
+  // Build the +u half: polygon p1, p1+u*t, p2+u*t, p2  -> a big rectangle on +u side.
+  const q1 = w2s([p1[0] + u[0] * t * 2, p1[1] + u[1] * t * 2]);
+  const q2 = w2s([p2[0] + u[0] * t * 2, p2[1] + u[1] * t * 2]);
+  ctx.moveTo(sp1[0], sp1[1]);
+  ctx.lineTo(q1[0], q1[1]);
+  ctx.lineTo(q2[0], q2[1]);
+  ctx.lineTo(sp2[0], sp2[1]);
+  ctx.closePath();
+  ctx.fill();
+
+  // light dashed boundary
+  ctx.strokeStyle = 'rgba(213,94,0,0.45)';
+  ctx.lineWidth = 1;
+  ctx.setLineDash([4, 4]);
+  ctx.beginPath();
+  ctx.moveTo(sp1[0], sp1[1]);
+  ctx.lineTo(sp2[0], sp2[1]);
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  // text label inside the shaded region — non-color cue for what the wash means
+  // place it ~0.85 along +u, offset slightly to stay clear of the truth arrow
+  const labelWorld = [u[0] * 0.92 + (-u[1]) * 0.18,
+                      u[1] * 0.92 + ( u[0]) * 0.18];
+  const sLabel = w2s(labelWorld);
+  ctx.fillStyle = 'rgba(213,94,0,0.85)';
+  ctx.font = '600 11px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('click region', sLabel[0], sLabel[1]);
+  ctx.restore();
+}
+
+function drawConfidenceEllipse() {
+  // Posterior covariance ≈ σ² · A^{-1}.  95% contour: scale = sqrt(chi2_95_2D)
+  const Sigma = [
+    [SIGMA2 * STATE.Ainv[0][0], SIGMA2 * STATE.Ainv[0][1]],
+    [SIGMA2 * STATE.Ainv[1][0], SIGMA2 * STATE.Ainv[1][1]]
+  ];
+  const { l1, l2, v1 } = eig2sym(Sigma);
+  const k = Math.sqrt(CHI2_95_2D);
+  const ax1 = k * Math.sqrt(Math.max(1e-9, l1));
+  const ax2 = k * Math.sqrt(Math.max(1e-9, l2));
+  const angle = Math.atan2(v1[1], v1[0]);
+
+  const center = w2s(STATE.zhat);
+  const sAx1 = w2sScalar(ax1);
+  const sAx2 = w2sScalar(ax2);
+
+  ctx.save();
+  ctx.translate(center[0], center[1]);
+  // canvas y is inverted: angle inversion
+  ctx.rotate(-angle);
+  ctx.beginPath();
+  ctx.ellipse(0, 0, sAx1, sAx2, 0, 0, 2 * Math.PI);
+  ctx.fillStyle = 'rgba(213,94,0,0.12)';   // Wong vermillion @12% alpha
+  ctx.fill();
+  ctx.strokeStyle = '#D55E00';
+  ctx.lineWidth = 1.25;
+  ctx.stroke();
+  ctx.restore();
+}
+
+function drawArrow(from, to, color, opts = {}) {
+  const lw = opts.lw || 2.5;
+  const dashed = !!opts.dashed;
+  const headLen = opts.head || 14;
+  const sFrom = w2s(from);
+  const sTo = w2s(to);
+  const dx = sTo[0] - sFrom[0], dy = sTo[1] - sFrom[1];
+  const len = Math.sqrt(dx * dx + dy * dy);
+  if (len < 1) return;
+  const ux = dx / len, uy = dy / len;
+  // shaft
+  ctx.save();
+  ctx.strokeStyle = color;
+  ctx.lineWidth = lw;
+  ctx.lineCap = 'round';
+  if (dashed) ctx.setLineDash([8, 4]);
+  ctx.beginPath();
+  ctx.moveTo(sFrom[0], sFrom[1]);
+  ctx.lineTo(sTo[0] - ux * headLen * 0.6, sTo[1] - uy * headLen * 0.6);
+  ctx.stroke();
+  ctx.setLineDash([]);
+  // head
+  ctx.fillStyle = color;
+  ctx.beginPath();
+  ctx.moveTo(sTo[0], sTo[1]);
+  ctx.lineTo(sTo[0] - ux * headLen - uy * headLen * 0.45,
+             sTo[1] - uy * headLen + ux * headLen * 0.45);
+  ctx.lineTo(sTo[0] - ux * headLen + uy * headLen * 0.45,
+             sTo[1] - uy * headLen - ux * headLen * 0.45);
+  ctx.closePath();
+  ctx.fill();
+  ctx.restore();
+}
+
+function drawItems() {
+  for (let i = 0; i < STATE.items.length; i++) {
+    const z = STATE.items[i].z;
+    const s = w2s(z);
+    const isLast = (i === STATE.lastIdx);
+
+    // halo for chosen one — Wong-safe: green on click, vermillion on no-click
+    if (isLast && STATE.haloTimer > 0) {
+      const haloR = 11 + 14 * STATE.haloTimer;
+      // halo color matches the click outcome (with safe fallback)
+      const haloRGB = (STATE.lastClick === true)  ? '0,158,115'   // #009E73 cb-green
+                    : (STATE.lastClick === false) ? '213,94,0'    // #D55E00 vermillion
+                    :                               '213,94,0';
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(s[0], s[1], haloR, 0, 2 * Math.PI);
+      ctx.fillStyle = `rgba(${haloRGB},${0.30 * STATE.haloTimer})`;
+      ctx.fill();
+      ctx.restore();
+    }
+
+    // base
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(s[0], s[1], 7.5, 0, 2 * Math.PI);
+    ctx.fillStyle = PAL.warmWhite;
+    ctx.fill();
+    ctx.lineWidth = 1.6;
+
+    if (isLast && STATE.flashTimer > 0) {
+      // Wong-safe flash: cb-green for click, vermillion for no-click
+      const flashCol = STATE.lastClick ? PAL.cbGreen : PAL.vermillion;
+      const flashRGB = STATE.lastClick ? '0,158,115' : '213,94,0';
+      ctx.fillStyle = `rgba(${flashRGB},${0.85 * STATE.flashTimer})`;
+      ctx.beginPath();
+      ctx.arc(s[0], s[1], 7.5, 0, 2 * Math.PI);
+      ctx.fill();
+      ctx.strokeStyle = flashCol;
+    } else {
+      ctx.strokeStyle = PAL.ink;   // ink stroke (Wong: redundant non-color cue)
+    }
+    ctx.beginPath();
+    ctx.arc(s[0], s[1], 7.5, 0, 2 * Math.PI);
+    ctx.stroke();
+    ctx.restore();
+
+    // item index label (1-based) — verbal-reference cue
+    ctx.save();
+    ctx.fillStyle = PAL.inkLight;
+    ctx.font = '600 10px "Courier New", Courier, monospace';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    // place label slightly above-right of the dot to keep it readable
+    const labelDx = 11, labelDy = -11;
+    ctx.fillText(String(i + 1), s[0] + labelDx, s[1] + labelDy);
+    ctx.restore();
+
+    // ── click-flash ICON (✓ / ✗) — primary non-color signal of outcome
+    if (isLast && STATE.flashTimer > 0 && STATE.lastClick !== null) {
+      ctx.save();
+      const iconCol = STATE.lastClick ? PAL.cbGreen : PAL.vermillion;
+      const glyph   = STATE.lastClick ? '✓' : '✗';   // ✓ or ✗
+      // grow slightly with the flash for visual punch
+      const iconSize = 18 + 4 * STATE.flashTimer;
+      ctx.font = `700 ${iconSize}px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`;
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'middle';
+      // halo behind the glyph for readability over any background
+      ctx.fillStyle = `rgba(255,250,244,${0.85 * STATE.flashTimer})`;
+      const padX = 12, padY = 8;
+      const gx = s[0] + 11, gy = s[1] + 12;
+      ctx.fillRect(gx - 2, gy - padY, padX + 4, padY * 2);
+      ctx.fillStyle = iconCol;
+      ctx.globalAlpha = Math.max(0.35, STATE.flashTimer);
+      ctx.fillText(glyph, gx, gy);
+      ctx.restore();
+    }
+  }
+}
+
+function drawScene() {
+  // background
+  ctx.fillStyle = PAL.warmWhite;
+  ctx.fillRect(0, 0, W, H);
+
+  drawAxes();
+
+  if (UI.showTruth) drawHalfplane(STATE.z_u);
+
+  // confidence ellipse first (under the arrow)
+  drawConfidenceEllipse();
+
+  // items
+  drawItems();
+
+  // truth arrow — DASHED ink (stroke pattern is the primary distinction)
+  if (UI.showTruth) {
+    drawArrow([0, 0], STATE.z_u, PAL.truth, { dashed: true, lw: 2.25, head: 12 });
+  }
+
+  // estimate arrow — SOLID Wong blue
+  if (norm2(STATE.zhat) > 0.01) {
+    drawArrow([0, 0], STATE.zhat, PAL.estimate, { lw: 3, head: 14 });
+  } else {
+    // tiny dot at origin when no estimate yet
+    const o = w2s([0, 0]);
+    ctx.beginPath();
+    ctx.fillStyle = PAL.estimate;
+    ctx.arc(o[0], o[1], 3.5, 0, 2 * Math.PI);
+    ctx.fill();
+  }
+}
+
+/* ════════════════════════════════════════════════════════════════
+   UI / loop
+   ════════════════════════════════════════════════════════════════ */
+
+const UI = {
+  playing: false,
+  speed: 6,         // rounds/sec
+  alpha: 1.2,
+  showTruth: false,
+  lastTickT: 0,
+  accumT: 0,
+};
+
+function updateStatsPanel() {
+  document.getElementById('stat-round').textContent = STATE.round;
+  document.getElementById('stat-clicks').textContent = STATE.clicks;
+  const ctr = STATE.shown > 0 ? (STATE.clicks / STATE.shown) : null;
+  document.getElementById('stat-ctr').textContent =
+    ctr === null ? '—' : (ctr.toFixed(2));
+
+  const last = document.getElementById('stat-last');
+  if (STATE.lastIdx < 0) {
+    last.textContent = 'idle';
+    last.classList.add('muted');
+  } else {
+    last.textContent = `item ${STATE.lastIdx + 1} → ${STATE.lastClick ? 'click' : 'no click'}`;
+    last.classList.remove('muted');
+  }
+
+  const angle = document.getElementById('stat-angle');
+  if (UI.showTruth && norm2(STATE.zhat) > 1e-3 && norm2(STATE.z_u) > 1e-3) {
+    const cos = dot2(unit2(STATE.zhat), unit2(STATE.z_u));
+    const deg = Math.acos(Math.max(-1, Math.min(1, cos))) * 180 / Math.PI;
+    angle.textContent = deg.toFixed(1) + '°';
+    angle.classList.remove('muted');
+  } else if (UI.showTruth) {
+    angle.textContent = '—';
+    angle.classList.add('muted');
+  } else {
+    angle.textContent = 'hidden';
+    angle.classList.add('muted');
+  }
+}
+
+function tick(now) {
+  if (!UI.lastTickT) UI.lastTickT = now;
+  const dt = Math.min(0.1, (now - UI.lastTickT) / 1000);
+  UI.lastTickT = now;
+
+  // decay flash/halo
+  if (STATE.flashTimer > 0) STATE.flashTimer = Math.max(0, STATE.flashTimer - dt * 1.6);
+  if (STATE.haloTimer > 0)  STATE.haloTimer  = Math.max(0, STATE.haloTimer  - dt * 1.4);
+
+  if (UI.playing) {
+    UI.accumT += dt;
+    const period = 1 / UI.speed;
+    while (UI.accumT >= period) {
+      step(UI.alpha);
+      UI.accumT -= period;
+    }
+  }
+
+  drawScene();
+  updateStatsPanel();
+  requestAnimationFrame(tick);
+}
+
+/* ── wire up controls ────────────────────────────────────── */
+function setPlaying(p) {
+  UI.playing = p;
+  document.getElementById('btn-play').textContent = p ? 'Pause' : 'Play';
+}
+
+document.getElementById('btn-play').addEventListener('click', () => setPlaying(!UI.playing));
+document.getElementById('btn-step').addEventListener('click', () => {
+  setPlaying(false);
+  step(UI.alpha);
+});
+document.getElementById('btn-reset').addEventListener('click', () => {
+  setPlaying(false);
+  fullReset();
+});
+document.getElementById('btn-newcust').addEventListener('click', () => {
+  // keep items, redraw customer + reset estimate (cold-start mode)
+  setPlaying(false);
+  makeCustomer();
+  resetEstimate();
+});
+document.getElementById('btn-rescatter').addEventListener('click', () => {
+  STATE.items = makeItems(12);
+  resetEstimate();
+});
+
+const speedSlider = document.getElementById('slider-speed');
+const speedVal = document.getElementById('speed-val');
+speedSlider.addEventListener('input', () => {
+  UI.speed = +speedSlider.value;
+  speedVal.textContent = speedSlider.value;
+});
+
+const alphaSlider = document.getElementById('slider-alpha');
+const alphaVal = document.getElementById('alpha-val');
+alphaSlider.addEventListener('input', () => {
+  UI.alpha = +alphaSlider.value;
+  alphaVal.textContent = (+alphaSlider.value).toFixed(1);
+});
+// init alpha display
+UI.alpha = +alphaSlider.value;
+alphaVal.textContent = UI.alpha.toFixed(1);
+
+const truthToggle = document.getElementById('toggle-truth');
+truthToggle.addEventListener('change', () => {
+  UI.showTruth = truthToggle.checked;
+});
+
+/* ── KaTeX render ────────────────────────────────────────── */
+function tryKatex() {
+  if (typeof katex === 'undefined') return;
+  katex.render('p(z, z_u) = \\max(0,\\, z^\\top z_u)',
+    document.getElementById('formula-p'), { throwOnError: false, displayMode: true });
+  katex.render('p(z, z_u) = \\max(0,\\, z^\\top z_u)',
+    document.getElementById('formula-inline-p'), { throwOnError: false });
+  katex.render('\\hat z_u = (X^\\top X + \\lambda I)^{-1} X^\\top y',
+    document.getElementById('formula-ridge'), { throwOnError: false, displayMode: true });
+  katex.render('a_t = \\arg\\max_{i}\\;\\hat z_u^\\top z_i \\;+\\; \\alpha\\,\\sqrt{z_i^\\top (X^\\top X + \\lambda I)^{-1} z_i}',
+    document.getElementById('formula-ucb'), { throwOnError: false, displayMode: true });
+}
+if (document.readyState === 'complete') tryKatex();
+else window.addEventListener('load', tryKatex);
+
+/* ── boot ────────────────────────────────────────────────── */
+fullReset();
+requestAnimationFrame(tick);
+</script>
+
+</body>
+</html>

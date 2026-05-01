@@ -1,0 +1,500 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Latent-axes laboratory · W2 Recsys</title>
+  <link rel="stylesheet" href="shared/style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+  <style>
+    .lab-grid {
+      display: grid;
+      grid-template-columns: 1fr 280px;
+      gap: 24px;
+      align-items: start;
+    }
+    @media (max-width: 1024px) {
+      .lab-grid { grid-template-columns: 1fr; }
+    }
+    .plane-wrap {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      max-width: 720px;
+      margin: 0 auto;
+    }
+    .plane-wrap svg { width: 100%; height: 100%; display: block; }
+
+    .control-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      padding: 16px;
+      background: var(--color-neu-bg);
+      border-radius: 8px;
+      border: 1px solid var(--color-border);
+    }
+    .control-panel h3 {
+      margin: 0;
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: var(--color-text);
+    }
+    .control-panel p.hint {
+      margin: 0;
+      font-size: 0.82rem;
+      color: var(--color-text-muted);
+    }
+    .control-panel .ctrl-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .control-panel button {
+      background: white;
+      color: var(--color-header-end);
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+      padding: 9px 12px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      text-align: left;
+      transition: background 0.15s, border-color 0.15s, transform 0.05s;
+    }
+    .control-panel button:hover {
+      background: var(--color-neu-bg);
+      border-color: var(--color-header-end);
+    }
+    .control-panel button:active { transform: translateY(1px); }
+    .control-panel button.active {
+      background: var(--color-header-end);
+      color: white;
+      border-color: var(--color-header-end);
+    }
+    .control-panel .toggle-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.9rem;
+      color: var(--color-text);
+    }
+    .control-panel .toggle-row input { transform: scale(1.1); }
+
+    .quad-tint { opacity: 0.18; }
+    .quad-label {
+      font-size: 12px;
+      font-weight: 600;
+      pointer-events: none;
+    }
+
+    .axis-line { stroke: #adb5bd; stroke-width: 1.5; }
+    .axis-arrow { fill: #adb5bd; }
+    .axis-end-label {
+      font-size: 12px;
+      fill: var(--color-text);
+      font-weight: 500;
+    }
+    .axis-end-label.muted { fill: var(--color-text-muted); font-weight: 400; }
+
+    .book-dot {
+      stroke: white;
+      stroke-width: 2;
+    }
+    .book-label {
+      font-size: 11px;
+      fill: var(--color-text);
+      font-weight: 500;
+      text-anchor: middle;
+      pointer-events: none;
+      paint-order: stroke;
+      stroke: white;
+      stroke-width: 3px;
+      stroke-linejoin: round;
+    }
+    .reader-dot {
+      fill: var(--color-text-muted);
+      fill-opacity: 0.55;
+      stroke: white;
+      stroke-width: 1;
+    }
+    .reader-dot:hover { fill-opacity: 0.95; }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px 16px;
+      margin-top: 12px;
+      font-size: 0.85rem;
+      color: var(--color-text);
+    }
+    .legend .swatch {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      margin-right: 6px;
+      vertical-align: middle;
+    }
+  </style>
+</head>
+<body>
+  <header class="eth-header">
+    <div class="eth-logo">ETH<em>zürich</em></div>
+    <nav><a href="index.html">← All visualizations</a></nav>
+  </header>
+  <main class="viz-container">
+    <h1>Latent-axes laboratory</h1>
+    <p class="lede">The 16 books sit in a 2D latent plane. Swap which axis is which — or flip an axis end-for-end — and watch the same books rearrange. The names on the axes are arbitrary; the geometry is not.</p>
+
+    <div class="viz-card">
+      <div class="lab-grid">
+        <div>
+          <div class="plane-wrap" id="plane-wrap">
+            <svg id="plane" viewBox="0 0 600 600" preserveAspectRatio="xMidYMid meet"></svg>
+          </div>
+          <div class="legend">
+            <span><span class="swatch" style="background:#56B4E9"></span>Light Fiction (LF)</span>
+            <span><span class="swatch" style="background:#CC79A7"></span>Demanding Fiction (DF)</span>
+            <span><span class="swatch" style="background:#E69F00"></span>Light Nonfiction (LN)</span>
+            <span><span class="swatch" style="background:#009E73"></span>Demanding Nonfiction (DN)</span>
+          </div>
+        </div>
+
+        <div>
+          <div class="control-panel">
+            <h3>Axis controls</h3>
+            <p class="hint">Same 16 books, different axis labelling. Cluster membership is invariant.</p>
+            <div class="ctrl-group">
+              <button id="btn-swap" type="button">Swap axes (x ↔ y)</button>
+              <button id="btn-flipx" type="button">Flip x-axis sign</button>
+              <button id="btn-flipy" type="button">Flip y-axis sign</button>
+              <button id="btn-reset" type="button">Reset to default</button>
+            </div>
+            <label class="toggle-row">
+              <input type="checkbox" id="toggle-readers">
+              <span>Overlay 21 readers</span>
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <aside class="explainer">
+      <h2>Where do these axes come from?</h2>
+      <p>The four axes — <strong>Fiction / Nonfiction</strong> × <strong>Light / Demanding</strong> — were not invented for this lecture. <em>Fiction vs. Nonfiction</em> is the oldest taxonomic axis in libraries (it predates the Dewey Decimal System). <em>Light vs. Demanding</em> maps directly onto readability indices like <em>Flesch reading ease</em> and the <em>Lexile</em> framework that schools and publishers have used for decades.</p>
+      <p>What matrix factorization gives you is the <strong>geometry</strong> — the four corner clusters and which books sit near which. The names you read on the axes are a human convention layered on top. Swap the axes, flip a sign, and the picture turns or mirrors — but Kant still sits next to Smith, and Potter still sits next to Christie.</p>
+    </aside>
+  </main>
+  <footer class="eth-footer">CAS AINIT FS26 · W2 Recsys</footer>
+
+  <script src="shared/data.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+  <script>
+  (function () {
+    const { BOOKS, READERS, COLORS } = window.RECSYS;
+
+    // ------------------------------------------------------------------
+    // SVG plane setup.
+    // ------------------------------------------------------------------
+    const W = 600, H = 600;
+    const PAD = 70;
+    const svg = d3.select('#plane');
+
+    // Domain is the latent space [-1, 1]; we leave headroom for arrows & labels.
+    const xScale = d3.scaleLinear().domain([-1.4, 1.4]).range([PAD, W - PAD]);
+    const yScale = d3.scaleLinear().domain([-1.4, 1.4]).range([H - PAD, PAD]);
+
+    // ------------------------------------------------------------------
+    // State: axis configuration.
+    //   `which` = which latent dimension is on the x-axis ('x'=fiction-nonfic,
+    //                                                     'y'=light-demanding)
+    //   `flipX`, `flipY` ∈ {+1, -1}: sign flip on each visual axis.
+    //
+    // Default: latent-x (fiction/nonfiction) on visual-x with no flip,
+    //          latent-y (light/demanding)    on visual-y with no flip.
+    //
+    // For a book with embedding [bx, by]:
+    //   visualX_value = flipX * (which==='x' ? bx : by)
+    //   visualY_value = flipY * (which==='x' ? by : bx)
+    // ------------------------------------------------------------------
+    const DEFAULT_STATE = { xDim: 0, yDim: 1, flipX: +1, flipY: +1 };
+    const state = { ...DEFAULT_STATE };
+
+    function project(emb) {
+      // emb = [b0, b1] where b0 is "fiction-axis" coord, b1 is "light-axis" coord.
+      // BOOKS spec: x = Fiction (+), Nonfiction (-) ; y = Light (+), Demanding (-).
+      const xv = state.flipX * emb[state.xDim];
+      const yv = state.flipY * emb[state.yDim];
+      return [xv, yv];
+    }
+
+    // Given the current axis assignment, return human-readable end labels for
+    // the visual x and y axes: { xLo, xHi, yLo, yHi }.
+    // Latent dim 0 = Fiction(+) ↔ Nonfiction(-)
+    // Latent dim 1 = Light(+)   ↔ Demanding(-)
+    const DIM_ENDS = [
+      { plus: 'Fiction',  minus: 'Nonfiction' }, // dim 0
+      { plus: 'Light',    minus: 'Demanding'  }, // dim 1
+    ];
+    function axisEnds() {
+      const xd = DIM_ENDS[state.xDim];
+      const yd = DIM_ENDS[state.yDim];
+      return {
+        xLo: state.flipX > 0 ? xd.minus : xd.plus,   // visual left
+        xHi: state.flipX > 0 ? xd.plus  : xd.minus,  // visual right
+        yLo: state.flipY > 0 ? yd.minus : yd.plus,   // visual bottom
+        yHi: state.flipY > 0 ? yd.plus  : yd.minus,  // visual top
+      };
+    }
+
+    // ------------------------------------------------------------------
+    // Layers (z-order matters)
+    // ------------------------------------------------------------------
+    const gQuadrants = svg.append('g').attr('class', 'quadrants');
+    const gAxes      = svg.append('g').attr('class', 'axes-static');
+    const gQuadLabel = svg.append('g').attr('class', 'quad-labels');
+    const gReaders   = svg.append('g').attr('class', 'readers');
+    const gBooks     = svg.append('g').attr('class', 'books');
+    const gAxisText  = svg.append('g').attr('class', 'axis-end-labels');
+
+    // ------------------------------------------------------------------
+    // Quadrant tints — drawn in *visual* coords, fixed regardless of the
+    // axis transform. The four quadrant colors stay in the same screen
+    // positions; only the BOOKS move when axes are swapped/flipped, which
+    // is exactly what makes cluster membership visible as invariance.
+    // We instead color each tile by the BOOKS that currently sit inside it.
+    // To do that without recomputing tiles, we keep them blank (very pale
+    // grey) and rely on book color + cluster legend to convey membership.
+    //
+    // Actually — to maximise the lecture point, color the tiles by the
+    // *visual quadrant identity* derived from the current axis ends. That
+    // way: when you flip x, the LF tile travels to the other side, but
+    // the same books still land in it.
+    // ------------------------------------------------------------------
+    function drawQuadrants() {
+      gQuadrants.selectAll('*').remove();
+      // Four tiles in screen coords: TL, TR, BL, BR
+      // Each tile's color is determined by which (sign_x, sign_y) latent
+      // signs it represents under the current state.
+      //   visual top-right  = (visual x > 0, visual y > 0)
+      //                     = latent (flipX*bx>0, flipY*by>0) when xDim=0
+      //                     = book dim signs (sx=flipX*latent[xDim]>0, sy=flipY*latent[yDim]>0)
+      const tiles = [
+        { vx: +1, vy: +1, x: xScale(0),    y: yScale(1.4),  w: xScale(1.4) - xScale(0), h: yScale(0) - yScale(1.4) }, // TR
+        { vx: -1, vy: +1, x: xScale(-1.4), y: yScale(1.4),  w: xScale(0) - xScale(-1.4), h: yScale(0) - yScale(1.4) }, // TL
+        { vx: -1, vy: -1, x: xScale(-1.4), y: yScale(0),    w: xScale(0) - xScale(-1.4), h: yScale(-1.4) - yScale(0) }, // BL
+        { vx: +1, vy: -1, x: xScale(0),    y: yScale(0),    w: xScale(1.4) - xScale(0), h: yScale(-1.4) - yScale(0) }, // BR
+      ];
+
+      const tileSel = gQuadrants.selectAll('rect.tile').data(tiles);
+      tileSel.enter().append('rect').attr('class', 'tile quad-tint')
+        .merge(tileSel)
+        .attr('x', d => d.x).attr('y', d => d.y)
+        .attr('width', d => d.w).attr('height', d => d.h)
+        .attr('fill', d => quadrantColorForTile(d.vx, d.vy));
+      tileSel.exit().remove();
+
+      // Quadrant label in each tile (LF, DF, LN, DN)
+      const labelSel = gQuadLabel.selectAll('text.quad-label').data(tiles);
+      labelSel.enter().append('text').attr('class', 'quad-label')
+        .merge(labelSel)
+        .attr('x', d => d.x + d.w / 2)
+        .attr('y', d => d.y + (d.vy > 0 ? 22 : d.h - 10))
+        .attr('text-anchor', 'middle')
+        .attr('fill', d => quadrantColorForTile(d.vx, d.vy))
+        .style('opacity', 0.8)
+        .text(d => quadrantIdForTile(d.vx, d.vy));
+      labelSel.exit().remove();
+    }
+
+    // Map a visual tile (vx, vy) ∈ {-1,+1}² back to which BOOK quadrant
+    // (LF/DF/LN/DN) currently sits there, given the active state.
+    function quadrantIdForTile(vx, vy) {
+      // visual signs → latent signs:
+      //   latent[xDim] sign = vx * flipX (because vx = flipX * latent[xDim])
+      //   latent[yDim] sign = vy * flipY
+      const sxDim = vx * state.flipX; // sign of latent dim assigned to x
+      const syDim = vy * state.flipY; // sign of latent dim assigned to y
+      // Reconstruct latent[0] (fiction sign) and latent[1] (light sign):
+      let s0, s1;
+      if (state.xDim === 0) { s0 = sxDim; s1 = syDim; }
+      else                   { s0 = syDim; s1 = sxDim; }
+      // s0: fiction sign (+1 fiction, -1 nonfiction)
+      // s1: light sign   (+1 light,   -1 demanding)
+      if (s0 > 0 && s1 > 0) return 'LF';
+      if (s0 > 0 && s1 < 0) return 'DF';
+      if (s0 < 0 && s1 > 0) return 'LN';
+      return 'DN';
+    }
+    function quadrantColorForTile(vx, vy) {
+      return COLORS[quadrantIdForTile(vx, vy)];
+    }
+
+    // ------------------------------------------------------------------
+    // Static axis lines & arrows (drawn once, always in the same screen
+    // position; only the END LABELS change as state changes).
+    // ------------------------------------------------------------------
+    function drawAxes() {
+      gAxes.selectAll('*').remove();
+      // X axis
+      gAxes.append('line').attr('class', 'axis-line')
+        .attr('x1', xScale(-1.4)).attr('y1', yScale(0))
+        .attr('x2', xScale(1.4)).attr('y2', yScale(0));
+      gAxes.append('polygon').attr('class', 'axis-arrow')
+        .attr('points', `${xScale(1.4)+10},${yScale(0)} ${xScale(1.4)-2},${yScale(0)-6} ${xScale(1.4)-2},${yScale(0)+6}`);
+      gAxes.append('polygon').attr('class', 'axis-arrow')
+        .attr('points', `${xScale(-1.4)-10},${yScale(0)} ${xScale(-1.4)+2},${yScale(0)-6} ${xScale(-1.4)+2},${yScale(0)+6}`);
+      // Y axis
+      gAxes.append('line').attr('class', 'axis-line')
+        .attr('x1', xScale(0)).attr('y1', yScale(-1.4))
+        .attr('x2', xScale(0)).attr('y2', yScale(1.4));
+      gAxes.append('polygon').attr('class', 'axis-arrow')
+        .attr('points', `${xScale(0)},${yScale(1.4)-10} ${xScale(0)-6},${yScale(1.4)+2} ${xScale(0)+6},${yScale(1.4)+2}`);
+      gAxes.append('polygon').attr('class', 'axis-arrow')
+        .attr('points', `${xScale(0)},${yScale(-1.4)+10} ${xScale(0)-6},${yScale(-1.4)-2} ${xScale(0)+6},${yScale(-1.4)-2}`);
+    }
+
+    // ------------------------------------------------------------------
+    // Axis end labels (animated text fades not necessary — just rewrite).
+    // ------------------------------------------------------------------
+    function drawAxisLabels() {
+      gAxisText.selectAll('*').remove();
+      const ends = axisEnds();
+      // X axis ends
+      gAxisText.append('text').attr('class', 'axis-end-label')
+        .attr('x', xScale(1.4) + 14).attr('y', yScale(0) + 4)
+        .attr('text-anchor', 'start').text(ends.xHi);
+      gAxisText.append('text').attr('class', 'axis-end-label')
+        .attr('x', xScale(-1.4) - 14).attr('y', yScale(0) + 4)
+        .attr('text-anchor', 'end').text(ends.xLo);
+      // Y axis ends
+      gAxisText.append('text').attr('class', 'axis-end-label')
+        .attr('x', xScale(0)).attr('y', yScale(1.4) - 16)
+        .attr('text-anchor', 'middle').text(ends.yHi);
+      gAxisText.append('text').attr('class', 'axis-end-label')
+        .attr('x', xScale(0)).attr('y', yScale(-1.4) + 24)
+        .attr('text-anchor', 'middle').text(ends.yLo);
+    }
+
+    // ------------------------------------------------------------------
+    // Books: 16 dots with labels, colored by quadrant.
+    // ------------------------------------------------------------------
+    function jitter(seed) {
+      // Deterministic small jitter so 4 books in the same corner spread out.
+      let h = 0;
+      for (let i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) | 0;
+      const a = (((h & 0xff) / 255) - 0.5) * 0.55;
+      const b = ((((h >> 8) & 0xff) / 255) - 0.5) * 0.55;
+      return [a, b];
+    }
+
+    function drawBooks(animate) {
+      const sel = gBooks.selectAll('g.book').data(BOOKS, d => d.id);
+      const enter = sel.enter().append('g').attr('class', 'book');
+
+      enter.append('circle')
+        .attr('class', 'book-dot')
+        .attr('r', 9)
+        .attr('fill', d => COLORS[d.quadrant]);
+
+      enter.append('text')
+        .attr('class', 'book-label')
+        .attr('y', -14)
+        .text(d => d.label);
+
+      enter.append('title').text(d => `${d.title} — ${d.author} (${d.year})`);
+
+      const merged = enter.merge(sel);
+
+      const t = animate
+        ? d3.transition().duration(320).ease(d3.easeCubicInOut)
+        : d3.transition().duration(0);
+
+      merged.transition(t)
+        .attr('transform', d => {
+          const [vx, vy] = project(d.embedding);
+          const [jx, jy] = jitter(d.label);
+          return `translate(${xScale(vx + jx)}, ${yScale(vy + jy)})`;
+        });
+    }
+
+    // ------------------------------------------------------------------
+    // Readers (overlay).
+    // ------------------------------------------------------------------
+    function drawReaders(animate) {
+      const visible = document.getElementById('toggle-readers').checked;
+      const data = visible ? READERS : [];
+
+      const sel = gReaders.selectAll('circle.reader-dot').data(data, d => d.id);
+
+      const enter = sel.enter().append('circle')
+        .attr('class', 'reader-dot')
+        .attr('r', 4)
+        .attr('opacity', 0)
+        .attr('transform', d => {
+          const [vx, vy] = project(d.embedding);
+          const [jx, jy] = jitter('R' + d.id);
+          return `translate(${xScale(vx + jx * 0.6)}, ${yScale(vy + jy * 0.6)})`;
+        });
+      enter.append('title').text(d => `${d.name} (${d.archetype}${d.special ? ' · ' + d.special : ''})`);
+
+      const t = animate
+        ? d3.transition().duration(320).ease(d3.easeCubicInOut)
+        : d3.transition().duration(0);
+
+      enter.transition(t).attr('opacity', 1);
+
+      sel.transition(t)
+        .attr('transform', d => {
+          const [vx, vy] = project(d.embedding);
+          const [jx, jy] = jitter('R' + d.id);
+          return `translate(${xScale(vx + jx * 0.6)}, ${yScale(vy + jy * 0.6)})`;
+        });
+
+      sel.exit().transition(t).attr('opacity', 0).remove();
+    }
+
+    // ------------------------------------------------------------------
+    // Renderers
+    // ------------------------------------------------------------------
+    function render(animate = true) {
+      drawQuadrants();
+      drawAxisLabels();
+      drawBooks(animate);
+      drawReaders(animate);
+    }
+
+    // ------------------------------------------------------------------
+    // Controls
+    // ------------------------------------------------------------------
+    document.getElementById('btn-swap').addEventListener('click', () => {
+      // Swap which latent dim is on x vs y.
+      const tmp = state.xDim; state.xDim = state.yDim; state.yDim = tmp;
+      // Also swap the corresponding flip signs so a previously-flipped
+      // axis stays flipped along its original latent dimension.
+      const tmpF = state.flipX; state.flipX = state.flipY; state.flipY = tmpF;
+      render(true);
+    });
+    document.getElementById('btn-flipx').addEventListener('click', () => {
+      state.flipX *= -1;
+      render(true);
+    });
+    document.getElementById('btn-flipy').addEventListener('click', () => {
+      state.flipY *= -1;
+      render(true);
+    });
+    document.getElementById('btn-reset').addEventListener('click', () => {
+      Object.assign(state, DEFAULT_STATE);
+      render(true);
+    });
+    document.getElementById('toggle-readers').addEventListener('change', () => {
+      drawReaders(true);
+    });
+
+    // First paint
+    drawAxes();
+    render(false);
+  })();
+  </script>
+</body>
+</html>

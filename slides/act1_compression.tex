@@ -1,0 +1,206 @@
+% =====================================================================
+% Act I --- Compression
+% Scenes 4 through 12 of the W2 narrative.
+% Total: ~12 slides + 1 optional act-opener divider.
+% =====================================================================
+
+% Set the section indicator for every slide in this file.
+\renewcommand{\AINITsection}{Act I \textemdash{} Compression}
+
+% ---------------------------------------------------------------------
+% Act-opener divider (optional but pedagogically nice).
+% ---------------------------------------------------------------------
+\sectiondivider%
+  {``In the imaginary universes of Borges, the libraries are infinite.\\ The librarians who can find a book are not.''}%
+  {after Jorge Luis Borges}%
+  {Act I \textemdash{} Compression}
+
+% ---------------------------------------------------------------------
+% Scene 4a --- The data
+% ---------------------------------------------------------------------
+\begin{frame}{The data: 21 readers, 16 books}
+  A small public library has kept a quiet record.
+
+  \vspace{0.5em}
+
+  For each of \AINITemph{21 anonymous readers} and each of \AINITemph{16 books},
+  one cell records whether the reader liked the book, disliked it, or
+  has not yet read it.
+
+  \vspace{0.5em}
+
+  Three symbols. Three hundred and fifty-seven cells.
+
+  \vspace{0.5em}
+
+  No names, no genres, no author photographs --- only the matrix.
+\end{frame}
+
+% ---------------------------------------------------------------------
+% Scene 4b --- The matrix as raw data, with a question
+% ---------------------------------------------------------------------
+\begin{frame}{Raw data}
+  \begin{center}
+    \begin{tikzpicture}[every node/.style={inner sep=0.6pt}]
+      % miniature 21x16 grid of dots, three shades, schematic.
+      \foreach \r in {0,...,20} {
+        \foreach \c in {0,...,15} {
+          \pgfmathtruncatemacro{\h}{mod(\r*7+\c*3,11)}
+          \ifnum\h<4
+            \fill[ink!85] (\c*0.32,-\r*0.22) circle (1.6pt);
+          \else
+            \ifnum\h<7
+              \fill[mutedWarmGray] (\c*0.32,-\r*0.22) circle (1.0pt);
+            \else
+              \draw[mutedWarmGray!50] (\c*0.32,-\r*0.22) circle (1.4pt);
+            \fi
+          \fi
+        }
+      }
+      \node[font=\itshape\small,mutedWarmGray] at (2.4,0.6) {16 books $\rightarrow$};
+      \node[font=\itshape\small,mutedWarmGray,rotate=90] at (-0.9,-2.2) {$\leftarrow$ 21 readers};
+    \end{tikzpicture}
+  \end{center}
+
+  \vspace{0.4em}
+  \begin{center}
+    \itshape Three hundred and fifty-seven cells. Can your brain remember them?
+  \end{center}
+\end{frame}
+
+% ---------------------------------------------------------------------
+% Scene 5 --- Block-diagonal puzzle (interactive)
+% ---------------------------------------------------------------------
+\vizhandoff{01\_block-diagonal-puzzle.html}
+
+% ---------------------------------------------------------------------
+% Scene 6a --- The four-corner reveal: the axes named
+% ---------------------------------------------------------------------
+\begin{frame}{The geometry was always there}
+  When the matrix is sorted by hand, two axes appear:
+
+  \vspace{0.6em}
+
+  \begin{itemize}
+    \setlength{\itemsep}{0.4em}
+    \item \AINITemph{Fiction} versus \AINITemph{Nonfiction}\sidenote{The
+      oldest taxonomic axis in libraries; Dewey codifies it in 1876.}
+    \item \AINITemph{Light} versus \AINITemph{Demanding}\sidenote{Readability
+      indices --- Flesch (1948), Lexile (1989) --- measure exactly this.}
+  \end{itemize}
+
+  \vspace{0.8em}
+
+  Neither axis was invented for this dataset. They are how librarians and
+  educators have sorted books for a century.
+
+  \vspace{0.4em}
+
+  We did not impose them. We \AINITemph{recovered} them.
+\end{frame}
+
+% ---------------------------------------------------------------------
+% Scene 6b --- The 16 books placed in 4 quadrants
+% ---------------------------------------------------------------------
+\begin{frame}{Sixteen books, four quadrants}
+  \begin{center}
+    \begin{tikzpicture}[
+      every node/.style={font=\footnotesize},
+      book/.style={font=\itshape\footnotesize,inner sep=1pt},
+    ]
+      % axes
+      \draw[ink,thick,->] (-4.2,0) -- (4.2,0) node[right,font=\scshape\scriptsize,mutedWarmGray] {nonfiction};
+      \draw[ink,thick,->] (0,-2.8) -- (0,2.8) node[above,font=\scshape\scriptsize,mutedWarmGray] {demanding};
+      \node[left,font=\scshape\scriptsize,mutedWarmGray] at (-4.2,0) {fiction};
+      \node[below,font=\scshape\scriptsize,mutedWarmGray] at (0,-2.8) {light};
+
+      % quadrant tints
+      \fill[accentOxblood,opacity=0.04] (-4,0) rectangle (0,2.6);
+      \fill[accentOxblood,opacity=0.04] (0,-2.6) rectangle (4,0);
+
+      % Books and quadrants per BOOKS_MATRIX.md (the matrix that drives every viz).
+      % top-left: demanding fiction (DF)
+      \node[book] at (-3.0, 2.1) {Ulysses};
+      \node[book] at (-1.5, 1.6) {Borges};
+      \node[book] at (-2.7, 1.1) {War \& Peace};
+      \node[book] at (-1.2, 0.5) {Lighthouse};
+
+      % top-right: demanding nonfiction (DN)
+      \node[book] at ( 1.2, 2.3) {Russell};
+      \node[book] at ( 2.7, 1.7) {Kant};
+      \node[book] at ( 1.6, 1.0) {Smith};
+      \node[book] at ( 3.2, 0.5) {Darwin};
+
+      % bottom-left: light fiction (LF)
+      \node[book] at (-2.8,-0.6) {Christie};
+      \node[book] at (-1.4,-1.2) {Potter};
+      \node[book] at (-3.1,-1.8) {Hunger Games};
+      \node[book] at (-1.2,-2.3) {Da Vinci Code};
+
+      % bottom-right: light nonfiction (LN)
+      \node[book] at ( 1.4,-0.6) {Eat Pray Love};
+      \node[book] at ( 3.0,-1.1) {Joy of Cooking};
+      \node[book] at ( 1.7,-1.9) {7 Habits};
+      \node[book] at ( 3.1,-2.3) {Switzerland};
+    \end{tikzpicture}
+  \end{center}
+\end{frame}
+
+% ---------------------------------------------------------------------
+% Scene 7 --- Latent axes lab (interactive)
+% ---------------------------------------------------------------------
+\vizhandoff{02\_latent-axes-lab.html}
+
+% ---------------------------------------------------------------------
+% Scene 8 --- Dot product equation
+% ---------------------------------------------------------------------
+\equationslide{Preference is a dot product}%
+  {\hat r_{ui} = u_i^\top v_j}%
+  {The user's vector and the book's vector live in the same space; their inner product is the predicted preference.}
+
+% ---------------------------------------------------------------------
+% Scene 9 --- Spectral microscope (interactive)
+% ---------------------------------------------------------------------
+\vizhandoff{spectral-microscope.html}
+
+% ---------------------------------------------------------------------
+% Scene 10 --- Eckart & Young (1936)
+% ---------------------------------------------------------------------
+\begin{frame}{Eckart \& Young (1936)\textsuperscript{1}}
+  \begin{quote}
+    \itshape Among all rank-$k$ approximations of any matrix, the one
+    given by the top-$k$ singular vectors is optimal in squared error.
+  \end{quote}
+
+  \vspace{0.8em}
+
+  No algorithm beats it. No clever trick beats it. No future
+  architecture beats it.
+
+  \vspace{0.4em}
+
+  The curve you just saw is not an empirical observation. It is the
+  graph of a theorem ninety years old.
+\end{frame}
+
+% ---------------------------------------------------------------------
+% Scene 11 --- Customer-Urns Carousel (interactive)
+% ---------------------------------------------------------------------
+\vizhandoff{customer-urns-carousel.html}
+
+% ---------------------------------------------------------------------
+% Scene 12 --- Embeddings that learn (interactive)
+% ---------------------------------------------------------------------
+\vizhandoff{07\_embeddings-that-learn.html}
+
+% ---------------------------------------------------------------------
+% Closing slide for Act I
+% ---------------------------------------------------------------------
+\begin{frame}{End of Act I}
+  We compressed a matrix. We named the act.
+
+  \vspace{0.8em}
+
+  The names --- \AINITemph{entropy}, \AINITemph{rank},
+  \AINITemph{factorization} --- were old words from 1936 and 1948.
+\end{frame}

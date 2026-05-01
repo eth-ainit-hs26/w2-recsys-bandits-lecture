@@ -1,0 +1,429 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Embedding interpolation</title>
+  <link rel="stylesheet" href="shared/style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+  <style>
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+      gap: 24px;
+    }
+    @media (max-width: 1024px) {
+      .layout { grid-template-columns: 1fr; }
+    }
+
+    .panel-title {
+      font-weight: 500;
+      font-size: 1rem;
+      color: var(--color-header-start);
+      margin-bottom: 8px;
+    }
+
+    #plotSvg {
+      width: 100%;
+      height: 460px;
+      display: block;
+      background: #fff;
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+    }
+
+    .axis-label {
+      font-size: 12px;
+      font-weight: 600;
+      fill: var(--color-text-muted);
+    }
+
+    .item-label {
+      font-size: 11px;
+      fill: var(--color-text);
+      pointer-events: none;
+    }
+
+    .quadrant-label {
+      font-size: 11px;
+      font-weight: 600;
+      opacity: 0.55;
+      pointer-events: none;
+    }
+
+    .user-arrow {
+      stroke-linecap: round;
+    }
+
+    .controls-row {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-top: 16px;
+    }
+    .controls-row select {
+      padding: 6px 10px;
+      border: 1px solid var(--color-border);
+      border-radius: 6px;
+      font-size: 0.95rem;
+      background: white;
+      color: var(--color-text);
+    }
+    .controls-row label {
+      font-size: 0.95rem;
+      color: var(--color-text-muted);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .slider-row {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      margin-top: 16px;
+    }
+    .slider-row input[type="range"] {
+      flex: 1;
+      min-width: 200px;
+    }
+    .slider-endpoint {
+      font-weight: 600;
+      font-size: 0.92rem;
+      min-width: 90px;
+    }
+    .slider-endpoint.left  { text-align: right; color: var(--color-pos); }
+    .slider-endpoint.right { text-align: left;  color: var(--color-neg); }
+    .t-readout {
+      font-variant-numeric: tabular-nums;
+      font-weight: 600;
+      color: var(--color-header-start);
+      margin-left: 12px;
+      min-width: 60px;
+      text-align: right;
+    }
+
+    .ratings-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin-top: 8px;
+    }
+    .rating-cell {
+      border-radius: 8px;
+      padding: 10px 8px;
+      text-align: center;
+      font-size: 0.85rem;
+      border: 1px solid var(--color-border);
+      transition: background-color 0.15s ease, transform 0.15s ease;
+    }
+    .rating-cell .ic { font-size: 1.6rem; display: block; margin-bottom: 2px; }
+    .rating-cell .nm { font-size: 0.72rem; line-height: 1.1; opacity: 0.85; }
+    .rating-cell .val {
+      display: block;
+      margin-top: 4px;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+      font-size: 0.85rem;
+    }
+
+    .vec-readout {
+      font-family: ui-monospace, "SF Mono", Menlo, monospace;
+      font-size: 0.88rem;
+      color: var(--color-text);
+      background: var(--color-neu-bg);
+      padding: 8px 12px;
+      border-radius: 6px;
+      display: inline-block;
+      margin-top: 8px;
+    }
+
+    .legend-line {
+      font-size: 0.85rem;
+      color: var(--color-text-muted);
+      margin-top: 8px;
+    }
+    .legend-swatch {
+      display: inline-block;
+      width: 14px; height: 14px;
+      border-radius: 50%;
+      vertical-align: middle;
+      margin: 0 4px 0 8px;
+    }
+  </style>
+</head>
+<body>
+  <header class="eth-header">
+    <div class="eth-logo">ETH<em>zürich</em></div>
+    <nav><a href="index.html">← All visualizations</a></nav>
+  </header>
+
+  <main class="viz-container">
+    <h1>Embedding interpolation</h1>
+    <p class="lede">An embedding is a personality vector. Slide between two users — their tastes morph smoothly along the line between them.</p>
+
+    <div class="viz-card">
+      <div class="controls-row">
+        <label>User A
+          <select id="selectA"></select>
+        </label>
+        <label>User B
+          <select id="selectB"></select>
+        </label>
+        <span class="legend-line">
+          <span class="legend-swatch" style="background:var(--color-pos);"></span>User A
+          <span class="legend-swatch" style="background:var(--color-neg);"></span>User B
+          <span class="legend-swatch" style="background:var(--color-tech);"></span>u(t)
+        </span>
+      </div>
+
+      <div class="layout" style="margin-top:16px;">
+        <div>
+          <div class="panel-title">Latent space</div>
+          <svg id="plotSvg" viewBox="0 0 600 460"></svg>
+          <div class="vec-readout" id="vecReadout">u(t) = (0.00, 0.00)</div>
+        </div>
+
+        <div>
+          <div class="panel-title">Predicted ratings for u(t)</div>
+          <div class="ratings-grid" id="ratingsGrid"></div>
+        </div>
+      </div>
+
+      <div class="slider-row">
+        <span class="slider-endpoint left" id="endpointLeft">User A</span>
+        <input type="range" id="tSlider" min="0" max="1" step="0.005" value="0">
+        <span class="slider-endpoint right" id="endpointRight">User B</span>
+        <span class="t-readout">t = <span id="tReadout">0.00</span></span>
+      </div>
+    </div>
+
+    <aside class="explainer">
+      <h2>What's happening?</h2>
+      <p>Each user has an embedding <em>u</em> — here a 2D vector along the <span class="swatch-simple">Simple</span>↔<span class="swatch-tech">Technology</span> and <span class="swatch-indoor">Indoor</span>↔<span class="swatch-outdoor">Outdoor</span> axes. We linearly interpolate <em>u(t) = (1−t)·u<sub>A</sub> + t·u<sub>B</sub></em> as you drag the slider.</p>
+      <p>The predicted rating of an item with embedding <em>v</em> is the dot product <em>u(t)·v</em>: positive (green) when the user-vector points the same way as the item, negative (red) when opposite. Watch the entire row of preferences morph smoothly — that's why embeddings are so powerful: a single slider mixes whole personalities.</p>
+    </aside>
+  </main>
+
+  <footer class="eth-footer">CAS AINIT FS26 · W2 Recsys</footer>
+
+  <script src="shared/data.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+  <script>
+  (function () {
+    const R = window.RECSYS;
+
+    // Default contrasting users (per spec): Michael (-1, 1) and Fabian (1, -1)
+    let userA = R.getPerson('Michael');
+    let userB = R.getPerson('Fabian');
+
+    // Populate selects
+    const selectA = document.getElementById('selectA');
+    const selectB = document.getElementById('selectB');
+    R.PEOPLE.forEach(p => {
+      const oA = document.createElement('option');
+      oA.value = p.name; oA.textContent = `${p.name} (${p.embedding[0]}, ${p.embedding[1]})`;
+      if (p.name === userA.name) oA.selected = true;
+      selectA.appendChild(oA);
+      const oB = oA.cloneNode(true);
+      if (p.name === userB.name) oB.selected = true; else oB.selected = false;
+      selectB.appendChild(oB);
+    });
+
+    // ---------- D3 plot setup ----------
+    const svg = d3.select('#plotSvg');
+    const W = 600, H = 460;
+    const margin = { top: 28, right: 28, bottom: 28, left: 28 };
+    const innerW = W - margin.left - margin.right;
+    const innerH = H - margin.top - margin.bottom;
+
+    // Domain a bit wider than [-1, 1] so points have padding
+    const x = d3.scaleLinear().domain([-1.6, 1.6]).range([0, innerW]);
+    const y = d3.scaleLinear().domain([-1.6, 1.6]).range([innerH, 0]);
+
+    const g = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
+
+    // Quadrant background tints
+    const quadW = x(0) - x(-1.6);
+    const quadH = y(-1.6) - y(0);
+    g.append('rect').attr('x', x(-1.6)).attr('y', y(0)).attr('width', quadW).attr('height', quadH)
+      .attr('fill', R.COLORS.indoor).attr('opacity', 0.04); // simple-indoor
+    g.append('rect').attr('x', x(0)).attr('y', y(0)).attr('width', quadW).attr('height', quadH)
+      .attr('fill', R.COLORS.tech).attr('opacity', 0.04); // tech-indoor
+    g.append('rect').attr('x', x(-1.6)).attr('y', y(1.6)).attr('width', quadW).attr('height', quadH)
+      .attr('fill', R.COLORS.outdoor).attr('opacity', 0.04); // simple-outdoor
+    g.append('rect').attr('x', x(0)).attr('y', y(1.6)).attr('width', quadW).attr('height', quadH)
+      .attr('fill', R.COLORS.simple).attr('opacity', 0.04); // tech-outdoor
+
+    // Axes (cross at origin)
+    g.append('line').attr('x1', x(-1.6)).attr('x2', x(1.6)).attr('y1', y(0)).attr('y2', y(0))
+      .attr('stroke', '#ced4da').attr('stroke-width', 1);
+    g.append('line').attr('x1', x(0)).attr('x2', x(0)).attr('y1', y(-1.6)).attr('y2', y(1.6))
+      .attr('stroke', '#ced4da').attr('stroke-width', 1);
+
+    // Axis labels (Simple / Tech / Indoor / Outdoor)
+    g.append('text').attr('class','axis-label')
+      .attr('x', x(-1.55)).attr('y', y(0) - 6)
+      .attr('fill', R.COLORS.simple).text('Simple ←');
+    g.append('text').attr('class','axis-label')
+      .attr('x', x(1.55)).attr('y', y(0) - 6).attr('text-anchor','end')
+      .attr('fill', R.COLORS.tech).text('→ Technology');
+    g.append('text').attr('class','axis-label')
+      .attr('x', x(0) + 6).attr('y', y(1.55))
+      .attr('fill', R.COLORS.outdoor).text('↑ Outdoor');
+    g.append('text').attr('class','axis-label')
+      .attr('x', x(0) + 6).attr('y', y(-1.5))
+      .attr('fill', R.COLORS.indoor).text('↓ Indoor');
+
+    // ---------- Items as fixed icons ----------
+    // Items share embeddings within a cluster; jitter for legibility.
+    const itemPositions = R.ITEMS.map((it, i) => {
+      // jitter inside the cluster cell, deterministic per index
+      const cluster = it.embedding;
+      const jx = ((i * 7) % 5 - 2) * 0.12;
+      const jy = ((i * 11) % 5 - 2) * 0.12;
+      return { name: it.name, icon: it.icon, embedding: cluster, jx, jy };
+    });
+
+    const itemG = g.append('g').attr('class', 'items');
+    const itemNodes = itemG.selectAll('g.item').data(itemPositions, d => d.name)
+      .enter().append('g')
+      .attr('class','item')
+      .attr('transform', d => `translate(${x(d.embedding[0] + d.jx)},${y(d.embedding[1] + d.jy)})`);
+
+    itemNodes.append('circle')
+      .attr('r', 16).attr('fill','white').attr('stroke', R.COLORS.border).attr('stroke-width',1);
+    itemNodes.append('text').attr('text-anchor','middle').attr('dy','0.35em').attr('font-size',16)
+      .text(d => d.icon);
+    itemNodes.append('text').attr('class','item-label')
+      .attr('text-anchor','middle').attr('y', 28).text(d => d.name);
+
+    // ---------- User A and B markers ----------
+    const userMarkerA = g.append('g');
+    userMarkerA.append('circle').attr('r', 7)
+      .attr('fill', R.COLORS.pos).attr('stroke','white').attr('stroke-width',2);
+    const labelA = userMarkerA.append('text').attr('font-size',11).attr('font-weight',600)
+      .attr('fill', R.COLORS.pos).attr('y', -12).attr('text-anchor','middle');
+
+    const userMarkerB = g.append('g');
+    userMarkerB.append('circle').attr('r', 7)
+      .attr('fill', R.COLORS.neg).attr('stroke','white').attr('stroke-width',2);
+    const labelB = userMarkerB.append('text').attr('font-size',11).attr('font-weight',600)
+      .attr('fill', R.COLORS.neg).attr('y', -12).attr('text-anchor','middle');
+
+    // Line A→B (path)
+    const lineAB = g.append('line')
+      .attr('stroke', R.COLORS.textMuted).attr('stroke-dasharray','4,4').attr('stroke-width', 1);
+
+    // Arrow for u(t) from origin
+    const arrowDef = svg.append('defs').append('marker')
+      .attr('id','arrowU').attr('viewBox','0 -5 10 10').attr('refX', 8).attr('refY',0)
+      .attr('markerWidth', 7).attr('markerHeight', 7).attr('orient','auto');
+    arrowDef.append('path').attr('d','M0,-5L10,0L0,5').attr('fill', R.COLORS.tech);
+
+    const userArrow = g.append('line').attr('class','user-arrow')
+      .attr('stroke', R.COLORS.tech).attr('stroke-width', 3)
+      .attr('marker-end','url(#arrowU)');
+
+    const userDot = g.append('circle').attr('r', 6)
+      .attr('fill', R.COLORS.tech).attr('stroke','white').attr('stroke-width',2);
+
+    // ---------- Ratings grid ----------
+    const ratingsGridEl = document.getElementById('ratingsGrid');
+    const ratingCells = R.ITEMS.map((it) => {
+      const div = document.createElement('div');
+      div.className = 'rating-cell';
+      div.innerHTML = `
+        <span class="ic">${it.icon}</span>
+        <span class="nm">${it.name}</span>
+        <span class="val">0.00</span>
+      `;
+      ratingsGridEl.appendChild(div);
+      return { div, val: div.querySelector('.val'), item: it };
+    });
+
+    // ---------- Color helpers ----------
+    // Map predicted rating in approx [-2, 2] to a color between negBg (red) and posBg (green) via white.
+    function predictionColor(p) {
+      // p in roughly [-2, 2]; clamp to [-1, 1] for color
+      const t = Math.max(-1, Math.min(1, p / 2));
+      const c1 = d3.color(R.COLORS.negBg);  // red bg
+      const c2 = d3.color('#ffffff');        // neutral white
+      const c3 = d3.color(R.COLORS.posBg);  // green bg
+      if (t < 0) {
+        return d3.interpolateRgb(c1, c2)(1 + t).toString();
+      } else {
+        return d3.interpolateRgb(c2, c3)(t).toString();
+      }
+    }
+    function valueTextColor(p) {
+      if (p > 0.4) return R.COLORS.pos;
+      if (p < -0.4) return R.COLORS.neg;
+      return R.COLORS.textMuted;
+    }
+
+    // ---------- Update ----------
+    const tSlider = document.getElementById('tSlider');
+    const tReadout = document.getElementById('tReadout');
+    const vecReadout = document.getElementById('vecReadout');
+    const endpointLeft  = document.getElementById('endpointLeft');
+    const endpointRight = document.getElementById('endpointRight');
+
+    function update() {
+      const t = parseFloat(tSlider.value);
+      const uA = userA.embedding;
+      const uB = userB.embedding;
+      const u = [
+        (1 - t) * uA[0] + t * uB[0],
+        (1 - t) * uA[1] + t * uB[1]
+      ];
+
+      tReadout.textContent = t.toFixed(2);
+      vecReadout.textContent = `u(t) = (${u[0].toFixed(2)}, ${u[1].toFixed(2)})`;
+
+      // Move user A and B markers
+      userMarkerA.attr('transform', `translate(${x(uA[0])},${y(uA[1])})`);
+      userMarkerB.attr('transform', `translate(${x(uB[0])},${y(uB[1])})`);
+      labelA.text(userA.name);
+      labelB.text(userB.name);
+      endpointLeft.textContent  = userA.name;
+      endpointRight.textContent = userB.name;
+
+      // Line A→B
+      lineAB
+        .attr('x1', x(uA[0])).attr('y1', y(uA[1]))
+        .attr('x2', x(uB[0])).attr('y2', y(uB[1]));
+
+      // Arrow from origin to u(t)
+      userArrow
+        .attr('x1', x(0)).attr('y1', y(0))
+        .attr('x2', x(u[0])).attr('y2', y(u[1]));
+      userDot.attr('cx', x(u[0])).attr('cy', y(u[1]));
+
+      // Update rating cells
+      ratingCells.forEach(rc => {
+        const v = rc.item.embedding;
+        const p = u[0] * v[0] + u[1] * v[1];
+        rc.div.style.background = predictionColor(p);
+        rc.val.textContent = (p >= 0 ? '+' : '') + p.toFixed(2);
+        rc.val.style.color = valueTextColor(p);
+      });
+    }
+
+    // ---------- Wire up ----------
+    tSlider.addEventListener('input', update);
+
+    selectA.addEventListener('change', () => {
+      userA = R.getPerson(selectA.value);
+      update();
+    });
+    selectB.addEventListener('change', () => {
+      userB = R.getPerson(selectB.value);
+      update();
+    });
+
+    update();
+  })();
+  </script>
+</body>
+</html>

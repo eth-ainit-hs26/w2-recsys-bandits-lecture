@@ -1,0 +1,619 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Outer-product painters · W2 Recsys</title>
+  <link rel="stylesheet" href="shared/style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+  <style>
+    .mode-bar {
+      display: flex; gap: 8px;
+      margin-bottom: 14px;
+    }
+    .mode-bar button {
+      background: white; color: var(--color-header-end);
+      border: 1px solid var(--color-border);
+      padding: 8px 14px; font-size: 0.92rem;
+      border-radius: 8px; cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+    }
+    .mode-bar button.active {
+      background: var(--color-header-end);
+      color: white;
+      border-color: var(--color-header-end);
+    }
+    .mode-bar button:hover:not(.active) { background: var(--color-neu-bg); }
+
+    .panels {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+    .panel {
+      background: var(--color-neu-bg);
+      border: 1px solid var(--color-border);
+      border-radius: 10px;
+      padding: 14px;
+    }
+    .panel h3 {
+      font-weight: 500;
+      font-size: 1rem;
+      margin: 0 0 8px;
+      color: var(--color-header-start);
+    }
+    .panel .sub {
+      font-size: 0.85rem;
+      color: var(--color-text-muted);
+      margin: 0 0 8px;
+    }
+
+    .thumb-strip {
+      display: flex; flex-wrap: wrap; gap: 10px;
+      align-items: flex-start;
+    }
+    .thumb {
+      display: flex; flex-direction: column; align-items: center;
+      gap: 4px;
+      transition: opacity 0.2s, transform 0.2s;
+    }
+    .thumb canvas {
+      display: block;
+      background: white;
+      border: 1px solid var(--color-border);
+      border-radius: 6px;
+      image-rendering: pixelated;
+    }
+    .thumb .cap {
+      font-size: 0.75rem;
+      color: var(--color-text-muted);
+      font-variant-numeric: tabular-nums;
+    }
+    .thumb .sigma { font-weight: 600; color: var(--color-tech); }
+    .thumb.dim { opacity: 0.25; }
+
+    .big-stage {
+      display: flex; gap: 18px; align-items: flex-start;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .big-stage .col {
+      display: flex; flex-direction: column; align-items: center; gap: 6px;
+    }
+    .big-stage canvas {
+      background: white;
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+      image-rendering: pixelated;
+    }
+    .big-stage .label {
+      font-size: 0.95rem; color: var(--color-text);
+      font-weight: 500;
+    }
+    .big-stage .sub-label {
+      font-size: 0.8rem; color: var(--color-text-muted);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .controls .meta {
+      font-size: 0.95rem;
+      color: var(--color-text);
+      font-variant-numeric: tabular-nums;
+      min-width: 110px;
+    }
+    .controls .meta strong { color: var(--color-header-start); }
+
+    .matrix-svg .cell-text {
+      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+      font-size: 11px;
+      font-variant-numeric: tabular-nums;
+      pointer-events: none;
+    }
+    .legend-bar {
+      display: flex; align-items: center; gap: 10px;
+      margin-top: 6px;
+      font-size: 0.82rem;
+      color: var(--color-text-muted);
+    }
+    .legend-bar .grad {
+      width: 160px; height: 10px;
+      background: linear-gradient(to right, var(--color-neg), #fff, var(--color-pos));
+      border: 1px solid var(--color-border);
+      border-radius: 3px;
+    }
+  </style>
+</head>
+<body>
+  <header class="eth-header">
+    <div class="eth-logo">ETH<em>zürich</em></div>
+    <nav><a href="index.html">← All visualizations</a></nav>
+  </header>
+  <main class="viz-container">
+    <h1>Outer-product painters</h1>
+    <p class="lede">
+      A matrix factorization <em>C = AB</em> can be rewritten as a sum of <em>k</em> rank-1
+      "paintings": <em>C = Σ a<sub>r</sub> ⊗ b<sub>r</sub><sup>⊤</sup></em>. Each painting is one
+      reason to like or dislike. Drag the slider to add paintings — and watch the residual fade.
+    </p>
+
+    <div class="viz-card">
+      <div class="mode-bar">
+        <button id="mode-matrix" class="active">Matrix mode (12×8 toy)</button>
+        <button id="mode-image">Image mode (SVD)</button>
+      </div>
+
+      <div class="big-stage" id="big-stage">
+        <div class="col">
+          <div class="label">Original C</div>
+          <canvas id="cv-orig"></canvas>
+          <div class="sub-label" id="cap-orig"></div>
+        </div>
+        <div class="col">
+          <div class="label">Reconstruction (rank k)</div>
+          <canvas id="cv-recon"></canvas>
+          <div class="sub-label" id="cap-recon"></div>
+        </div>
+        <div class="col">
+          <div class="label">Residual = C − reconstruction</div>
+          <canvas id="cv-resid"></canvas>
+          <div class="sub-label" id="cap-resid"></div>
+        </div>
+      </div>
+
+      <div class="legend-bar">
+        <span>negative</span>
+        <span class="grad"></span>
+        <span>positive</span>
+        <span style="margin-left:14px;">colors share a single scale across all three panels.</span>
+      </div>
+
+      <div class="controls">
+        <label>k = <span id="k-val" class="meta"><strong>1</strong></span></label>
+        <input type="range" id="k-slider" min="1" max="5" value="1" step="1" style="min-width:280px">
+        <button id="btn-play">▶ Animate</button>
+        <span class="meta" id="cap-summary"></span>
+      </div>
+
+      <div class="panel" style="margin-top:18px;">
+        <h3>The k rank-1 paintings used so far</h3>
+        <p class="sub">Each thumbnail is the outer product <em>σ<sub>r</sub> · u<sub>r</sub> v<sub>r</sub><sup>⊤</sup></em>. Adding them up gives the reconstruction above.</p>
+        <div id="thumb-strip" class="thumb-strip"></div>
+      </div>
+    </div>
+
+    <aside class="explainer">
+      <h2>What's happening?</h2>
+      <p>
+        <strong>Matrix mode:</strong> the toy 12×8 matrix is built from 5 latent factors. With <em>k</em>=1 you
+        already capture the dominant pattern; by <em>k</em>=5 the residual is exactly zero. This is the
+        bridge from matrix factorization to <em>truncated SVD</em>: keep the top <em>k</em> outer
+        products by singular value σ<sub>r</sub> and you get the best rank-<em>k</em> approximation.
+      </p>
+      <p>
+        <strong>Image mode:</strong> the same trick compresses an image. A few outer products store the
+        broad strokes; later ones add fine detail. This is exactly how SVD-based image compression works.
+      </p>
+    </aside>
+  </main>
+  <footer class="eth-footer">CAS AINIT FS26 · W2 Recsys</footer>
+
+  <script src="shared/data.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+  <script>
+  (function () {
+    const C = RECSYS.COLORS;
+
+    // ============================================================
+    // Tiny linear algebra: matrices are arrays of arrays of numbers.
+    // ============================================================
+    function zeros(r, c) {
+      const M = new Array(r);
+      for (let i = 0; i < r; i++) { M[i] = new Float64Array(c); }
+      return M;
+    }
+    function clone(M) {
+      const r = M.length, c = M[0].length;
+      const N = zeros(r, c);
+      for (let i = 0; i < r; i++) for (let j = 0; j < c; j++) N[i][j] = M[i][j];
+      return N;
+    }
+    function shape(M) { return [M.length, M[0].length]; }
+    function transpose(M) {
+      const [r, c] = shape(M);
+      const T = zeros(c, r);
+      for (let i = 0; i < r; i++) for (let j = 0; j < c; j++) T[j][i] = M[i][j];
+      return T;
+    }
+    function matVec(M, v) { // M(r×c) * v(c)  -> r
+      const [r, c] = shape(M);
+      const out = new Float64Array(r);
+      for (let i = 0; i < r; i++) {
+        let s = 0;
+        for (let j = 0; j < c; j++) s += M[i][j] * v[j];
+        out[i] = s;
+      }
+      return out;
+    }
+    function vecNorm(v) {
+      let s = 0;
+      for (let i = 0; i < v.length; i++) s += v[i] * v[i];
+      return Math.sqrt(s);
+    }
+    function vecScale(v, s) {
+      const out = new Float64Array(v.length);
+      for (let i = 0; i < v.length; i++) out[i] = v[i] * s;
+      return out;
+    }
+    function outerSubtract(M, u, sigma, v) {
+      // M -= sigma * u v^T  (in place)
+      const r = u.length, c = v.length;
+      for (let i = 0; i < r; i++) {
+        const ui = sigma * u[i];
+        for (let j = 0; j < c; j++) M[i][j] -= ui * v[j];
+      }
+    }
+    function frobenius(M) {
+      const [r, c] = shape(M);
+      let s = 0;
+      for (let i = 0; i < r; i++) for (let j = 0; j < c; j++) s += M[i][j] * M[i][j];
+      return Math.sqrt(s);
+    }
+    function maxAbs(M) {
+      const [r, c] = shape(M);
+      let mx = 0;
+      for (let i = 0; i < r; i++) for (let j = 0; j < c; j++) {
+        const v = Math.abs(M[i][j]); if (v > mx) mx = v;
+      }
+      return mx;
+    }
+
+    // Power iteration for the dominant singular triple (u, σ, v) of M.
+    function dominantSV(M, iters = 80, tol = 1e-9) {
+      const [r, c] = shape(M);
+      // start with a deterministic but mixed vector
+      let v = new Float64Array(c);
+      for (let i = 0; i < c; i++) v[i] = Math.sin(i * 1.7 + 0.3) + 0.13 * (i % 3);
+      let nv = vecNorm(v);
+      if (nv < 1e-12) { v[0] = 1; nv = 1; }
+      v = vecScale(v, 1 / nv);
+
+      let u = new Float64Array(r);
+      let sigma = 0;
+      const Mt = transpose(M);
+      for (let it = 0; it < iters; it++) {
+        // u = M v
+        u = matVec(M, v);
+        const su = vecNorm(u);
+        if (su < 1e-14) {
+          // matrix essentially zero
+          return { u: new Float64Array(r), v: new Float64Array(c), sigma: 0 };
+        }
+        u = vecScale(u, 1 / su);
+        // v_new = M^T u
+        const vn = matVec(Mt, u);
+        const sv = vecNorm(vn);
+        if (sv < 1e-14) {
+          return { u, v, sigma: 0 };
+        }
+        const vNorm = vecScale(vn, 1 / sv);
+        // convergence by sigma
+        const delta = Math.abs(sv - sigma);
+        sigma = sv;
+        v = vNorm;
+        if (delta < tol * Math.max(1, sigma)) break;
+      }
+      return { u, v, sigma };
+    }
+
+    // Truncated SVD via deflation. Returns array of {u, v, sigma}.
+    function truncatedSVD(M, K) {
+      const W = clone(M);
+      const out = [];
+      for (let k = 0; k < K; k++) {
+        const { u, v, sigma } = dominantSV(W);
+        if (sigma < 1e-10) { out.push({ u, v, sigma: 0 }); continue; }
+        out.push({ u, v, sigma });
+        outerSubtract(W, u, sigma, v);
+      }
+      return out;
+    }
+
+    // ============================================================
+    // Heatmap rendering on canvas
+    // Diverging color: negative -> red, zero -> white, positive -> green.
+    // ============================================================
+    // For matrices that are not strictly +/-, allow a separate gray scheme via opts.scheme = 'gray'.
+    function drawHeatmap(canvas, M, cellSize, opts = {}) {
+      const [r, c] = shape(M);
+      const w = c * cellSize;
+      const h = r * cellSize;
+      // sharp pixel rendering
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width  = w * dpr;
+      canvas.height = h * dpr;
+      canvas.style.width  = w + 'px';
+      canvas.style.height = h + 'px';
+      const ctx = canvas.getContext('2d');
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.imageSmoothingEnabled = false;
+
+      const scale = opts.scale != null ? opts.scale : Math.max(1e-9, maxAbs(M));
+      const scheme = opts.scheme || 'diverging';
+
+      // diverging (CVD-safe): -scale -> vermillion(213,94,0), 0 -> white,
+      //                       +scale -> blue(0,114,178).
+      // gray: 0 -> white, +scale -> black
+      const negR = 213, negG = 94,  negB = 0;    // #D55E00 vermillion
+      const posR =   0, posG = 114, posB = 178;  // #0072B2 blue
+
+      for (let i = 0; i < r; i++) {
+        for (let j = 0; j < c; j++) {
+          const v = M[i][j];
+          let R, G, B;
+          if (scheme === 'gray') {
+            const t = Math.max(0, Math.min(1, v / scale));
+            const k = Math.round(255 * (1 - t));
+            R = G = B = k;
+          } else {
+            const t = Math.max(-1, Math.min(1, v / scale));
+            if (t >= 0) {
+              R = Math.round(255 + (posR - 255) * t);
+              G = Math.round(255 + (posG - 255) * t);
+              B = Math.round(255 + (posB - 255) * t);
+            } else {
+              const a = -t;
+              R = Math.round(255 + (negR - 255) * a);
+              G = Math.round(255 + (negG - 255) * a);
+              B = Math.round(255 + (negB - 255) * a);
+            }
+          }
+          ctx.fillStyle = `rgb(${R},${G},${B})`;
+          ctx.fillRect(j * cellSize, i * cellSize, cellSize, cellSize);
+        }
+      }
+      // grid (only when cells are big enough)
+      if (cellSize >= 14) {
+        ctx.strokeStyle = 'rgba(0,0,0,0.08)';
+        ctx.lineWidth = 1;
+        for (let i = 0; i <= r; i++) {
+          ctx.beginPath();
+          ctx.moveTo(0, i * cellSize + 0.5);
+          ctx.lineTo(w, i * cellSize + 0.5);
+          ctx.stroke();
+        }
+        for (let j = 0; j <= c; j++) {
+          ctx.beginPath();
+          ctx.moveTo(j * cellSize + 0.5, 0);
+          ctx.lineTo(j * cellSize + 0.5, h);
+          ctx.stroke();
+        }
+      }
+    }
+
+    // ============================================================
+    // Build a 12×8 toy matrix from 5 latent factors.
+    // Pseudo-random but deterministic (seeded mulberry32).
+    // ============================================================
+    function mulberry32(seed) {
+      let t = seed >>> 0;
+      return function () {
+        t = (t + 0x6D2B79F5) >>> 0;
+        let r = t;
+        r = Math.imul(r ^ (r >>> 15), r | 1);
+        r ^= r + Math.imul(r ^ (r >>> 7), r | 61);
+        return ((r ^ (r >>> 14)) >>> 0) / 4294967296;
+      };
+    }
+    function buildToy(n, m, d, seed) {
+      const rng = mulberry32(seed);
+      const A = zeros(n, d);
+      const B = zeros(d, m);
+      for (let i = 0; i < n; i++) for (let r = 0; r < d; r++) A[i][r] = (rng() * 2 - 1);
+      for (let r = 0; r < d; r++) for (let j = 0; j < m; j++) B[r][j] = (rng() * 2 - 1);
+      // C = A B
+      const C = zeros(n, m);
+      for (let i = 0; i < n; i++) {
+        for (let j = 0; j < m; j++) {
+          let s = 0;
+          for (let r = 0; r < d; r++) s += A[i][r] * B[r][j];
+          C[i][j] = s;
+        }
+      }
+      return C;
+    }
+
+    // ============================================================
+    // Build a synthetic 64×64 grayscale image (no base64 needed):
+    // a smooth circular blob + diagonal stripes + a small bright spot.
+    // ============================================================
+    function buildToyImage(N) {
+      const M = zeros(N, N);
+      const cx = N * 0.5, cy = N * 0.55;
+      for (let i = 0; i < N; i++) {
+        for (let j = 0; j < N; j++) {
+          const dx = (j - cx) / (N * 0.4);
+          const dy = (i - cy) / (N * 0.4);
+          const r = Math.sqrt(dx * dx + dy * dy);
+          const blob = Math.max(0, 1 - r);                // soft disk
+          const stripes = 0.18 * (0.5 + 0.5 * Math.sin((i + j) * 0.55));
+          const spot = Math.exp(-(((j - N * 0.7) ** 2 + (i - N * 0.3) ** 2)) / (2 * (N * 0.07) ** 2));
+          let v = 0.55 * blob + stripes + 0.6 * spot;
+          if (v < 0) v = 0; if (v > 1) v = 1;
+          M[i][j] = v;
+        }
+      }
+      return M;
+    }
+
+    // ============================================================
+    // STATE
+    // ============================================================
+    const state = {
+      mode: 'matrix',     // 'matrix' | 'image'
+      C: null,
+      Krank: 0,           // total available rank we computed
+      svd: [],            // list of {u, v, sigma}
+      kView: 1,           // current slider value
+      cellPx: 0,
+      thumbPx: 0,
+    };
+
+    function setupForMode(mode) {
+      state.mode = mode;
+      if (mode === 'matrix') {
+        state.C = buildToy(12, 8, 5, 42);
+        state.Krank = 5;
+        state.cellPx = 28;
+        state.thumbPx = 12;
+      } else {
+        state.C = buildToyImage(64);
+        state.Krank = 32;
+        state.cellPx = 5;
+        state.thumbPx = 2;
+      }
+      // compute SVD
+      state.svd = truncatedSVD(state.C, state.Krank);
+      // init slider
+      const slider = document.getElementById('k-slider');
+      slider.min = 1;
+      slider.max = state.Krank;
+      slider.value = 1;
+      state.kView = 1;
+      document.getElementById('k-val').innerHTML = '<strong>1</strong>';
+    }
+
+    function reconstructUpToK(k) {
+      const [r, c] = shape(state.C);
+      const R = zeros(r, c);
+      for (let t = 0; t < k; t++) {
+        const { u, v, sigma } = state.svd[t];
+        for (let i = 0; i < r; i++) {
+          const ui = sigma * u[i];
+          for (let j = 0; j < c; j++) R[i][j] += ui * v[j];
+        }
+      }
+      return R;
+    }
+
+    function residual(R) {
+      const [r, c] = shape(state.C);
+      const D = zeros(r, c);
+      for (let i = 0; i < r; i++) for (let j = 0; j < c; j++) D[i][j] = state.C[i][j] - R[i][j];
+      return D;
+    }
+
+    function rankOnePainting(t) {
+      const { u, v, sigma } = state.svd[t];
+      const r = u.length, c = v.length;
+      const M = zeros(r, c);
+      for (let i = 0; i < r; i++) {
+        const ui = sigma * u[i];
+        for (let j = 0; j < c; j++) M[i][j] = ui * v[j];
+      }
+      return M;
+    }
+
+    // ============================================================
+    // Render
+    // ============================================================
+    function render() {
+      const cvOrig  = document.getElementById('cv-orig');
+      const cvRec   = document.getElementById('cv-recon');
+      const cvRes   = document.getElementById('cv-resid');
+
+      const k = state.kView;
+      const R = reconstructUpToK(k);
+      const D = residual(R);
+
+      // shared color scale across original / reconstruction / residual
+      const scheme = state.mode === 'image' ? 'gray' : 'diverging';
+      let scaleMain;
+      if (scheme === 'gray') {
+        // use 1 as the natural max for [0,1] image data
+        scaleMain = 1.0;
+      } else {
+        scaleMain = Math.max(maxAbs(state.C), maxAbs(R), 1e-6);
+      }
+      const scaleResid = scheme === 'gray'
+        ? Math.max(maxAbs(D), 1e-6)        // residual can be negative even for image -> show diverging
+        : scaleMain;
+
+      drawHeatmap(cvOrig, state.C, state.cellPx, { scheme, scale: scaleMain });
+      drawHeatmap(cvRec,  R,       state.cellPx, { scheme, scale: scaleMain });
+      // residual: always use diverging so we see sign
+      drawHeatmap(cvRes,  D,       state.cellPx, { scheme: 'diverging', scale: scaleResid });
+
+      // captions
+      const fro = frobenius(state.C);
+      const froD = frobenius(D);
+      const explained = fro > 1e-12 ? Math.max(0, 1 - froD * froD / (fro * fro)) : 1;
+      document.getElementById('cap-orig').textContent =
+        `${state.C.length}×${state.C[0].length} matrix, ‖C‖ = ${fro.toFixed(2)}`;
+      document.getElementById('cap-recon').textContent =
+        `rank ${k} approximation (${(explained * 100).toFixed(1)}% energy)`;
+      document.getElementById('cap-resid').textContent =
+        `‖residual‖ = ${froD.toFixed(3)}`;
+      document.getElementById('cap-summary').innerHTML =
+        `<strong>${(explained * 100).toFixed(1)}%</strong> of C explained by ${k} outer product${k === 1 ? '' : 's'}.`;
+
+      // thumbnails: render all Krank, dim those with index >= k
+      const strip = document.getElementById('thumb-strip');
+      strip.innerHTML = '';
+      for (let t = 0; t < state.Krank; t++) {
+        const wrap = document.createElement('div');
+        wrap.className = 'thumb' + (t >= k ? ' dim' : '');
+        const cv = document.createElement('canvas');
+        const M = rankOnePainting(t);
+        // each painting's own scale so visible
+        const localScale = Math.max(maxAbs(M), 1e-9);
+        drawHeatmap(cv, M, state.thumbPx, { scheme: 'diverging', scale: localScale });
+        const cap = document.createElement('div');
+        cap.className = 'cap';
+        cap.innerHTML = `<span class="sigma">σ${t+1}</span> = ${state.svd[t].sigma.toFixed(2)}`;
+        wrap.appendChild(cv);
+        wrap.appendChild(cap);
+        strip.appendChild(wrap);
+      }
+    }
+
+    // ============================================================
+    // Wire up controls
+    // ============================================================
+    function setMode(mode) {
+      document.getElementById('mode-matrix').classList.toggle('active', mode === 'matrix');
+      document.getElementById('mode-image').classList.toggle('active', mode === 'image');
+      setupForMode(mode);
+      render();
+    }
+
+    document.getElementById('mode-matrix').addEventListener('click', () => setMode('matrix'));
+    document.getElementById('mode-image').addEventListener('click', () => setMode('image'));
+
+    const slider = document.getElementById('k-slider');
+    slider.addEventListener('input', () => {
+      state.kView = +slider.value;
+      document.getElementById('k-val').innerHTML = `<strong>${state.kView}</strong>`;
+      render();
+    });
+
+    let playing = false;
+    document.getElementById('btn-play').addEventListener('click', async () => {
+      if (playing) return;
+      playing = true;
+      try {
+        for (let kk = 1; kk <= state.Krank; kk++) {
+          slider.value = kk;
+          state.kView = kk;
+          document.getElementById('k-val').innerHTML = `<strong>${kk}</strong>`;
+          render();
+          await new Promise(r => setTimeout(r, state.mode === 'image' ? 220 : 420));
+        }
+      } finally { playing = false; }
+    });
+
+    // initial
+    setMode('matrix');
+  })();
+  </script>
+</body>
+</html>

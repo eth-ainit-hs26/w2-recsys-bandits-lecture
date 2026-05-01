@@ -1,0 +1,40 @@
+% beamerthemeAINITAcademic.sty
+% Master theme file. Loads the four sub-themes (color, font, inner, outer).
+%
+% Usage in a deck:
+%   \documentclass[aspectratio=169,11pt]{beamer}
+%   \usetheme{AINITAcademic}
+%
+% Requires lualatex (preferred) or pdflatex.
+% See beamerfontthemeAINITAcademic.sty for engine-specific font handling.
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{beamerthemeAINITAcademic}[2026/05/01 AINIT Academic master]
+
+\RequirePackage{etoolbox}
+\RequirePackage{microtype}
+
+% Sub-themes (order matters: colors first so fonts/inner/outer can refer
+% to color names; outer last so margins win over inner).
+\useinnertheme{AINITAcademic}
+\useoutertheme{AINITAcademic}
+\usecolortheme{AINITAcademic}
+\usefonttheme{AINITAcademic}
+
+% --- Global beamer tweaks ------------------------------------------------
+% Generous line-height: 1.45 of the body baseline. Beamer uses 11pt body,
+% so we set baselinestretch globally.
+\renewcommand{\baselinestretch}{1.20}% beamer already adds ~20%; total ≈1.45 visually
+
+% Italic-emphasis macro the deck can use; we deliberately do NOT bind \emph
+% to \textbf — italic only.
+\let\AINITemph\emph
+
+% Convenience: oxblood-coloured KL term for equations.
+\newcommand{\KL}[2]{\mathrm{KL}\!\left(#1 \,\|\, #2\right)}
+\newcommand{\KLox}[2]{{\color{accentOxblood}\KL{#1}{#2}}}
+
+% Roman-numeral section numbering (per design intent).
+\renewcommand{\thesection}{\Roman{section}}
+
+\endinput

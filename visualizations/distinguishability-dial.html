@@ -1,0 +1,459 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Distinguishability dial · W2 Bandits</title>
+  <link rel="stylesheet" href="shared/style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+  <style>
+    .dial-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      align-items: start;
+    }
+    @media (max-width: 1024px) {
+      .dial-grid { grid-template-columns: 1fr; }
+    }
+
+    .urn-row {
+      display: flex;
+      justify-content: center;
+      gap: 48px;
+      align-items: flex-end;
+      margin: 8px 0 18px;
+    }
+    .urn-cell {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+    .urn-cell .urn-label {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--color-text);
+    }
+    .urn-cell .urn-bias {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 0.95rem;
+      color: var(--color-text-muted);
+    }
+    .urn-svg { width: 130px; height: 150px; display: block; }
+
+    .gap-readout {
+      text-align: center;
+      font-size: 0.95rem;
+      color: var(--color-text-muted);
+      margin-bottom: 8px;
+    }
+    .gap-readout strong {
+      color: var(--color-text);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    }
+
+    .slider-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-top: 8px;
+    }
+    .slider-row label {
+      font-size: 0.9rem;
+      color: var(--color-text-muted);
+      white-space: nowrap;
+    }
+    .slider-row input[type="range"] { flex: 1; }
+
+    .bignum-card {
+      background: var(--color-neu-bg);
+      border: 1px solid var(--color-border);
+      border-radius: 10px;
+      padding: 18px 20px;
+      text-align: center;
+      margin-top: 14px;
+    }
+    .bignum-card .bignum-label {
+      font-size: 0.85rem;
+      color: var(--color-text-muted);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+    .bignum-card .bignum-value {
+      font-size: 2.4rem;
+      font-weight: 300;
+      color: var(--color-header-end);
+      font-feature-settings: "tnum";
+      letter-spacing: -0.5px;
+      line-height: 1.05;
+    }
+    .bignum-card .bignum-sub {
+      font-size: 0.95rem;
+      color: var(--color-text-muted);
+      margin-top: 4px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    }
+
+    .plot-wrap {
+      width: 100%;
+      aspect-ratio: 4 / 3;
+      max-width: 560px;
+      margin: 0 auto;
+    }
+    .plot-wrap svg { width: 100%; height: 100%; display: block; }
+
+    .axis text { font-size: 11px; fill: var(--color-text-muted); }
+    .axis path, .axis line { stroke: #adb5bd; }
+    .grid line { stroke: #e9ecef; stroke-dasharray: 2 3; }
+    .grid path { stroke: none; }
+
+    .curve-line {
+      fill: none;
+      stroke: var(--color-tech);
+      stroke-width: 2.2;
+    }
+    .current-marker {
+      fill: var(--color-neg);
+      stroke: white;
+      stroke-width: 2;
+    }
+    .ref-marker {
+      fill: white;
+      stroke: var(--color-header-end);
+      stroke-width: 1.5;
+    }
+    .ref-label {
+      font-size: 11px;
+      fill: var(--color-text);
+      paint-order: stroke;
+      stroke: white;
+      stroke-width: 3px;
+      stroke-linejoin: round;
+    }
+    .axis-title {
+      font-size: 12px;
+      fill: var(--color-text);
+      font-weight: 500;
+    }
+
+    .formula-box {
+      background: white;
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+      padding: 12px 14px;
+      margin-top: 14px;
+      font-size: 0.92rem;
+      color: var(--color-text);
+    }
+    .formula-box .katex { font-size: 1em; }
+  </style>
+</head>
+<body>
+  <header class="eth-header">
+    <div class="eth-logo">ETH<em>zürich</em></div>
+    <nav><a href="index.html">← All visualizations</a></nav>
+  </header>
+  <main class="viz-container">
+    <h1>Distinguishability dial</h1>
+    <p class="lede">Two urns, two hidden biases. How many draws do you need to be 95% sure which is bigger?</p>
+
+    <div class="viz-card">
+      <div class="dial-grid">
+        <!-- Left column: urns + slider + bignum -->
+        <div>
+          <div class="urn-row">
+            <div class="urn-cell">
+              <svg class="urn-svg" id="urn-A" viewBox="0 0 130 150"></svg>
+              <div class="urn-label" style="color: var(--color-fiction)">Urn A</div>
+              <div class="urn-bias">p<sub>A</sub> = <span id="pa-readout">0.55</span></div>
+            </div>
+            <div class="urn-cell">
+              <svg class="urn-svg" id="urn-B" viewBox="0 0 130 150"></svg>
+              <div class="urn-label" style="color: var(--color-light)">Urn B</div>
+              <div class="urn-bias">p<sub>B</sub> = <span id="pb-readout">0.45</span></div>
+            </div>
+          </div>
+
+          <div class="gap-readout">
+            Gap <strong>Δ = |p<sub>A</sub> − p<sub>B</sub>| = <span id="delta-readout">0.100</span></strong>
+          </div>
+
+          <div class="slider-row">
+            <label for="delta-slider">Δ</label>
+            <input type="range" id="delta-slider" min="0.01" max="0.50" step="0.005" value="0.10">
+            <span style="font-family: ui-monospace, monospace; font-size: 0.9rem; min-width: 3.2em; text-align: right;" id="delta-num">0.100</span>
+          </div>
+
+          <div class="bignum-card">
+            <div class="bignum-label">Samples needed (per urn)</div>
+            <div class="bignum-value" id="n-per-urn">191</div>
+            <div class="bignum-sub">total trials: <span id="n-total">382</span></div>
+          </div>
+
+          <div class="formula-box">
+            <div id="formula-display"></div>
+          </div>
+        </div>
+
+        <!-- Right column: log-scale plot -->
+        <div>
+          <div class="plot-wrap">
+            <svg id="plot" viewBox="0 0 560 420" preserveAspectRatio="xMidYMid meet"></svg>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <aside class="explainer">
+      <h2>The cost of distinguishability is quadratic in 1/Δ</h2>
+      <p>When the audience's statistician says <em>"we need a million users to A/B-test this,"</em> she means: the gap is small. Halve Δ and the sample count quadruples; shrink it tenfold and the cost goes up a hundredfold.</p>
+      <p>Lai &amp; Robbins (1985) proved this is unavoidable for any algorithm — clever or not. The Shannon-flavored quantity sitting behind the bound is <strong>KL divergence</strong>: distributions that are close in KL are expensive to tell apart, no matter how you sample. The next slide makes that precise.</p>
+    </aside>
+  </main>
+  <footer class="eth-footer">CAS AINIT FS26 · W2 Bandits · Scene 23</footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
+          onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]})"></script>
+  <script>
+  (function () {
+    // ------------------------------------------------------------------
+    // Statistics: per-urn sample size for 95% confidence two-sample
+    // Bernoulli test (normal approximation, alpha = 0.05, two-sided).
+    //   n = ceil( z² · (p_A·(1-p_A) + p_B·(1-p_B)) / Δ² )
+    // ------------------------------------------------------------------
+    const Z = 1.96;
+    const Z2 = Z * Z;
+
+    function nPerUrn(delta) {
+      const pA = 0.5 + delta / 2;
+      const pB = 0.5 - delta / 2;
+      const num = Z2 * (pA * (1 - pA) + pB * (1 - pB));
+      return Math.ceil(num / (delta * delta));
+    }
+
+    function fmt(n) {
+      if (n >= 1000) return n.toLocaleString('en-US');
+      return String(n);
+    }
+
+    // ------------------------------------------------------------------
+    // Urn drawing — minimal SVG glyph showing two-color ball mix at bias p.
+    // We pre-place 24 balls in a fixed pattern; color them by bias (top
+    // p fraction = "win color", remainder = "lose color"). Determinism
+    // matters more than physics here.
+    // ------------------------------------------------------------------
+    const N_BALLS = 24;
+    // Pre-baked positions inside an urn shape (relative coords in 130x150 viewBox)
+    function ballPositions() {
+      const rows = [
+        // y, count, xStart, xStep
+        { y: 130, xs: [25, 45, 65, 85, 105] },
+        { y: 112, xs: [22, 42, 62, 82, 102] },
+        { y:  94, xs: [25, 45, 65, 85, 105] },
+        { y:  78, xs: [30, 50, 70, 90] },
+        { y:  64, xs: [35, 55, 75, 95] },
+        { y:  52, xs: [42, 62, 82] },
+      ];
+      const pos = [];
+      rows.forEach(r => r.xs.forEach(x => pos.push([x, r.y])));
+      return pos.slice(0, N_BALLS);
+    }
+    const BALLS = ballPositions();
+
+    function drawUrn(svgId, p, winColor, loseColor) {
+      const svg = d3.select(svgId);
+      svg.selectAll('*').remove();
+
+      // Urn body: rounded vase shape via path
+      svg.append('path')
+        .attr('d', 'M 22 60 Q 22 48 35 44 L 95 44 Q 108 48 108 60 L 105 138 Q 105 145 96 145 L 34 145 Q 25 145 25 138 Z')
+        .attr('fill', '#FFFFFF')
+        .attr('stroke', 'var(--color-text-muted)')
+        .attr('stroke-width', 1.4)
+        .attr('opacity', 0.9);
+
+      // Rim
+      svg.append('ellipse')
+        .attr('cx', 65).attr('cy', 44)
+        .attr('rx', 32).attr('ry', 5)
+        .attr('fill', '#F1F3F5')
+        .attr('stroke', 'var(--color-text-muted)')
+        .attr('stroke-width', 1.2);
+
+      // Decide how many balls are "win color" (deterministic by bias).
+      const nWin = Math.round(p * N_BALLS);
+
+      // Use a deterministic shuffle so balls of each color are
+      // interspersed (rather than all win-balls clustered at the top).
+      // Hash by position index for stable assignment.
+      const order = d3.range(N_BALLS).sort((a, b) => {
+        const ha = ((a * 2654435761) >>> 0) & 0xffff;
+        const hb = ((b * 2654435761) >>> 0) & 0xffff;
+        return ha - hb;
+      });
+      const winSet = new Set(order.slice(0, nWin));
+
+      const g = svg.append('g');
+      BALLS.forEach((pt, i) => {
+        g.append('circle')
+          .attr('cx', pt[0])
+          .attr('cy', pt[1])
+          .attr('r', 5)
+          .attr('fill', winSet.has(i) ? winColor : loseColor)
+          .attr('stroke', 'white')
+          .attr('stroke-width', 1);
+      });
+    }
+
+    // ------------------------------------------------------------------
+    // Plot: log-scale n-vs-Δ curve over [0.01, 0.50].
+    // ------------------------------------------------------------------
+    const PW = 560, PH = 420;
+    const M = { top: 24, right: 24, bottom: 50, left: 70 };
+    const plotW = PW - M.left - M.right;
+    const plotH = PH - M.top - M.bottom;
+    const plot = d3.select('#plot');
+    const gPlot = plot.append('g').attr('transform', `translate(${M.left},${M.top})`);
+
+    const DELTA_MIN = 0.01, DELTA_MAX = 0.50;
+    const xScale = d3.scaleLinear().domain([DELTA_MIN, DELTA_MAX]).range([0, plotW]);
+
+    // y-domain spans the full sample-count range across [0.01, 0.50]
+    const nMin = nPerUrn(DELTA_MAX); // smallest n at largest delta
+    const nMax = nPerUrn(DELTA_MIN); // largest n at smallest delta
+    const yScale = d3.scaleLog().domain([Math.max(1, nMin / 1.4), nMax * 1.2]).range([plotH, 0]);
+
+    // Gridlines (y-axis log ticks)
+    gPlot.append('g').attr('class', 'grid')
+      .call(d3.axisLeft(yScale)
+        .ticks(8, '~s')
+        .tickSize(-plotW)
+        .tickFormat(''));
+
+    // Axes
+    gPlot.append('g').attr('class', 'axis')
+      .attr('transform', `translate(0,${plotH})`)
+      .call(d3.axisBottom(xScale).ticks(6).tickFormat(d3.format('.2f')));
+
+    gPlot.append('g').attr('class', 'axis')
+      .call(d3.axisLeft(yScale).ticks(6, '~s'));
+
+    // Axis titles
+    gPlot.append('text').attr('class', 'axis-title')
+      .attr('x', plotW / 2).attr('y', plotH + 38)
+      .attr('text-anchor', 'middle')
+      .text('gap Δ = |p_A − p_B|');
+
+    gPlot.append('text').attr('class', 'axis-title')
+      .attr('transform', `translate(-50, ${plotH / 2}) rotate(-90)`)
+      .attr('text-anchor', 'middle')
+      .text('samples per urn (log scale)');
+
+    // Curve data — sample densely
+    const curveData = d3.range(DELTA_MIN, DELTA_MAX + 1e-9, 0.002).map(d => ({
+      delta: d,
+      n: nPerUrn(d),
+    }));
+    const lineGen = d3.line()
+      .x(d => xScale(d.delta))
+      .y(d => yScale(d.n))
+      .curve(d3.curveMonotoneX);
+
+    gPlot.append('path')
+      .datum(curveData)
+      .attr('class', 'curve-line')
+      .attr('d', lineGen);
+
+    // Reference markers at Δ ∈ {0.10, 0.05, 0.01}
+    const REF_DELTAS = [0.10, 0.05, 0.01];
+    const refG = gPlot.append('g').attr('class', 'ref-markers');
+    REF_DELTAS.forEach(d => {
+      const n = nPerUrn(d);
+      refG.append('circle')
+        .attr('class', 'ref-marker')
+        .attr('cx', xScale(d)).attr('cy', yScale(n))
+        .attr('r', 4);
+      // Label placement: nudge so labels don't collide with axes/curve
+      const lx = xScale(d) + 8;
+      const ly = yScale(n) - 8;
+      refG.append('text')
+        .attr('class', 'ref-label')
+        .attr('x', lx).attr('y', ly)
+        .attr('text-anchor', 'start')
+        .text(`Δ=${d.toFixed(2)} → n=${fmt(n)}`);
+    });
+
+    // Current-Δ marker (animated on slider change)
+    const currentMarker = gPlot.append('circle')
+      .attr('class', 'current-marker')
+      .attr('r', 7)
+      .attr('cx', xScale(0.10))
+      .attr('cy', yScale(nPerUrn(0.10)));
+
+    // Vertical guide line at current Δ
+    const currentGuide = gPlot.append('line')
+      .attr('stroke', 'var(--color-neg)')
+      .attr('stroke-width', 1)
+      .attr('stroke-dasharray', '3 3')
+      .attr('opacity', 0.5)
+      .attr('y1', 0).attr('y2', plotH);
+
+    // ------------------------------------------------------------------
+    // Update loop
+    // ------------------------------------------------------------------
+    const slider = document.getElementById('delta-slider');
+    const deltaNum = document.getElementById('delta-num');
+    const deltaReadout = document.getElementById('delta-readout');
+    const paReadout = document.getElementById('pa-readout');
+    const pbReadout = document.getElementById('pb-readout');
+    const nPerUrnEl = document.getElementById('n-per-urn');
+    const nTotalEl = document.getElementById('n-total');
+
+    const COLOR_FICTION = getCSS('--color-fiction');
+    const COLOR_LIGHT = getCSS('--color-light');
+    const COLOR_NEU = getCSS('--color-neu');
+
+    function getCSS(name) {
+      return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+    }
+
+    function update(delta) {
+      const pA = 0.5 + delta / 2;
+      const pB = 0.5 - delta / 2;
+      const n = nPerUrn(delta);
+
+      paReadout.textContent = pA.toFixed(3);
+      pbReadout.textContent = pB.toFixed(3);
+      deltaReadout.textContent = delta.toFixed(3);
+      deltaNum.textContent = delta.toFixed(3);
+      nPerUrnEl.textContent = fmt(n);
+      nTotalEl.textContent = fmt(2 * n);
+
+      drawUrn('#urn-A', pA, COLOR_FICTION, COLOR_NEU);
+      drawUrn('#urn-B', pB, COLOR_LIGHT, COLOR_NEU);
+
+      currentMarker
+        .attr('cx', xScale(delta))
+        .attr('cy', yScale(n));
+      currentGuide
+        .attr('x1', xScale(delta)).attr('x2', xScale(delta));
+    }
+
+    slider.addEventListener('input', e => update(parseFloat(e.target.value)));
+
+    // ------------------------------------------------------------------
+    // KaTeX formula
+    // ------------------------------------------------------------------
+    document.getElementById('formula-display').innerHTML =
+      '$n_{\\text{per urn}} = \\left\\lceil \\frac{z_{0.975}^{2}\\,\\bigl(p_A(1-p_A) + p_B(1-p_B)\\bigr)}{\\Delta^{2}} \\right\\rceil,\\quad z_{0.975} \\approx 1.96$';
+
+    // First paint
+    update(parseFloat(slider.value));
+  })();
+  </script>
+</body>
+</html>

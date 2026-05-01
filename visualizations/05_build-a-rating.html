@@ -1,0 +1,595 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Build a single rating · W2 Recsys</title>
+  <link rel="stylesheet" href="shared/style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+  <style>
+    /* -------- viz-specific layout -------- */
+    .stage {
+      position: relative;
+      display: grid;
+      grid-template-columns: auto auto;
+      grid-template-rows: auto auto;
+      gap: 28px 24px;
+      justify-content: center;
+      padding: 16px 8px 8px;
+    }
+    .label-A, .label-B, .label-C {
+      font-style: italic;
+      font-size: 1.6rem;
+      color: var(--color-text);
+      font-family: "Times New Roman", Georgia, serif;
+    }
+    .slot-Alabel {
+      grid-column: 1; grid-row: 1;
+      align-self: end; justify-self: end;
+      padding-right: 6px; padding-bottom: 4px;
+    }
+    .slot-Blabel {
+      grid-column: 2; grid-row: 1;
+      align-self: end; justify-self: start;
+      padding-left: 6px; padding-bottom: 4px;
+    }
+    .slot-A { grid-column: 1; grid-row: 2; align-self: start; }
+    .slot-B { grid-column: 2; grid-row: 1; align-self: start; }
+    .slot-C { grid-column: 2; grid-row: 2; align-self: start; }
+    .slot-Clabel {
+      grid-column: 2; grid-row: 2;
+      align-self: end; justify-self: end;
+      padding: 4px 6px 0 0;
+      pointer-events: none;
+    }
+
+    table.mat {
+      border-collapse: separate;
+      border-spacing: 3px;
+      table-layout: fixed;
+    }
+    table.mat td, table.mat th {
+      width: 56px;
+      height: 44px;
+      text-align: center;
+      vertical-align: middle;
+      font-variant-numeric: tabular-nums;
+      font-size: 0.95rem;
+      background: #EEF1F8;
+      color: var(--color-text);
+      border-radius: 4px;
+      transition: background-color 0.25s, color 0.25s, box-shadow 0.25s, transform 0.25s;
+    }
+    table.mat th {
+      background: transparent;
+      color: var(--color-text-muted);
+      font-weight: 500;
+      font-size: 0.85rem;
+      width: 64px;
+      height: 32px;
+    }
+    table.mat td.alt { background: #DDE3EF; }
+
+    /* axis headers (item icons / person names) */
+    .item-head { font-size: 1.15rem; }
+    .person-head {
+      font-size: 0.85rem;
+      color: var(--color-text-muted);
+      text-align: right !important;
+      padding-right: 8px !important;
+      width: 78px !important;
+      white-space: nowrap;
+    }
+
+    /* C cell states */
+    table.mat td.c-cell {
+      cursor: pointer;
+      background: #EEF1F8;
+      color: transparent;
+      position: relative;
+    }
+    table.mat td.c-cell:hover {
+      background: #DDE3EF;
+      box-shadow: 0 0 0 2px var(--color-header-end) inset;
+    }
+    table.mat td.c-cell.filled {
+      cursor: default;
+      color: inherit;
+    }
+    table.mat td.c-cell.filled.pos { background: var(--color-pos-bg); color: var(--color-pos); font-weight: 600; }
+    table.mat td.c-cell.filled.neg { background: var(--color-neg-bg); color: var(--color-neg); font-weight: 600; }
+    table.mat td.c-cell.filled.neu { background: var(--color-neu-bg); color: var(--color-neu); font-weight: 600; }
+
+    /* highlights */
+    table.mat td.row-hi { box-shadow: 0 0 0 2px var(--color-tech) inset; background: #EEE5F6; }
+    table.mat td.col-hi { box-shadow: 0 0 0 2px var(--color-outdoor) inset; background: #DEF6F7; }
+    table.mat td.target {
+      box-shadow: 0 0 0 3px var(--color-header-end) inset;
+      background: #fff;
+    }
+
+    /* fly-out chips */
+    .chip {
+      position: absolute;
+      pointer-events: none;
+      background: white;
+      border: 1.5px solid var(--color-header-end);
+      color: var(--color-text);
+      border-radius: 999px;
+      padding: 4px 10px;
+      font-size: 0.85rem;
+      font-variant-numeric: tabular-nums;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.12);
+      transition: transform 0.55s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.4s;
+      z-index: 50;
+    }
+    .chip.product { border-color: var(--color-tech); color: var(--color-tech); font-weight: 600; }
+    .chip.product.neg { border-color: var(--color-neg); color: var(--color-neg); }
+    .chip.product.zero { border-color: var(--color-text-muted); color: var(--color-text-muted); }
+    .chip.sum { border-color: var(--color-header-start); color: var(--color-header-start); font-weight: 700; }
+
+    /* formula readout */
+    .readout {
+      margin-top: 10px;
+      min-height: 32px;
+      font-size: 1.05rem;
+      color: var(--color-text);
+      text-align: center;
+      font-variant-numeric: tabular-nums;
+    }
+    .readout .muted { color: var(--color-text-muted); }
+    .readout .term { padding: 0 4px; }
+    .readout .res { font-weight: 700; }
+    .readout .res.pos { color: var(--color-pos); }
+    .readout .res.neg { color: var(--color-neg); }
+    .readout .res.neu { color: var(--color-neu); }
+
+    .controls .speed { display: flex; align-items: center; gap: 6px; }
+    .legend-row {
+      display: flex; gap: 18px; flex-wrap: wrap;
+      margin: 4px 0 12px;
+      color: var(--color-text-muted);
+      font-size: 0.9rem;
+    }
+    .legend-row span.dot {
+      display: inline-block; width: 10px; height: 10px; border-radius: 999px;
+      margin-right: 6px; vertical-align: 1px;
+    }
+
+    /* responsive shrink */
+    @media (max-width: 1024px) {
+      table.mat td, table.mat th { width: 46px; height: 38px; font-size: 0.85rem; }
+      table.mat th.person-head { width: 70px !important; }
+    }
+  </style>
+</head>
+<body>
+  <header class="eth-header">
+    <div class="eth-logo">ETH<em>zürich</em></div>
+    <nav><a href="index.html">← All visualizations</a></nav>
+  </header>
+  <main class="viz-container">
+    <h1>Build a single rating</h1>
+    <p class="lede">
+      The predicted ratings matrix <em>C</em> is born one cell at a time — every entry
+      <em>C<sub>ij</sub></em> is the inner product of row <em>i</em> of <em>A</em> (the user)
+      and column <em>j</em> of <em>B</em> (the item). Click an empty cell to watch it happen.
+    </p>
+
+    <div class="viz-card">
+      <div class="legend-row">
+        <span><span class="dot" style="background:var(--color-tech)"></span>row of A (user latent vector)</span>
+        <span><span class="dot" style="background:var(--color-outdoor)"></span>column of B (item latent vector)</span>
+        <span><span class="dot" style="background:var(--color-header-end)"></span>chosen cell of C</span>
+      </div>
+
+      <div id="stage" class="stage">
+        <div class="slot-Alabel label-A">A</div>
+        <div class="slot-Blabel label-B">B</div>
+        <div class="slot-A"  id="slot-A"></div>
+        <div class="slot-B"  id="slot-B"></div>
+        <div class="slot-C"  id="slot-C"></div>
+        <div class="slot-Clabel label-C">C</div>
+      </div>
+
+      <div id="readout" class="readout"><span class="muted">Click any empty cell of C to compute it.</span></div>
+
+      <div class="controls">
+        <button id="btn-all">Compute all</button>
+        <button id="btn-clear" class="secondary">Clear</button>
+        <label class="speed">
+          step
+          <input id="speed" type="range" min="1" max="6" value="3" style="min-width:140px">
+        </label>
+      </div>
+    </div>
+
+    <aside class="explainer">
+      <h2>What's happening?</h2>
+      <p>
+        Matrix <em>A</em> stacks the 2-D user embeddings as rows; matrix <em>B</em> stacks the item
+        embeddings as columns. Multiplying them is just running this animation for every cell —
+        each cell is an inner product, a tiny dot-product story between one user and one item.
+      </p>
+      <p>
+        Sign tells the story: products of like-signed coordinates push the rating up, opposite signs
+        pull it down. That is why users and items in the same quadrant end up with the largest
+        positive predicted rating.
+      </p>
+    </aside>
+  </main>
+  <footer class="eth-footer">CAS AINIT FS26 · W2 Recsys</footer>
+
+  <script src="shared/data.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+  <script>
+  (function () {
+    const C = RECSYS.COLORS;
+
+    // ----- pick a pedagogically representative subset (8 users × 6 items, all 4 quadrants) -----
+    const PICK_USERS = [
+      'Alice',   // (-1,-1) simple-indoor
+      'David',   // (-1,-1) simple-indoor
+      'Michael', // (-1, 1) simple-outdoor
+      'Bob',     // (-1, 1) simple-outdoor
+      'Fabian',  // ( 1,-1) tech-indoor
+      'Peter',   // ( 1,-1) tech-indoor
+      'Susan',   // ( 1, 1) tech-outdoor
+      'John',    // ( 1, 1) tech-outdoor
+    ];
+    const PICK_ITEMS = [
+      'Lightbulb',     // (-1,-1)
+      'Frying pan',    // (-1,-1)
+      'Hiking shoes',  // (-1, 1)
+      'Gaming console',// ( 1,-1)
+      'Car',           // ( 1, 1)
+      'Motorcycle',    // ( 1, 1)
+    ];
+
+    const usersData = PICK_USERS.map(n => RECSYS.getPerson(n));
+    const itemsData = PICK_ITEMS.map(n => RECSYS.getItem(n));
+
+    const A = usersData.map(p => p.embedding.slice());      // n×d
+    const Bcols = itemsData.map(it => it.embedding.slice()); // m×d  (each row = column of B)
+    const n = A.length, m = Bcols.length, d = A[0].length;
+
+    // C[i][j] = sum_k A[i][k] * Bcols[j][k]
+    const Cmat = Array.from({length: n}, (_, i) =>
+      Array.from({length: m}, (_, j) => RECSYS.dot(A[i], Bcols[j]))
+    );
+
+    // ---- build A table ----
+    const slotA = document.getElementById('slot-A');
+    const slotB = document.getElementById('slot-B');
+    const slotC = document.getElementById('slot-C');
+
+    function buildA() {
+      const t = document.createElement('table');
+      t.className = 'mat'; t.id = 'tableA';
+      const tb = document.createElement('tbody');
+      // a column-header row to align with B's row-header column? Not needed here: A header is just row label.
+      // top spacer row (empty corner) — none, A starts directly.
+      for (let i = 0; i < n; i++) {
+        const tr = document.createElement('tr');
+        const th = document.createElement('th');
+        th.className = 'person-head';
+        th.textContent = usersData[i].name;
+        tr.appendChild(th);
+        for (let k = 0; k < d; k++) {
+          const td = document.createElement('td');
+          td.dataset.matrix = 'A';
+          td.dataset.row = i; td.dataset.col = k;
+          td.textContent = A[i][k];
+          if (k % 2 === 1) td.classList.add('alt');
+          tr.appendChild(td);
+        }
+        tb.appendChild(tr);
+      }
+      t.appendChild(tb);
+      slotA.appendChild(t);
+    }
+
+    function buildB() {
+      const t = document.createElement('table');
+      t.className = 'mat'; t.id = 'tableB';
+      const tb = document.createElement('tbody');
+
+      // top header row: item icons
+      const trH = document.createElement('tr');
+      // empty corner to align with A's row-label column? B does not have a row label column, just d rows of m cells.
+      for (let j = 0; j < m; j++) {
+        const th = document.createElement('th');
+        th.className = 'item-head';
+        th.title = itemsData[j].name;
+        th.textContent = itemsData[j].icon;
+        trH.appendChild(th);
+      }
+      tb.appendChild(trH);
+
+      for (let k = 0; k < d; k++) {
+        const tr = document.createElement('tr');
+        for (let j = 0; j < m; j++) {
+          const td = document.createElement('td');
+          td.dataset.matrix = 'B';
+          td.dataset.row = k; td.dataset.col = j;
+          td.textContent = Bcols[j][k];
+          if (k % 2 === 1) td.classList.add('alt');
+          tr.appendChild(td);
+        }
+        tb.appendChild(tr);
+      }
+      t.appendChild(tb);
+      slotB.appendChild(t);
+    }
+
+    function buildC() {
+      const t = document.createElement('table');
+      t.className = 'mat'; t.id = 'tableC';
+      const tb = document.createElement('tbody');
+
+      // top header row: item icons (mirror of B)
+      const trH = document.createElement('tr');
+      const corner = document.createElement('th');
+      corner.className = 'person-head';
+      corner.textContent = '';
+      // we don't need a person-head corner here because C has no row-label column;
+      // we'll instead show person names on the left of C as well.
+      trH.appendChild(corner);
+      for (let j = 0; j < m; j++) {
+        const th = document.createElement('th');
+        th.className = 'item-head';
+        th.title = itemsData[j].name;
+        th.textContent = itemsData[j].icon;
+        trH.appendChild(th);
+      }
+      tb.appendChild(trH);
+
+      for (let i = 0; i < n; i++) {
+        const tr = document.createElement('tr');
+        const th = document.createElement('th');
+        th.className = 'person-head';
+        th.textContent = usersData[i].name;
+        tr.appendChild(th);
+        for (let j = 0; j < m; j++) {
+          const td = document.createElement('td');
+          td.classList.add('c-cell');
+          td.dataset.matrix = 'C';
+          td.dataset.row = i; td.dataset.col = j;
+          td.textContent = ''; // empty until computed
+          td.addEventListener('click', () => onClickC(i, j));
+          tr.appendChild(td);
+        }
+        tb.appendChild(tr);
+      }
+      t.appendChild(tb);
+      slotC.appendChild(t);
+    }
+
+    buildA(); buildB(); buildC();
+
+    // ---- helpers ----
+    const stage = document.getElementById('stage');
+    function rectIn(el, container) {
+      const r = el.getBoundingClientRect();
+      const c = container.getBoundingClientRect();
+      return {
+        x: r.left - c.left + r.width / 2,
+        y: r.top  - c.top  + r.height / 2,
+        w: r.width, h: r.height
+      };
+    }
+
+    function tdA(i, k) { return slotA.querySelector(`td[data-matrix="A"][data-row="${i}"][data-col="${k}"]`); }
+    function tdB(k, j) { return slotB.querySelector(`td[data-matrix="B"][data-row="${k}"][data-col="${j}"]`); }
+    function tdC(i, j) { return slotC.querySelector(`td[data-matrix="C"][data-row="${i}"][data-col="${j}"]`); }
+
+    function clearHighlights() {
+      stage.querySelectorAll('.row-hi, .col-hi, .target').forEach(el => {
+        el.classList.remove('row-hi', 'col-hi', 'target');
+      });
+    }
+
+    function clearChips() {
+      stage.querySelectorAll('.chip').forEach(c => c.remove());
+    }
+
+    function colorClassForValue(v) {
+      if (v >  0.001) return 'pos';
+      if (v < -0.001) return 'neg';
+      return 'neu';
+    }
+
+    function setReadout(html) {
+      document.getElementById('readout').innerHTML = html;
+    }
+
+    function fmt(v) { return Number.isInteger(v) ? String(v) : (+v).toFixed(1); }
+
+    function buildReadoutHTML(i, j, partials, total, finalize) {
+      const u = usersData[i].name;
+      const it = itemsData[j].icon + ' ' + itemsData[j].name;
+      const parts = partials.map(p => {
+        const cls = p.v > 0 ? '' : (p.v < 0 ? 'class="muted"' : 'class="muted"');
+        return `<span class="term">${fmt(p.a)}·${fmt(p.b)}</span>`;
+      }).join(`<span class="muted">+</span>`);
+      let resHTML = '';
+      if (finalize) {
+        const cls = colorClassForValue(total);
+        resHTML = ` <span class="muted">=</span> <span class="res ${cls}">${fmt(total)}</span>`;
+      }
+      return `<span class="muted">C[${u}, ${it}]</span> = ${parts}${resHTML}`;
+    }
+
+    // ---- main animation ----
+    let busy = false;
+    function speedScale() {
+      // slider 1 (slow) .. 6 (fast)
+      const s = +document.getElementById('speed').value;
+      return 1.0 / s; // 1.0 .. ~0.17
+    }
+
+    async function animateCell(i, j, opts = {}) {
+      const fast = opts.fast === true;
+      const sc = fast ? 0.35 : speedScale(); // animation timing scalar
+      const wait = ms => new Promise(r => setTimeout(r, ms * sc));
+
+      clearHighlights();
+      clearChips();
+
+      // 1. highlight row of A and column of B (entries) and the target C cell
+      for (let k = 0; k < d; k++) tdA(i, k).classList.add('row-hi');
+      for (let k = 0; k < d; k++) tdB(k, j).classList.add('col-hi');
+      const target = tdC(i, j);
+      target.classList.add('target');
+
+      // intro readout: show formula skeleton
+      const partials = [];
+      setReadout(buildReadoutHTML(i, j, A[i].map((a, k) => ({a, b: Bcols[j][k], v: a*Bcols[j][k]})), Cmat[i][j], false));
+
+      await wait(450);
+
+      // 2. emit product chips between A row k and B col k -> midpoint
+      const midpoint = (() => {
+        const aMid = rectIn(tdA(i, Math.floor(d/2)), stage);
+        const bMid = rectIn(tdB(Math.floor(d/2), j), stage);
+        return { x: (aMid.x + bMid.x) / 2, y: (aMid.y + bMid.y) / 2 };
+      })();
+
+      const chipNodes = [];
+      for (let k = 0; k < d; k++) {
+        const aR = rectIn(tdA(i, k), stage);
+        const bR = rectIn(tdB(k, j), stage);
+        const startX = (aR.x + bR.x) / 2;
+        const startY = (aR.y + bR.y) / 2;
+        const v = A[i][k] * Bcols[j][k];
+        const chip = document.createElement('div');
+        chip.className = 'chip product ' + (v > 0 ? '' : (v < 0 ? 'neg' : 'zero'));
+        chip.textContent = `${fmt(A[i][k])}·${fmt(Bcols[j][k])} = ${fmt(v)}`;
+        chip.style.left = startX + 'px';
+        chip.style.top  = startY + 'px';
+        chip.style.transform = 'translate(-50%, -50%) scale(0.6)';
+        chip.style.opacity = '0';
+        stage.appendChild(chip);
+        chipNodes.push({ chip, v });
+        // animate in
+        requestAnimationFrame(() => {
+          chip.style.opacity = '1';
+          chip.style.transform = 'translate(-50%, -50%) scale(1)';
+        });
+        await wait(160);
+      }
+
+      await wait(220);
+
+      // 3. fly chips toward the C cell (and stack)
+      const tR = rectIn(target, stage);
+      let running = 0;
+      for (let k = 0; k < chipNodes.length; k++) {
+        const { chip, v } = chipNodes[k];
+        const cur = chip.getBoundingClientRect();
+        const stageR = stage.getBoundingClientRect();
+        const x0 = cur.left - stageR.left + cur.width / 2;
+        const y0 = cur.top  - stageR.top  + cur.height / 2;
+        const dx = tR.x - x0;
+        const dy = tR.y - y0;
+        chip.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px)) scale(0.85)`;
+        chip.style.opacity = '0.85';
+        await wait(140);
+        running += v;
+        // brief running sum readout
+        setReadout(buildReadoutHTML(
+          i, j,
+          A[i].map((a, kk) => ({a, b: Bcols[j][kk], v: a*Bcols[j][kk]})),
+          running,
+          k === chipNodes.length - 1
+        ) + (k < chipNodes.length - 1
+              ? ` <span class="muted">(running = ${fmt(running)})</span>`
+              : ''));
+        chip.style.opacity = '0';
+      }
+
+      // 4. reveal cell value
+      target.classList.remove('target');
+      target.classList.add('filled');
+      const v = Cmat[i][j];
+      const cls = colorClassForValue(v);
+      target.classList.add(cls);
+      target.textContent = fmt(v);
+
+      await wait(220);
+      stage.querySelectorAll('.chip').forEach(c => c.remove());
+      // keep highlights briefly, then drop unless we're cascading
+      if (!opts.keepHighlight) {
+        clearHighlights();
+      }
+    }
+
+    async function onClickC(i, j) {
+      if (busy) return;
+      const cell = tdC(i, j);
+      if (cell.classList.contains('filled')) return;
+      busy = true;
+      try {
+        await animateCell(i, j);
+      } finally {
+        busy = false;
+      }
+    }
+
+    function clearAll() {
+      if (busy) return;
+      clearHighlights();
+      clearChips();
+      slotC.querySelectorAll('td.c-cell').forEach(td => {
+        td.classList.remove('filled', 'pos', 'neg', 'neu', 'target', 'row-hi', 'col-hi');
+        td.textContent = '';
+      });
+      setReadout('<span class="muted">Click any empty cell of C to compute it.</span>');
+    }
+
+    async function computeAll() {
+      if (busy) return;
+      busy = true;
+      try {
+        // fast cadence: ~30ms-ish between cells (fast mode skips the long step).
+        for (let i = 0; i < n; i++) {
+          for (let j = 0; j < m; j++) {
+            const cell = tdC(i, j);
+            if (cell.classList.contains('filled')) continue;
+            // for the cascade we use a much terser version: just light up + reveal
+            await fastReveal(i, j);
+          }
+        }
+      } finally {
+        clearHighlights();
+        busy = false;
+      }
+    }
+
+    async function fastReveal(i, j) {
+      clearHighlights();
+      const aRow = []; for (let k = 0; k < d; k++) { tdA(i, k).classList.add('row-hi'); aRow.push(tdA(i,k)); }
+      const bCol = []; for (let k = 0; k < d; k++) { tdB(k, j).classList.add('col-hi'); bCol.push(tdB(k,j)); }
+      const target = tdC(i, j);
+      target.classList.add('target');
+      // tiny readout
+      const partials = A[i].map((a, k) => ({a, b: Bcols[j][k], v: a*Bcols[j][k]}));
+      setReadout(buildReadoutHTML(i, j, partials, Cmat[i][j], true));
+      await new Promise(r => setTimeout(r, 30));
+      target.classList.remove('target');
+      target.classList.add('filled');
+      const v = Cmat[i][j];
+      target.classList.add(colorClassForValue(v));
+      target.textContent = fmt(v);
+      await new Promise(r => setTimeout(r, 30));
+    }
+
+    document.getElementById('btn-all').addEventListener('click', computeAll);
+    document.getElementById('btn-clear').addEventListener('click', clearAll);
+
+    // Recompute chip positions on resize: we just clear active chips.
+    window.addEventListener('resize', () => clearChips());
+  })();
+  </script>
+</body>
+</html>

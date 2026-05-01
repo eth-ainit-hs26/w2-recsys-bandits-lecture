@@ -1,0 +1,70 @@
+% =====================================================================
+% Epilogue --- Duality
+% Scenes 25--27: Compression-Prediction Twin, KL as protagonist, Funes returns.
+% =====================================================================
+
+\renewcommand{\AINITsection}{Epilogue \textemdash{} Duality}
+
+\sectiondivider%
+  {``Compression is comprehension.''}%
+  {Marcus Hutter, on the spirit of his prize}%
+  {Epilogue \textemdash{} Duality}
+
+% ---------------------------------------------------------------------
+% Scene 25a --- Compression-Prediction Twin (framing slide)
+% ---------------------------------------------------------------------
+\begin{frame}{A perfect predictor is a perfect compressor}
+  Two halves of one subject.
+
+  \begin{itemize}
+    \item A \AINITemph{forecaster} assigns probabilities to the next symbol;
+          her loss is the average $-\log \hat p$ she pays per draw.
+    \item An \AINITemph{encoder} assigns short codewords to likely symbols;
+          his cost is the average bits per draw.
+    \item Shannon (1948) proved these two numbers are the same number.
+          Both bottom out at $H(p)$.
+  \end{itemize}
+
+  \vspace{0.5em}
+  Hence the slogan, due to Hutter\textsuperscript{1}:
+  \AINITemph{compression is comprehension.}
+  And the empirical confirmation, due to Del\'etang et al.\textsuperscript{2}:
+  a large language model, trained only on text, compresses ImageNet
+  pixels better than PNG.
+
+  \vfill
+  {\footnotesize
+   \textsuperscript{1}\,Hutter, M. (2005). \emph{Universal Artificial Intelligence};
+   the Hutter Prize for lossless text compression.\\
+   \textsuperscript{2}\,Del\'etang, G.\ et al.\ (2023).
+   \emph{Language Modeling Is Compression}.}
+\end{frame}
+
+% ---------------------------------------------------------------------
+% Scene 25b --- viz handoff
+% ---------------------------------------------------------------------
+\vizhandoff{compression-prediction-twin.html}
+
+% ---------------------------------------------------------------------
+% Scene 26 --- Cross-entropy = floor + inefficiency
+% ---------------------------------------------------------------------
+\equationslide%
+  {Floor + inefficiency}%
+  {%
+    \underbrace{-\mathbb{E}_p[\log \hat p]}_{\text{cross-entropy}}
+    \;=\;
+    \underbrace{H(p)}_{\text{Shannon's floor}}
+    \;+\;
+    \underbrace{{\color{accentOxblood}\mathrm{KL}(p \,\|\, \hat p)}}_{\text{your inefficiency}}
+  }%
+  {Recsys: KL is the gap between your factorization and the truth.
+   Bandits: KL is the cost of mistaking one urn for another.
+   Compression: KL is the bits you waste because your predictor is imperfect.
+   One quantity, three roles.}
+
+% ---------------------------------------------------------------------
+% Scene 27 --- Funes returns (closing slide)
+% ---------------------------------------------------------------------
+\closingslide%
+  {Funes remembered everything and could think nothing.}%
+  {Machine learning forgets almost everything --- and that is why it understands.}

@@ -1,0 +1,695 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Spectral microscope · W2 Recsys</title>
+  <link rel="stylesheet" href="shared/style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+  <style>
+    .stage {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 280px;
+      gap: 18px;
+      align-items: start;
+    }
+    @media (max-width: 980px) {
+      .stage { grid-template-columns: 1fr; }
+    }
+    .panel {
+      background: var(--color-neu-bg);
+      border: 1px solid var(--color-border);
+      border-radius: 10px;
+      padding: 14px;
+    }
+    .panel h3 {
+      font-weight: 500;
+      font-size: 1rem;
+      margin: 0 0 8px;
+      color: var(--color-header-start);
+    }
+    .panel .sub {
+      font-size: 0.85rem;
+      color: var(--color-text-muted);
+      margin: 0 0 10px;
+    }
+    .heatmap-wrap {
+      display: flex; flex-direction: column; align-items: center;
+      gap: 6px;
+    }
+    .heatmap-wrap canvas {
+      background: white;
+      border: 1px solid var(--color-border);
+      border-radius: 6px;
+      image-rendering: pixelated;
+    }
+    .legend-bar {
+      display: flex; align-items: center; gap: 10px;
+      margin-top: 6px;
+      font-size: 0.82rem;
+      color: var(--color-text-muted);
+    }
+    .legend-bar .grad {
+      width: 180px; height: 10px;
+      background: linear-gradient(to right, var(--color-neg), #fff, var(--color-pos));
+      border: 1px solid var(--color-border);
+      border-radius: 3px;
+    }
+    .controls {
+      display: flex; flex-wrap: wrap; gap: 16px; align-items: center;
+      margin-top: 14px;
+    }
+    .controls .meta {
+      font-size: 0.95rem;
+      color: var(--color-text);
+      font-variant-numeric: tabular-nums;
+      min-width: 110px;
+    }
+    .controls .meta strong { color: var(--color-header-start); }
+
+    .sigma-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      font-variant-numeric: tabular-nums;
+    }
+    .sigma-list li {
+      display: flex;
+      justify-content: space-between;
+      padding: 4px 0;
+      border-bottom: 1px dashed var(--color-border);
+      font-size: 0.9rem;
+    }
+    .sigma-list li.cur {
+      background: var(--color-pos-bg);
+      border-radius: 4px;
+      padding-left: 6px;
+      padding-right: 6px;
+      border-bottom: 1px solid var(--color-pos);
+    }
+    .sigma-list li.dim {
+      color: var(--color-text-muted);
+    }
+    .sigma-list .name { font-weight: 500; }
+    .sigma-list .name .sub { color: var(--color-text-muted); font-weight: 400; }
+    .sigma-list .val { font-feature-settings: "tnum"; }
+
+    .error-panel { margin-top: 18px; }
+    .error-panel svg {
+      display: block;
+      width: 100%;
+      height: 220px;
+    }
+    .error-panel .axis text { fill: var(--color-text-muted); font-size: 11px; }
+    .error-panel .axis path,
+    .error-panel .axis line { stroke: var(--color-border); }
+    .error-panel .err-line {
+      fill: none;
+      stroke: var(--color-header-end);
+      stroke-width: 2;
+    }
+    .error-panel .err-dot {
+      fill: var(--color-pos);
+      stroke: white;
+      stroke-width: 2;
+    }
+    .error-panel .err-dot-bg {
+      fill: var(--color-text-muted);
+      opacity: 0.4;
+    }
+    .error-panel .elbow {
+      fill: none;
+      stroke: var(--color-neg);
+      stroke-width: 1;
+      stroke-dasharray: 3 3;
+    }
+    .error-panel .elbow-label {
+      fill: var(--color-neg);
+      font-size: 11px;
+      font-weight: 500;
+    }
+    .error-panel .axis-label {
+      fill: var(--color-text);
+      font-size: 12px;
+    }
+
+    .citation {
+      font-size: 0.88rem;
+      color: var(--color-text-muted);
+      border-left: 3px solid var(--color-pos);
+      padding: 4px 10px;
+      margin-top: 10px;
+      background: var(--color-pos-bg);
+      border-radius: 3px;
+    }
+  </style>
+</head>
+<body>
+  <header class="eth-header">
+    <div class="eth-logo">ETH<em>zürich</em></div>
+    <nav><a href="index.html">← All visualizations</a></nav>
+  </header>
+  <main class="viz-container">
+    <h1>Spectral microscope</h1>
+    <p class="lede">
+      The 21×16 ratings matrix looks busy, but its singular values tell a quieter story.
+      Slide <em>k</em> from 1 to 16 and watch the rank-<em>k</em> SVD reconstruction
+      <em>A<sub>k</sub> = U<sub>k</sub> Σ<sub>k</sub> V<sub>k</sub><sup>⊤</sup></em>
+      sharpen back into the original. The error curve below shows where the matrix
+      stops being interesting.
+    </p>
+
+    <div class="viz-card">
+      <div class="stage">
+        <div>
+          <div class="panel">
+            <h3>Rank-<em>k</em> reconstruction A<sub>k</sub></h3>
+            <p class="sub">21 readers (rows) × 16 books (cols). Cells colored by reconstructed value.</p>
+            <div class="heatmap-wrap">
+              <canvas id="heatmap"></canvas>
+              <div class="legend-bar">
+                <span>−1</span>
+                <span class="grad"></span>
+                <span>+1</span>
+                <span style="margin-left:14px;" id="caption-fro">‖A − A<sub>k</sub>‖<sub>F</sub> = ?</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="controls">
+            <label>k = <span id="k-val" class="meta"><strong>2</strong></span></label>
+            <input type="range" id="k-slider" min="0" max="16" value="2" step="1" style="min-width:340px">
+            <button id="btn-play" class="play-btn">▶ Sweep 0 → 16</button>
+            <span class="meta" id="caption-explained"></span>
+          </div>
+
+          <div class="panel error-panel">
+            <h3>Frobenius error ‖A − A<sub>k</sub>‖<sub>F</sub> vs k</h3>
+            <p class="sub">A clear elbow at k = 2 is the empirical fingerprint of a rank-2 signal.</p>
+            <svg id="err-svg" viewBox="0 0 640 220" preserveAspectRatio="xMidYMid meet"></svg>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h3>Singular values</h3>
+          <p class="sub">σ<sub>r</sub> sorted largest to smallest. The top two carry the signal.</p>
+          <ul class="sigma-list" id="sigma-list"></ul>
+        </div>
+      </div>
+    </div>
+
+    <aside class="explainer">
+      <h2>Why this works</h2>
+      <p>
+        The Eckart-Young-Mirsky theorem (1936) makes a strong promise:
+        among <em>all</em> matrices of rank ≤ k, the truncated SVD
+        <em>A<sub>k</sub> = Σ<sub>r=1..k</sub> σ<sub>r</sub> u<sub>r</sub> v<sub>r</sub><sup>⊤</sup></em>
+        minimises ‖A − B‖<sub>F</sub>. No other rank-k approximation can do
+        better in squared error — and the leftover error is exactly
+        <em>√(σ<sub>k+1</sub>² + σ<sub>k+2</sub>² + …)</em>.
+      </p>
+      <p>
+        So when the curve above flattens after k = 2, it is not bad luck: it means
+        σ<sub>3</sub>, σ<sub>4</sub>, … are tiny. Two latent factors really are enough.
+      </p>
+      <p class="citation">
+        Eckart, C. &amp; Young, G. (1936). <em>The approximation of one matrix by another of lower rank.</em>
+        Psychometrika, 1, 211–218.
+      </p>
+    </aside>
+  </main>
+  <footer class="eth-footer">CAS AINIT FS26 · W2 Recsys</footer>
+
+  <script src="shared/data.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+  <script>
+  (function () {
+    const A = RECSYS.ratingsForFactorization(); // 21 x 16, dense
+    const m = A.length;
+    const n = A[0].length;
+
+    // ============================================================
+    // Linear algebra primitives
+    // ============================================================
+    function zeros(r, c) {
+      const M = new Array(r);
+      for (let i = 0; i < r; i++) M[i] = new Float64Array(c);
+      return M;
+    }
+    function identity(n) {
+      const I = zeros(n, n);
+      for (let i = 0; i < n; i++) I[i][i] = 1;
+      return I;
+    }
+    function transpose(M) {
+      const r = M.length, c = M[0].length;
+      const T = zeros(c, r);
+      for (let i = 0; i < r; i++) for (let j = 0; j < c; j++) T[j][i] = M[i][j];
+      return T;
+    }
+    function matMul(A, B) {
+      const r = A.length, c = B[0].length, k = B.length;
+      const C = zeros(r, c);
+      for (let i = 0; i < r; i++) {
+        const Ai = A[i], Ci = C[i];
+        for (let p = 0; p < k; p++) {
+          const aip = Ai[p];
+          if (aip === 0) continue;
+          const Bp = B[p];
+          for (let j = 0; j < c; j++) Ci[j] += aip * Bp[j];
+        }
+      }
+      return C;
+    }
+    function frobenius(M) {
+      const r = M.length, c = M[0].length;
+      let s = 0;
+      for (let i = 0; i < r; i++) for (let j = 0; j < c; j++) s += M[i][j] * M[i][j];
+      return Math.sqrt(s);
+    }
+
+    // ============================================================
+    // Jacobi eigendecomposition of a symmetric n×n matrix.
+    // Returns { eigs: array of {value, vector} } sorted descending by value.
+    // ============================================================
+    function jacobiEigen(Sin, maxSweeps = 100, tol = 1e-12) {
+      const n = Sin.length;
+      // copy
+      const S = zeros(n, n);
+      for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) S[i][j] = Sin[i][j];
+      const V = identity(n);
+
+      for (let sweep = 0; sweep < maxSweeps; sweep++) {
+        // off-diagonal Frobenius norm
+        let off = 0;
+        for (let p = 0; p < n; p++)
+          for (let q = p + 1; q < n; q++)
+            off += S[p][q] * S[p][q];
+        if (off < tol) break;
+
+        for (let p = 0; p < n - 1; p++) {
+          for (let q = p + 1; q < n; q++) {
+            const Spq = S[p][q];
+            if (Math.abs(Spq) < 1e-14) continue;
+            const Spp = S[p][p];
+            const Sqq = S[q][q];
+            const theta = (Sqq - Spp) / (2 * Spq);
+            let t;
+            if (Math.abs(theta) > 1e15) {
+              t = 1 / (2 * theta);
+            } else {
+              const sgn = theta >= 0 ? 1 : -1;
+              t = sgn / (Math.abs(theta) + Math.sqrt(theta * theta + 1));
+            }
+            const c = 1 / Math.sqrt(t * t + 1);
+            const s = t * c;
+
+            // Update S: rotate rows/cols p and q
+            S[p][p] = Spp - t * Spq;
+            S[q][q] = Sqq + t * Spq;
+            S[p][q] = 0;
+            S[q][p] = 0;
+            for (let i = 0; i < n; i++) {
+              if (i !== p && i !== q) {
+                const Sip = S[i][p];
+                const Siq = S[i][q];
+                S[i][p] = c * Sip - s * Siq;
+                S[p][i] = S[i][p];
+                S[i][q] = s * Sip + c * Siq;
+                S[q][i] = S[i][q];
+              }
+            }
+            // Update V: V = V * R(p,q,c,s)
+            for (let i = 0; i < n; i++) {
+              const Vip = V[i][p];
+              const Viq = V[i][q];
+              V[i][p] = c * Vip - s * Viq;
+              V[i][q] = s * Vip + c * Viq;
+            }
+          }
+        }
+      }
+      // Pull out (value, column-vector)
+      const eigs = [];
+      for (let i = 0; i < n; i++) {
+        const vec = new Float64Array(n);
+        for (let j = 0; j < n; j++) vec[j] = V[j][i];
+        eigs.push({ value: S[i][i], vector: vec });
+      }
+      eigs.sort((a, b) => b.value - a.value);
+      return eigs;
+    }
+
+    // ============================================================
+    // SVD of A (m×n). Strategy: A^T A is n×n symmetric (n=16, smaller).
+    // Eigendecompose to get V and singular values; then U = A V Σ^{-1}.
+    // ============================================================
+    function svd(A) {
+      const m = A.length, n = A[0].length;
+      // Build A^T A (n x n)
+      const AT = transpose(A);
+      const ATA = matMul(AT, A);
+
+      const eigs = jacobiEigen(ATA);
+      const k = Math.min(m, n);
+      const sigmas = new Array(k);
+      const V = zeros(n, k); // columns are right singular vectors
+      const U = zeros(m, k);
+
+      for (let r = 0; r < k; r++) {
+        const lambda = Math.max(eigs[r].value, 0);
+        const sig = Math.sqrt(lambda);
+        sigmas[r] = sig;
+        const vr = eigs[r].vector;
+        // store v_r as column r of V
+        for (let i = 0; i < n; i++) V[i][r] = vr[i];
+
+        // u_r = A v_r / sigma  (when sigma > 0)
+        const Avr = new Float64Array(m);
+        for (let i = 0; i < m; i++) {
+          let s = 0;
+          for (let j = 0; j < n; j++) s += A[i][j] * vr[j];
+          Avr[i] = s;
+        }
+        if (sig > 1e-12) {
+          for (let i = 0; i < m; i++) U[i][r] = Avr[i] / sig;
+        } else {
+          // For zero singular value, leave column zero (won't contribute).
+          for (let i = 0; i < m; i++) U[i][r] = 0;
+        }
+      }
+      return { U, sigmas, V, k };
+    }
+
+    // ============================================================
+    // Compute SVD once.
+    // ============================================================
+    const { U, sigmas, V, k: K } = svd(A);
+
+    // Self-test
+    (function selfTest() {
+      // reconstruct full and compare
+      const Afull = zeros(m, n);
+      for (let r = 0; r < K; r++) {
+        const sr = sigmas[r];
+        for (let i = 0; i < m; i++) {
+          const uir = U[i][r] * sr;
+          if (uir === 0) continue;
+          for (let j = 0; j < n; j++) Afull[i][j] += uir * V[j][r];
+        }
+      }
+      let diff = 0, fnA = 0;
+      for (let i = 0; i < m; i++) for (let j = 0; j < n; j++) {
+        const d = A[i][j] - Afull[i][j];
+        diff += d * d;
+        fnA += A[i][j] * A[i][j];
+      }
+      const ratio = Math.sqrt(diff) / Math.max(1e-12, Math.sqrt(fnA));
+      console.log('[spectral-microscope] full-rank reconstruction error (relative):', ratio.toExponential(3));
+      console.log('[spectral-microscope] singular values:', sigmas.map(s => s.toFixed(4)));
+      console.log('[spectral-microscope] σ2/σ3 ratio:', (sigmas[1] / Math.max(sigmas[2], 1e-12)).toFixed(2));
+    })();
+
+    // Precompute reconstructions and Frobenius errors for each k = 0..K
+    const recons = new Array(K + 1);
+    const errs = new Array(K + 1);
+    {
+      // start from zeros; cumulatively add rank-1 outer products
+      let cur = zeros(m, n);
+      recons[0] = zeros(m, n);
+      errs[0] = frobenius(A);
+      for (let r = 0; r < K; r++) {
+        const sr = sigmas[r];
+        for (let i = 0; i < m; i++) {
+          const uir = U[i][r] * sr;
+          if (uir === 0) continue;
+          for (let j = 0; j < n; j++) cur[i][j] += uir * V[j][r];
+        }
+        // copy snapshot
+        const snap = zeros(m, n);
+        for (let i = 0; i < m; i++) for (let j = 0; j < n; j++) snap[i][j] = cur[i][j];
+        recons[r + 1] = snap;
+        // residual norm
+        let s = 0;
+        for (let i = 0; i < m; i++) for (let j = 0; j < n; j++) {
+          const d = A[i][j] - cur[i][j];
+          s += d * d;
+        }
+        errs[r + 1] = Math.sqrt(s);
+      }
+    }
+
+    // ============================================================
+    // Heatmap rendering
+    // ============================================================
+    const cellPx = 26;
+    const heatCanvas = document.getElementById('heatmap');
+    function drawHeatmap(M) {
+      const r = M.length, c = M[0].length;
+      const w = c * cellPx, h = r * cellPx;
+      const dpr = window.devicePixelRatio || 1;
+      heatCanvas.width = w * dpr;
+      heatCanvas.height = h * dpr;
+      heatCanvas.style.width = w + 'px';
+      heatCanvas.style.height = h + 'px';
+      const ctx = heatCanvas.getContext('2d');
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.imageSmoothingEnabled = false;
+
+      // Fixed scale = 1 so the original (values ±1) hits saturation.
+      const scale = 1.0;
+      // Vermillion #D55E00 ↔ blue #0072B2.
+      const negR = 213, negG = 94, negB = 0;
+      const posR = 0, posG = 114, posB = 178;
+
+      for (let i = 0; i < r; i++) {
+        for (let j = 0; j < c; j++) {
+          const v = M[i][j];
+          let R, G, B;
+          const t = Math.max(-1, Math.min(1, v / scale));
+          if (t >= 0) {
+            R = Math.round(255 + (posR - 255) * t);
+            G = Math.round(255 + (posG - 255) * t);
+            B = Math.round(255 + (posB - 255) * t);
+          } else {
+            const a = -t;
+            R = Math.round(255 + (negR - 255) * a);
+            G = Math.round(255 + (negG - 255) * a);
+            B = Math.round(255 + (negB - 255) * a);
+          }
+          ctx.fillStyle = `rgb(${R},${G},${B})`;
+          ctx.fillRect(j * cellPx, i * cellPx, cellPx, cellPx);
+        }
+      }
+      // grid
+      ctx.strokeStyle = 'rgba(0,0,0,0.08)';
+      ctx.lineWidth = 1;
+      for (let i = 0; i <= r; i++) {
+        ctx.beginPath();
+        ctx.moveTo(0, i * cellPx + 0.5);
+        ctx.lineTo(w, i * cellPx + 0.5);
+        ctx.stroke();
+      }
+      for (let j = 0; j <= c; j++) {
+        ctx.beginPath();
+        ctx.moveTo(j * cellPx + 0.5, 0);
+        ctx.lineTo(j * cellPx + 0.5, h);
+        ctx.stroke();
+      }
+    }
+
+    // Smooth transition: interpolate between previous & current reconstruction
+    let lastK = -1;
+    let animFrame = null;
+    function transitionTo(k, durationMs = 250) {
+      if (animFrame) cancelAnimationFrame(animFrame);
+      const fromM = (lastK >= 0) ? recons[lastK] : recons[k];
+      const toM = recons[k];
+      const start = performance.now();
+      const interpM = zeros(m, n);
+      function step(now) {
+        const t = Math.min(1, (now - start) / durationMs);
+        // easeInOutQuad
+        const e = t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+        for (let i = 0; i < m; i++) for (let j = 0; j < n; j++) {
+          interpM[i][j] = fromM[i][j] * (1 - e) + toM[i][j] * e;
+        }
+        drawHeatmap(interpM);
+        if (t < 1) animFrame = requestAnimationFrame(step);
+        else { animFrame = null; lastK = k; }
+      }
+      animFrame = requestAnimationFrame(step);
+    }
+
+    // ============================================================
+    // Error curve
+    // ============================================================
+    const errSvg = d3.select('#err-svg');
+    function drawErrorCurve(currentK) {
+      errSvg.selectAll('*').remove();
+      const W = 640, H = 220;
+      const pad = { l: 50, r: 16, t: 12, b: 36 };
+
+      const x = d3.scaleLinear().domain([0, K]).range([pad.l, W - pad.r]);
+      const yMax = errs[0] * 1.05;
+      const y = d3.scaleLinear().domain([0, yMax]).range([H - pad.b, pad.t]);
+
+      // Axes
+      const xAxis = d3.axisBottom(x).ticks(K).tickFormat(d3.format('d'));
+      const yAxis = d3.axisLeft(y).ticks(5).tickFormat(d => d.toFixed(1));
+      errSvg.append('g')
+        .attr('class', 'axis')
+        .attr('transform', `translate(0,${H - pad.b})`)
+        .call(xAxis);
+      errSvg.append('g')
+        .attr('class', 'axis')
+        .attr('transform', `translate(${pad.l},0)`)
+        .call(yAxis);
+      // axis labels
+      errSvg.append('text')
+        .attr('class', 'axis-label')
+        .attr('x', (W - pad.r + pad.l) / 2)
+        .attr('y', H - 4)
+        .attr('text-anchor', 'middle')
+        .text('k (rank of approximation)');
+      errSvg.append('text')
+        .attr('class', 'axis-label')
+        .attr('transform', `translate(14,${(H - pad.b + pad.t) / 2}) rotate(-90)`)
+        .attr('text-anchor', 'middle')
+        .text('‖A − Aₖ‖_F');
+
+      // Elbow line at k=2
+      errSvg.append('line')
+        .attr('class', 'elbow')
+        .attr('x1', x(2)).attr('x2', x(2))
+        .attr('y1', pad.t).attr('y2', H - pad.b);
+      errSvg.append('text')
+        .attr('class', 'elbow-label')
+        .attr('x', x(2) + 4).attr('y', pad.t + 12)
+        .text('elbow @ k=2');
+
+      // Curve
+      const line = d3.line()
+        .x((d, i) => x(i))
+        .y(d => y(d))
+        .curve(d3.curveMonotoneX);
+      errSvg.append('path')
+        .datum(errs)
+        .attr('class', 'err-line')
+        .attr('d', line);
+
+      // dots for every k (faint)
+      errSvg.selectAll('.err-dot-bg')
+        .data(errs)
+        .enter().append('circle')
+        .attr('class', 'err-dot-bg')
+        .attr('r', 2.5)
+        .attr('cx', (d, i) => x(i))
+        .attr('cy', d => y(d));
+
+      // current k highlighted
+      errSvg.append('circle')
+        .attr('class', 'err-dot')
+        .attr('r', 6)
+        .attr('cx', x(currentK))
+        .attr('cy', y(errs[currentK]));
+
+      // current value text
+      errSvg.append('text')
+        .attr('class', 'axis-label')
+        .attr('x', x(currentK))
+        .attr('y', y(errs[currentK]) - 12)
+        .attr('text-anchor', 'middle')
+        .style('fill', 'var(--color-pos)')
+        .style('font-weight', '600')
+        .text(`${errs[currentK].toFixed(2)}`);
+    }
+
+    // ============================================================
+    // Singular value list
+    // ============================================================
+    function fmtSig3(x) {
+      if (x === 0) return '0.00';
+      if (!isFinite(x)) return '—';
+      // 3 significant figures
+      const exp = Math.floor(Math.log10(Math.abs(x)));
+      const factor = Math.pow(10, 2 - exp);
+      const rounded = Math.round(x * factor) / factor;
+      // Render with at least 3 sig figs visible
+      const decimals = Math.max(0, 2 - exp);
+      return rounded.toFixed(Math.min(decimals, 6));
+    }
+    function drawSigmaList(currentK) {
+      const list = document.getElementById('sigma-list');
+      list.innerHTML = '';
+      for (let r = 0; r < sigmas.length; r++) {
+        const li = document.createElement('li');
+        if (r < currentK) li.classList.add('cur');
+        else li.classList.add('dim');
+        const name = document.createElement('span');
+        name.className = 'name';
+        name.innerHTML = `σ<span class="sub">${r + 1}</span>`;
+        const val = document.createElement('span');
+        val.className = 'val';
+        val.textContent = fmtSig3(sigmas[r]);
+        li.appendChild(name);
+        li.appendChild(val);
+        list.appendChild(li);
+      }
+    }
+
+    // ============================================================
+    // Captions
+    // ============================================================
+    function updateCaptions(k) {
+      const fro = errs[0];
+      const froD = errs[k];
+      const explained = fro > 1e-12 ? Math.max(0, 1 - (froD * froD) / (fro * fro)) : 1;
+      document.getElementById('caption-fro').innerHTML =
+        `‖A − A<sub>k</sub>‖<sub>F</sub> = <strong>${froD.toFixed(2)}</strong> &nbsp; (‖A‖<sub>F</sub> = ${fro.toFixed(2)})`;
+      document.getElementById('caption-explained').innerHTML =
+        `<strong>${(explained * 100).toFixed(1)}%</strong> of squared energy captured by k = ${k} factor${k === 1 ? '' : 's'}.`;
+    }
+
+    // ============================================================
+    // Wire up
+    // ============================================================
+    const slider = document.getElementById('k-slider');
+    const kValEl = document.getElementById('k-val');
+
+    function setK(k, animate = true) {
+      kValEl.innerHTML = `<strong>${k}</strong>`;
+      if (animate) transitionTo(k, 250);
+      else {
+        if (animFrame) { cancelAnimationFrame(animFrame); animFrame = null; }
+        drawHeatmap(recons[k]);
+        lastK = k;
+      }
+      drawErrorCurve(k);
+      drawSigmaList(k);
+      updateCaptions(k);
+    }
+
+    slider.addEventListener('input', () => {
+      setK(+slider.value, true);
+    });
+
+    let playing = false;
+    document.getElementById('btn-play').addEventListener('click', async () => {
+      if (playing) return;
+      playing = true;
+      try {
+        for (let kk = 0; kk <= K; kk++) {
+          slider.value = kk;
+          setK(kk, true);
+          await new Promise(r => setTimeout(r, 320));
+        }
+      } finally { playing = false; }
+    });
+
+    // Initial draw at k=2 (the "right" answer for this matrix)
+    setK(2, false);
+  })();
+  </script>
+</body>
+</html>

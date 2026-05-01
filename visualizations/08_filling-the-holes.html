@@ -1,0 +1,668 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Filling the holes — W2 Recsys</title>
+  <link rel="stylesheet" href="shared/style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+  <style>
+    .layout {
+      display: grid;
+      grid-template-columns: 1.6fr 1fr;
+      gap: 22px;
+      align-items: start;
+    }
+    @media (max-width: 1024px) {
+      .layout { grid-template-columns: 1fr; }
+    }
+    .panel-title {
+      font-size: 0.95rem; font-weight: 600;
+      color: var(--color-header-start);
+      margin-bottom: 6px;
+    }
+    .panel-sub {
+      font-size: 0.82rem; color: var(--color-text-muted);
+      margin-bottom: 10px;
+    }
+    .matrix-with-labels {
+      display: grid;
+      grid-template-columns: 80px 1fr;
+      grid-template-rows: 92px 1fr;
+      gap: 2px;
+    }
+    .col-labels-row {
+      grid-column: 2; grid-row: 1;
+      display: grid;
+      gap: 1px;
+    }
+    .col-labels-row > div {
+      writing-mode: vertical-rl;
+      transform: rotate(180deg);
+      text-align: right;
+      font-size: 9.5px;
+      color: var(--color-text-muted);
+      padding-bottom: 2px;
+      white-space: nowrap; overflow: hidden;
+    }
+    .row-labels-col {
+      grid-column: 1; grid-row: 2;
+      display: grid;
+      gap: 1px;
+      font-size: 10px;
+      color: var(--color-text-muted);
+    }
+    .row-labels-col > div {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      padding-right: 6px;
+      white-space: nowrap; overflow: hidden;
+    }
+    .matrix-area {
+      grid-column: 2; grid-row: 2;
+      display: grid;
+      gap: 1px;
+      background: var(--color-border);
+      border: 1px solid var(--color-border);
+      border-radius: 6px;
+      overflow: hidden;
+    }
+    .mcell {
+      background: white;
+      aspect-ratio: 1 / 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      transition: background 0.25s;
+      position: relative;
+    }
+    .mcell.miss { box-shadow: inset 0 0 0 2px var(--color-unk); }
+    .mcell.held { box-shadow: inset 0 0 0 2px #6f42c1; }
+    .mcell .pred {
+      font-weight: 700;
+      opacity: 0;
+      transition: opacity 0.4s;
+    }
+    .mcell.miss .pred { opacity: 1; }
+    .loss-svg {
+      width: 100%; height: 130px;
+      background: #fbfbfd;
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+      display: block;
+      margin-top: 8px;
+    }
+    .stat-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px 16px;
+      margin-top: 12px;
+      font-size: 0.9rem;
+    }
+    .stat-grid .lbl { color: var(--color-text-muted); }
+    .stat-grid .val { font-weight: 600; color: var(--color-header-start); font-variant-numeric: tabular-nums; }
+    .legend-row {
+      display: flex; gap: 16px;
+      font-size: 0.82rem; color: var(--color-text-muted);
+      margin-top: 8px; flex-wrap: wrap;
+    }
+    .legend-row span::before {
+      content: "■";
+      margin-right: 4px;
+      font-size: 0.95rem;
+    }
+    .swatch-miss::before { color: var(--color-unk); }
+    .swatch-held::before { color: #6f42c1; }
+    .swatch-train::before { color: var(--color-text-muted); opacity: 0.4; }
+    .formula-card {
+      background: var(--color-neu-bg);
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 0.9rem;
+      margin-top: 6px;
+      margin-bottom: 6px;
+    }
+    #tooltip {
+      position: absolute;
+      pointer-events: none;
+      background: white;
+      border: 1px solid var(--color-border);
+      box-shadow: 0 4px 14px rgba(0,0,0,0.12);
+      border-radius: 6px;
+      padding: 6px 10px;
+      font-size: 12px;
+      color: var(--color-text);
+      opacity: 0;
+      transition: opacity 0.1s;
+      z-index: 100;
+      max-width: 230px;
+    }
+    #tooltip b { color: var(--color-header-start); }
+    .epoch-bar {
+      font-size: 0.85rem;
+      color: var(--color-text-muted);
+      margin-left: auto;
+      font-variant-numeric: tabular-nums;
+    }
+  </style>
+</head>
+<body>
+  <header class="eth-header">
+    <div class="eth-logo">ETH<em>zürich</em></div>
+    <nav><a href="index.html">← All visualizations</a></nav>
+  </header>
+  <main class="viz-container">
+    <h1>Filling the holes</h1>
+    <p class="lede">
+      Missing ratings are not gaps in our knowledge — they are <em>predictions</em>.
+      Once <math>U</math> and <math>V</math> are learned, every empty cell has an answer:
+      <math>\hat R_{ij} = u_i^\top v_j</math>.
+    </p>
+
+    <div class="formula-card" id="formula"></div>
+
+    <div class="viz-card">
+      <div class="layout">
+        <div>
+          <div class="panel-title">Rating matrix · 21 users × 16 items</div>
+          <div class="panel-sub">
+            <span style="color:var(--color-unk);font-weight:700">Yellow border</span> = unknown (?).
+            <span style="color:#6f42c1;font-weight:700">Purple border</span> = held out for validation.
+            Hover any cell for prediction details.
+          </div>
+          <div id="matrix-host"></div>
+          <div class="legend-row">
+            <span class="swatch-miss">unknown (?) — predicted</span>
+            <span class="swatch-held">held-out (validation)</span>
+            <span class="swatch-train">training</span>
+          </div>
+        </div>
+        <div>
+          <div class="panel-title">Training loss</div>
+          <svg id="loss-svg" class="loss-svg" viewBox="0 0 360 130" preserveAspectRatio="none"></svg>
+          <div class="stat-grid">
+            <span class="lbl">epoch</span>           <span class="val" id="stat-epoch">0</span>
+            <span class="lbl">train RMSE</span>      <span class="val" id="stat-rmse">—</span>
+            <span class="lbl">validation MAE</span>  <span class="val" id="stat-mae">—</span>
+            <span class="lbl">validation accuracy</span><span class="val" id="stat-acc">—</span>
+            <span class="lbl">unknown ? cells</span> <span class="val" id="stat-unk">—</span>
+            <span class="lbl">held-out cells</span>  <span class="val" id="stat-held">—</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="controls">
+        <button id="btn-train">▶ Train</button>
+        <button id="btn-step">+10 epochs</button>
+        <button id="btn-reset" class="secondary">Reset</button>
+        <button id="btn-resplit" class="secondary">New holdout</button>
+        <span class="epoch-bar" id="epoch-bar">idle</span>
+      </div>
+    </div>
+
+    <aside class="explainer">
+      <h2>What's happening?</h2>
+      <p>
+        We hide ~10% of <em>known</em> ratings (purple border) so we can grade ourselves,
+        then train MF on what's left. As epochs pass, predictions for the
+        <span style="color:var(--color-unk);font-weight:600">unknown ?</span> cells fade in
+        (✅ / ➖ / ❌), while the validation MAE keeps the model honest.
+      </p>
+      <p>
+        Hover any cell to see the raw prediction $u_i^\top v_j$ — note the magnitude
+        is a kind of confidence: predictions near 0 mean "the model isn't sure".
+      </p>
+    </aside>
+  </main>
+  <footer class="eth-footer">CAS AINIT FS26 · W2 Recsys · 08 / 11</footer>
+
+  <div id="tooltip"></div>
+
+  <script src="shared/data.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+  <script>
+  (function () {
+    const C = RECSYS.COLORS;
+    const PEOPLE = RECSYS.PEOPLE;
+    const ITEMS  = RECSYS.ITEMS;
+    const M = PEOPLE.length, N = ITEMS.length;
+    const K = 2;
+    const HP = { lr: 0.05, lambda: 0.05, initScale: 0.3, holdoutFrac: 0.10 };
+
+    const R = RECSYS.ratingsByEmbeddingOrder(); // 21×16, NaN for '?'
+
+    // --- Cell categorization ---
+    // 'miss'   : '?' in source data — predict, no supervision
+    // 'held'   : known cell, held out as validation
+    // 'train'  : known cell, used in training
+    let cellType;       // M×N strings
+    let trainList;      // [[i,j,r]]
+    let validList;      // [[i,j,r]]
+    let missList;       // [[i,j]]
+    let U, V, epoch, lossHistory, playing, animHandle, lastFrameTs, epochAccumulator;
+    const SPEED = 25; // epochs/sec when playing
+
+    function rngMaker(seed) {
+      let s = (seed >>> 0) || 1;
+      return function () {
+        s = (s + 0x6D2B79F5) >>> 0;
+        let t = s;
+        t = Math.imul(t ^ (t >>> 15), t | 1);
+        t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+        return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+      };
+    }
+    let rng = rngMaker(7);
+    function randn() {
+      const u = Math.max(rng(), 1e-9);
+      const v = rng();
+      return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+    }
+
+    function splitData(seed) {
+      const r = rngMaker(seed);
+      cellType = Array.from({ length: M }, () => new Array(N).fill('train'));
+      const known = [];
+      missList = [];
+      for (let i = 0; i < M; i++) {
+        for (let j = 0; j < N; j++) {
+          if (Number.isNaN(R[i][j])) {
+            cellType[i][j] = 'miss';
+            missList.push([i, j]);
+          } else {
+            known.push([i, j]);
+          }
+        }
+      }
+      // Shuffle known
+      for (let k = known.length - 1; k > 0; k--) {
+        const t = Math.floor(r() * (k + 1));
+        const tmp = known[k]; known[k] = known[t]; known[t] = tmp;
+      }
+      const nVal = Math.max(8, Math.round(known.length * HP.holdoutFrac));
+      validList = [];
+      trainList = [];
+      for (let k = 0; k < known.length; k++) {
+        const [i, j] = known[k];
+        if (k < nVal) {
+          cellType[i][j] = 'held';
+          validList.push([i, j, R[i][j]]);
+        } else {
+          trainList.push([i, j, R[i][j]]);
+        }
+      }
+    }
+
+    function initParams(seed) {
+      rng = rngMaker(seed);
+      U = Array.from({ length: M }, () =>
+        Array.from({ length: K }, () => randn() * HP.initScale));
+      V = Array.from({ length: N }, () =>
+        Array.from({ length: K }, () => randn() * HP.initScale));
+      epoch = 0;
+      lossHistory = [];
+      logLoss();
+    }
+
+    function predict(i, j) {
+      let s = 0;
+      for (let k = 0; k < K; k++) s += U[i][k] * V[j][k];
+      return s;
+    }
+    function clip1(x) { return Math.max(-1, Math.min(1, x)); }
+    function predSign(x) {
+      if (x > 0.4) return 1;
+      if (x < -0.4) return -1;
+      return 0;
+    }
+    function symbolFor(s) {
+      return s > 0 ? '✅' : (s < 0 ? '❌' : '➖');
+    }
+    function bgFor(s) {
+      return s > 0 ? C.posBg : (s < 0 ? C.negBg : C.neutralBg);
+    }
+    function fgFor(s) {
+      return s > 0 ? C.pos : (s < 0 ? C.neg : C.neutral);
+    }
+
+    function logLoss() {
+      let sseTrain = 0;
+      for (const [i, j, r] of trainList) {
+        const e = predict(i, j) - r; sseTrain += e * e;
+      }
+      let reg = 0;
+      for (let i = 0; i < M; i++) for (let k = 0; k < K; k++) reg += U[i][k] * U[i][k];
+      for (let j = 0; j < N; j++) for (let k = 0; k < K; k++) reg += V[j][k] * V[j][k];
+      const trainRmse = Math.sqrt(sseTrain / Math.max(1, trainList.length));
+      let mae = 0, accCount = 0;
+      for (const [i, j, r] of validList) {
+        const p = predict(i, j);
+        mae += Math.abs(p - r);
+        if (predSign(p) === r) accCount++;
+      }
+      mae /= Math.max(1, validList.length);
+      const acc = validList.length ? accCount / validList.length : 0;
+      lossHistory.push({
+        epoch,
+        loss: sseTrain + HP.lambda * reg,
+        trainRmse, valMae: mae, valAcc: acc,
+      });
+      if (lossHistory.length > 1500) lossHistory.shift();
+    }
+
+    function shuffleTrain() {
+      for (let k = trainList.length - 1; k > 0; k--) {
+        const j = Math.floor(Math.random() * (k + 1));
+        const t = trainList[k]; trainList[k] = trainList[j]; trainList[j] = t;
+      }
+    }
+
+    function stepEpoch() {
+      shuffleTrain();
+      const lr = HP.lr, lam = HP.lambda;
+      for (const [i, j, r] of trainList) {
+        const ui = U[i], vj = V[j];
+        let p = 0;
+        for (let k = 0; k < K; k++) p += ui[k] * vj[k];
+        const e = p - r;
+        for (let k = 0; k < K; k++) {
+          const guk = e * vj[k] + lam * ui[k];
+          const gvk = e * ui[k] + lam * vj[k];
+          ui[k] -= lr * guk;
+          vj[k] -= lr * gvk;
+        }
+      }
+      epoch += 1;
+      logLoss();
+    }
+
+    // ---------------- Matrix DOM ----------------
+    const host = document.getElementById('matrix-host');
+    let cellEls = [];
+
+    function buildMatrixDom() {
+      host.innerHTML = '';
+      const wrap = document.createElement('div');
+      wrap.className = 'matrix-with-labels';
+      const corner = document.createElement('div'); wrap.appendChild(corner);
+      const colRow = document.createElement('div');
+      colRow.className = 'col-labels-row';
+      colRow.style.gridTemplateColumns = `repeat(${N}, 1fr)`;
+      for (const it of ITEMS) {
+        const c = document.createElement('div');
+        c.textContent = `${it.icon} ${it.name}`;
+        c.title = it.name;
+        colRow.appendChild(c);
+      }
+      wrap.appendChild(colRow);
+      const rowCol = document.createElement('div');
+      rowCol.className = 'row-labels-col';
+      rowCol.style.gridTemplateRows = `repeat(${M}, 1fr)`;
+      for (const p of PEOPLE) {
+        const r = document.createElement('div');
+        r.textContent = p.name;
+        r.title = p.name;
+        rowCol.appendChild(r);
+      }
+      wrap.appendChild(rowCol);
+      const mat = document.createElement('div');
+      mat.className = 'matrix-area';
+      mat.style.gridTemplateColumns = `repeat(${N}, 1fr)`;
+      mat.style.gridTemplateRows = `repeat(${M}, 1fr)`;
+      cellEls = [];
+      for (let i = 0; i < M; i++) {
+        const row = [];
+        for (let j = 0; j < N; j++) {
+          const d = document.createElement('div');
+          d.className = 'mcell';
+          if (cellType[i][j] === 'miss') d.classList.add('miss');
+          else if (cellType[i][j] === 'held') d.classList.add('held');
+          // baseline (training) cells: show the actual rating once at start
+          const tx = document.createElement('span');
+          tx.className = 'sym';
+          d.appendChild(tx);
+          const pp = document.createElement('span');
+          pp.className = 'pred';
+          d.appendChild(pp);
+          d._sym = tx; d._pred = pp;
+          d.dataset.i = i; d.dataset.j = j;
+          mat.appendChild(d);
+          row.push(d);
+        }
+        cellEls.push(row);
+      }
+      wrap.appendChild(mat);
+      host.appendChild(wrap);
+
+      // Tooltip wiring
+      const tip = document.getElementById('tooltip');
+      mat.addEventListener('mousemove', (ev) => {
+        const t = ev.target.closest('.mcell');
+        if (!t) { tip.style.opacity = 0; return; }
+        const i = +t.dataset.i, j = +t.dataset.j;
+        const p = predict(i, j);
+        const truth = cellType[i][j] === 'miss' ? '?' :
+          (R[i][j] > 0 ? '✅ +1' : R[i][j] < 0 ? '❌ −1' : '➖ 0');
+        const split = cellType[i][j] === 'miss' ? 'unknown' :
+                      cellType[i][j] === 'held' ? 'held-out' : 'training';
+        tip.innerHTML =
+          `<b>${PEOPLE[i].name}</b> × <b>${ITEMS[j].name}</b><br>` +
+          `prediction $\\hat R = ${p.toFixed(3)}$<br>` +
+          `truth ${truth}<br>` +
+          `<span style="color:var(--color-text-muted)">${split}</span>`;
+        // simple tooltip (no katex re-render to keep mouse fast):
+        tip.innerHTML =
+          `<b>${PEOPLE[i].name}</b> × <b>${ITEMS[j].name}</b><br>` +
+          `prediction <b style="font-variant-numeric:tabular-nums">${p.toFixed(3)}</b><br>` +
+          `truth ${truth}<br>` +
+          `<span style="color:var(--color-text-muted)">${split} cell</span>`;
+        const r = host.getBoundingClientRect();
+        tip.style.left = (ev.clientX + 12) + 'px';
+        tip.style.top  = (ev.clientY + 12) + 'px';
+        tip.style.opacity = 1;
+      });
+      mat.addEventListener('mouseleave', () => {
+        document.getElementById('tooltip').style.opacity = 0;
+      });
+    }
+
+    function renderMatrixCells() {
+      for (let i = 0; i < M; i++) {
+        for (let j = 0; j < N; j++) {
+          const cell = cellEls[i][j];
+          const t = cellType[i][j];
+          if (t === 'miss') {
+            const p = predict(i, j);
+            const s = predSign(p);
+            const mag = Math.min(1, Math.abs(p) / 1.0);
+            cell._pred.textContent = symbolFor(s);
+            cell._pred.style.color = fgFor(s);
+            cell._pred.style.opacity = 0.4 + 0.6 * mag * Math.min(1, epoch / 30);
+            cell._sym.textContent = '';
+            // Tinted background by predicted sign × magnitude × training progress
+            const bg = bgFor(s);
+            const a = 0.25 + 0.55 * mag * Math.min(1, epoch / 50);
+            cell.style.background = blend('#ffffff', bg, a);
+          } else if (t === 'held') {
+            const r = R[i][j];
+            const s = r > 0 ? 1 : (r < 0 ? -1 : 0);
+            cell._sym.textContent = symbolFor(s);
+            cell._sym.style.color = fgFor(s);
+            cell._sym.style.opacity = 1;
+            // Highlight: lightly tinted by truth, but always with purple border
+            cell.style.background = bgFor(s);
+            // Show prediction error subtly via opacity of inner color:
+            const p = predict(i, j);
+            const ok = predSign(p) === s;
+            cell._sym.style.fontWeight = ok ? 700 : 400;
+            cell._sym.style.opacity = ok ? 1 : 0.55;
+          } else {
+            const r = R[i][j];
+            const s = r > 0 ? 1 : (r < 0 ? -1 : 0);
+            cell._sym.textContent = symbolFor(s);
+            cell._sym.style.color = fgFor(s);
+            cell._sym.style.opacity = 0.85;
+            cell.style.background = bgFor(s);
+          }
+        }
+      }
+    }
+
+    function blend(hexA, hexB, t) {
+      // Linear blend t in [0,1] from hexA to hexB; hexB may already be a hex string.
+      function parse(h) {
+        const x = h.replace('#', '');
+        return [parseInt(x.slice(0,2),16), parseInt(x.slice(2,4),16), parseInt(x.slice(4,6),16)];
+      }
+      const a = parse(hexA), b = parse(hexB);
+      const r = Math.round(a[0] + (b[0]-a[0])*t);
+      const g = Math.round(a[1] + (b[1]-a[1])*t);
+      const bl= Math.round(a[2] + (b[2]-a[2])*t);
+      return `rgb(${r},${g},${bl})`;
+    }
+
+    // ---------------- Loss curve ----------------
+    const lossSvg = d3.select('#loss-svg');
+    const LW = 360, LH = 130, LP = 14;
+    const trainPath = lossSvg.append('path')
+      .attr('fill', 'none').attr('stroke', C.tech).attr('stroke-width', 1.6);
+    const valPath = lossSvg.append('path')
+      .attr('fill', 'none').attr('stroke', C.unknown).attr('stroke-width', 1.6).attr('stroke-dasharray', '3 2');
+    const lossAx = lossSvg.append('g');
+    const legend = lossSvg.append('g');
+
+    function renderLoss() {
+      lossAx.selectAll('*').remove();
+      legend.selectAll('*').remove();
+      if (lossHistory.length < 2) {
+        trainPath.attr('d', null);
+        valPath.attr('d', null);
+        return;
+      }
+      const xs = d3.scaleLinear()
+        .domain([lossHistory[0].epoch, lossHistory[lossHistory.length - 1].epoch])
+        .range([LP + 22, LW - LP]);
+      // Two y-scales: train RMSE (left) and val MAE (left, same units roughly)
+      const allY = lossHistory.flatMap(d => [d.trainRmse, d.valMae]);
+      const maxY = Math.max(...allY) * 1.05;
+      const ys = d3.scaleLinear().domain([0, maxY]).range([LH - LP - 4, LP + 4]);
+      const lineT = d3.line().x(d => xs(d.epoch)).y(d => ys(d.trainRmse));
+      const lineV = d3.line().x(d => xs(d.epoch)).y(d => ys(d.valMae));
+      trainPath.attr('d', lineT(lossHistory));
+      valPath.attr('d', lineV(lossHistory));
+
+      // axes
+      lossAx.append('line').attr('x1', LP+22).attr('x2', LW-LP)
+        .attr('y1', LH-LP-4).attr('y2', LH-LP-4).attr('stroke', '#d4d8dc');
+      lossAx.append('line').attr('x1', LP+22).attr('x2', LP+22)
+        .attr('y1', LP).attr('y2', LH-LP-4).attr('stroke', '#d4d8dc');
+      lossAx.append('text').attr('x', 4).attr('y', LP+8)
+        .attr('font-size', 9).attr('fill', C.textMuted).text(maxY.toFixed(2));
+      lossAx.append('text').attr('x', 4).attr('y', LH-LP-6)
+        .attr('font-size', 9).attr('fill', C.textMuted).text('0');
+      lossAx.append('text').attr('x', LW-LP).attr('y', LH-2)
+        .attr('font-size', 9).attr('fill', C.textMuted).attr('text-anchor', 'end')
+        .text('epoch ' + lossHistory[lossHistory.length-1].epoch);
+
+      // legend
+      legend.append('line').attr('x1', LP+30).attr('x2', LP+50)
+        .attr('y1', LP+2).attr('y2', LP+2).attr('stroke', C.tech).attr('stroke-width', 1.6);
+      legend.append('text').attr('x', LP+54).attr('y', LP+5)
+        .attr('font-size', 9).attr('fill', C.textMuted).text('train RMSE');
+      legend.append('line').attr('x1', LP+128).attr('x2', LP+148)
+        .attr('y1', LP+2).attr('y2', LP+2).attr('stroke', C.unknown).attr('stroke-width', 1.6).attr('stroke-dasharray', '3 2');
+      legend.append('text').attr('x', LP+152).attr('y', LP+5)
+        .attr('font-size', 9).attr('fill', C.textMuted).text('val MAE');
+    }
+
+    function renderStats() {
+      const last = lossHistory[lossHistory.length - 1];
+      document.getElementById('stat-epoch').textContent = epoch;
+      document.getElementById('stat-rmse').textContent = last ? last.trainRmse.toFixed(3) : '—';
+      document.getElementById('stat-mae').textContent  = last ? last.valMae.toFixed(3) : '—';
+      document.getElementById('stat-acc').textContent  = last ? (last.valAcc * 100).toFixed(0) + '%' : '—';
+      document.getElementById('stat-unk').textContent  = missList.length;
+      document.getElementById('stat-held').textContent = validList.length;
+      document.getElementById('epoch-bar').textContent = playing ? `running · ${epoch} epochs` : `idle · ${epoch} epochs`;
+    }
+
+    function renderAll() {
+      renderMatrixCells();
+      renderLoss();
+      renderStats();
+    }
+
+    // ---------------- Loop ----------------
+    function tick(ts) {
+      if (!playing) return;
+      if (lastFrameTs == null) lastFrameTs = ts;
+      const dt = (ts - lastFrameTs) / 1000;
+      lastFrameTs = ts;
+      epochAccumulator += dt * SPEED;
+      let did = 0;
+      while (epochAccumulator >= 1 && did < 8) {
+        stepEpoch();
+        epochAccumulator -= 1;
+        did++;
+      }
+      if (did) renderAll();
+      // Auto-stop after 400 epochs
+      if (epoch >= 400) { pause(); return; }
+      animHandle = requestAnimationFrame(tick);
+    }
+    function play() {
+      if (playing) return;
+      playing = true;
+      lastFrameTs = null;
+      epochAccumulator = 0;
+      document.getElementById('btn-train').textContent = '⏸ Pause';
+      animHandle = requestAnimationFrame(tick);
+      renderStats();
+    }
+    function pause() {
+      playing = false;
+      if (animHandle) cancelAnimationFrame(animHandle);
+      document.getElementById('btn-train').textContent = '▶ Train';
+      renderStats();
+    }
+
+    // ---------------- UI ----------------
+    document.getElementById('btn-train').onclick = () => playing ? pause() : play();
+    document.getElementById('btn-step').onclick = () => {
+      for (let i = 0; i < 10; i++) stepEpoch();
+      renderAll();
+    };
+    document.getElementById('btn-reset').onclick = () => {
+      pause();
+      initParams(currentInitSeed);
+      renderAll();
+    };
+    document.getElementById('btn-resplit').onclick = () => {
+      pause();
+      currentSplitSeed = (Math.random() * 1e9) | 0;
+      splitData(currentSplitSeed);
+      currentInitSeed = (Math.random() * 1e9) | 0;
+      initParams(currentInitSeed);
+      renderAll();
+    };
+
+    katex.render(
+      String.raw`\hat R_{ij} = u_i^{\!\top} v_j \quad\text{for any } (i,j)\notin\Omega`,
+      document.getElementById('formula'),
+      { displayMode: true, throwOnError: false }
+    );
+
+    // ---------------- Boot ----------------
+    let currentSplitSeed = 11;
+    let currentInitSeed  = 13;
+    splitData(currentSplitSeed);
+    initParams(currentInitSeed);
+    buildMatrixDom();
+    renderAll();
+  })();
+  </script>
+</body>
+</html>

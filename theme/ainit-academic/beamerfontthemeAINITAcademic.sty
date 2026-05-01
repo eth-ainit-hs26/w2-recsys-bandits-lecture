@@ -1,0 +1,77 @@
+% beamerfontthemeAINITAcademic.sty
+% Font theme: EB Garamond throughout for body, headings, and (where the
+% engine can do it) math italics. Sans is reserved for chrome only.
+%
+% Engine policy:
+%   * Under LuaLaTeX/XeLaTeX: load fontspec + unicode-math, request
+%     EB Garamond by name (system install) and fall back to the bundled
+%     LaTeX package if not present.
+%   * Under pdflatex: use the ebgaramond LaTeX package directly.
+%
+% In all cases TeX Gyre Heros provides the sans fallback for figure
+% chrome and footers.
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{beamerfontthemeAINITAcademic}[2026/05/01 AINIT Academic fonts]
+
+\RequirePackage{etoolbox}
+\RequirePackage{iftex}
+
+% --- Font loading --------------------------------------------------------
+\ifPDFTeX
+  % pdflatex path: rely entirely on the bundled ebgaramond LaTeX package.
+  \RequirePackage[T1]{fontenc}
+  \RequirePackage[utf8]{inputenc}
+  \RequirePackage[oldstyle]{ebgaramond}
+  \RequirePackage{ebgaramond-maths}
+  \RequirePackage{tgheros}  % sans fallback for chrome
+\else
+  % lualatex / xelatex path.
+  \RequirePackage{fontspec}
+  \RequirePackage{unicode-math}
+  % Try the system font first; if absent, fall back to the package.
+  % We swallow the warning silently if the system font is missing.
+  \IfFontExistsTF{EB Garamond}{%
+    \setmainfont{EB Garamond}[Numbers={OldStyle,Proportional}]%
+    \setsansfont{TeX Gyre Heros}%
+    \setmathfont{Latin Modern Math}%
+  }{%
+    % Fall back: load the LaTeX package version of EB Garamond.
+    \RequirePackage[oldstyle]{ebgaramond}%
+    \RequirePackage{ebgaramond-maths}%
+    \setsansfont{TeX Gyre Heros}%
+    \setmathfont{Latin Modern Math}%
+  }
+\fi
+
+% --- Beamer font assignments --------------------------------------------
+% Body 11pt is set in the master via \documentclass option [11pt].
+% Beamer's default frame title is sans + bold; we override here.
+
+\setbeamerfont{normal text}{family=\rmfamily, series=\mdseries, size=\normalsize}
+\setbeamerfont{structure}{family=\rmfamily, series=\mdseries}
+
+% Frame title: serif, 24pt, semibold-ish (EB Garamond's regular reads
+% strong enough; we avoid actual bold per design intent).
+\setbeamerfont{frametitle}{family=\rmfamily, series=\mdseries, size=\Large, shape=\upshape}
+
+% Title slide
+\setbeamerfont{title}{family=\rmfamily, series=\mdseries, size=\Huge, shape=\upshape}
+\setbeamerfont{subtitle}{family=\rmfamily, series=\mdseries, size=\large, shape=\itshape}
+\setbeamerfont{author}{family=\rmfamily, series=\mdseries, size=\normalsize, shape=\scshape}
+\setbeamerfont{date}{family=\rmfamily, series=\mdseries, size=\small, shape=\itshape}
+\setbeamerfont{institute}{family=\rmfamily, series=\mdseries, size=\small, shape=\itshape}
+
+% Footers / chrome use the sans fallback at small size.
+\setbeamerfont{footline}{family=\sffamily, series=\mdseries, size=\scriptsize}
+\setbeamerfont{page number in head/foot}{family=\sffamily, series=\mdseries, size=\scriptsize}
+
+% Itemize markers
+\setbeamerfont{itemize/enumerate body}{family=\rmfamily, size=\normalsize}
+\setbeamerfont{itemize/enumerate subbody}{family=\rmfamily, size=\small}
+
+% Blocks
+\setbeamerfont{block title}{family=\rmfamily, series=\mdseries, shape=\itshape}
+\setbeamerfont{block body}{family=\rmfamily, series=\mdseries, shape=\upshape}
+
+\endinput

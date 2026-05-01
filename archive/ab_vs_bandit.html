@@ -1,0 +1,1268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>A/B/C Test vs. Adaptive Bandit — CAS AINIT FS26</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+  onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]});"></script>
+<style>
+  :root {
+    --cream: #fdf6ee;
+    --warm-white: #fffaf4;
+    --sand: #f0e6d3;
+    --sand-dark: #e0cdb5;
+    --terra: #c17f4e;
+    --terra-dark: #a0623a;
+    --rust: #d4622a;
+    --ochre: #d49a3a;
+    --sage: #6a8f73;
+    --sage-light: #8fb098;
+    --ink: #2c2416;
+    --ink-light: #5a4a36;
+    --ink-muted: #8a7660;
+    --success: #4a9055;
+    --error: #c0392b;
+    --border: rgba(193, 127, 78, 0.2);
+    --shadow: 0 4px 24px rgba(44,36,22,0.08);
+    --shadow-lg: 0 8px 40px rgba(44,36,22,0.12);
+    /* Per-ad palette — Wong color-blind-safe palette */
+    --ad-a: #0072B2;       /* blue */
+    --ad-b: #D55E00;       /* vermillion */
+    --ad-c: #009E73;       /* bluish green */
+    --ad-a-soft: rgba(0,114,178,0.18);
+    --ad-b-soft: rgba(213,94,0,0.18);
+    --ad-c-soft: rgba(0,158,115,0.18);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--cream);
+    color: var(--ink);
+    min-height: 100vh;
+    background-image:
+      radial-gradient(ellipse at 10% 0%, rgba(193,127,78,0.08) 0%, transparent 60%),
+      radial-gradient(ellipse at 90% 100%, rgba(106,143,115,0.06) 0%, transparent 60%);
+  }
+
+  .shell { display: flex; flex-direction: column; min-height: 100vh; }
+  .main { flex: 1; padding: 40px 56px; max-width: 1280px; margin: 0 auto; width: 100%; }
+
+  /* Typography */
+  .page-header { margin-bottom: 28px; }
+  .page-title {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--ink);
+    line-height: 1.2;
+    margin-bottom: 10px;
+  }
+  .page-subtitle {
+    font-size: 15px;
+    color: var(--ink-muted);
+    line-height: 1.6;
+    max-width: 760px;
+  }
+  h2.section-title {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 19px;
+    font-weight: 600;
+    color: var(--terra-dark);
+    margin: 28px 0 12px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  h2.section-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  /* Cards */
+  .card {
+    background: var(--warm-white);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 22px 24px;
+    margin-bottom: 18px;
+    box-shadow: var(--shadow);
+  }
+  .card-title {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 12px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .callout {
+    border-left: 3px solid var(--terra);
+    background: rgba(193,127,78,0.06);
+    padding: 14px 18px;
+    border-radius: 0 10px 10px 0;
+    margin: 16px 0;
+  }
+  .callout p { font-size: 14px; color: var(--ink-light); margin: 0; line-height: 1.65; }
+  .callout strong { color: var(--terra-dark); }
+  .info-box {
+    background: rgba(106,143,115,0.08);
+    border: 1px solid rgba(106,143,115,0.25);
+    border-radius: 12px;
+    padding: 14px 18px;
+    margin: 14px 0;
+  }
+  .info-box p { font-size: 13.5px; color: var(--ink-light); margin: 0; line-height: 1.65; }
+
+  /* Buttons */
+  .btn {
+    padding: 9px 18px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all 0.18s;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    letter-spacing: 0.02em;
+  }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--terra), var(--rust));
+    color: white;
+    box-shadow: 0 3px 12px rgba(193,127,78,0.3);
+  }
+  .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 5px 16px rgba(193,127,78,0.4); }
+  .btn-secondary {
+    background: var(--sand);
+    color: var(--ink-light);
+    border: 1px solid var(--sand-dark);
+  }
+  .btn-secondary:hover { background: var(--sand-dark); }
+  .btn-ghost {
+    background: rgba(106,143,115,0.1);
+    color: var(--sage);
+    border: 1px solid rgba(106,143,115,0.3);
+  }
+  .btn-ghost:hover { background: rgba(106,143,115,0.2); }
+  .btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none !important; }
+
+  /* Controls */
+  .controls-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 14px 22px;
+    align-items: center;
+  }
+  .ctrl {
+    display: flex; flex-direction: column; gap: 4px;
+    font-size: 13px; color: var(--ink-muted);
+  }
+  .ctrl-row { display: flex; align-items: center; gap: 8px; }
+  .ctrl label { font-weight: 600; color: var(--ink-light); font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em; }
+  .ctrl input[type=range] { flex: 1; accent-color: var(--terra); }
+  .ctrl-val { font-family: 'Courier New', Courier, monospace; font-size: 13px; min-width: 56px; text-align: right; color: var(--ink); font-weight: 600; }
+  .ctrl-buttons { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+
+  /* Two side-by-side simulator panels */
+  .arena {
+    display: grid;
+    grid-template-columns: 1fr 280px 1fr;
+    gap: 18px;
+    align-items: stretch;
+    margin-top: 8px;
+  }
+  @media (max-width: 1100px) {
+    .arena { grid-template-columns: 1fr; }
+    .arena .scoreboard { order: -1; }
+  }
+
+  .panel {
+    background: var(--warm-white);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 22px;
+    box-shadow: var(--shadow);
+    display: flex; flex-direction: column;
+  }
+  .panel.bandit { border-color: rgba(193,127,78,0.45); }
+  .panel-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin-bottom: 6px; }
+  .panel-name {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--ink);
+  }
+  .panel-tag {
+    display: inline-block;
+    padding: 2px 9px;
+    border-radius: 20px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .panel-tag.naive  { background: var(--sand); color: var(--ink-light); border: 1px solid var(--sand-dark); }
+  .panel-tag.smart  { background: rgba(44,36,22,0.06); color: var(--ink); border: 1px solid rgba(44,36,22,0.18); }
+  .panel-sub { font-size: 12.5px; color: var(--ink-muted); margin-bottom: 14px; line-height: 1.5; }
+
+  /* Ad icons */
+  .ads-row { display: flex; gap: 10px; margin-bottom: 14px; }
+  .ad-icon {
+    flex: 1;
+    background: var(--sand);
+    border: 1px solid var(--sand-dark);
+    border-radius: 10px;
+    padding: 8px 6px;
+    text-align: center;
+    transition: all 0.25s;
+    position: relative;
+    overflow: hidden;
+  }
+  .ad-icon .ad-letter {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 22px; font-weight: 700;
+    line-height: 1;
+  }
+  .ad-icon[data-ad="A"] .ad-letter { color: var(--ad-a); }
+  .ad-icon[data-ad="B"] .ad-letter { color: var(--ad-b); }
+  .ad-icon[data-ad="C"] .ad-letter { color: var(--ad-c); }
+  .ad-icon .ad-stat {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 10.5px;
+    color: var(--ink-muted);
+    margin-top: 4px;
+    line-height: 1.35;
+  }
+  .ad-icon.live[data-ad="A"] { background: var(--ad-a-soft); border-color: var(--ad-a); }
+  .ad-icon.live[data-ad="B"] { background: var(--ad-b-soft); border-color: var(--ad-b); }
+  .ad-icon.live[data-ad="C"] { background: var(--ad-c-soft); border-color: var(--ad-c); }
+
+  /* Chart */
+  .chart-wrap {
+    background: var(--sand);
+    border-radius: 12px;
+    padding: 12px 14px 8px;
+    position: relative;
+  }
+  .chart-wrap canvas { display: block; width: 100%; height: 130px; border-radius: 8px; background: var(--warm-white); }
+  .chart-axis {
+    display: flex; justify-content: space-between;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 10.5px; color: var(--ink-muted);
+    margin-top: 4px;
+  }
+  .chart-legend {
+    display: flex; gap: 14px;
+    font-size: 11px; color: var(--ink-light);
+    margin-top: 6px;
+    align-items: center;
+  }
+  .chart-legend .legend-item {
+    display: inline-flex; align-items: center; gap: 5px;
+  }
+  .chart-legend .legend-letter {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-weight: 700;
+    font-size: 12px;
+    color: var(--ink);
+  }
+  .chart-legend .swatch {
+    display: inline-block; width: 14px; height: 14px;
+    border-radius: 3px;
+    vertical-align: -2px;
+    border: 1px solid rgba(44,36,22,0.15);
+  }
+  .chart-legend .sw-a {
+    background: var(--ad-a);
+  }
+  .chart-legend .sw-b {
+    background-color: var(--ad-b);
+    background-image: repeating-linear-gradient(
+      45deg,
+      rgba(0,0,0,0.35) 0 2px,
+      transparent 2px 5px
+    );
+  }
+  .chart-legend .sw-c {
+    background-color: var(--ad-c);
+    background-image: radial-gradient(
+      circle,
+      rgba(255,250,244,0.85) 1px,
+      transparent 1.6px
+    );
+    background-size: 5px 5px;
+  }
+
+  /* Big numbers */
+  .big-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+    margin-top: 14px;
+  }
+  .big-cell {
+    background: var(--sand);
+    border-radius: 10px;
+    padding: 10px 12px;
+    text-align: center;
+  }
+  .big-cell .lbl {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--ink-muted);
+    margin-bottom: 4px;
+    font-weight: 600;
+  }
+  .big-cell .val {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--ink);
+    line-height: 1.1;
+  }
+  .big-cell .val.money { color: var(--terra-dark); font-size: 26px; }
+  .big-cell.money-cell { background: rgba(193,127,78,0.1); border: 1px solid rgba(193,127,78,0.25); }
+
+  .panel-footer { margin-top: 12px; font-size: 12px; color: var(--ink-muted); }
+  .panel-footer .lost { color: var(--error); font-weight: 600; }
+  .panel-footer .phase {
+    display: inline-block;
+    padding: 2px 9px;
+    border-radius: 20px;
+    font-size: 10.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-right: 8px;
+  }
+  .phase-explore { background: var(--sand); color: var(--ink-light); border: 1px solid var(--sand-dark); }
+  .phase-exploit { background: rgba(193,127,78,0.12); color: var(--terra-dark); border: 1px solid rgba(193,127,78,0.3); }
+  .phase-adapt   { background: rgba(212,154,58,0.15); color: #8c6418; border: 1px solid rgba(212,154,58,0.4); }
+
+  /* Scoreboard */
+  .scoreboard {
+    background: linear-gradient(160deg, var(--warm-white), var(--sand));
+    border: 1px solid rgba(193,127,78,0.35);
+    border-radius: 16px;
+    padding: 22px 18px;
+    box-shadow: var(--shadow);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    text-align: center;
+    gap: 6px;
+  }
+  .sb-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--terra-dark);
+    font-weight: 700;
+  }
+  .sb-lift {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 56px;
+    font-weight: 700;
+    color: var(--ink);
+    line-height: 1;
+    margin: 4px 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .sb-lift.neutral { color: var(--ink-muted); font-size: 28px; }
+  .sb-lift.neutral .sb-arrow { display: none; }
+  .sb-arrow {
+    font-size: 36px;
+    color: var(--ink);
+    line-height: 1;
+  }
+  .sb-arrow.down { color: var(--ink); }
+  .sb-delta {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 18px;
+    color: var(--ink);
+    font-weight: 600;
+  }
+  .sb-progress {
+    width: 100%;
+    height: 8px;
+    background: var(--sand-dark);
+    border-radius: 20px;
+    margin-top: 14px;
+    overflow: hidden;
+  }
+  .sb-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--terra), var(--rust));
+    border-radius: 20px;
+    transition: width 0.15s linear;
+    width: 0;
+  }
+  .sb-visitors {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 12px;
+    color: var(--ink-muted);
+    margin-top: 6px;
+  }
+  .sb-tip {
+    font-size: 11.5px;
+    color: var(--ink-muted);
+    line-height: 1.5;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+  }
+
+  /* True-CTR sliders, compact stack */
+  .true-ctr-stack { display: flex; flex-direction: column; gap: 10px; }
+  .true-ctr-row {
+    display: grid;
+    grid-template-columns: 32px 1fr 56px;
+    align-items: center;
+    gap: 10px;
+  }
+  .true-ctr-row .badge {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 18px; font-weight: 700;
+    text-align: center;
+    border-radius: 8px;
+    padding: 4px 0;
+  }
+  .true-ctr-row[data-ad="A"] .badge { background: var(--ad-a-soft); color: var(--ad-a); }
+  .true-ctr-row[data-ad="B"] .badge { background: var(--ad-b-soft); color: var(--ad-b); }
+  .true-ctr-row[data-ad="C"] .badge { background: var(--ad-c-soft); color: var(--ad-c); }
+  .true-ctr-row input[type=range] { width: 100%; accent-color: var(--terra); }
+  .true-ctr-row .ctr-val {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 13px;
+    text-align: right;
+    color: var(--ink);
+    font-weight: 600;
+  }
+
+  .footer-note {
+    font-size: 12px;
+    color: var(--ink-muted);
+    text-align: center;
+    margin-top: 24px;
+    padding-top: 14px;
+    border-top: 1px solid var(--border);
+    line-height: 1.6;
+  }
+</style>
+</head>
+<body>
+<div class="shell">
+<div class="main">
+
+  <div class="page-header">
+    <div class="page-title">A/B/C Test vs. Adaptive Bandit</div>
+    <div class="page-subtitle">
+      Same campaign. Same 10,000 visitors. Two strategies. Watch how a multi-armed bandit
+      reallocates traffic in real time — and how much revenue the naive A/B/C test leaves on the table
+      while it's still "exploring".
+    </div>
+  </div>
+
+  <!-- Controls -->
+  <div class="card">
+    <div class="card-title">Campaign setup</div>
+    <div class="controls-grid">
+      <div class="ctrl">
+        <label>Total visitors</label>
+        <div class="ctrl-row">
+          <input id="s-visitors" type="range" min="1000" max="50000" step="1000" value="10000">
+          <span class="ctrl-val" id="v-visitors">10,000</span>
+        </div>
+      </div>
+      <div class="ctrl">
+        <label>$ per conversion</label>
+        <div class="ctrl-row">
+          <input id="s-revenue" type="range" min="1" max="50" step="1" value="5">
+          <span class="ctrl-val" id="v-revenue">$5</span>
+        </div>
+      </div>
+      <div class="ctrl">
+        <label>Animation speed</label>
+        <div class="ctrl-row">
+          <input id="s-speed" type="range" min="1" max="10" step="1" value="5">
+          <span class="ctrl-val" id="v-speed">5x</span>
+        </div>
+      </div>
+      <div class="ctrl">
+        <label>RNG seed</label>
+        <div class="ctrl-row">
+          <input id="s-seed" type="range" min="1" max="100" step="1" value="42">
+          <span class="ctrl-val" id="v-seed">42</span>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top: 18px;">
+      <div style="font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink-light); font-weight: 600; margin-bottom: 10px;">
+        Hidden true click-through rates
+      </div>
+      <div class="true-ctr-stack">
+        <div class="true-ctr-row" data-ad="A">
+          <div class="badge">A</div>
+          <input id="ctr-A" type="range" min="0" max="20" step="0.1" value="4">
+          <div class="ctr-val" id="v-ctr-A">4.0%</div>
+        </div>
+        <div class="true-ctr-row" data-ad="B">
+          <div class="badge">B</div>
+          <input id="ctr-B" type="range" min="0" max="20" step="0.1" value="6">
+          <div class="ctr-val" id="v-ctr-B">6.0%</div>
+        </div>
+        <div class="true-ctr-row" data-ad="C">
+          <div class="badge">C</div>
+          <input id="ctr-C" type="range" min="0" max="20" step="0.1" value="5">
+          <div class="ctr-val" id="v-ctr-C">5.0%</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="ctrl-buttons" style="margin-top: 20px;">
+      <button id="btn-play" class="btn btn-primary">Play</button>
+      <button id="btn-pause" class="btn btn-secondary" disabled>Pause</button>
+      <button id="btn-reset" class="btn btn-secondary">Reset</button>
+      <button id="btn-finish" class="btn btn-ghost">Run both to completion</button>
+      <span style="margin-left: auto; font-size: 12px; color: var(--ink-muted);">
+        Bandit policy: <strong style="color: var(--terra-dark); font-family: 'Courier New', Courier, monospace;">UCB1</strong>
+      </span>
+    </div>
+  </div>
+
+  <!-- Arena -->
+  <div class="arena">
+
+    <!-- LEFT: A/B/C panel -->
+    <div class="panel naive" id="panel-ab">
+      <div class="panel-head">
+        <div class="panel-name">Naive A/B/C Test</div>
+        <span class="panel-tag naive">Explore then exploit</span>
+      </div>
+      <div class="panel-sub">
+        Split 33/33/33 for the first third of traffic, then send 100% to whichever ad looked best
+        at that point. Simple, common — and burns a lot of clicks on losers before it commits.
+      </div>
+
+      <div class="ads-row" id="ads-ab">
+        <div class="ad-icon" data-ad="A"><div class="ad-letter">A</div><div class="ad-stat">0 / 0<br>—</div></div>
+        <div class="ad-icon" data-ad="B"><div class="ad-letter">B</div><div class="ad-stat">0 / 0<br>—</div></div>
+        <div class="ad-icon" data-ad="C"><div class="ad-letter">C</div><div class="ad-stat">0 / 0<br>—</div></div>
+      </div>
+
+      <div class="chart-wrap">
+        <canvas id="chart-ab" width="600" height="130"></canvas>
+        <div class="chart-axis"><span>visitor 0</span><span class="ab-mid">⅓ split → winner</span><span>end</span></div>
+        <div class="chart-legend">
+          <span class="legend-item"><span class="swatch sw-a"></span><span class="legend-letter">A</span><span>solid</span></span>
+          <span class="legend-item"><span class="swatch sw-b"></span><span class="legend-letter">B</span><span>stripes</span></span>
+          <span class="legend-item"><span class="swatch sw-c"></span><span class="legend-letter">C</span><span>dots</span></span>
+        </div>
+      </div>
+
+      <div class="big-row">
+        <div class="big-cell"><div class="lbl">Visitors</div><div class="val" id="ab-visitors">0</div></div>
+        <div class="big-cell"><div class="lbl">Conversions</div><div class="val" id="ab-conv">0</div></div>
+        <div class="big-cell money-cell"><div class="lbl">Earned</div><div class="val money" id="ab-money">$0</div></div>
+      </div>
+
+      <div class="panel-footer">
+        <span id="ab-phase" class="phase phase-explore">Explore</span>
+        <span>Observed CTR: <strong id="ab-ctr">—</strong></span>
+        <span style="margin-left: 12px;">Wasted on losers: <span class="lost" id="ab-wasted">0</span> clicks</span>
+      </div>
+    </div>
+
+    <!-- CENTER: scoreboard -->
+    <div class="scoreboard">
+      <div class="sb-label">Bandit revenue lift</div>
+      <div class="sb-lift" id="sb-lift"><span class="sb-arrow" id="sb-arrow" aria-hidden="true">▲</span><span id="sb-lift-num">+0%</span></div>
+      <div class="sb-delta" id="sb-delta">+$0</div>
+      <div class="sb-progress"><div class="sb-progress-fill" id="sb-progress"></div></div>
+      <div class="sb-visitors" id="sb-visitors">0 / 10,000 visitors</div>
+      <div class="sb-tip" id="sb-tip">
+        While A/B/C is still measuring, the bandit is already shifting traffic to the winning ad.
+      </div>
+    </div>
+
+    <!-- RIGHT: Bandit panel -->
+    <div class="panel bandit" id="panel-bd">
+      <div class="panel-head">
+        <div class="panel-name">Adaptive Bandit (UCB1)</div>
+        <span class="panel-tag smart">Learn while earning</span>
+      </div>
+      <div class="panel-sub">
+        Every visitor, pick the ad with the highest upper-confidence bound on its CTR.
+        Traffic flows toward winners as evidence builds — no separate test phase, no wasted budget.
+      </div>
+
+      <div class="ads-row" id="ads-bd">
+        <div class="ad-icon" data-ad="A"><div class="ad-letter">A</div><div class="ad-stat">0 / 0<br>—</div></div>
+        <div class="ad-icon" data-ad="B"><div class="ad-letter">B</div><div class="ad-stat">0 / 0<br>—</div></div>
+        <div class="ad-icon" data-ad="C"><div class="ad-letter">C</div><div class="ad-stat">0 / 0<br>—</div></div>
+      </div>
+
+      <div class="chart-wrap">
+        <canvas id="chart-bd" width="600" height="130"></canvas>
+        <div class="chart-axis"><span>visitor 0</span><span>continuous adaptation</span><span>end</span></div>
+        <div class="chart-legend">
+          <span class="legend-item"><span class="swatch sw-a"></span><span class="legend-letter">A</span><span>solid</span></span>
+          <span class="legend-item"><span class="swatch sw-b"></span><span class="legend-letter">B</span><span>stripes</span></span>
+          <span class="legend-item"><span class="swatch sw-c"></span><span class="legend-letter">C</span><span>dots</span></span>
+        </div>
+      </div>
+
+      <div class="big-row">
+        <div class="big-cell"><div class="lbl">Visitors</div><div class="val" id="bd-visitors">0</div></div>
+        <div class="big-cell"><div class="lbl">Conversions</div><div class="val" id="bd-conv">0</div></div>
+        <div class="big-cell money-cell"><div class="lbl">Earned</div><div class="val money" id="bd-money">$0</div></div>
+      </div>
+
+      <div class="panel-footer">
+        <span class="phase phase-adapt">Adaptive</span>
+        <span>Observed CTR: <strong id="bd-ctr">—</strong></span>
+        <span style="margin-left: 12px;">Best arm so far: <strong id="bd-best">—</strong></span>
+      </div>
+    </div>
+  </div>
+
+  <h2 class="section-title">Why this matters</h2>
+  <div class="callout">
+    <p>
+      <strong>A/B testing wastes traffic on losers.</strong> The bandit reallocates as it learns.
+      The lift you see above is the dollar value of that reallocation — pure revenue recovered
+      from clicks that would otherwise have been spent gathering evidence we already had.
+    </p>
+  </div>
+  <div class="info-box">
+    <p>
+      The decision rule is upper-confidence bound: at each step, pick
+      $\arg\max_k \big(\hat{\mu}_k + \sqrt{2\ln t / n_k}\big)$.
+      Both simulators draw from the same hidden CTRs and the same RNG sequence, so the only
+      difference you see is the allocation policy itself.
+    </p>
+  </div>
+
+  <div class="footer-note">
+    CAS AINIT FS26 — Week 2: Bandits · Slide companion for "ad selection based on customer profiles".
+  </div>
+</div>
+</div>
+
+<script>
+'use strict';
+
+// ─── Mulberry32 seeded RNG ────────────────────────────────────────────────
+function mulberry32(a) {
+  return function() {
+    a |= 0; a = (a + 0x6D2B79F5) | 0;
+    let t = a;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+// ─── State ────────────────────────────────────────────────────────────────
+const NUM_BINS = 120;          // x-axis resolution of the stacked bar chart
+const ARMS = ['A', 'B', 'C'];
+
+const state = {
+  totalVisitors: 10000,
+  revenuePerConv: 5,
+  speed: 5,
+  seed: 42,
+  trueCTR: { A: 0.04, B: 0.06, C: 0.05 },
+
+  // shared visitor outcome stream (computed lazily): for each visitor we
+  // store a uniform per arm so both simulators use the *same* draws.
+  draws: null,    // Float32Array of length 3*N (interleaved A,B,C)
+
+  // simulator states
+  ab: null,
+  bd: null,
+
+  // animation
+  running: false,
+  rafId: null,
+  finished: false,
+};
+
+function makeSim() {
+  return {
+    visitor: 0,
+    pulls:  { A: 0, B: 0, C: 0 },
+    conv:   { A: 0, B: 0, C: 0 },
+    money:  0,
+    bins:   makeBins(),       // counts per bin per ad
+    binConv:makeBins(),       // conversions per bin per ad (for live CTR per bin? unused but cheap)
+  };
+}
+function makeBins() {
+  const arr = [];
+  for (let i = 0; i < NUM_BINS; i++) arr.push({ A: 0, B: 0, C: 0 });
+  return arr;
+}
+
+// ─── Core simulation step ─────────────────────────────────────────────────
+function pickAB(sim, visitor, totalVisitors) {
+  // First 33% of visitors: round-robin A,B,C. Then 100% to empirical winner.
+  const exploreEnd = Math.floor(totalVisitors / 3);
+  if (visitor < exploreEnd) {
+    return ARMS[visitor % 3];
+  }
+  // pick best by observed CTR (ties broken alphabetically)
+  let best = 'A', bestRate = -1;
+  for (const k of ARMS) {
+    const r = sim.pulls[k] > 0 ? sim.conv[k] / sim.pulls[k] : 0;
+    if (r > bestRate) { bestRate = r; best = k; }
+  }
+  return best;
+}
+
+function pickBandit(sim, visitor) {
+  // UCB1: each arm pulled once first; then argmax mu_hat + sqrt(2 ln t / n_k).
+  for (const k of ARMS) if (sim.pulls[k] === 0) return k;
+  const t = sim.visitor; // total pulls so far
+  let best = 'A', bestU = -Infinity;
+  for (const k of ARMS) {
+    const n = sim.pulls[k];
+    const mu = sim.conv[k] / n;
+    const u = mu + Math.sqrt(2 * Math.log(t) / n);
+    if (u > bestU) { bestU = u; best = k; }
+  }
+  return best;
+}
+
+function step(sim, picker) {
+  const v = sim.visitor;
+  if (v >= state.totalVisitors) return false;
+  const arm = picker(sim, v, state.totalVisitors);
+  const armIdx = arm === 'A' ? 0 : arm === 'B' ? 1 : 2;
+  const u = state.draws[3 * v + armIdx];
+  const converted = u < state.trueCTR[arm];
+  sim.pulls[arm]++;
+  if (converted) {
+    sim.conv[arm]++;
+    sim.money += state.revenuePerConv;
+  }
+  // bin tally
+  const bin = Math.min(NUM_BINS - 1, Math.floor((v / state.totalVisitors) * NUM_BINS));
+  sim.bins[bin][arm]++;
+  if (converted) sim.binConv[bin][arm]++;
+  sim.visitor++;
+  return true;
+}
+
+// ─── Visitor draws ────────────────────────────────────────────────────────
+function rebuildDraws() {
+  const N = state.totalVisitors;
+  const rng = mulberry32(state.seed >>> 0);
+  const arr = new Float32Array(N * 3);
+  for (let i = 0; i < N * 3; i++) arr[i] = rng();
+  state.draws = arr;
+}
+
+// ─── Rendering ────────────────────────────────────────────────────────────
+const COLORS = {
+  A: getComputedStyle(document.documentElement).getPropertyValue('--ad-a').trim() || '#0072B2',
+  B: getComputedStyle(document.documentElement).getPropertyValue('--ad-b').trim() || '#D55E00',
+  C: getComputedStyle(document.documentElement).getPropertyValue('--ad-c').trim() || '#009E73',
+};
+
+// Per-ad text-on-fill colors (high contrast against the base fill).
+// Wong palette fills are saturated; warm-white reads cleanly on top.
+const TEXT_ON_FILL = {
+  A: '#fffaf4',  // warm-white on blue
+  B: '#fffaf4',  // warm-white on vermillion
+  C: '#fffaf4',  // warm-white on bluish-green
+};
+
+// Draw the redundant non-color pattern overlay on top of a colored segment.
+// A: solid (no overlay)   B: diagonal stripes   C: dots
+function drawPatternOverlay(ctx, arm, x, y, w, h, dpr) {
+  if (w <= 0 || h <= 0) return;
+  ctx.save();
+  // clip to the segment so patterns never bleed
+  ctx.beginPath();
+  ctx.rect(x, y, w, h);
+  ctx.clip();
+
+  if (arm === 'B') {
+    // diagonal stripes — thin darker lines over the vermillion fill
+    ctx.strokeStyle = 'rgba(0,0,0,0.32)';
+    ctx.lineWidth = Math.max(1, 1 * dpr);
+    const spacing = Math.max(4, 6 * dpr);
+    const len = w + h;
+    for (let off = -h; off < w + h; off += spacing) {
+      ctx.beginPath();
+      ctx.moveTo(x + off, y);
+      ctx.lineTo(x + off + h, y + h);
+      ctx.stroke();
+    }
+  } else if (arm === 'C') {
+    // dots — small light circles over the bluish-green fill
+    const spacing = Math.max(5, 6 * dpr);
+    const r = Math.max(0.8, 1.1 * dpr);
+    ctx.fillStyle = 'rgba(255,250,244,0.75)';
+    // stagger rows for visual texture
+    let row = 0;
+    for (let yy = y + spacing / 2; yy < y + h; yy += spacing) {
+      const xOff = (row % 2) ? spacing / 2 : 0;
+      for (let xx = x + spacing / 2 + xOff; xx < x + w; xx += spacing) {
+        ctx.beginPath();
+        ctx.arc(xx, yy, r, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      row++;
+    }
+  }
+  // A: solid — no overlay
+  ctx.restore();
+}
+
+function drawChart(canvas, sim, isAB) {
+  const ctx = canvas.getContext('2d');
+  // Handle hi-DPI
+  const cssW = canvas.clientWidth || canvas.width;
+  const cssH = canvas.clientHeight || canvas.height;
+  const dpr = window.devicePixelRatio || 1;
+  if (canvas.width !== Math.floor(cssW * dpr) || canvas.height !== Math.floor(cssH * dpr)) {
+    canvas.width = Math.floor(cssW * dpr);
+    canvas.height = Math.floor(cssH * dpr);
+  }
+  const W = canvas.width, H = canvas.height;
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.clearRect(0, 0, W, H);
+
+  // background
+  ctx.fillStyle = '#fffaf4';
+  ctx.fillRect(0, 0, W, H);
+
+  // (dpr already declared above for hi-DPI sizing; reused below for pattern strokes/dots)
+
+  // shade exploration phase on A/B/C panel — neutral sand wash (was green-ish)
+  if (isAB) {
+    const exploreFrac = 1 / 3;
+    ctx.fillStyle = 'rgba(224,205,181,0.45)';   // sand-dark-ish, low alpha
+    ctx.fillRect(0, 0, W * exploreFrac, H);
+    // small "exploration phase" label so meaning isn't color-dependent
+    ctx.save();
+    ctx.fillStyle = 'rgba(44,36,22,0.55)';
+    ctx.font = `${Math.max(9, 10 * dpr)}px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif`;
+    ctx.textBaseline = 'top';
+    ctx.textAlign = 'left';
+    ctx.fillText('exploration phase', 6 * dpr, 4 * dpr);
+    ctx.restore();
+  }
+
+  // current x position based on visitor count
+  const progress = state.totalVisitors > 0 ? sim.visitor / state.totalVisitors : 0;
+  const filledBins = Math.min(NUM_BINS, Math.ceil(progress * NUM_BINS));
+  const binW = W / NUM_BINS;
+
+  // We'll stack bottom→top in order A, B, C. Track each bin's segment Y/H so we can
+  // do a second pass for pattern overlays and letter labels.
+  // segGeom[i] = { A:{y,h}, B:{y,h}, C:{y,h} }
+  const segGeom = new Array(filledBins);
+
+  for (let i = 0; i < filledBins; i++) {
+    const b = sim.bins[i];
+    const total = b.A + b.B + b.C;
+    if (total === 0) continue;
+    const x = i * binW;
+    const segs = [
+      { k: 'A', v: b.A },
+      { k: 'B', v: b.B },
+      { k: 'C', v: b.C },
+    ];
+    let acc = 0;
+    const geom = { A: null, B: null, C: null };
+    for (const s of segs) {
+      const frac = s.v / total;
+      const segH = frac * H;
+      ctx.fillStyle = COLORS[s.k];
+      ctx.fillRect(x, acc, Math.ceil(binW) + 0.5, segH + 0.5);
+      geom[s.k] = { y: acc, h: segH };
+      acc += segH;
+    }
+    segGeom[i] = geom;
+  }
+
+  // ── Pattern overlay pass ──
+  // For each arm, walk bins and overlay the pattern across the arm's segment row.
+  // We render per-bin (cheap; clipped to segment). Skip arm A (solid).
+  for (const arm of ['B', 'C']) {
+    for (let i = 0; i < filledBins; i++) {
+      const g = segGeom[i] && segGeom[i][arm];
+      if (!g || g.h <= 0) continue;
+      const x = i * binW;
+      drawPatternOverlay(ctx, arm, x, g.y, Math.ceil(binW) + 0.5, g.h, dpr);
+    }
+  }
+
+  // ── In-segment letter labels ──
+  // For each arm, find contiguous runs of bins where that arm's segment height >= a min,
+  // then if the run's pixel width is > 20px CSS (≈ 20*dpr device px) AND tall enough,
+  // draw the letter centered in that run.
+  const MIN_RUN_W_DEV = 20 * dpr;     // 20 CSS px in device px
+  const MIN_SEG_H_DEV = 14 * dpr;     // need vertical room for text
+  ctx.save();
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.font = `700 ${Math.max(10, 12 * dpr)}px Georgia, 'Times New Roman', serif`;
+
+  for (const arm of ARMS) {
+    let runStart = -1;
+    let runMinH = Infinity;
+    let runYAccum = 0;
+    let runCount = 0;
+    const flush = (endExclusive) => {
+      if (runStart < 0) return;
+      const runW = (endExclusive - runStart) * binW;
+      if (runW >= MIN_RUN_W_DEV && runMinH >= MIN_SEG_H_DEV) {
+        const cx = runStart * binW + runW / 2;
+        const cy = runYAccum / runCount; // average vertical center across run
+        // High-contrast text: warm-white sits well on all three Wong fills.
+        ctx.fillStyle = TEXT_ON_FILL[arm];
+        // Subtle ink halo for legibility on top of pattern overlays
+        ctx.lineWidth = Math.max(2, 2 * dpr);
+        ctx.strokeStyle = 'rgba(44,36,22,0.55)';
+        ctx.strokeText(arm, cx, cy);
+        ctx.fillText(arm, cx, cy);
+      }
+      runStart = -1;
+      runMinH = Infinity;
+      runYAccum = 0;
+      runCount = 0;
+    };
+    for (let i = 0; i < filledBins; i++) {
+      const g = segGeom[i] && segGeom[i][arm];
+      if (g && g.h > 0) {
+        if (runStart < 0) runStart = i;
+        if (g.h < runMinH) runMinH = g.h;
+        runYAccum += g.y + g.h / 2;
+        runCount++;
+      } else {
+        flush(i);
+      }
+    }
+    flush(filledBins);
+  }
+  ctx.restore();
+
+  // playhead vertical line
+  if (sim.visitor > 0 && sim.visitor < state.totalVisitors) {
+    const px = progress * W;
+    ctx.strokeStyle = 'rgba(44,36,22,0.35)';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(px, 0); ctx.lineTo(px, H);
+    ctx.stroke();
+  }
+
+  // 33% marker on A/B/C panel — keep dashed marker at the snap point
+  if (isAB) {
+    const mx = W / 3;
+    ctx.strokeStyle = 'rgba(44,36,22,0.55)';
+    ctx.setLineDash([4, 4]);
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(mx, 0); ctx.lineTo(mx, H);
+    ctx.stroke();
+    ctx.setLineDash([]);
+  }
+}
+
+function fmtInt(n) { return Math.round(n).toLocaleString('en-US'); }
+function fmtMoney(n) { return '$' + Math.round(n).toLocaleString('en-US'); }
+function fmtPct(p, d=2) { return (p * 100).toFixed(d) + '%'; }
+
+function updateAdIcons(rowEl, sim, highlightArm) {
+  const cards = rowEl.querySelectorAll('.ad-icon');
+  cards.forEach(c => {
+    const k = c.dataset.ad;
+    const stat = c.querySelector('.ad-stat');
+    const ctr = sim.pulls[k] > 0 ? (sim.conv[k] / sim.pulls[k] * 100).toFixed(1) + '%' : '—';
+    stat.innerHTML = `${fmtInt(sim.conv[k])} / ${fmtInt(sim.pulls[k])}<br>${ctr}`;
+    if (k === highlightArm) c.classList.add('live');
+    else c.classList.remove('live');
+  });
+}
+
+function updatePanelMetrics() {
+  // A/B/C
+  document.getElementById('ab-visitors').textContent = fmtInt(state.ab.visitor);
+  const abConv = state.ab.conv.A + state.ab.conv.B + state.ab.conv.C;
+  document.getElementById('ab-conv').textContent = fmtInt(abConv);
+  document.getElementById('ab-money').textContent = fmtMoney(state.ab.money);
+  document.getElementById('ab-ctr').textContent =
+    state.ab.visitor > 0 ? (abConv / state.ab.visitor * 100).toFixed(2) + '%' : '—';
+
+  const exploreEnd = Math.floor(state.totalVisitors / 3);
+  const phaseEl = document.getElementById('ab-phase');
+  if (state.ab.visitor < exploreEnd) {
+    phaseEl.textContent = 'Explore';
+    phaseEl.className = 'phase phase-explore';
+  } else {
+    phaseEl.textContent = 'Exploit';
+    phaseEl.className = 'phase phase-exploit';
+  }
+
+  // wasted clicks during exploration on non-best arms (true best by hidden CTR)
+  let trueBest = 'A';
+  let bestCTR = -1;
+  for (const k of ARMS) if (state.trueCTR[k] > bestCTR) { bestCTR = state.trueCTR[k]; trueBest = k; }
+  let wasted = 0;
+  // sum pulls on non-best arms during exploration phase
+  // We need pulls during exploration, not after. The A/B/C protocol pulls each arm equally
+  // during exploration, so wasted = pulls_on_non_best_arm during exploration only.
+  // After exploration, all traffic goes to one arm; if that arm is best, no waste; if not, those
+  // are also "lost opportunity". We'll use the simpler frame: clicks given to non-true-best arm.
+  for (const k of ARMS) if (k !== trueBest) wasted += state.ab.pulls[k];
+  document.getElementById('ab-wasted').textContent = fmtInt(wasted);
+
+  // Bandit
+  document.getElementById('bd-visitors').textContent = fmtInt(state.bd.visitor);
+  const bdConv = state.bd.conv.A + state.bd.conv.B + state.bd.conv.C;
+  document.getElementById('bd-conv').textContent = fmtInt(bdConv);
+  document.getElementById('bd-money').textContent = fmtMoney(state.bd.money);
+  document.getElementById('bd-ctr').textContent =
+    state.bd.visitor > 0 ? (bdConv / state.bd.visitor * 100).toFixed(2) + '%' : '—';
+  // best arm so far
+  let bdBest = '—', bdBestRate = -1;
+  for (const k of ARMS) {
+    if (state.bd.pulls[k] === 0) continue;
+    const r = state.bd.conv[k] / state.bd.pulls[k];
+    if (r > bdBestRate) { bdBestRate = r; bdBest = k; }
+  }
+  document.getElementById('bd-best').textContent = bdBest;
+}
+
+function updateScoreboard() {
+  const ab$ = state.ab.money;
+  const bd$ = state.bd.money;
+  const delta = bd$ - ab$;
+  const liftEl = document.getElementById('sb-lift');
+  const liftNumEl = document.getElementById('sb-lift-num');
+  const arrowEl = document.getElementById('sb-arrow');
+  const deltaEl = document.getElementById('sb-delta');
+  const tipEl = document.getElementById('sb-tip');
+
+  // detect "no measurable lift" condition: all true CTRs within 0.1 percentage points
+  const ctrs = ARMS.map(k => state.trueCTR[k]);
+  const ctrMax = Math.max(...ctrs), ctrMin = Math.min(...ctrs);
+  const equalish = (ctrMax - ctrMin) < 0.001; // <0.1pp
+
+  if (equalish) {
+    liftEl.classList.add('neutral');
+    // text-driven equal state — wipe number/arrow contents
+    liftEl.textContent = 'no measurable lift';
+    deltaEl.textContent = (delta >= 0 ? '+' : '−') + '$' + fmtInt(Math.abs(delta));
+    tipEl.textContent = 'When all ads convert at the same rate, no policy can do better. The bandit\'s edge comes from real differences in CTR.';
+  } else {
+    // restore inner structure if the neutral branch wiped it
+    if (!document.getElementById('sb-lift-num')) {
+      liftEl.innerHTML = '<span class="sb-arrow" id="sb-arrow" aria-hidden="true">▲</span><span id="sb-lift-num">+0%</span>';
+    }
+    liftEl.classList.remove('neutral');
+    const numEl = document.getElementById('sb-lift-num');
+    const arEl = document.getElementById('sb-arrow');
+    let liftPctStr;
+    if (ab$ > 0) {
+      const liftPct = (delta / ab$) * 100;
+      liftPctStr = (liftPct >= 0 ? '+' : '') + liftPct.toFixed(1) + '%';
+    } else {
+      liftPctStr = delta > 0 ? '+∞%' : '+0%';
+    }
+    numEl.textContent = liftPctStr;
+    // direction indicator: ▲ when bandit ahead or tied positive, ▼ when bandit behind
+    if (delta >= 0) {
+      arEl.textContent = '▲';
+      arEl.classList.remove('down');
+    } else {
+      arEl.textContent = '▼';
+      arEl.classList.add('down');
+    }
+    deltaEl.textContent = (delta >= 0 ? '+' : '−') + '$' + fmtInt(Math.abs(delta));
+    if (state.finished) {
+      tipEl.textContent = `Final result: bandit earned $${fmtInt(Math.abs(delta))} ${delta >= 0 ? 'more' : 'less'} on the same ${fmtInt(state.totalVisitors)} visitors.`;
+    } else {
+      tipEl.textContent = 'While A/B/C is still measuring, the bandit is already shifting traffic to the winning ad.';
+    }
+  }
+
+  const progress = state.totalVisitors > 0 ? state.ab.visitor / state.totalVisitors : 0;
+  document.getElementById('sb-progress').style.width = (progress * 100).toFixed(1) + '%';
+  document.getElementById('sb-visitors').textContent =
+    fmtInt(state.ab.visitor) + ' / ' + fmtInt(state.totalVisitors) + ' visitors';
+}
+
+function renderAll(lastABarm, lastBDarm) {
+  drawChart(document.getElementById('chart-ab'), state.ab, true);
+  drawChart(document.getElementById('chart-bd'), state.bd, false);
+  updateAdIcons(document.getElementById('ads-ab'), state.ab, lastABarm);
+  updateAdIcons(document.getElementById('ads-bd'), state.bd, lastBDarm);
+  updatePanelMetrics();
+  updateScoreboard();
+}
+
+// ─── Animation loop ───────────────────────────────────────────────────────
+function batchSize() {
+  // speed 1..10 → ~ proportional batch. Aim for full 10K to finish in <30s at speed 5.
+  // 10000 / (30 * 60) ≈ 5.5 visitors/frame at speed 1 baseline. We'll scale linearly.
+  const base = Math.max(1, Math.round(state.totalVisitors / 4000)); // adapts to length
+  return base * state.speed * 4;
+}
+
+function tick() {
+  if (!state.running) return;
+  const N = batchSize();
+  let lastAB = null, lastBD = null;
+  for (let i = 0; i < N; i++) {
+    const a = step(state.ab, pickAB);
+    const b = step(state.bd, pickBandit);
+    if (a) { /* track last picked arm via current pulls — not needed; we don't highlight precisely */ }
+    if (!a && !b) break;
+  }
+  // last arm highlight: highlight whatever was just picked (approximate: arm whose pulls increased most this batch).
+  // For simplicity, highlight the most-pulled arm so far in each.
+  lastAB = mostPulledArm(state.ab);
+  lastBD = mostPulledArm(state.bd);
+
+  renderAll(lastAB, lastBD);
+
+  if (state.ab.visitor >= state.totalVisitors && state.bd.visitor >= state.totalVisitors) {
+    state.running = false;
+    state.finished = true;
+    setButtonsRunning(false);
+    updateScoreboard();
+    return;
+  }
+  state.rafId = requestAnimationFrame(tick);
+}
+
+function mostPulledArm(sim) {
+  let best = 'A', bv = -1;
+  for (const k of ARMS) if (sim.pulls[k] > bv) { bv = sim.pulls[k]; best = k; }
+  return best;
+}
+
+// ─── Controls ─────────────────────────────────────────────────────────────
+function setButtonsRunning(r) {
+  document.getElementById('btn-play').disabled = r;
+  document.getElementById('btn-pause').disabled = !r;
+}
+
+function resetSim() {
+  if (state.rafId) cancelAnimationFrame(state.rafId);
+  state.running = false;
+  state.finished = false;
+  state.ab = makeSim();
+  state.bd = makeSim();
+  rebuildDraws();
+  setButtonsRunning(false);
+  renderAll(null, null);
+}
+
+function play() {
+  if (state.finished) return;
+  if (state.ab.visitor >= state.totalVisitors && state.bd.visitor >= state.totalVisitors) return;
+  state.running = true;
+  setButtonsRunning(true);
+  state.rafId = requestAnimationFrame(tick);
+}
+
+function pause() {
+  state.running = false;
+  if (state.rafId) cancelAnimationFrame(state.rafId);
+  setButtonsRunning(false);
+}
+
+function runToCompletion() {
+  if (state.rafId) cancelAnimationFrame(state.rafId);
+  state.running = false;
+  // run synchronously to end
+  while (state.ab.visitor < state.totalVisitors) step(state.ab, pickAB);
+  while (state.bd.visitor < state.totalVisitors) step(state.bd, pickBandit);
+  state.finished = true;
+  setButtonsRunning(false);
+  renderAll(mostPulledArm(state.ab), mostPulledArm(state.bd));
+}
+
+// ─── Wiring ───────────────────────────────────────────────────────────────
+function readControls() {
+  state.totalVisitors = parseInt(document.getElementById('s-visitors').value, 10);
+  state.revenuePerConv = parseInt(document.getElementById('s-revenue').value, 10);
+  state.speed = parseInt(document.getElementById('s-speed').value, 10);
+  state.seed = parseInt(document.getElementById('s-seed').value, 10);
+  for (const k of ARMS) {
+    state.trueCTR[k] = parseFloat(document.getElementById('ctr-' + k).value) / 100;
+  }
+  // mirror values
+  document.getElementById('v-visitors').textContent = state.totalVisitors.toLocaleString('en-US');
+  document.getElementById('v-revenue').textContent = '$' + state.revenuePerConv;
+  document.getElementById('v-speed').textContent = state.speed + 'x';
+  document.getElementById('v-seed').textContent = String(state.seed);
+  for (const k of ARMS) {
+    document.getElementById('v-ctr-' + k).textContent =
+      (state.trueCTR[k] * 100).toFixed(1) + '%';
+  }
+}
+
+function bindControls() {
+  const ids = ['s-visitors', 's-revenue', 's-speed', 's-seed', 'ctr-A', 'ctr-B', 'ctr-C'];
+  ids.forEach(id => {
+    document.getElementById(id).addEventListener('input', () => {
+      const wasRunning = state.running;
+      pause();
+      readControls();
+      // Any change to visitors/seed/CTR invalidates the simulation.
+      if (id !== 's-speed' && id !== 's-revenue') {
+        resetSim();
+      } else if (id === 's-revenue') {
+        // re-derive money from conversions for both sims (so live update is consistent)
+        const totA = state.ab.conv.A + state.ab.conv.B + state.ab.conv.C;
+        const totB = state.bd.conv.A + state.bd.conv.B + state.bd.conv.C;
+        state.ab.money = totA * state.revenuePerConv;
+        state.bd.money = totB * state.revenuePerConv;
+        renderAll(mostPulledArm(state.ab), mostPulledArm(state.bd));
+      }
+      if (wasRunning && !state.finished) play();
+    });
+  });
+
+  document.getElementById('btn-play').addEventListener('click', play);
+  document.getElementById('btn-pause').addEventListener('click', pause);
+  document.getElementById('btn-reset').addEventListener('click', () => {
+    pause();
+    readControls();
+    resetSim();
+  });
+  document.getElementById('btn-finish').addEventListener('click', () => {
+    pause();
+    if (state.ab.visitor === 0 && state.bd.visitor === 0) {
+      // already reset; just run
+    } else {
+      // ensure consistent draws
+      readControls();
+      resetSim();
+    }
+    runToCompletion();
+  });
+
+  window.addEventListener('resize', () => renderAll(mostPulledArm(state.ab), mostPulledArm(state.bd)));
+}
+
+// ─── Init ─────────────────────────────────────────────────────────────────
+function init() {
+  readControls();
+  resetSim();
+  bindControls();
+}
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>

@@ -1,0 +1,1249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Algorithm Stadium — Five Strategies, One Bandit</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<style>
+  :root {
+    --cream: #fdf6ee;
+    --warm-white: #fffaf4;
+    --sand: #f0e6d3;
+    --sand-dark: #e0cdb5;
+    --terra: #c17f4e;
+    --terra-dark: #a0623a;
+    --rust: #d4622a;
+    --ochre: #d49a3a;
+    --sage: #6a8f73;
+    --sage-light: #8fb098;
+    --ink: #2c2416;
+    --ink-light: #5a4a36;
+    --ink-muted: #8a7660;
+    --success: #4a9055;
+    --error: #c0392b;
+    --border: rgba(193, 127, 78, 0.2);
+    --shadow: 0 4px 24px rgba(44,36,22,0.08);
+    --shadow-lg: 0 8px 40px rgba(44,36,22,0.12);
+
+    /* Per-algorithm colors — Wong color-blind-safe palette (5 categories).
+       Naive estimate-then-exploit, ε-greedy at three different ε, and pure
+       random — five mutually distinguishable hues under deuteranopia,
+       protanopia, and tritanopia. Color is *not* the only cue: line styles,
+       avatar outlines, card border-styles carry redundant non-color encodings. */
+    --algo-naive:   #D55E00;   /* vermillion  — naive estimate-then-exploit */
+    --algo-eps05:   #0072B2;   /* blue        — ε = 0.05 (too small) */
+    --algo-eps20:   #009E73;   /* bluish green — ε = 0.20 (sweet spot) */
+    --algo-eps50:   #CC79A7;   /* reddish purple — ε = 0.50 (too large) */
+    --algo-random:  #2c2416;   /* ink         — pure random */
+
+    /* Per-arm colors (also Wong-safe; tied to the mini-bars in stat cards).
+       Arm identity is also text-encoded ("1 / 2 / 3 / …") under each bar. */
+    --arm-1: #0072B2;   /* blue */
+    --arm-2: #D55E00;   /* vermillion */
+    --arm-3: #009E73;   /* bluish green */
+    --arm-4: #E69F00;   /* orange */
+    --arm-5: #CC79A7;   /* reddish purple */
+    --arm-6: #56B4E9;   /* sky blue */
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--cream);
+    color: var(--ink);
+    min-height: 100vh;
+    background-image:
+      radial-gradient(ellipse at 10% 0%, rgba(193,127,78,0.08) 0%, transparent 60%),
+      radial-gradient(ellipse at 90% 100%, rgba(106,143,115,0.06) 0%, transparent 60%);
+  }
+
+  .shell { display: flex; flex-direction: column; min-height: 100vh; }
+  .main { flex: 1; padding: 40px 56px; max-width: 1100px; margin: 0 auto; width: 100%; }
+
+  /* ── TYPOGRAPHY ──────────────────────────────────── */
+  .page-header { margin-bottom: 28px; }
+  .page-title {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--ink);
+    line-height: 1.2;
+    margin-bottom: 10px;
+  }
+  .page-subtitle {
+    font-size: 15px;
+    color: var(--ink-muted);
+    line-height: 1.6;
+    max-width: 740px;
+  }
+
+  h2.section-title {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 19px;
+    font-weight: 600;
+    color: var(--terra-dark);
+    margin: 28px 0 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  h2.section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  p.prose {
+    font-size: 14.5px;
+    line-height: 1.7;
+    color: var(--ink-light);
+    margin-bottom: 12px;
+    max-width: 760px;
+  }
+
+  /* ── CARDS ────────────────────────────────────────── */
+  .card {
+    background: var(--warm-white);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 22px;
+    margin-bottom: 18px;
+    box-shadow: var(--shadow);
+  }
+  .card-title {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 12px;
+  }
+
+  .callout {
+    border-left: 3px solid var(--terra);
+    background: rgba(193,127,78,0.06);
+    padding: 14px 18px;
+    border-radius: 0 10px 10px 0;
+    margin: 14px 0;
+  }
+  .callout p { font-size: 14px; color: var(--ink-light); margin: 0; line-height: 1.65; }
+  .callout strong { color: var(--terra-dark); }
+
+  .info-box {
+    background: rgba(106,143,115,0.08);
+    border: 1px solid rgba(106,143,115,0.25);
+    border-radius: 12px;
+    padding: 14px 18px;
+    margin: 14px 0;
+  }
+  .info-box p { font-size: 13.5px; color: var(--ink-light); margin: 0; line-height: 1.65; }
+
+  /* ── BUTTONS ──────────────────────────────────────── */
+  .btn {
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    transition: all 0.18s;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--terra), var(--rust));
+    color: white;
+    box-shadow: 0 3px 12px rgba(193,127,78,0.3);
+  }
+  .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 5px 16px rgba(193,127,78,0.4); }
+  .btn-secondary {
+    background: var(--sand);
+    color: var(--ink-light);
+    border: 1px solid var(--sand-dark);
+  }
+  .btn-secondary:hover { background: var(--sand-dark); }
+  .btn-ghost {
+    background: rgba(106,143,115,0.1);
+    color: var(--sage);
+    border: 1px solid rgba(106,143,115,0.3);
+  }
+  .btn-ghost:hover { background: rgba(106,143,115,0.2); }
+
+  /* ── CONTROL ROW ──────────────────────────────────── */
+  .control-row {
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+    align-items: center;
+    margin: 14px 0 4px;
+  }
+  .ctrl-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--ink-muted);
+  }
+  .ctrl-group label { font-weight: 500; color: var(--ink-light); white-space: nowrap; }
+  .ctrl-group input[type=range] {
+    width: 130px;
+    accent-color: var(--terra);
+  }
+  .ctrl-group .val {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 12px;
+    min-width: 44px;
+    color: var(--terra-dark);
+  }
+  .ctrl-divider { width: 1px; height: 24px; background: var(--border); margin: 0 4px; }
+
+  /* ── RACE TRACK ───────────────────────────────────── */
+  .stadium-wrap {
+    background: var(--sand);
+    border-radius: 14px;
+    padding: 22px 22px 18px;
+    margin: 14px 0;
+    border: 1px solid var(--sand-dark);
+  }
+
+  .stadium-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .stadium-title {
+    font-family: Georgia, serif;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ink);
+    letter-spacing: 0.02em;
+  }
+  .stadium-clock {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 13px;
+    color: var(--ink-muted);
+  }
+  .stadium-clock strong { color: var(--terra-dark); }
+
+  .lane {
+    display: grid;
+    grid-template-columns: 180px 1fr 110px;
+    align-items: center;
+    gap: 12px;
+    margin: 7px 0;
+  }
+  .lane-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink);
+    display: flex;
+    align-items: center;
+    gap: 7px;
+  }
+  .lane-swatch {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .lane-track {
+    position: relative;
+    height: 28px;
+    background: var(--warm-white);
+    border-radius: 14px;
+    border: 1px solid var(--sand-dark);
+    overflow: hidden;
+  }
+  .lane-fill {
+    position: absolute;
+    top: 0; left: 0; bottom: 0;
+    border-radius: 14px;
+    opacity: 0.18;
+    transition: width 0.06s linear;
+  }
+  .lane-target-line {
+    position: absolute;
+    top: 2px; bottom: 2px;
+    width: 1px;
+    background: rgba(44,36,22,0.18);
+    pointer-events: none;
+  }
+  .lane-avatar {
+    position: absolute;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    /* Default: warm-white outer ring + thin ink outline for non-color shape cue.
+       Per-algorithm modifier classes override the outline pattern below. */
+    border: 2px solid var(--warm-white);
+    outline: 1.5px solid var(--ink);
+    outline-offset: 0px;
+    box-shadow: 0 2px 6px rgba(44,36,22,0.18);
+    transition: left 0.06s linear;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--warm-white);
+    font-size: 11px;
+    font-weight: 800;
+    font-family: 'Courier New', monospace;
+    text-shadow: 0 1px 1px rgba(0,0,0,0.45);
+  }
+  /* Avatar outline-pattern redundancy (non-color shape cue per algorithm).
+     The browser's `outline-style` only supports solid/dashed/dotted/double — so
+     we map the chart line styles to the available outline styles. */
+  .lane-avatar.style-dotted   { outline-style: dotted; outline-width: 2px; }
+  .lane-avatar.style-dashed   { outline-style: dashed; outline-width: 2px; }
+  .lane-avatar.style-dashdot  { outline-style: dashed; outline-width: 2.5px; outline-offset: 1px; }
+  .lane-avatar.style-solid    { outline-style: solid;  outline-width: 1.5px; }
+  .lane-avatar.style-double   { outline-style: double; outline-width: 4px; }
+  .lane-avatar.leader::after {
+    content: '';
+    position: absolute;
+    top: -6px; left: -6px; right: -6px; bottom: -6px;
+    border-radius: 50%;
+    border: 2px solid currentColor;
+    opacity: 0.55;
+    animation: pulse 1.6s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); opacity: 0.55; }
+    50% { transform: scale(1.25); opacity: 0; }
+  }
+  .lane-stat {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 12px;
+    color: var(--ink-light);
+    text-align: right;
+  }
+  .lane-stat .reward { color: var(--ink); font-weight: 700; }
+  .lane-stat .regret { color: var(--ink-muted); font-size: 11px; }
+
+  .stadium-axis {
+    display: grid;
+    grid-template-columns: 180px 1fr 110px;
+    gap: 12px;
+    margin-top: 6px;
+    font-family: 'Courier New', monospace;
+    font-size: 10px;
+    color: var(--ink-muted);
+  }
+  .axis-track {
+    display: flex;
+    justify-content: space-between;
+    padding: 0 2px;
+  }
+  .axis-track span:last-child { text-align: right; }
+
+  /* ── REGRET CHART ─────────────────────────────────── */
+  .chart-wrap {
+    background: var(--sand);
+    border-radius: 14px;
+    padding: 18px;
+    margin: 14px 0;
+    border: 1px solid var(--sand-dark);
+  }
+  canvas.regret-chart {
+    display: block;
+    background: var(--warm-white);
+    border-radius: 10px;
+    width: 100%;
+    height: 320px;
+  }
+  .chart-legend {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-top: 12px;
+    padding-top: 10px;
+    border-top: 1px solid rgba(193,127,78,0.15);
+    justify-content: center;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--ink-light);
+  }
+  /* Legend swatch is a tiny canvas so it can render the *exact* dash pattern
+     the regret chart uses — line-style is the redundant non-color cue. */
+  .legend-dash { display: inline-block; width: 28px; height: 10px; vertical-align: middle; }
+
+  /* ── ALGORITHM STATS GRID ─────────────────────────── */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 10px;
+    margin-top: 8px;
+  }
+  .stat-card {
+    background: var(--warm-white);
+    border: 1px solid var(--border);
+    /* Default top accent — per-algorithm modifier class below replaces the
+       border-top with a style matching the chart's line dash pattern. */
+    border-top: 4px solid currentColor;
+    border-radius: 10px;
+    padding: 12px 12px 10px;
+  }
+  /* Border-style redundancy: matches the regret-chart line style for the
+     same algorithm, so a CB student looking at a stat card knows exactly
+     which line on the chart belongs to it. CSS only ships solid/dashed/
+     dotted/double — we map the 5 chart styles onto these. */
+  .stat-card.style-dotted   { border-top: 4px dotted currentColor; }
+  .stat-card.style-dashed   { border-top: 4px dashed currentColor; }
+  .stat-card.style-dashdot  { border-top: 5px dashed currentColor; border-bottom: 2px dotted currentColor; }
+  .stat-card.style-solid    { border-top: 4px solid  currentColor; }
+  .stat-card.style-double   { border-top: 6px double currentColor; }
+  .stat-card-title {
+    font-family: Georgia, serif;
+    font-size: 12px;
+    font-weight: 700;
+    color: currentColor;
+    margin-bottom: 6px;
+    letter-spacing: 0.01em;
+  }
+  .stat-row {
+    display: flex;
+    justify-content: space-between;
+    font-family: 'Courier New', monospace;
+    font-size: 11px;
+    color: var(--ink-light);
+    padding: 1px 0;
+  }
+  .stat-row .v { color: var(--ink); font-weight: 700; }
+  .arm-bars {
+    display: flex;
+    gap: 3px;
+    margin-top: 8px;
+    height: 22px;
+    align-items: flex-end;
+  }
+  .arm-bar {
+    flex: 1;
+    background: var(--sand);
+    border-radius: 3px 3px 0 0;
+    position: relative;
+    overflow: hidden;
+    min-height: 2px;
+  }
+  .arm-bar-fill {
+    position: absolute;
+    bottom: 0;
+    left: 0; right: 0;
+    /* Per-arm Wong color set via inline style; full opacity for clarity */
+    background: currentColor;
+    border-radius: 3px 3px 0 0;
+  }
+  .arm-bar-label {
+    text-align: center;
+    font-family: 'Courier New', monospace;
+    font-size: 9px;
+    color: var(--ink-muted);
+    margin-top: 1px;
+  }
+  /* Arm labels under the mini-bars: text-encoded arm identity ("1..K")
+     so a student doesn't need to read color to tell which bar is which arm. */
+  .arm-labels {
+    display: flex;
+    gap: 3px;
+    margin-top: 2px;
+    font-family: 'Courier New', monospace;
+    font-size: 9.5px;
+    color: var(--ink-muted);
+    text-align: center;
+  }
+  .arm-labels > div { flex: 1; font-weight: 700; }
+
+  /* ── TRUE-MEANS ROW ───────────────────────────────── */
+  .means-row {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    align-items: center;
+    margin: 4px 0 8px;
+  }
+  .mean-chip {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--warm-white);
+    border: 1px solid var(--sand-dark);
+    border-radius: 20px;
+    padding: 4px 10px 4px 8px;
+    font-size: 12px;
+    color: var(--ink-light);
+  }
+  .mean-chip .arm-id {
+    font-family: 'Courier New', monospace;
+    font-size: 11px;
+    color: var(--ink-muted);
+  }
+  .mean-chip .mean-val {
+    font-family: 'Courier New', monospace;
+    font-weight: 700;
+    color: var(--terra-dark);
+  }
+  .mean-chip input[type=range] {
+    width: 70px;
+    accent-color: var(--terra);
+  }
+  .mean-chip.best {
+    background: rgba(106,143,115,0.12);
+    border-color: rgba(106,143,115,0.35);
+  }
+  .mean-chip.best .mean-val { color: var(--sage); }
+
+  /* ── FORMULA STRIP ────────────────────────────────── */
+  .formula-strip {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin: 12px 0 6px;
+  }
+  .formula-card {
+    background: var(--warm-white);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px 14px;
+  }
+  .formula-card .label {
+    font-size: 10.5px;
+    color: var(--ink-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 6px;
+    font-weight: 600;
+  }
+  .formula-card .body { font-size: 14px; color: var(--ink); text-align: center; min-height: 28px; }
+
+  /* ── DIVIDER ──────────────────────────────────────── */
+  .divider { height: 1px; background: var(--border); margin: 22px 0; }
+
+  /* ── RESPONSIVE ──────────────────────────────────── */
+  @media (max-width: 900px) {
+    .main { padding: 24px 20px; }
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    .formula-strip { grid-template-columns: 1fr; }
+    .lane { grid-template-columns: 140px 1fr 90px; gap: 8px; }
+    .stadium-axis { grid-template-columns: 140px 1fr 90px; gap: 8px; }
+    .lane-label { font-size: 12px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="shell">
+<main class="main">
+
+<div class="page-header">
+  <h1 class="page-title">Algorithm Stadium</h1>
+  <p class="page-subtitle">Same urns. Same rounds. Five strategies running side by side. Watch cumulative regret accumulate underneath each one — and see how the choice of &epsilon; alone separates linear regret from sublinear regret.</p>
+</div>
+
+<!-- ══════════════ TRUE BIASES + GLOBAL CONTROLS ══════════════ -->
+<div class="card">
+  <div class="card-title">The hidden urns</div>
+  <p class="prose">Several Bernoulli urns with hidden success probabilities. Every algorithm sees the same urns and the same bandit RNG; their internal random draws (for &epsilon;-flips, tie-breaks) come from independent streams.</p>
+  <div class="means-row" id="means-row"></div>
+
+  <div class="control-row">
+    <button class="btn btn-primary" id="btn-play">Play</button>
+    <button class="btn btn-secondary" id="btn-step">Step</button>
+    <button class="btn btn-secondary" id="btn-reset">Reset</button>
+    <div class="ctrl-divider"></div>
+    <div class="ctrl-group">
+      <label>Speed</label>
+      <input type="range" id="r-speed" min="1" max="500" step="1" value="10">
+      <span class="val" id="v-speed">10/f</span>
+    </div>
+    <div class="ctrl-group">
+      <label>T</label>
+      <input type="range" id="r-T" min="100" max="5000" step="100" value="500">
+      <span class="val" id="v-T">500</span>
+    </div>
+    <div class="ctrl-group">
+      <label>naive n</label>
+      <input type="range" id="r-naiveN" min="3" max="60" step="1" value="10">
+      <span class="val" id="v-naiveN">10</span>
+    </div>
+    <div class="ctrl-divider"></div>
+    <button class="btn btn-ghost" id="btn-reseed-rng">Reseed RNG</button>
+    <button class="btn btn-ghost" id="btn-reseed-all">Reseed everything</button>
+  </div>
+</div>
+
+<!-- ══════════════ RACE TRACK ══════════════ -->
+<h2 class="section-title">The race</h2>
+
+<div class="stadium-wrap">
+  <div class="stadium-header">
+    <div class="stadium-title">Cumulative reward — distance from the gate</div>
+    <div class="stadium-clock">round <strong id="clock-t">0</strong> / <span id="clock-T">500</span> &nbsp;&middot;&nbsp; ideal pace <strong id="clock-pstar">0.85</strong> per round</div>
+  </div>
+  <div id="lanes"></div>
+  <div class="stadium-axis">
+    <div></div>
+    <div class="axis-track"><span>0</span><span id="axis-mid">212</span><span id="axis-max">425</span></div>
+    <div></div>
+  </div>
+</div>
+
+<!-- ══════════════ REGRET CHART ══════════════ -->
+<h2 class="section-title">Cumulative regret</h2>
+<p class="prose">Regret is what you couldn't see — the reward you'd have gotten always pulling the best urn, minus what you actually got. A flat slope means the algorithm has stopped paying tuition. A steep slope means it's still bleeding. Pure random and &epsilon; = 0.50 grow linearly. Naive estimate-then-exploit and &epsilon; = 0.05 grow linearly *if* they commit to the wrong urn. &epsilon; = 0.20 typically wins.</p>
+
+<div class="chart-wrap">
+  <canvas class="regret-chart" id="regret-canvas" width="1040" height="320"></canvas>
+  <div class="chart-legend" id="chart-legend"></div>
+</div>
+
+<!-- ══════════════ STATS PER ALGORITHM ══════════════ -->
+<h2 class="section-title">What each algorithm is doing</h2>
+<p class="prose">Arm-pull bars show the fraction of pulls each algorithm has spent on each urn. Naive locks onto whichever urn looked best after its 10 exploration rounds. &epsilon;-greedy keeps a steady tax on losers — the size of the tax is exactly &epsilon;. Pure random taxes everyone equally.</p>
+<div class="stats-grid" id="stats-grid"></div>
+
+<!-- ══════════════ FORMULAS ══════════════ -->
+<h2 class="section-title">The rules they play by</h2>
+<div class="formula-strip">
+  <div class="formula-card">
+    <div class="label">Naive estimate-then-exploit</div>
+    <div class="body" id="f-naive"></div>
+  </div>
+  <div class="formula-card">
+    <div class="label">&epsilon;-greedy</div>
+    <div class="body" id="f-eps"></div>
+  </div>
+  <div class="formula-card">
+    <div class="label">Cumulative regret</div>
+    <div class="body" id="f-regret"></div>
+  </div>
+</div>
+
+<div class="callout">
+  <p><strong>The punchline.</strong> &epsilon; too small (or zero, as in naive estimate-then-exploit) means: if you commit to the wrong urn, regret grows linearly forever. &epsilon; too large means: you keep paying full exploration cost, regret again grows linearly. A middling &epsilon; — here 0.20 — produces sublinear regret on average. The take-away: the explore/exploit dial is real, and tuning it matters.</p>
+</div>
+
+<div class="info-box">
+  <p>Tip: hit "Reseed everything" a few times. On some seeds the naive learner gets lucky and locks onto the best urn — its regret then flattens completely. On other seeds it locks onto a near-best urn and you can see the linear-regret slope. &epsilon; = 0.20 stays sublinear across almost all seeds.</p>
+</div>
+
+</main>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════
+// RNG: mulberry32 — fast, seedable, deterministic
+// ═══════════════════════════════════════════════════
+function mulberry32(seed) {
+  let s = seed >>> 0;
+  return function() {
+    s = (s + 0x6D2B79F5) >>> 0;
+    let t = s;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+// ═══════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════
+// Wong color-blind-safe palette + per-algorithm canvas dash pattern + matching
+// CSS shape-class for the avatar outline / stat-card border-style. Color is
+// only one of three redundant cues; line-style and dash-pattern carry the
+// same information for any viewer with a color-vision deficiency.
+const ALGOS = [
+  { id: 'naive',  name: 'Naive (n=10)',     hex: '#D55E00', short: 'N',   dash: [8, 4],         styleClass: 'style-dashed'  },
+  { id: 'eps05',  name: 'ε-greedy 0.05',    hex: '#0072B2', short: '.05', dash: [],             styleClass: 'style-solid'   },
+  { id: 'eps20',  name: 'ε-greedy 0.20',    hex: '#009E73', short: '.20', dash: [12, 6],        styleClass: 'style-double'  },
+  { id: 'eps50',  name: 'ε-greedy 0.50',    hex: '#CC79A7', short: '.50', dash: [10, 3, 2, 3],  styleClass: 'style-dashdot' },
+  { id: 'random', name: 'Pure random',      hex: '#2c2416', short: 'R',   dash: [2, 4],         styleClass: 'style-dotted'  },
+];
+
+// Bandit: 5 urns by default. Biases drawn from the suggested set so the gap
+// between the best and the second-best is informative but not enormous.
+const DEFAULT_BIASES = [0.10, 0.30, 0.50, 0.70, 0.85];
+let N_ARMS = DEFAULT_BIASES.length;
+
+// Wong-safe arm colors for mini-bars in each stat card (separate from
+// algorithm colors). Arm identity is *also* text-encoded ("1 / 2 / …").
+const ARM_HEX = ['#0072B2', '#D55E00', '#009E73', '#E69F00', '#CC79A7', '#56B4E9'];
+
+const state = {
+  trueMeans: DEFAULT_BIASES.slice(),
+  T: 500,
+  speed: 10,
+  naiveN: 10,                 // # of round-robin exploration rounds for naive
+  t: 0,                       // current round (0..T)
+  playing: false,
+  bestArm: 4,
+  pStar: 0.85,
+  // RNG seeds
+  banditSeed: 0,
+  algoSeeds: [0, 0, 0, 0, 0],
+  // RNG instances
+  banditRand: null,
+  algoRand: [],
+  // Per-algorithm state
+  algos: [],
+  // Regret history (downsampled to ~MAX_POINTS rows)
+  history: [],   // entries: { t, regrets: [5] }
+  lastRecordT: -1,
+  rafId: null,
+};
+
+const MAX_POINTS = 600;       // chart sample budget
+
+function newAlgoState() {
+  return {
+    n: new Array(N_ARMS).fill(0),
+    sum: new Array(N_ARMS).fill(0),
+    mu: new Array(N_ARMS).fill(0),
+    cumReward: 0,
+    cumRegret: 0,
+    committedArm: -1,         // for naive: arm chosen after exploration phase
+  };
+}
+
+function reseedRNGs(banditSeed, algoSeeds) {
+  state.banditSeed = banditSeed;
+  state.algoSeeds = algoSeeds.slice();
+  state.banditRand = mulberry32(banditSeed);
+  state.algoRand = algoSeeds.map(s => mulberry32(s));
+}
+
+function freshSeeds() {
+  const r = () => Math.floor(Math.random() * 0xFFFFFFFF) >>> 0;
+  return { bandit: r(), algos: ALGOS.map(() => r()) };
+}
+
+function reset(opts = {}) {
+  if (opts.newMeans) {
+    // Shuffle the default bias set so the best-arm index varies. Keeps
+    // students from memorizing "arm 5 is always best."
+    const shuffled = DEFAULT_BIASES.slice();
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    state.trueMeans = shuffled;
+    N_ARMS = state.trueMeans.length;
+  }
+  state.bestArm = state.trueMeans.indexOf(Math.max(...state.trueMeans));
+  state.pStar = state.trueMeans[state.bestArm];
+
+  if (opts.newRng || opts.newMeans) {
+    const s = freshSeeds();
+    reseedRNGs(s.bandit, s.algos);
+  } else if (state.banditRand === null) {
+    const s = freshSeeds();
+    reseedRNGs(s.bandit, s.algos);
+  } else {
+    // Re-seed using stored seeds (Reset to start = same trajectory)
+    reseedRNGs(state.banditSeed, state.algoSeeds);
+  }
+
+  state.t = 0;
+  state.algos = ALGOS.map(() => newAlgoState());
+  state.history = [{ t: 0, regrets: ALGOS.map(() => 0) }];
+  state.lastRecordT = 0;
+  pause();
+  // Force lane / stat grid rebuild because arm count may have changed.
+  document.getElementById('lanes').innerHTML = '';
+  document.getElementById('stats-grid').innerHTML = '';
+  renderMeansRow();
+  renderAll();
+}
+
+// ═══════════════════════════════════════════════════
+// ALGORITHM POLICIES
+// Each takes (algoState, t, rand) and returns chosen arm index.
+// ═══════════════════════════════════════════════════
+
+// Naive estimate-then-exploit: round-robin for naiveN rounds, then commit
+// to argmax of empirical means for the rest of the run.
+function pickNaive(s, t, rand) {
+  if (t < state.naiveN) {
+    return t % N_ARMS;          // round-robin exploration
+  }
+  if (s.committedArm < 0) {
+    s.committedArm = argmaxTieBreak(s.mu, rand);
+  }
+  return s.committedArm;
+}
+
+// ε-greedy (closure-bound ε). With probability ε draw uniformly at random;
+// otherwise pick argmax empirical mean. Untouched arms get a forced first
+// pull so argmax is well-defined.
+function makeEpsGreedy(eps) {
+  return function(s, t, rand) {
+    if (rand() < eps) {
+      return Math.floor(rand() * N_ARMS);
+    }
+    for (let i = 0; i < N_ARMS; i++) if (s.n[i] === 0) return i;
+    return argmaxTieBreak(s.mu, rand);
+  };
+}
+
+function pickRandom(s, t, rand) {
+  return Math.floor(rand() * N_ARMS);
+}
+
+function argmaxTieBreak(arr, rand) {
+  let max = arr[0], bestIdxs = [0];
+  for (let i = 1; i < arr.length; i++) {
+    if (arr[i] > max) { max = arr[i]; bestIdxs = [i]; }
+    else if (arr[i] === max) bestIdxs.push(i);
+  }
+  return bestIdxs[Math.floor(rand() * bestIdxs.length)];
+}
+
+const POLICIES = [
+  pickNaive,
+  makeEpsGreedy(0.05),
+  makeEpsGreedy(0.20),
+  makeEpsGreedy(0.50),
+  pickRandom,
+];
+
+// ═══════════════════════════════════════════════════
+// CORE TICK — advance ALL algorithms by one round
+// Each algorithm uses its own RNG for policy choice and its own
+// reward draw (separate Bernoulli realization with its own randomness).
+// We share only the bandit's true means.
+// ═══════════════════════════════════════════════════
+function tickOne() {
+  if (state.t >= state.T) return false;
+  const t = state.t;
+  for (let k = 0; k < ALGOS.length; k++) {
+    const s = state.algos[k];
+    const rand = state.algoRand[k];
+    const arm = POLICIES[k](s, t, rand);
+    // Bernoulli reward draw using algorithm's own RNG (each algo gets its own
+    // realized rewards — they share the *means* but not the *coin flips*).
+    const r = (rand() < state.trueMeans[arm]) ? 1 : 0;
+    s.n[arm] += 1;
+    s.sum[arm] += r;
+    s.mu[arm] = s.sum[arm] / s.n[arm];
+    s.cumReward += r;
+    // Expected per-round regret for arm a is pStar - mu_a (using true means),
+    // not pStar - r. This avoids the noisy "stochastic regret" curve and
+    // gives the smooth E[R_T] curve we want pedagogically.
+    s.cumRegret += state.pStar - state.trueMeans[arm];
+  }
+  state.t += 1;
+  return true;
+}
+
+function recordHistory(force) {
+  const stride = Math.max(1, Math.ceil(state.T / MAX_POINTS));
+  if (!force && state.t - state.lastRecordT < stride && state.t < state.T) return;
+  state.history.push({
+    t: state.t,
+    regrets: state.algos.map(a => a.cumRegret),
+  });
+  state.lastRecordT = state.t;
+}
+
+// ═══════════════════════════════════════════════════
+// MAIN LOOP
+// ═══════════════════════════════════════════════════
+function frame() {
+  if (!state.playing) return;
+  const k = state.speed;
+  let advanced = 0;
+  for (let i = 0; i < k; i++) {
+    if (!tickOne()) break;
+    advanced += 1;
+  }
+  if (advanced > 0) recordHistory(state.t >= state.T);
+  renderAll();
+  if (state.t >= state.T) {
+    pause();
+    return;
+  }
+  state.rafId = requestAnimationFrame(frame);
+}
+function play() {
+  if (state.playing) return;
+  if (state.t >= state.T) return;
+  state.playing = true;
+  document.getElementById('btn-play').textContent = 'Pause';
+  state.rafId = requestAnimationFrame(frame);
+}
+function pause() {
+  state.playing = false;
+  document.getElementById('btn-play').textContent = state.t >= state.T ? 'Done' : 'Play';
+  if (state.rafId) cancelAnimationFrame(state.rafId);
+  state.rafId = null;
+}
+function step() {
+  pause();
+  if (tickOne()) {
+    recordHistory(state.t >= state.T);
+    renderAll();
+  }
+}
+
+// ═══════════════════════════════════════════════════
+// RENDERING
+// ═══════════════════════════════════════════════════
+function renderAll() {
+  renderClock();
+  renderLanes();
+  renderStats();
+  renderRegretChart();
+}
+
+function renderClock() {
+  document.getElementById('clock-t').textContent = state.t;
+  document.getElementById('clock-T').textContent = state.T;
+  document.getElementById('clock-pstar').textContent = state.pStar.toFixed(2);
+  const maxR = state.T * state.pStar;
+  document.getElementById('axis-mid').textContent = (maxR / 2).toFixed(0);
+  document.getElementById('axis-max').textContent = maxR.toFixed(0);
+}
+
+function renderMeansRow() {
+  const row = document.getElementById('means-row');
+  row.innerHTML = '';
+  for (let i = 0; i < N_ARMS; i++) {
+    const isBest = (i === state.bestArm);
+    const chip = document.createElement('div');
+    chip.className = 'mean-chip' + (isBest ? ' best' : '');
+    chip.innerHTML = `
+      <span class="arm-id">urn ${i+1}</span>
+      <input type="range" min="0" max="100" step="1" value="${Math.round(state.trueMeans[i]*100)}" data-arm="${i}">
+      <span class="mean-val">${state.trueMeans[i].toFixed(2)}</span>
+    `;
+    chip.querySelector('input').addEventListener('input', (e) => {
+      const v = parseInt(e.target.value, 10) / 100;
+      state.trueMeans[i] = v;
+      state.bestArm = state.trueMeans.indexOf(Math.max(...state.trueMeans));
+      state.pStar = state.trueMeans[state.bestArm];
+      reset({ newRng: false });
+    });
+    row.appendChild(chip);
+  }
+}
+
+function renderLanes() {
+  const wrap = document.getElementById('lanes');
+  if (wrap.children.length !== ALGOS.length) {
+    wrap.innerHTML = '';
+    for (let k = 0; k < ALGOS.length; k++) {
+      const algo = ALGOS[k];
+      const lane = document.createElement('div');
+      lane.className = 'lane';
+      // Avatar gets a per-algorithm outline-style class — non-color shape cue
+      // matching the chart line dash. Avatar text is warm-white with a dark
+      // shadow so the labels stay readable on any background.
+      lane.innerHTML = `
+        <div class="lane-label"><span class="lane-swatch" style="background:${algo.hex}"></span>${algo.name}</div>
+        <div class="lane-track">
+          <div class="lane-fill" style="background:${algo.hex}"></div>
+          <div class="lane-avatar ${algo.styleClass}" style="background:${algo.hex};outline-color:${algo.hex === '#2c2416' ? '#fffaf4' : '#2c2416'}">${algo.short}</div>
+        </div>
+        <div class="lane-stat">
+          <div class="reward" data-r></div>
+          <div class="regret" data-rg></div>
+        </div>
+      `;
+      wrap.appendChild(lane);
+    }
+  }
+  // Find current leader by reward
+  let leaderIdx = 0, leaderR = -1;
+  for (let k = 0; k < ALGOS.length; k++) {
+    if (state.algos[k].cumReward > leaderR) {
+      leaderR = state.algos[k].cumReward;
+      leaderIdx = k;
+    }
+  }
+
+  const maxR = Math.max(1, state.T * state.pStar);
+  const lanes = wrap.children;
+  for (let k = 0; k < ALGOS.length; k++) {
+    const lane = lanes[k];
+    const s = state.algos[k];
+    const frac = Math.min(1, s.cumReward / maxR);
+    const fill = lane.querySelector('.lane-fill');
+    const avatar = lane.querySelector('.lane-avatar');
+    fill.style.width = (frac * 100) + '%';
+    avatar.style.left = `calc(${frac * 100}% )`;
+    if (k === leaderIdx && state.t > 0) avatar.classList.add('leader');
+    else avatar.classList.remove('leader');
+    lane.querySelector('[data-r]').textContent = s.cumReward.toFixed(0);
+    lane.querySelector('[data-rg]').textContent = 'regret ' + s.cumRegret.toFixed(1);
+  }
+}
+
+function renderStats() {
+  const grid = document.getElementById('stats-grid');
+  if (grid.children.length !== ALGOS.length) {
+    grid.innerHTML = '';
+    for (let k = 0; k < ALGOS.length; k++) {
+      const algo = ALGOS[k];
+      const card = document.createElement('div');
+      // Per-algorithm border-style class matches the chart's dash for that
+      // algorithm — a non-color cue that ties cards to chart lines.
+      card.className = 'stat-card ' + algo.styleClass;
+      card.style.color = algo.hex;
+      const armLabels = [];
+      for (let i = 1; i <= N_ARMS; i++) {
+        armLabels.push(`<div style="color:${ARM_HEX[(i-1) % ARM_HEX.length]}">${i}</div>`);
+      }
+      card.innerHTML = `
+        <div class="stat-card-title">${algo.name}</div>
+        <div class="stat-row"><span>reward</span><span class="v" data-r></span></div>
+        <div class="stat-row"><span>regret</span><span class="v" data-rg></span></div>
+        <div class="stat-row"><span>mean R/t</span><span class="v" data-rt></span></div>
+        <div class="arm-bars" data-bars></div>
+        <div class="arm-labels">${armLabels.join('')}</div>
+      `;
+      grid.appendChild(card);
+    }
+  }
+  for (let k = 0; k < ALGOS.length; k++) {
+    const s = state.algos[k];
+    const card = grid.children[k];
+    card.querySelector('[data-r]').textContent = s.cumReward.toFixed(0);
+    card.querySelector('[data-rg]').textContent = s.cumRegret.toFixed(1);
+    const meanRt = state.t > 0 ? (s.cumReward / state.t).toFixed(3) : '—';
+    card.querySelector('[data-rt]').textContent = meanRt;
+    const bars = card.querySelector('[data-bars]');
+    const totalPulls = s.n.reduce((a,b) => a+b, 0) || 1;
+    let html = '';
+    for (let i = 0; i < N_ARMS; i++) {
+      const frac = s.n[i] / totalPulls;
+      // Each mini-bar uses its own Wong-safe arm color (independent of algo
+      // color) — the "1..K" labels under the bars text-encode arm id.
+      html += `<div class="arm-bar"><div class="arm-bar-fill" style="height:${(frac*100).toFixed(1)}%;background:${ARM_HEX[i % ARM_HEX.length]}"></div></div>`;
+    }
+    bars.innerHTML = html;
+  }
+}
+
+// ── Regret line chart ────────────────────────────────
+function renderRegretChart() {
+  const c = document.getElementById('regret-canvas');
+  const ctx = c.getContext('2d');
+  const W = c.width, H = c.height;
+  ctx.clearRect(0, 0, W, H);
+
+  const ML = 56, MR = 24, MT = 18, MB = 36;
+  const PW = W - ML - MR;
+  const PH = H - MT - MB;
+
+  const tMax = state.T;
+  let regMax = 1;
+  for (const row of state.history) {
+    for (const v of row.regrets) if (v > regMax) regMax = v;
+  }
+  regMax = niceCeil(regMax);
+
+  ctx.fillStyle = '#fffaf4';
+  ctx.fillRect(ML, MT, PW, PH);
+
+  ctx.strokeStyle = 'rgba(193,127,78,0.13)';
+  ctx.lineWidth = 1;
+  ctx.font = "11px 'Courier New', monospace";
+  ctx.fillStyle = '#8a7660';
+
+  const yTicks = 5;
+  for (let i = 0; i <= yTicks; i++) {
+    const y = MT + PH - (i / yTicks) * PH;
+    ctx.beginPath();
+    ctx.moveTo(ML, y); ctx.lineTo(ML + PW, y);
+    ctx.stroke();
+    const v = (regMax * i / yTicks);
+    ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+    ctx.fillText(formatTick(v), ML - 8, y);
+  }
+  const xTicks = 5;
+  for (let i = 0; i <= xTicks; i++) {
+    const x = ML + (i / xTicks) * PW;
+    ctx.beginPath();
+    ctx.moveTo(x, MT); ctx.lineTo(x, MT + PH);
+    ctx.strokeStyle = i === 0 || i === xTicks ? 'rgba(193,127,78,0.28)' : 'rgba(193,127,78,0.10)';
+    ctx.stroke();
+    const v = Math.round(tMax * i / xTicks);
+    ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+    ctx.fillStyle = '#8a7660';
+    ctx.fillText(v.toString(), x, MT + PH + 6);
+  }
+
+  ctx.fillStyle = '#5a4a36';
+  ctx.font = "12px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+  ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+  ctx.fillText('round t', ML + PW / 2, MT + PH + 20);
+  ctx.save();
+  ctx.translate(14, MT + PH / 2);
+  ctx.rotate(-Math.PI / 2);
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText('cumulative regret', 0, 0);
+  ctx.restore();
+
+  // Lines — per-algorithm dash pattern is the *primary* non-color encoding.
+  // Each algorithm's polyline is drawn with its own setLineDash so a viewer
+  // with any major color-vision deficiency can still tell the five lines
+  // apart by their dash signature alone.
+  //   Naive (n=10)      dashed   [8, 4]
+  //   ε-greedy 0.05     solid    []
+  //   ε-greedy 0.20     long-dsh [12, 6]
+  //   ε-greedy 0.50     dash-dot [10, 3, 2, 3]
+  //   Pure random       dotted   [2, 4]
+  ctx.lineWidth = 2.4;
+  ctx.lineJoin = 'round';
+  // 'butt' caps so dotted/dashed segments don't blur into each other.
+  ctx.lineCap = 'butt';
+  for (let k = 0; k < ALGOS.length; k++) {
+    ctx.strokeStyle = ALGOS[k].hex;
+    ctx.setLineDash(ALGOS[k].dash);
+    ctx.beginPath();
+    let started = false;
+    for (const row of state.history) {
+      const x = ML + (row.t / tMax) * PW;
+      const y = MT + PH - (row.regrets[k] / regMax) * PH;
+      if (!started) { ctx.moveTo(x, y); started = true; }
+      else ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+  }
+  ctx.setLineDash([]);
+
+  // Endpoint dots + labels for current state
+  ctx.font = "11px 'Courier New', monospace";
+  ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+  if (state.history.length > 0) {
+    const last = state.history[state.history.length - 1];
+    const x = ML + (last.t / tMax) * PW;
+    const ends = ALGOS.map((a, k) => ({
+      k, name: a.name, hex: a.hex, val: last.regrets[k],
+      y: MT + PH - (last.regrets[k] / regMax) * PH
+    })).sort((a,b) => a.y - b.y);
+    let prevY = -1e9;
+    const minGap = 14;
+    for (const e of ends) {
+      if (e.y - prevY < minGap) e.y = prevY + minGap;
+      prevY = e.y;
+      ctx.fillStyle = e.hex;
+      const realY = MT + PH - (e.val / regMax) * PH;
+      ctx.beginPath(); ctx.arc(x, realY, 3, 0, 2*Math.PI); ctx.fill();
+      ctx.fillStyle = e.hex;
+      ctx.fillText(e.name + ' ' + e.val.toFixed(1), Math.min(x + 6, ML + PW - 110), e.y);
+    }
+  }
+}
+
+function niceCeil(v) {
+  if (v <= 0) return 1;
+  const exp = Math.pow(10, Math.floor(Math.log10(v)));
+  const m = v / exp;
+  let nice;
+  if (m <= 1) nice = 1;
+  else if (m <= 2) nice = 2;
+  else if (m <= 5) nice = 5;
+  else nice = 10;
+  return nice * exp;
+}
+function formatTick(v) {
+  if (v >= 1000) return (v/1000).toFixed(1) + 'k';
+  if (v >= 100) return v.toFixed(0);
+  if (v >= 10) return v.toFixed(0);
+  return v.toFixed(1);
+}
+
+// Legend: render each swatch as a tiny canvas drawn with the *same* dash
+// pattern used on the regret chart, so the legend itself shows the
+// non-color cue. A solid block was insufficient — a CB student needs to
+// see the dash signature that ties a name to a line.
+function renderLegend() {
+  const el = document.getElementById('chart-legend');
+  el.innerHTML = '';
+  for (const a of ALGOS) {
+    const item = document.createElement('div');
+    item.className = 'legend-item';
+    const canvas = document.createElement('canvas');
+    canvas.className = 'legend-dash';
+    const cw = 28, ch = 10, dpr = window.devicePixelRatio || 1;
+    canvas.width = cw * dpr; canvas.height = ch * dpr;
+    canvas.style.width = cw + 'px'; canvas.style.height = ch + 'px';
+    const cx = canvas.getContext('2d');
+    cx.scale(dpr, dpr);
+    cx.strokeStyle = a.hex;
+    cx.lineWidth = 2.4;
+    cx.lineCap = 'butt';
+    cx.setLineDash(a.dash);
+    cx.beginPath();
+    cx.moveTo(0, ch / 2);
+    cx.lineTo(cw, ch / 2);
+    cx.stroke();
+    item.appendChild(canvas);
+    const label = document.createElement('span');
+    label.textContent = a.name;
+    item.appendChild(label);
+    el.appendChild(item);
+  }
+}
+
+// ═══════════════════════════════════════════════════
+// CONTROL WIRING
+// ═══════════════════════════════════════════════════
+document.getElementById('btn-play').addEventListener('click', () => {
+  if (state.playing) pause(); else play();
+});
+document.getElementById('btn-step').addEventListener('click', step);
+document.getElementById('btn-reset').addEventListener('click', () => reset({ newRng: false }));
+document.getElementById('btn-reseed-rng').addEventListener('click', () => reset({ newRng: true }));
+document.getElementById('btn-reseed-all').addEventListener('click', () => reset({ newMeans: true, newRng: true }));
+
+document.getElementById('r-speed').addEventListener('input', (e) => {
+  state.speed = parseInt(e.target.value, 10);
+  document.getElementById('v-speed').textContent = state.speed + '/f';
+});
+document.getElementById('r-T').addEventListener('input', (e) => {
+  state.T = parseInt(e.target.value, 10);
+  document.getElementById('v-T').textContent = state.T;
+  reset({ newRng: false });
+});
+document.getElementById('r-naiveN').addEventListener('input', (e) => {
+  state.naiveN = parseInt(e.target.value, 10);
+  document.getElementById('v-naiveN').textContent = state.naiveN;
+  reset({ newRng: false });
+});
+
+// ═══════════════════════════════════════════════════
+// KATEX FORMULAS
+// ═══════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', () => {
+  if (typeof katex !== 'undefined') {
+    katex.render(
+      '\\text{round-robin for } t<n,\\;\\; \\text{then commit to } \\arg\\max_i \\hat{\\mu}_i',
+      document.getElementById('f-naive'),
+      { throwOnError: false, displayMode: false }
+    );
+    katex.render(
+      'a_t = \\begin{cases} \\text{uniform} & \\text{w.p. } \\varepsilon \\\\ \\arg\\max_i \\hat{\\mu}_i & \\text{otherwise}\\end{cases}',
+      document.getElementById('f-eps'),
+      { throwOnError: false, displayMode: false }
+    );
+    katex.render(
+      'R_T = \\sum_{t=1}^{T}\\bigl(\\mu^{*} - \\mu_{a_t}\\bigr)',
+      document.getElementById('f-regret'),
+      { throwOnError: false, displayMode: false }
+    );
+  }
+  renderLegend();
+  reset({ newRng: false });
+});
+</script>
+</body>
+</html>

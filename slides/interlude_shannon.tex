@@ -1,0 +1,63 @@
+% =====================================================================
+%  Interlude --- Shannon  (Scenes 13--16)
+%  Pure section content. No preamble. LuaLaTeX-compatible.
+% =====================================================================
+
+\renewcommand{\AINITsection}{Interlude \textemdash{} Shannon}
+
+% ---------------------------------------------------------------------
+% Section divider --- opens the interlude
+% ---------------------------------------------------------------------
+\sectiondivider%
+  {``The fundamental problem of communication is that of\\ reproducing at one point either exactly or approximately\\ a message selected at another point.''}%
+  {Claude E.\ Shannon, 1948}%
+  {Interlude}
+
+% ---------------------------------------------------------------------
+% Scene 13 --- Shannon, 1948
+% ---------------------------------------------------------------------
+\begin{frame}{Shannon, 1948}
+  In 1948, Claude Shannon published \AINITemph{A Mathematical Theory of
+  Communication}\footnote{C.\ E.\ Shannon, \AINITemph{A Mathematical
+  Theory of Communication}, Bell System Technical Journal, 1948.}
+  --- a paper with two theorems at its core. The \AINITemph{source
+  coding theorem} fixes a floor on how compactly any sequence of symbols
+  can be described; the \AINITemph{channel coding theorem} fixes a
+  ceiling on how reliably they can be transmitted through noise. For
+  the next seven minutes we restate the first of these in the only
+  vocabulary this lecture admits: urns.
+\end{frame}
+
+% ---------------------------------------------------------------------
+% Scene 14 --- Entropy Mountain
+%   Optional framing slide, then the viz handoff.
+% ---------------------------------------------------------------------
+\begin{frame}{How unpredictable is the next ball?}
+  An urn with bias $p$ produces a stream of white and yellow draws.
+  When $p = \tfrac{1}{2}$ every draw is a coin flip --- maximal
+  surprise. When $p = 0.99$ almost every draw is white --- the
+  sequence is nearly redundant. \AINITemph{Entropy} is the name we
+  give to this gradient between certainty and surprise. Let us feel
+  it before we write it down.
+\end{frame}
+
+\vizhandoff{entropy-mountain.html}
+
+% ---------------------------------------------------------------------
+% Scene 15 --- H(p) floor stated
+% ---------------------------------------------------------------------
+\equationslide%
+  {The entropy of an urn}%
+  {H(p) = -p\log_2 p - (1-p)\log_2 (1-p)}%
+  {No compression scheme can describe an urn's draws in fewer than
+  $H(p)$ bits per ball. Eckart--Young was the floor for compressing a
+  matrix; entropy is the floor for compressing a sequence.}
+
+% ---------------------------------------------------------------------
+% Scene 16 --- Bridge into Act II
+% ---------------------------------------------------------------------
+\sectiondivider%
+  {\AINITemph{Recsys was compression. Bandits will be prediction.\\
+  Same urns, different question.}}%
+  {}%
+  {Act II \textemdash{} Prediction}

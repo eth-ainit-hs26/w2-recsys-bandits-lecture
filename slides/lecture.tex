@@ -1,0 +1,37 @@
+% lecture.tex — W2 lecture
+% "Two Engines: memory, prediction, and the difference between them"
+% Carlos Cotrini Jiménez, ETH Zürich, CAS AINIT FS26, Week 2, Spring 2026.
+%
+% Compile from this directory with:
+%   bash build.sh
+% which sets TEXINPUTS to include ../theme/ainit-academic/.
+
+\documentclass[aspectratio=169,11pt]{beamer}
+
+\usepackage{appendixnumberbeamer}
+
+\usetheme{AINITAcademic}
+
+% Lecture identity (used by the title and by the page-furniture macros)
+\title{Two Engines}
+\subtitle{Memory, prediction, and the difference between them}
+\author{\textsc{Carlos Cotrini Jiménez}}
+\institute{ETH Zürich \,|\, CAS AINIT FS26}
+\date{Week 2 \textemdash{} Spring 2026}
+
+\renewcommand{\AINITshorttitle}{Two engines}
+\renewcommand{\AINITsection}{}
+
+\begin{document}
+
+\input{prologue}
+\input{act1_compression}
+\input{interlude_shannon}
+\input{act2_prediction}
+\input{epilogue_duality}
+
+\appendix
+\renewcommand{\AINITshorttitle}{Two engines \textemdash{} references}
+\input{references}
+
+\end{document}

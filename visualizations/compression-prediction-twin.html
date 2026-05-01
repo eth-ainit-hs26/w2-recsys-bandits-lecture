@@ -1,0 +1,1669 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Compression-prediction twin · W2</title>
+  <link rel="stylesheet" href="shared/style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+  <style>
+    /* ============================================================
+       Compression-prediction twin.
+       Stage 1 (Binary urn) is implemented; Modes 2/3 stub out.
+       ============================================================ */
+
+    /* ---------- Tab strip (modes) ---------- */
+    .mode-tabs {
+      display: flex;
+      gap: 4px;
+      border-bottom: 1px solid var(--color-border);
+      margin-bottom: 14px;
+      align-items: flex-end;
+      flex-wrap: wrap;
+    }
+    .mode-tabs .tab {
+      background: transparent;
+      border: 1px solid transparent;
+      border-bottom: none;
+      border-radius: 8px 8px 0 0;
+      padding: 8px 16px;
+      font-size: 0.95rem;
+      cursor: pointer;
+      color: var(--color-text-muted);
+      transition: background 0.15s, color 0.15s;
+    }
+    .mode-tabs .tab:hover:not(:disabled) {
+      background: var(--color-neu-bg);
+      color: var(--color-text);
+    }
+    .mode-tabs .tab.active {
+      background: white;
+      border-color: var(--color-border);
+      color: var(--color-header-start);
+      font-weight: 600;
+      position: relative;
+      top: 1px;
+    }
+    .mode-tabs .tab:disabled {
+      cursor: not-allowed;
+      opacity: 0.45;
+    }
+    .mode-tabs .spacer { flex: 1; }
+    .mode-tabs .play-controls {
+      display: flex;
+      gap: 6px;
+      padding-bottom: 6px;
+    }
+    .mode-tabs .play-controls button {
+      background: var(--color-header-end);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 6px 12px;
+      font-size: 0.88rem;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .mode-tabs .play-controls button:hover { background: var(--color-header-start); }
+    .mode-tabs .play-controls button.secondary {
+      background: white;
+      color: var(--color-header-end);
+      border: 1px solid var(--color-border);
+    }
+    .mode-tabs .play-controls button.secondary:hover { background: var(--color-neu-bg); }
+
+    /* ---------- Sub-tabs (forecaster style) ---------- */
+    .substyle-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+      font-size: 0.9rem;
+    }
+    .substyle-row .label {
+      color: var(--color-text-muted);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      font-size: 0.78rem;
+    }
+    .substyle-row .style-tabs {
+      display: inline-flex;
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+      overflow: hidden;
+      background: white;
+    }
+    .substyle-row .style-tabs button {
+      background: white;
+      border: none;
+      padding: 6px 14px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      color: var(--color-text-muted);
+      border-right: 1px solid var(--color-border);
+      transition: background 0.15s, color 0.15s;
+    }
+    .substyle-row .style-tabs button:last-child { border-right: none; }
+    .substyle-row .style-tabs button.active {
+      background: var(--color-header-end);
+      color: white;
+      font-weight: 600;
+    }
+    .substyle-row .slider-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--color-text-muted);
+    }
+    .substyle-row input[type="range"] {
+      width: 140px;
+    }
+    .substyle-row .pval {
+      font-variant-numeric: tabular-nums;
+      color: var(--color-text);
+      min-width: 3.2em;
+      display: inline-block;
+    }
+
+    /* ---------- Top history strip ---------- */
+    .history-strip {
+      border: 1px solid var(--color-border);
+      border-radius: 10px;
+      background: var(--color-neu-bg);
+      padding: 10px 12px;
+      margin-bottom: 14px;
+      min-height: 56px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      overflow: hidden;
+    }
+    .history-strip .strip-label {
+      font-size: 0.76rem;
+      color: var(--color-text-muted);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      margin-right: 8px;
+      white-space: nowrap;
+    }
+    .history-strip .symbols {
+      display: flex;
+      gap: 5px;
+      flex: 1;
+      overflow: hidden;
+    }
+    .ball {
+      width: 26px; height: 26px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      border: 1.5px solid rgba(0,0,0,0.18);
+      transition: transform 0.25s ease, opacity 0.25s ease;
+    }
+    .ball.pos { background: white; }
+    .ball.neg { background: var(--color-neg); border-color: var(--color-neg); }
+    .ball.enter { transform: translateY(-12px) scale(0.4); opacity: 0; }
+
+    /* ---------- Twin layout ---------- */
+    .twin-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    @media (max-width: 900px) {
+      .twin-layout { grid-template-columns: 1fr; }
+    }
+    .panel {
+      background: white;
+      border: 1px solid var(--color-border);
+      border-radius: 10px;
+      padding: 16px 18px;
+      display: flex;
+      flex-direction: column;
+      min-height: 280px;
+    }
+    .panel h3 {
+      font-size: 1.0rem;
+      font-weight: 600;
+      margin: 0 0 12px;
+      color: var(--color-header-start);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .panel h3 .pill {
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: var(--color-neu-bg);
+      color: var(--color-text-muted);
+    }
+
+    /* ---------- Forecaster bars ---------- */
+    .prob-bars {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+    .prob-row {
+      display: grid;
+      grid-template-columns: 90px 1fr 60px;
+      align-items: center;
+      gap: 10px;
+    }
+    .prob-row .name {
+      font-size: 0.92rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .prob-row .swatch {
+      width: 14px; height: 14px;
+      border-radius: 50%;
+      border: 1.5px solid rgba(0,0,0,0.2);
+      display: inline-block;
+    }
+    .prob-row .swatch.pos { background: white; }
+    .prob-row .swatch.neg { background: var(--color-neg); border-color: var(--color-neg); }
+    .prob-row .bar-track {
+      height: 22px;
+      background: var(--color-neu-bg);
+      border-radius: 5px;
+      overflow: hidden;
+      position: relative;
+    }
+    .prob-row .bar-fill {
+      height: 100%;
+      transition: width 0.35s cubic-bezier(.4,.2,.2,1);
+    }
+    .prob-row .bar-fill.pos { background: linear-gradient(90deg, #aac4d8, #5d8ba6); }
+    .prob-row .bar-fill.neg { background: var(--color-neg); }
+    .prob-row .pct {
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+      font-size: 0.92rem;
+      color: var(--color-text);
+    }
+
+    .recent-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+      min-height: 28px;
+    }
+    .recent-row .ball-sm {
+      width: 18px; height: 18px;
+      border-radius: 50%;
+      border: 1.2px solid rgba(0,0,0,0.18);
+    }
+    .recent-row .ball-sm.pos { background: white; }
+    .recent-row .ball-sm.neg { background: var(--color-neg); border-color: var(--color-neg); }
+    .recent-row .recent-label {
+      font-size: 0.78rem;
+      color: var(--color-text-muted);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      margin-right: 6px;
+    }
+
+    .metric-line {
+      margin-top: auto;
+      padding-top: 10px;
+      border-top: 1px dashed var(--color-border);
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+      font-size: 1.0rem;
+    }
+    .metric-line .lbl {
+      color: var(--color-text-muted);
+      font-size: 0.85rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+    .metric-line .val {
+      font-variant-numeric: tabular-nums;
+      font-weight: 700;
+      font-size: 1.55rem;
+      color: var(--color-pos);
+    }
+    .panel.encoder .metric-line .val { color: var(--color-tech); }
+
+    /* ---------- Encoder panel ---------- */
+    .bitstream {
+      font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+      font-size: 0.78rem;
+      letter-spacing: 0.5px;
+      line-height: 1.45;
+      background: var(--color-neu-bg);
+      border-radius: 6px;
+      padding: 10px 12px;
+      margin-bottom: 12px;
+      word-break: break-all;
+      min-height: 90px;
+      color: var(--color-text);
+      overflow-wrap: break-word;
+    }
+    .bitstream .new-bits {
+      background: rgba(204, 121, 167, 0.25);
+      color: var(--color-tech);
+      font-weight: 700;
+      border-radius: 2px;
+      padding: 0 1px;
+      transition: background 0.6s ease;
+    }
+    .enc-stats {
+      display: flex;
+      gap: 18px;
+      flex-wrap: wrap;
+      font-size: 0.88rem;
+      color: var(--color-text-muted);
+      margin-bottom: 8px;
+    }
+    .enc-stats .stat {
+      display: inline-flex;
+      align-items: baseline;
+      gap: 4px;
+    }
+    .enc-stats .stat .num {
+      font-variant-numeric: tabular-nums;
+      font-weight: 600;
+      color: var(--color-text);
+      font-size: 1.0rem;
+    }
+
+    /* ---------- Identity strip ---------- */
+    .identity-strip {
+      margin-top: 16px;
+      background: linear-gradient(135deg, #fff8ed, #f3ecff);
+      border: 1px solid var(--color-border);
+      border-radius: 10px;
+      padding: 16px 20px;
+      text-align: center;
+    }
+    .identity-strip .equation {
+      font-size: 1.05rem;
+      color: var(--color-text);
+      margin-bottom: 8px;
+    }
+    .identity-strip .equation .num {
+      font-variant-numeric: tabular-nums;
+      font-weight: 700;
+      font-size: 1.35rem;
+      color: var(--color-header-start);
+    }
+    .identity-strip .floor {
+      font-size: 0.92rem;
+      color: var(--color-text-muted);
+    }
+    .identity-strip .floor .num {
+      font-variant-numeric: tabular-nums;
+      font-weight: 600;
+      color: var(--color-text);
+    }
+    .identity-strip .check-mark {
+      display: inline-block;
+      margin-left: 8px;
+      font-size: 0.85rem;
+      color: var(--color-demanding);
+      font-weight: 600;
+    }
+
+    /* ---------- Text history strip ---------- */
+    .text-strip {
+      font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+      font-size: 0.95rem;
+      letter-spacing: 0.5px;
+      color: var(--color-text);
+      white-space: nowrap;
+      overflow: hidden;
+      flex: 1;
+      text-align: right;
+      direction: ltr;
+    }
+    .text-strip .latest {
+      background: rgba(204, 121, 167, 0.25);
+      color: var(--color-tech);
+      font-weight: 700;
+      border-radius: 2px;
+      padding: 0 2px;
+    }
+    .text-strip .space-dot {
+      color: var(--color-text-muted);
+    }
+
+    /* ---------- 27-symbol probability grid ---------- */
+    .prob-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 4px 14px;
+      margin-bottom: 12px;
+      max-height: 320px;
+      overflow-y: auto;
+    }
+    .prob-grid .row {
+      display: grid;
+      grid-template-columns: 24px 1fr 50px;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.82rem;
+      font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    }
+    .prob-grid .row .sym {
+      color: var(--color-text-muted);
+      text-align: center;
+      font-weight: 600;
+    }
+    .prob-grid .row.actual .sym {
+      color: var(--color-tech);
+      background: rgba(204, 121, 167, 0.18);
+      border-radius: 3px;
+    }
+    .prob-grid .row .track {
+      height: 12px;
+      background: var(--color-neu-bg);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .prob-grid .row .fill {
+      height: 100%;
+      background: linear-gradient(90deg, #aac4d8, #5d8ba6);
+      transition: width 0.25s cubic-bezier(.4,.2,.2,1);
+    }
+    .prob-grid .row.actual .fill {
+      background: linear-gradient(90deg, #e8b8d6, #cc79a7);
+    }
+    .prob-grid .row .pp {
+      font-variant-numeric: tabular-nums;
+      color: var(--color-text-muted);
+      font-size: 0.78rem;
+      text-align: right;
+    }
+
+    /* ---------- Mode placeholder ---------- */
+    .mode-placeholder {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 320px;
+      background: var(--color-neu-bg);
+      border: 1px dashed var(--color-border);
+      border-radius: 10px;
+      color: var(--color-text-muted);
+      font-size: 1.05rem;
+      flex-direction: column;
+      gap: 6px;
+      padding: 24px;
+      text-align: center;
+    }
+    .mode-placeholder .big {
+      font-size: 1.6rem;
+      color: var(--color-text);
+      font-weight: 300;
+    }
+
+    /* ---------- Citation caption (LLM mode) ---------- */
+    .citation-caption {
+      margin-top: 12px;
+      font-size: 0.82rem;
+      color: var(--color-text-muted);
+      font-style: italic;
+      line-height: 1.5;
+      padding: 10px 14px;
+      border-left: 3px solid var(--color-header-end);
+      background: var(--color-neu-bg);
+      border-radius: 0 6px 6px 0;
+    }
+    .llm-notice {
+      display: inline-block;
+      margin-left: 10px;
+      font-size: 0.78rem;
+      color: var(--color-neg);
+      font-style: italic;
+    }
+  </style>
+</head>
+<body>
+  <header class="eth-header">
+    <div class="eth-logo">ETH<em>zürich</em></div>
+    <nav><a href="index.html">← All visualizations</a></nav>
+  </header>
+  <main class="viz-container">
+    <h1>The compression-prediction twin</h1>
+    <p class="lede">
+      A perfect predictor <em>is</em> a perfect compressor. The forecaster outputs a probability
+      for each next symbol; an arithmetic coder uses those exact probabilities to write bits.
+      Watch the forecaster's per-symbol cross-entropy and the encoder's per-symbol bit rate
+      track each other exactly — both bounded below by Shannon's entropy
+      <span style="white-space:nowrap"><em>H</em></span>.
+    </p>
+
+    <div class="viz-card">
+      <!-- Mode tabs + play controls -->
+      <div class="mode-tabs" id="mode-tabs">
+        <button class="tab active" data-mode="binary">Binary urn</button>
+        <button class="tab" data-mode="text">English text</button>
+        <button class="tab" data-mode="llm" title="Higher-order Markov LM">Markov LM</button>
+        <div class="spacer"></div>
+        <div class="play-controls">
+          <button id="btn-play">▶ Play</button>
+          <button id="btn-step" class="secondary">Step</button>
+          <button id="btn-reset" class="secondary">Reset</button>
+        </div>
+      </div>
+
+      <!-- Mode body -->
+      <div id="mode-body"></div>
+
+      <!-- Identity strip (always visible) -->
+      <div class="identity-strip">
+        <div class="equation">
+          Forecaster loss <span style="color:var(--color-text-muted)">≡</span> Encoder rate
+          <span style="color:var(--color-text-muted)">≡</span>
+          <span class="num" id="ident-val">—</span>
+          <span style="color:var(--color-text-muted)">bits / symbol</span>
+          <span class="check-mark" id="ident-check"></span>
+        </div>
+        <div class="floor">
+          Shannon's floor <em>H</em> = <span class="num" id="floor-val">—</span> bits
+          ·  gap above floor = KL(p ‖ p̂) = <span class="num" id="kl-val">—</span>
+        </div>
+      </div>
+    </div>
+
+    <aside class="explainer">
+      <h2>Why are these numbers literally equal?</h2>
+      <p>
+        The forecaster outputs <em>p̂</em> over the alphabet. The arithmetic coder uses
+        <em>p̂</em> to allocate <em>−log₂ p̂(x)</em> bits to each actual symbol <em>x</em>.
+        That is also exactly the cross-entropy term for that step. Sum, divide by <em>n</em>:
+        same number on both sides, by construction.
+      </p>
+      <p>
+        Both quantities converge to Shannon's entropy <em>H(p)</em> from above as the forecaster
+        learns. The excess above <em>H</em> is the Kullback–Leibler divergence KL(<em>p</em> ‖ <em>p̂</em>) —
+        the price of imperfect prediction, paid in bits.
+      </p>
+    </aside>
+  </main>
+  <footer class="eth-footer">CAS AINIT FS26 · W2 · Compression ⇄ Prediction</footer>
+
+  <script>
+  // =============================================================
+  // Mode-switcher scaffold (T2 fills text, T3 fills llm).
+  // =============================================================
+  const MODES = {
+    binary: { name: 'Binary urn',    init: () => initBinaryMode(),  step: () => stepBinaryMode(),  teardown: () => teardownBinaryMode() },
+    text:   { name: 'English text',  init: () => initTextMode(),    step: () => stepTextMode(),    teardown: () => {} },
+    llm:    { name: 'LLM',           init: () => initLLMMode(),     step: () => stepLLMMode(),     teardown: () => {} },
+  };
+  let currentMode = 'binary';
+  let playing = false;
+  let playTimer = null;
+  const PLAY_INTERVAL_MS = 200;  // ~5 steps/sec
+
+  // ---- Identity strip helpers (shared across modes) ----
+  function setIdentity(loss, rate, H, kl) {
+    const id = document.getElementById('ident-val');
+    const fl = document.getElementById('floor-val');
+    const kv = document.getElementById('kl-val');
+    const ck = document.getElementById('ident-check');
+    if (loss == null || rate == null) {
+      id.textContent = '—';
+      fl.textContent = H == null ? '—' : H.toFixed(3);
+      kv.textContent = '—';
+      ck.textContent = '';
+      return;
+    }
+    // Identity check (loss should equal rate to within numerical tolerance)
+    const eq = Math.abs(loss - rate) < 1e-6;
+    // Display the encoder rate (they're equal anyway)
+    id.textContent = rate.toFixed(3);
+    fl.textContent = H == null ? '—' : H.toFixed(3);
+    kv.textContent = (kl == null) ? '—' : kl.toFixed(3);
+    ck.textContent = eq ? '✓ equal' : `Δ=${(loss-rate).toExponential(1)}`;
+    ck.style.color = eq ? 'var(--color-demanding)' : 'var(--color-neg)';
+  }
+
+  // ---- Mode switching ----
+  function switchMode(mode) {
+    if (!MODES[mode]) return;
+    if (playing) togglePlay();   // pause when switching
+    if (MODES[currentMode].teardown) MODES[currentMode].teardown();
+    currentMode = mode;
+    document.querySelectorAll('#mode-tabs .tab').forEach(b => {
+      b.classList.toggle('active', b.dataset.mode === mode);
+    });
+    MODES[mode].init();
+  }
+
+  // ---- Play loop (mode-agnostic) ----
+  function togglePlay() {
+    playing = !playing;
+    document.getElementById('btn-play').textContent = playing ? '⏸ Pause' : '▶ Play';
+    document.getElementById('btn-play').classList.toggle('secondary', false);
+    if (playing) {
+      playTimer = setInterval(() => {
+        const fn = MODES[currentMode].step;
+        if (fn) fn();
+      }, PLAY_INTERVAL_MS);
+    } else {
+      clearInterval(playTimer);
+      playTimer = null;
+    }
+  }
+  function singleStep() {
+    if (playing) togglePlay();
+    const fn = MODES[currentMode].step;
+    if (fn) fn();
+  }
+  function resetCurrentMode() {
+    if (playing) togglePlay();
+    MODES[currentMode].init();
+  }
+
+  // =============================================================
+  // BINARY URN MODE (Stage 1).
+  // =============================================================
+  // State for binary mode lives in this closure-scoped object.
+  const BIN = {
+    p: 0.7,                // hidden bias for white (will-finish)
+    style: 'learning',     // 'naive' | 'learning' | 'oracle'
+    n: 0,
+    whites: 0,             // count of x=1 (white)
+    history: [],           // recent symbols [{x:0|1}], newest last
+    bitsUsed: 0.0,         // float; total -log2 p̂(x_t) accumulated
+    sumLoss: 0.0,          // float; same accumulator (mirror, for identity check)
+    bitstream: '',         // synthesized bit string (string of 0/1) — last 200 bits kept
+    bitstreamFull: '',     // for "new-bits" highlighting
+    lastNewLen: 0,
+  };
+
+  function binaryProbForecaster() {
+    // returns [p_white_hat, p_neg_hat]
+    if (BIN.style === 'naive') return [0.5, 0.5];
+    if (BIN.style === 'oracle') return [BIN.p, 1 - BIN.p];
+    // 'learning' — Laplace (add-one)
+    const phat = (BIN.whites + 1) / (BIN.n + 2);
+    return [phat, 1 - phat];
+  }
+
+  // Arithmetic-coder bit accounting:
+  // For an idealized arithmetic coder, each symbol x with prob p̂(x) contributes
+  // exactly -log2 p̂(x) bits to the message length (real-valued; in practice you
+  // emit whole bits but rounding error → 0 / n as n → ∞). We track that real-valued
+  // total here AND also synthesize a believable binary stream for display by mapping
+  // each step into ceil(-log2 p̂(x)) bits (display only — the "bits used" counter
+  // stays the real-valued total so the identity loss == rate is exact).
+  function appendDisplayBits(infoBits) {
+    // Generate `infoBits` worth of pseudo-bits. We use a deterministic hash of
+    // (n, x) so the stream looks varied but reproducible.
+    const k = Math.max(1, Math.round(infoBits));
+    let s = '';
+    let seed = (BIN.n * 2654435761 + (BIN.whites * 40503)) >>> 0;
+    for (let i = 0; i < k; i++) {
+      seed = (seed * 1103515245 + 12345) >>> 0;
+      s += ((seed >>> 16) & 1).toString();
+    }
+    BIN.bitstream += s;
+    BIN.lastNewLen = s.length;
+    if (BIN.bitstream.length > 200) {
+      BIN.bitstream = BIN.bitstream.slice(BIN.bitstream.length - 200);
+      // clamp lastNewLen so it doesn't exceed remaining stream
+      BIN.lastNewLen = Math.min(BIN.lastNewLen, BIN.bitstream.length);
+    }
+  }
+
+  function entropyBinary(p) {
+    if (p <= 0 || p >= 1) return 0;
+    return -p * Math.log2(p) - (1 - p) * Math.log2(1 - p);
+  }
+  function klBinary(p, q) {
+    // KL(p || q) for Bernoulli, in bits
+    const term = (a, b) => (a <= 0 ? 0 : a * Math.log2(a / b));
+    return term(p, q) + term(1 - p, 1 - q);
+  }
+
+  function initBinaryMode() {
+    // Reset state
+    BIN.n = 0;
+    BIN.whites = 0;
+    BIN.history = [];
+    BIN.bitsUsed = 0;
+    BIN.sumLoss = 0;
+    BIN.bitstream = '';
+    BIN.lastNewLen = 0;
+
+    const body = document.getElementById('mode-body');
+    body.innerHTML = `
+      <div class="substyle-row">
+        <span class="label">Forecaster style</span>
+        <span class="style-tabs" id="style-tabs">
+          <button data-style="naive">Naive 50/50</button>
+          <button data-style="learning" class="active">Learning</button>
+          <button data-style="oracle">Oracle</button>
+        </span>
+        <span class="slider-group">
+          <label for="p-slider">true p (white) =</label>
+          <input id="p-slider" type="range" min="0.05" max="0.95" step="0.01" value="${BIN.p}">
+          <span class="pval" id="p-readout">${BIN.p.toFixed(2)}</span>
+        </span>
+      </div>
+
+      <div class="history-strip">
+        <span class="strip-label">Last symbols</span>
+        <div class="symbols" id="history-symbols"></div>
+      </div>
+
+      <div class="twin-layout">
+        <div class="panel forecaster">
+          <h3>Forecaster <span class="pill" id="fc-pill">learning</span></h3>
+          <div class="prob-bars" id="prob-bars">
+            <div class="prob-row">
+              <span class="name"><span class="swatch pos"></span>white (1)</span>
+              <span class="bar-track"><span class="bar-fill pos" id="bar-pos" style="width:50%"></span></span>
+              <span class="pct" id="pct-pos">0.500</span>
+            </div>
+            <div class="prob-row">
+              <span class="name"><span class="swatch neg"></span>vermillion (0)</span>
+              <span class="bar-track"><span class="bar-fill neg" id="bar-neg" style="width:50%"></span></span>
+              <span class="pct" id="pct-neg">0.500</span>
+            </div>
+          </div>
+          <div class="recent-row" id="recent-row">
+            <span class="recent-label">last 20</span>
+          </div>
+          <div class="metric-line">
+            <span class="lbl">Loss</span>
+            <span class="val" id="loss-val">—</span>
+            <span style="color:var(--color-text-muted);font-size:0.85rem">bits / symbol</span>
+          </div>
+        </div>
+
+        <div class="panel encoder">
+          <h3>Arithmetic encoder <span class="pill">−log₂ p̂(x)</span></h3>
+          <div class="bitstream" id="bitstream">
+            <span style="color:var(--color-text-muted)">(bits will appear as symbols arrive)</span>
+          </div>
+          <div class="enc-stats">
+            <span class="stat"><span>bits used</span> <span class="num" id="bits-used">0.00</span></span>
+            <span class="stat"><span>symbols seen</span> <span class="num" id="sym-seen">0</span></span>
+          </div>
+          <div class="metric-line">
+            <span class="lbl">Rate</span>
+            <span class="val" id="rate-val">—</span>
+            <span style="color:var(--color-text-muted);font-size:0.85rem">bits / symbol</span>
+          </div>
+        </div>
+      </div>
+    `;
+
+    // Wire up sub-tabs
+    document.querySelectorAll('#style-tabs button').forEach(b => {
+      b.classList.toggle('active', b.dataset.style === BIN.style);
+      b.addEventListener('click', () => {
+        BIN.style = b.dataset.style;
+        document.querySelectorAll('#style-tabs button').forEach(o =>
+          o.classList.toggle('active', o.dataset.style === BIN.style));
+        document.getElementById('fc-pill').textContent = BIN.style;
+        renderBinary();
+      });
+    });
+    // Slider
+    const sl = document.getElementById('p-slider');
+    sl.addEventListener('input', () => {
+      // Allow change only when paused
+      if (playing) { sl.value = BIN.p; return; }
+      BIN.p = +sl.value;
+      document.getElementById('p-readout').textContent = BIN.p.toFixed(2);
+      // Resetting the run when p changes
+      BIN.n = 0; BIN.whites = 0; BIN.history = [];
+      BIN.bitsUsed = 0; BIN.sumLoss = 0; BIN.bitstream = '';
+      renderBinary();
+    });
+
+    renderBinary();
+  }
+
+  function teardownBinaryMode() {
+    // Nothing async to clean. The mode-body innerHTML gets replaced on switch.
+  }
+
+  function stepBinaryMode() {
+    // 1) Forecaster outputs probabilities BEFORE seeing the new symbol
+    const [phatW, phatV] = binaryProbForecaster();
+    // 2) Sample from the true urn
+    const x = Math.random() < BIN.p ? 1 : 0;
+    // 3) Bit cost = -log2 p̂(x)
+    const phatX = x === 1 ? phatW : phatV;
+    const bits = -Math.log2(Math.max(1e-12, phatX));
+    BIN.bitsUsed += bits;
+    BIN.sumLoss  += bits;   // identical accumulator => identity holds exactly
+    // 4) Update state
+    BIN.history.push({ x });
+    if (BIN.history.length > 30) BIN.history.shift();
+    BIN.n += 1;
+    if (x === 1) BIN.whites += 1;
+    // 5) Append display bits
+    appendDisplayBits(bits);
+    renderBinary();
+  }
+
+  // Cached: most recent rendered length so we can "highlight" the new bits.
+  let _lastBitstreamLen = 0;
+
+  function renderBinary() {
+    const [phatW, phatV] = binaryProbForecaster();
+
+    // Probability bars
+    document.getElementById('bar-pos').style.width = (phatW * 100).toFixed(2) + '%';
+    document.getElementById('bar-neg').style.width = (phatV * 100).toFixed(2) + '%';
+    document.getElementById('pct-pos').textContent = phatW.toFixed(3);
+    document.getElementById('pct-neg').textContent = phatV.toFixed(3);
+
+    // History strip (top, last 30)
+    const sym = document.getElementById('history-symbols');
+    if (sym) {
+      const data = BIN.history;
+      const sel = d3.select(sym).selectAll('div.ball')
+        .data(data, (d, i) => `${BIN.n - data.length + i}`);
+      sel.enter()
+        .append('div')
+        .attr('class', d => `ball ${d.x === 1 ? 'pos' : 'neg'} enter`)
+        .transition().duration(220)
+        .style('opacity', 1)
+        .style('transform', 'translateY(0) scale(1)')
+        .on('start', function () { this.classList.remove('enter'); });
+      sel.exit().remove();
+    }
+
+    // Recent-20 row in the forecaster panel
+    const recent = document.getElementById('recent-row');
+    if (recent) {
+      // keep the label, replace remainder
+      const last20 = BIN.history.slice(-20);
+      // Wipe everything after .recent-label
+      while (recent.children.length > 1) recent.removeChild(recent.lastChild);
+      last20.forEach(d => {
+        const el = document.createElement('div');
+        el.className = 'ball-sm ' + (d.x === 1 ? 'pos' : 'neg');
+        recent.appendChild(el);
+      });
+    }
+
+    // Encoder stats
+    const lossPerSym = BIN.n === 0 ? null : BIN.sumLoss / BIN.n;
+    const ratePerSym = BIN.n === 0 ? null : BIN.bitsUsed / BIN.n;
+    document.getElementById('loss-val').textContent = lossPerSym == null ? '—' : lossPerSym.toFixed(3);
+    document.getElementById('rate-val').textContent = ratePerSym == null ? '—' : ratePerSym.toFixed(3);
+    document.getElementById('bits-used').textContent = BIN.bitsUsed.toFixed(2);
+    document.getElementById('sym-seen').textContent  = BIN.n;
+
+    // Bitstream display (last 200 bits, with new bits highlighted)
+    const bs = document.getElementById('bitstream');
+    if (bs) {
+      if (BIN.bitstream.length === 0) {
+        bs.innerHTML = '<span style="color:var(--color-text-muted)">(bits will appear as symbols arrive)</span>';
+      } else {
+        const newLen = Math.min(BIN.lastNewLen, BIN.bitstream.length);
+        const old = BIN.bitstream.slice(0, BIN.bitstream.length - newLen);
+        const fresh = BIN.bitstream.slice(BIN.bitstream.length - newLen);
+        bs.innerHTML = `${escapeBits(old)}<span class="new-bits">${escapeBits(fresh)}</span>`;
+      }
+    }
+
+    // Identity strip — feed both numbers; H is always entropyBinary(BIN.p) for binary mode
+    const H = entropyBinary(BIN.p);
+    const klVal = BIN.n === 0 ? null : klBinary(BIN.p, phatW);
+    setIdentity(lossPerSym, ratePerSym, H, klVal);
+  }
+  function escapeBits(s) { return s; /* already plain 0/1 */ }
+
+  // =============================================================
+  // TEXT MODE (Stage 2).
+  // =============================================================
+  // Source paragraph: opening of Russell's History of Western Philosophy,
+  // lowercased and with punctuation stripped. Stream loops at end.
+  const TEXT_SOURCE =
+    "the conceptions of life and the world which we call philosophical are " +
+    "a product of two factors one inherited religious and ethical conceptions " +
+    "the other the sort of investigation which may be called scientific using " +
+    "this word in its broadest sense individual philosophers have differed " +
+    "widely in regard to the proportions in which these two factors entered " +
+    "into their systems but it is the presence of both in some degree that " +
+    "characterizes philosophy almost all the questions of most interest to " +
+    "speculative minds are such as science cannot answer and the confident " +
+    "answers of theologians no longer seem so convincing as they did in former " +
+    "centuries";
+
+  // 27-symbol alphabet: a..z then space.
+  const TEXT_ALPHABET = (() => {
+    const a = [];
+    for (let i = 0; i < 26; i++) a.push(String.fromCharCode(97 + i));
+    a.push(' ');
+    return a;
+  })();
+
+  // English unigram frequency table (renormalized below).
+  const ENGLISH_FREQ_RAW = {
+    ' ': 0.18,
+    e: 0.105, t: 0.075, a: 0.066, o: 0.060, i: 0.057, n: 0.057, s: 0.053, h: 0.051,
+    r: 0.048, d: 0.034, l: 0.033, c: 0.026, u: 0.024, m: 0.022, w: 0.020, f: 0.020,
+    g: 0.017, y: 0.016, p: 0.015, b: 0.013, v: 0.008, k: 0.007, j: 0.001, x: 0.001,
+    q: 0.001, z: 0.001,
+  };
+  const ENGLISH_FREQ = (() => {
+    const raw = {};
+    let s = 0;
+    for (const c of TEXT_ALPHABET) {
+      raw[c] = ENGLISH_FREQ_RAW[c] != null ? ENGLISH_FREQ_RAW[c] : 1e-6;
+      s += raw[c];
+    }
+    for (const c of TEXT_ALPHABET) raw[c] = raw[c] / s;
+    return raw;
+  })();
+  const UNIFORM_FREQ = (() => {
+    const u = {};
+    const p = 1 / TEXT_ALPHABET.length;
+    for (const c of TEXT_ALPHABET) u[c] = p;
+    return u;
+  })();
+
+  const TXT = {
+    style: 'frequency',     // 'uniform' | 'frequency'
+    n: 0,
+    pos: 0,                 // current index into TEXT_SOURCE
+    history: '',            // rolling window of emitted chars (last ~50)
+    bitsUsed: 0.0,
+    sumLoss: 0.0,
+    bitstream: '',
+    lastNewLen: 0,
+    lastChar: null,
+  };
+
+  function textForecaster() {
+    return TXT.style === 'uniform' ? UNIFORM_FREQ : ENGLISH_FREQ;
+  }
+
+  function appendTextDisplayBits(infoBits) {
+    const k = Math.max(1, Math.round(infoBits));
+    let s = '';
+    let seed = (TXT.n * 2654435761 + (TXT.pos * 40503)) >>> 0;
+    for (let i = 0; i < k; i++) {
+      seed = (seed * 1103515245 + 12345) >>> 0;
+      s += ((seed >>> 16) & 1).toString();
+    }
+    TXT.bitstream += s;
+    TXT.lastNewLen = s.length;
+    if (TXT.bitstream.length > 400) {
+      TXT.bitstream = TXT.bitstream.slice(TXT.bitstream.length - 400);
+      TXT.lastNewLen = Math.min(TXT.lastNewLen, TXT.bitstream.length);
+    }
+  }
+
+  // Empirical entropy of the source paragraph under a given distribution.
+  // For "infinite" loop case, equals - sum_c freq_source(c) * log2 q(c).
+  function textCrossEntropy(q) {
+    const counts = {};
+    let total = 0;
+    for (const c of TEXT_SOURCE) {
+      if (TEXT_ALPHABET.indexOf(c) === -1) continue;
+      counts[c] = (counts[c] || 0) + 1;
+      total += 1;
+    }
+    let H = 0;
+    for (const c of TEXT_ALPHABET) {
+      const p = (counts[c] || 0) / total;
+      if (p <= 0) continue;
+      const qc = Math.max(1e-12, q[c] || 1e-12);
+      H += -p * Math.log2(qc);
+    }
+    return H;
+  }
+  function textEntropySource() {
+    const counts = {};
+    let total = 0;
+    for (const c of TEXT_SOURCE) {
+      if (TEXT_ALPHABET.indexOf(c) === -1) continue;
+      counts[c] = (counts[c] || 0) + 1;
+      total += 1;
+    }
+    let H = 0;
+    for (const c of TEXT_ALPHABET) {
+      const p = (counts[c] || 0) / total;
+      if (p <= 0) continue;
+      H += -p * Math.log2(p);
+    }
+    return H;
+  }
+  function textKL(q) {
+    // KL(p_source || q) in bits = cross-entropy - source entropy
+    return textCrossEntropy(q) - textEntropySource();
+  }
+
+  function initTextMode() {
+    TXT.n = 0;
+    TXT.pos = 0;
+    TXT.history = '';
+    TXT.bitsUsed = 0;
+    TXT.sumLoss = 0;
+    TXT.bitstream = '';
+    TXT.lastNewLen = 0;
+    TXT.lastChar = null;
+
+    const body = document.getElementById('mode-body');
+    body.innerHTML = `
+      <div class="substyle-row">
+        <span class="label">Forecaster style</span>
+        <span class="style-tabs" id="text-style-tabs">
+          <button data-style="uniform">Uniform (1/27)</button>
+          <button data-style="frequency" class="active">Frequency</button>
+        </span>
+        <span class="slider-group" style="font-size:0.82rem">
+          <span>27-symbol alphabet · a–z + space</span>
+        </span>
+      </div>
+
+      <div class="history-strip">
+        <span class="strip-label">Text stream</span>
+        <div class="text-strip" id="text-history">
+          <span style="color:var(--color-text-muted)">(stream begins on play)</span>
+        </div>
+      </div>
+
+      <div class="twin-layout">
+        <div class="panel forecaster">
+          <h3>Forecaster <span class="pill" id="tfc-pill">frequency</span></h3>
+          <div class="prob-grid" id="text-prob-grid"></div>
+          <div class="metric-line">
+            <span class="lbl">Loss</span>
+            <span class="val" id="text-loss-val">—</span>
+            <span style="color:var(--color-text-muted);font-size:0.85rem">bits / char</span>
+          </div>
+        </div>
+
+        <div class="panel encoder">
+          <h3>Arithmetic encoder <span class="pill">−log₂ p̂(c)</span></h3>
+          <div class="bitstream" id="text-bitstream">
+            <span style="color:var(--color-text-muted)">(bits will appear as characters arrive)</span>
+          </div>
+          <div class="enc-stats">
+            <span class="stat"><span>bits used</span> <span class="num" id="text-bits-used">0.00</span></span>
+            <span class="stat"><span>chars seen</span> <span class="num" id="text-sym-seen">0</span></span>
+          </div>
+          <div class="metric-line">
+            <span class="lbl">Rate</span>
+            <span class="val" id="text-rate-val">—</span>
+            <span style="color:var(--color-text-muted);font-size:0.85rem">bits / char</span>
+          </div>
+        </div>
+      </div>
+    `;
+
+    // Build the 27-row prob grid once.
+    const grid = document.getElementById('text-prob-grid');
+    TEXT_ALPHABET.forEach(c => {
+      const row = document.createElement('div');
+      row.className = 'row';
+      row.dataset.sym = c;
+      const label = c === ' ' ? '␣' : c;
+      row.innerHTML = `
+        <span class="sym">${label}</span>
+        <span class="track"><span class="fill" style="width:0%"></span></span>
+        <span class="pp">0.000</span>
+      `;
+      grid.appendChild(row);
+    });
+
+    // Wire sub-tabs
+    document.querySelectorAll('#text-style-tabs button').forEach(b => {
+      b.classList.toggle('active', b.dataset.style === TXT.style);
+      b.addEventListener('click', () => {
+        TXT.style = b.dataset.style;
+        document.querySelectorAll('#text-style-tabs button').forEach(o =>
+          o.classList.toggle('active', o.dataset.style === TXT.style));
+        document.getElementById('tfc-pill').textContent = TXT.style;
+        // Reset run when style changes (so loss/rate reflect the chosen forecaster)
+        TXT.n = 0; TXT.pos = 0; TXT.history = '';
+        TXT.bitsUsed = 0; TXT.sumLoss = 0; TXT.bitstream = '';
+        TXT.lastNewLen = 0; TXT.lastChar = null;
+        renderText();
+      });
+    });
+
+    renderText();
+  }
+
+  function stepTextMode() {
+    // 1) Read next char from source (loop)
+    const c = TEXT_SOURCE.charAt(TXT.pos % TEXT_SOURCE.length);
+    TXT.pos = (TXT.pos + 1) % TEXT_SOURCE.length;
+    // 2) Forecaster probability for the actual char
+    const q = textForecaster();
+    const phat = Math.max(1e-12, q[c] != null ? q[c] : 1e-6);
+    const bits = -Math.log2(phat);
+    TXT.bitsUsed += bits;
+    TXT.sumLoss += bits;
+    TXT.n += 1;
+    TXT.lastChar = c;
+    TXT.history += c;
+    if (TXT.history.length > 80) TXT.history = TXT.history.slice(-80);
+    appendTextDisplayBits(bits);
+    renderText();
+  }
+
+  function renderText() {
+    const q = textForecaster();
+
+    // History strip — show last ~50 chars, with the latest highlighted.
+    const hist = document.getElementById('text-history');
+    if (hist) {
+      if (TXT.history.length === 0) {
+        hist.innerHTML = '<span style="color:var(--color-text-muted)">(stream begins on play)</span>';
+      } else {
+        const tail = TXT.history.slice(-50);
+        const latestChar = TXT.lastChar;
+        const old = tail.slice(0, -1);
+        const fresh = tail.slice(-1);
+        const renderChar = ch => ch === ' ' ? '<span class="space-dot">·</span>' : escapeHTML(ch);
+        const oldStr = Array.from(old).map(renderChar).join('');
+        const freshStr = renderChar(fresh);
+        hist.innerHTML = `${oldStr}<span class="latest">${freshStr}</span>`;
+      }
+    }
+
+    // Prob grid — update fill width and pp text; mark "actual" row for last char.
+    const grid = document.getElementById('text-prob-grid');
+    if (grid) {
+      const maxP = Math.max(...TEXT_ALPHABET.map(c => q[c]));
+      TEXT_ALPHABET.forEach(c => {
+        const row = grid.querySelector(`.row[data-sym="${c === ' ' ? ' ' : c}"]`);
+        if (!row) return;
+        const p = q[c];
+        const widthPct = (p / maxP) * 100;
+        row.querySelector('.fill').style.width = widthPct.toFixed(2) + '%';
+        row.querySelector('.pp').textContent = p.toFixed(3);
+        row.classList.toggle('actual', c === TXT.lastChar);
+      });
+    }
+
+    // Encoder stats
+    const lossPerSym = TXT.n === 0 ? null : TXT.sumLoss / TXT.n;
+    const ratePerSym = TXT.n === 0 ? null : TXT.bitsUsed / TXT.n;
+    document.getElementById('text-loss-val').textContent = lossPerSym == null ? '—' : lossPerSym.toFixed(3);
+    document.getElementById('text-rate-val').textContent = ratePerSym == null ? '—' : ratePerSym.toFixed(3);
+    document.getElementById('text-bits-used').textContent = TXT.bitsUsed.toFixed(2);
+    document.getElementById('text-sym-seen').textContent  = TXT.n;
+
+    // Bitstream display
+    const bs = document.getElementById('text-bitstream');
+    if (bs) {
+      if (TXT.bitstream.length === 0) {
+        bs.innerHTML = '<span style="color:var(--color-text-muted)">(bits will appear as characters arrive)</span>';
+      } else {
+        const newLen = Math.min(TXT.lastNewLen, TXT.bitstream.length);
+        const old = TXT.bitstream.slice(0, TXT.bitstream.length - newLen);
+        const fresh = TXT.bitstream.slice(TXT.bitstream.length - newLen);
+        bs.innerHTML = `${old}<span class="new-bits">${fresh}</span>`;
+      }
+    }
+
+    // Identity strip — H is the source's own unigram entropy; KL = cross-entropy(q) - H.
+    const H = textEntropySource();
+    const klVal = TXT.n === 0 ? null : Math.max(0, textKL(q));
+    setIdentity(lossPerSym, ratePerSym, H, klVal);
+  }
+
+  function escapeHTML(s) {
+    return s.replace(/[&<>"']/g, ch => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    }[ch]));
+  }
+
+  // =============================================================
+  // LLM MODE (Stage 3) — higher-order Markov LM with backoff.
+  // =============================================================
+  // Training corpus: opening of Pride and Prejudice (public domain), normalized
+  // to 27-symbol alphabet (a..z + space). Embedded directly so the page stays
+  // self-contained.
+  const LLM_CORPUS_RAW =
+    "It is a truth universally acknowledged, that a single man in possession " +
+    "of a good fortune, must be in want of a wife. However little known the " +
+    "feelings or views of such a man may be on his first entering a " +
+    "neighbourhood, this truth is so well fixed in the minds of the " +
+    "surrounding families, that he is considered the rightful property of " +
+    "some one or other of their daughters. My dear Mr. Bennet, said his " +
+    "lady to him one day, have you heard that Netherfield Park is let at " +
+    "last? Mr. Bennet replied that he had not. But it is, returned she; " +
+    "for Mrs. Long has just been here, and she told me all about it. Mr. " +
+    "Bennet made no answer. Do not you want to know who has taken it? " +
+    "cried his wife impatiently. You want to tell me, and I have no " +
+    "objection to hearing it. This was invitation enough. Why, my dear, " +
+    "you must know, Mrs. Long says that Netherfield is taken by a young " +
+    "man of large fortune from the north of England; that he came down " +
+    "on Monday in a chaise and four to see the place, and was so much " +
+    "delighted with it that he agreed with Mr. Morris immediately; that " +
+    "he is to take possession before Michaelmas, and some of his servants " +
+    "are to be in the house by the end of next week. What is his name? " +
+    "Bingley. Is he married or single? Oh! single, my dear, to be sure! A " +
+    "single man of large fortune; four or five thousand a year. What a " +
+    "fine thing for our girls! How so? how can it affect them? My dear " +
+    "Mr. Bennet, replied his wife, how can you be so tiresome! You must " +
+    "know that I am thinking of his marrying one of them. Is that his " +
+    "design in settling here? Design! nonsense, how can you talk so! But " +
+    "it is very likely that he may fall in love with one of them, and " +
+    "therefore you must visit him as soon as he comes. I see no occasion " +
+    "for that. You and the girls may go, or you may send them by " +
+    "themselves, which perhaps will be still better; for as you are as " +
+    "handsome as any of them, Mr. Bingley might like you the best of the " +
+    "party. My dear, you flatter me. I certainly have had my share of " +
+    "beauty, but I do not pretend to be anything extraordinary now. When " +
+    "a woman has five grown up daughters, she ought to give over thinking " +
+    "of her own beauty. In such cases, a woman has not often much beauty " +
+    "to think of. But, my dear, you must indeed go and see Mr. Bingley " +
+    "when he comes into the neighbourhood. It is more than I engage for, " +
+    "I assure you. But consider your daughters. Only think what an " +
+    "establishment it would be for one of them. Sir William and Lady " +
+    "Lucas are determined to go, merely on that account, for in general, " +
+    "you know, they visit no newcomers. Indeed you must go, for it will " +
+    "be impossible for us to visit him if you do not. You are over " +
+    "scrupulous, surely. I dare say Mr. Bingley will be very glad to see " +
+    "you; and I will send a few lines by you to assure him of my hearty " +
+    "consent to his marrying whichever he chooses of the girls; though I " +
+    "must throw in a good word for my little Lizzy. I desire you will do " +
+    "no such thing. Lizzy is not a bit better than the others; and I am " +
+    "sure she is not half so handsome as Jane, nor half so good humoured " +
+    "as Lydia. But you are always giving her the preference. They have " +
+    "none of them much to recommend them, replied he; they are all silly " +
+    "and ignorant like other girls; but Lizzy has something more of " +
+    "quickness than her sisters. Mr. Bennet, how can you abuse your own " +
+    "children in such a way? You take delight in vexing me. You have no " +
+    "compassion on my poor nerves. You mistake me, my dear. I have a " +
+    "high respect for your nerves. They are my old friends. I have heard " +
+    "you mention them with consideration these last twenty years at least. " +
+    "Ah, you do not know what I suffer. But I hope you will get over it, " +
+    "and live to see many young men of four thousand a year come into the " +
+    "neighbourhood. It will be no use to us, if twenty such should come, " +
+    "since you will not visit them. Depend upon it, my dear, that when " +
+    "there are twenty I will visit them all.";
+
+  // Normalize to 27-symbol alphabet (a..z + space).
+  function llmNormalize(raw) {
+    const out = [];
+    let prevSpace = false;
+    for (let i = 0; i < raw.length; i++) {
+      const ch = raw.charAt(i).toLowerCase();
+      if (ch >= 'a' && ch <= 'z') {
+        out.push(ch);
+        prevSpace = false;
+      } else {
+        // any non-letter becomes a space; collapse runs of spaces
+        if (!prevSpace && out.length > 0) {
+          out.push(' ');
+          prevSpace = true;
+        }
+      }
+    }
+    return out.join('').trim();
+  }
+
+  // Trainer: builds unigram / bigram / trigram count tables.
+  // We mix the test paragraph in for a small smoothing nudge.
+  function buildLLMTables() {
+    const corpusNorm = llmNormalize(LLM_CORPUS_RAW + ' ' + TEXT_SOURCE);
+    if (corpusNorm.length < 10) return null;
+    const ALPHA = TEXT_ALPHABET;
+    // unigram counts
+    const uniC = {};
+    for (const c of ALPHA) uniC[c] = 0;
+    // bigram: counts[c1][c2]
+    const biC = {};
+    for (const c of ALPHA) { biC[c] = {}; for (const d of ALPHA) biC[c][d] = 0; }
+    // trigram: counts[c1c2][c3] — keyed by 2-char string
+    const triC = {};
+
+    let prev2 = ' ';
+    let prev1 = ' ';
+    for (let i = 0; i < corpusNorm.length; i++) {
+      const c = corpusNorm.charAt(i);
+      if (ALPHA.indexOf(c) === -1) continue;
+      uniC[c] += 1;
+      biC[prev1][c] += 1;
+      const k = prev2 + prev1;
+      if (!triC[k]) { triC[k] = {}; for (const d of ALPHA) triC[k][d] = 0; }
+      triC[k][c] += 1;
+      prev2 = prev1;
+      prev1 = c;
+    }
+    // Convert to probability tables.
+    const uniTotal = Object.values(uniC).reduce((a, b) => a + b, 0);
+    const uniP = {};
+    for (const c of ALPHA) uniP[c] = (uniC[c] + 0.5) / (uniTotal + 0.5 * ALPHA.length);
+
+    const biP = {};
+    for (const c of ALPHA) {
+      const tot = Object.values(biC[c]).reduce((a, b) => a + b, 0);
+      biP[c] = {};
+      // add-half smoothing for bigram conditional
+      for (const d of ALPHA) {
+        biP[c][d] = (biC[c][d] + 0.5) / (tot + 0.5 * ALPHA.length);
+      }
+    }
+
+    const triP = {};
+    for (const k of Object.keys(triC)) {
+      const tot = Object.values(triC[k]).reduce((a, b) => a + b, 0);
+      triP[k] = {};
+      // we DON'T add-smooth here; we use mixture backoff for unseen contexts
+      for (const d of ALPHA) {
+        triP[k][d] = tot > 0 ? triC[k][d] / tot : 0;
+      }
+      triP[k]._tot = tot;
+    }
+
+    return { uniP, biP, triP, uniTotal };
+  }
+
+  const LLM_UNIFORM = (() => {
+    const u = {};
+    const p = 1 / TEXT_ALPHABET.length;
+    for (const c of TEXT_ALPHABET) u[c] = p;
+    return u;
+  })();
+
+  // Backoff weights — bigram and trigram styles.
+  const LLM_LAMBDAS = {
+    bigram:  { tri: 0.0, bi: 0.85, uni: 0.10, uniform: 0.05 },
+    trigram: { tri: 0.70, bi: 0.20, uni: 0.07, uniform: 0.03 },
+  };
+
+  // Build the predictive distribution over the next char given (prev2, prev1).
+  function llmPredict(tables, lambdas, prev2, prev1) {
+    const dist = {};
+    const k = prev2 + prev1;
+    const triRow = tables.triP[k];
+    const triHas = lambdas.tri > 0 && triRow && triRow._tot > 0;
+    const biRow = tables.biP[prev1] || tables.biP[' '];
+    let s = 0;
+    for (const c of TEXT_ALPHABET) {
+      const triP = triHas ? (triRow[c] || 0) : 0;
+      const biP = biRow[c] != null ? biRow[c] : (1 / TEXT_ALPHABET.length);
+      const uniP = tables.uniP[c];
+      const uniformP = LLM_UNIFORM[c];
+      // If trigram is "off" for this context (unseen or disabled), redistribute its weight
+      // proportionally onto bi/uni/uniform so the mass still sums to 1.
+      let p;
+      if (triHas) {
+        p = lambdas.tri * triP + lambdas.bi * biP + lambdas.uni * uniP + lambdas.uniform * uniformP;
+      } else {
+        const denom = lambdas.bi + lambdas.uni + lambdas.uniform;
+        p = (lambdas.bi / denom) * biP + (lambdas.uni / denom) * uniP + (lambdas.uniform / denom) * uniformP;
+      }
+      dist[c] = p;
+      s += p;
+    }
+    // Renormalize defensively
+    if (s > 0 && Math.abs(s - 1) > 1e-9) {
+      for (const c of TEXT_ALPHABET) dist[c] /= s;
+    }
+    return dist;
+  }
+
+  const LLM = {
+    style: 'trigram',          // 'bigram' | 'trigram'
+    tables: null,
+    fallback: false,           // true if higher-order tables failed; use unigram instead
+    n: 0,
+    pos: 0,
+    prev2: ' ',
+    prev1: ' ',
+    history: '',
+    bitsUsed: 0.0,
+    sumLoss: 0.0,
+    bitstream: '',
+    lastNewLen: 0,
+    lastChar: null,
+    lastDist: null,            // cached prediction for current (prev2, prev1) — for rendering
+  };
+
+  function llmForecaster() {
+    if (LLM.fallback || !LLM.tables) {
+      // return unigram English frequency table
+      return ENGLISH_FREQ;
+    }
+    return llmPredict(LLM.tables, LLM_LAMBDAS[LLM.style], LLM.prev2, LLM.prev1);
+  }
+
+  function appendLLMDisplayBits(infoBits) {
+    const k = Math.max(1, Math.round(infoBits));
+    let s = '';
+    let seed = (LLM.n * 2654435761 + (LLM.pos * 40503)) >>> 0;
+    for (let i = 0; i < k; i++) {
+      seed = (seed * 1103515245 + 12345) >>> 0;
+      s += ((seed >>> 16) & 1).toString();
+    }
+    LLM.bitstream += s;
+    LLM.lastNewLen = s.length;
+    if (LLM.bitstream.length > 400) {
+      LLM.bitstream = LLM.bitstream.slice(LLM.bitstream.length - 400);
+      LLM.lastNewLen = Math.min(LLM.lastNewLen, LLM.bitstream.length);
+    }
+  }
+
+  function initLLMMode() {
+    // Try training tables (memoized).
+    if (LLM.tables == null && !LLM.fallback) {
+      try {
+        const t = buildLLMTables();
+        if (t) {
+          LLM.tables = t;
+        } else {
+          LLM.fallback = true;
+        }
+      } catch (e) {
+        console.warn('LLM table build failed:', e);
+        LLM.fallback = true;
+      }
+    }
+
+    LLM.n = 0;
+    LLM.pos = 0;
+    LLM.prev2 = ' ';
+    LLM.prev1 = ' ';
+    LLM.history = '';
+    LLM.bitsUsed = 0;
+    LLM.sumLoss = 0;
+    LLM.bitstream = '';
+    LLM.lastNewLen = 0;
+    LLM.lastChar = null;
+    LLM.lastDist = null;
+
+    const noticeHTML = LLM.fallback
+      ? '<span class="llm-notice">Higher-order model unavailable — showing unigram</span>'
+      : '';
+
+    const body = document.getElementById('mode-body');
+    body.innerHTML = `
+      <div class="substyle-row">
+        <span class="label">Forecaster style</span>
+        <span class="style-tabs" id="llm-style-tabs">
+          <button data-style="bigram">Bigram</button>
+          <button data-style="trigram" class="active">Trigram + backoff</button>
+        </span>
+        <span class="slider-group" style="font-size:0.82rem">
+          <span>Trained on Pride and Prejudice (~6 KB) · 27-symbol alphabet</span>
+          ${noticeHTML}
+        </span>
+      </div>
+
+      <div class="history-strip">
+        <span class="strip-label">Text stream</span>
+        <div class="text-strip" id="llm-history">
+          <span style="color:var(--color-text-muted)">(stream begins on play)</span>
+        </div>
+      </div>
+
+      <div class="twin-layout">
+        <div class="panel forecaster">
+          <h3>Forecaster <span class="pill" id="llm-pill">trigram + backoff</span></h3>
+          <div class="prob-grid" id="llm-prob-grid"></div>
+          <div class="metric-line">
+            <span class="lbl">Loss</span>
+            <span class="val" id="llm-loss-val">—</span>
+            <span style="color:var(--color-text-muted);font-size:0.85rem">bits / char</span>
+          </div>
+        </div>
+
+        <div class="panel encoder">
+          <h3>Arithmetic encoder <span class="pill">−log₂ p̂(c | ctx)</span></h3>
+          <div class="bitstream" id="llm-bitstream">
+            <span style="color:var(--color-text-muted)">(bits will appear as characters arrive)</span>
+          </div>
+          <div class="enc-stats">
+            <span class="stat"><span>bits used</span> <span class="num" id="llm-bits-used">0.00</span></span>
+            <span class="stat"><span>chars seen</span> <span class="num" id="llm-sym-seen">0</span></span>
+          </div>
+          <div class="metric-line">
+            <span class="lbl">Rate</span>
+            <span class="val" id="llm-rate-val">—</span>
+            <span style="color:var(--color-text-muted);font-size:0.85rem">bits / char</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="citation-caption">
+        Delétang et al. (2023): a 7-billion-parameter language model compresses
+        ImageNet pixels better than PNG. Hutter (2005) is paying €500&#8239;000 to
+        whoever does it best on Wikipedia. The trick is the same one in front of
+        you — a stronger predictor is a better compressor.
+      </div>
+    `;
+
+    // Build the 27-row prob grid once.
+    const grid = document.getElementById('llm-prob-grid');
+    TEXT_ALPHABET.forEach(c => {
+      const row = document.createElement('div');
+      row.className = 'row';
+      row.dataset.sym = c;
+      const label = c === ' ' ? '␣' : c;
+      row.innerHTML = `
+        <span class="sym">${label}</span>
+        <span class="track"><span class="fill" style="width:0%"></span></span>
+        <span class="pp">0.000</span>
+      `;
+      grid.appendChild(row);
+    });
+
+    // Wire sub-tabs
+    document.querySelectorAll('#llm-style-tabs button').forEach(b => {
+      b.classList.toggle('active', b.dataset.style === LLM.style);
+      b.addEventListener('click', () => {
+        LLM.style = b.dataset.style;
+        document.querySelectorAll('#llm-style-tabs button').forEach(o =>
+          o.classList.toggle('active', o.dataset.style === LLM.style));
+        const lbl = LLM.style === 'bigram' ? 'bigram' : 'trigram + backoff';
+        document.getElementById('llm-pill').textContent = lbl;
+        // Reset run when style changes
+        LLM.n = 0; LLM.pos = 0; LLM.prev2 = ' '; LLM.prev1 = ' ';
+        LLM.history = ''; LLM.bitsUsed = 0; LLM.sumLoss = 0;
+        LLM.bitstream = ''; LLM.lastNewLen = 0; LLM.lastChar = null;
+        LLM.lastDist = null;
+        renderLLM();
+      });
+    });
+
+    renderLLM();
+  }
+
+  function stepLLMMode() {
+    // 1) Read next char from the same Russell paragraph (loop)
+    const c = TEXT_SOURCE.charAt(LLM.pos % TEXT_SOURCE.length);
+    LLM.pos = (LLM.pos + 1) % TEXT_SOURCE.length;
+    if (TEXT_ALPHABET.indexOf(c) === -1) {
+      // skip non-alphabet chars (shouldn't happen — TEXT_SOURCE is already clean)
+      return;
+    }
+    // 2) Forecaster distribution BEFORE seeing the char
+    const dist = llmForecaster();
+    LLM.lastDist = dist;
+    const phat = Math.max(1e-12, dist[c] != null ? dist[c] : 1e-12);
+    const bits = -Math.log2(phat);
+    LLM.bitsUsed += bits;
+    LLM.sumLoss += bits;   // identical accumulator => identity bit-exact
+    LLM.n += 1;
+    LLM.lastChar = c;
+    LLM.history += c;
+    if (LLM.history.length > 80) LLM.history = LLM.history.slice(-80);
+    // 3) Slide the context window
+    LLM.prev2 = LLM.prev1;
+    LLM.prev1 = c;
+    appendLLMDisplayBits(bits);
+    renderLLM();
+  }
+
+  function renderLLM() {
+    // Use cached lastDist if we've stepped; else compute the forecaster's
+    // current view of the next-char distribution.
+    const q = LLM.lastDist || llmForecaster();
+
+    // History strip
+    const hist = document.getElementById('llm-history');
+    if (hist) {
+      if (LLM.history.length === 0) {
+        hist.innerHTML = '<span style="color:var(--color-text-muted)">(stream begins on play)</span>';
+      } else {
+        const tail = LLM.history.slice(-50);
+        const old = tail.slice(0, -1);
+        const fresh = tail.slice(-1);
+        const renderChar = ch => ch === ' ' ? '<span class="space-dot">·</span>' : escapeHTML(ch);
+        const oldStr = Array.from(old).map(renderChar).join('');
+        const freshStr = renderChar(fresh);
+        hist.innerHTML = `${oldStr}<span class="latest">${freshStr}</span>`;
+      }
+    }
+
+    // Prob grid
+    const grid = document.getElementById('llm-prob-grid');
+    if (grid) {
+      const maxP = Math.max(...TEXT_ALPHABET.map(c => q[c] || 0), 1e-9);
+      TEXT_ALPHABET.forEach(c => {
+        const row = grid.querySelector(`.row[data-sym="${c === ' ' ? ' ' : c}"]`);
+        if (!row) return;
+        const p = q[c] || 0;
+        const widthPct = (p / maxP) * 100;
+        row.querySelector('.fill').style.width = widthPct.toFixed(2) + '%';
+        row.querySelector('.pp').textContent = p.toFixed(3);
+        row.classList.toggle('actual', c === LLM.lastChar);
+      });
+    }
+
+    // Encoder stats
+    const lossPerSym = LLM.n === 0 ? null : LLM.sumLoss / LLM.n;
+    const ratePerSym = LLM.n === 0 ? null : LLM.bitsUsed / LLM.n;
+    document.getElementById('llm-loss-val').textContent = lossPerSym == null ? '—' : lossPerSym.toFixed(3);
+    document.getElementById('llm-rate-val').textContent = ratePerSym == null ? '—' : ratePerSym.toFixed(3);
+    document.getElementById('llm-bits-used').textContent = LLM.bitsUsed.toFixed(2);
+    document.getElementById('llm-sym-seen').textContent  = LLM.n;
+
+    // Bitstream display
+    const bs = document.getElementById('llm-bitstream');
+    if (bs) {
+      if (LLM.bitstream.length === 0) {
+        bs.innerHTML = '<span style="color:var(--color-text-muted)">(bits will appear as characters arrive)</span>';
+      } else {
+        const newLen = Math.min(LLM.lastNewLen, LLM.bitstream.length);
+        const old = LLM.bitstream.slice(0, LLM.bitstream.length - newLen);
+        const fresh = LLM.bitstream.slice(LLM.bitstream.length - newLen);
+        bs.innerHTML = `${old}<span class="new-bits">${fresh}</span>`;
+      }
+    }
+
+    // Identity strip — H is unigram source entropy (same lower-bound reference
+    // as Mode 2 — note that a context-conditional model can drop *below* this
+    // unigram reference, which is exactly the pedagogical message). KL is not
+    // well-defined against the unigram H once we condition, so we display the
+    // gap (loss − H_unigram) as an informal "bits saved" measure when negative.
+    const modeLabel = LLM.style === 'bigram' ? 'Mode 3 · Bigram LM' : 'Mode 3 · Trigram LM';
+    // Re-purpose the floor strip subtly: still show unigram H so users can see
+    // that the LM has crossed below it.
+    const H = textEntropySource();
+    let klDisplay = null;
+    if (LLM.n > 0 && lossPerSym != null) {
+      // Show gap above (or below) unigram source entropy.
+      klDisplay = lossPerSym - H;
+    }
+    setIdentity(lossPerSym, ratePerSym, H, klDisplay);
+    // Tag mode in identity area via the check-mark string (keeps existing layout)
+    const ck = document.getElementById('ident-check');
+    if (ck && lossPerSym != null && ratePerSym != null) {
+      const eq = Math.abs(lossPerSym - ratePerSym) < 1e-6;
+      ck.textContent = eq ? `✓ equal · ${modeLabel}` : `Δ=${(lossPerSym-ratePerSym).toExponential(1)} · ${modeLabel}`;
+    }
+  }
+
+  // =============================================================
+  // Wire up controls + boot.
+  // =============================================================
+  document.querySelectorAll('#mode-tabs .tab').forEach(b => {
+    b.addEventListener('click', () => {
+      if (b.disabled) return;
+      switchMode(b.dataset.mode);
+    });
+  });
+  document.getElementById('btn-play').addEventListener('click', togglePlay);
+  document.getElementById('btn-step').addEventListener('click', singleStep);
+  document.getElementById('btn-reset').addEventListener('click', resetCurrentMode);
+
+  // Boot — start in binary mode
+  initBinaryMode();
+  </script>
+</body>
+</html>

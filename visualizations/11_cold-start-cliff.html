@@ -1,0 +1,737 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Cold-start cliff — W2 Recsys</title>
+  <link rel="stylesheet" href="shared/style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+  <style>
+    .layout {
+      display: grid;
+      grid-template-columns: 1.4fr 1fr;
+      gap: 22px;
+      align-items: start;
+    }
+    @media (max-width: 1024px) {
+      .layout { grid-template-columns: 1fr; }
+    }
+    .panel-title {
+      font-size: 0.95rem; font-weight: 600;
+      color: var(--color-header-start); margin-bottom: 6px;
+    }
+    .panel-sub {
+      font-size: 0.82rem; color: var(--color-text-muted);
+      margin-bottom: 10px;
+    }
+    svg.embed-svg {
+      width: 100%; height: auto;
+      background: #fbfbfd;
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+      display: block;
+    }
+    .acc-svg {
+      width: 100%; height: 180px;
+      background: #fbfbfd;
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+      display: block;
+    }
+    .pred-row {
+      display: grid;
+      grid-template-columns: repeat(16, 1fr);
+      gap: 3px;
+      margin-top: 6px;
+    }
+    .pred-cell {
+      aspect-ratio: 1 / 1;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      transition: background 0.25s, transform 0.2s;
+      position: relative;
+      box-sizing: border-box;
+    }
+    .pred-cell .icon {
+      filter: grayscale(0.1);
+    }
+    .pred-cell.revealed {
+      box-shadow: inset 0 0 0 2px var(--color-header-end);
+    }
+    .pred-cell.held {
+      box-shadow: inset 0 0 0 1.5px #6f42c1;
+    }
+    .stat-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px 16px;
+      margin-top: 12px;
+      font-size: 0.92rem;
+    }
+    .stat-grid .lbl { color: var(--color-text-muted); }
+    .stat-grid .val { font-weight: 700; color: var(--color-header-start); font-variant-numeric: tabular-nums; }
+    .scenario-row {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 6px;
+    }
+    .person-card {
+      flex: 1;
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+      padding: 12px;
+      background: white;
+    }
+    .person-card h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 4px;
+      color: var(--color-header-start);
+    }
+    .person-card .subtitle {
+      font-size: 0.82rem;
+      color: var(--color-text-muted);
+      margin-bottom: 8px;
+    }
+    .controls .slider-wrap {
+      display: flex; align-items: center; gap: 8px;
+      flex: 1; min-width: 240px;
+    }
+    .controls .slider-wrap input[type=range] { flex: 1; }
+    .formula-card {
+      background: var(--color-neu-bg);
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 0.9rem;
+      margin-top: 6px;
+      margin-bottom: 6px;
+    }
+    .axis line, .axis path { stroke: #d0d4d8; }
+    .axis text { fill: var(--color-text-muted); font-size: 10px; }
+    .legend-line {
+      display: flex; gap: 18px; flex-wrap: wrap;
+      font-size: 0.82rem; color: var(--color-text-muted);
+      margin-top: 6px;
+    }
+    .legend-line .swatch {
+      display: inline-block; width: 18px; height: 3px; vertical-align: 2px;
+      margin-right: 4px;
+    }
+    .training-note {
+      font-size: 0.82rem;
+      color: var(--color-text-muted);
+      margin-top: 6px;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body>
+  <header class="eth-header">
+    <div class="eth-logo">ETH<em>zürich</em></div>
+    <nav><a href="index.html">← All visualizations</a></nav>
+  </header>
+  <main class="viz-container">
+    <h1>The cold-start cliff</h1>
+    <p class="lede">
+      Matrix factorisation needs <em>some</em> ratings to learn an embedding for a new user.
+      With zero, you predict the average and call it a day. As ratings trickle in,
+      prediction quality climbs — but only after enough data has been gathered.
+    </p>
+
+    <div class="formula-card" id="formula"></div>
+
+    <div class="viz-card">
+      <div class="scenario-row">
+        <div class="person-card">
+          <h3 id="userA-name">User A · reference</h3>
+          <div class="subtitle" id="userA-sub">trained on all of A's known ratings</div>
+          <div id="userA-preds" class="pred-row"></div>
+        </div>
+        <div class="person-card">
+          <h3 id="userB-name">User B · cold-start</h3>
+          <div class="subtitle" id="userB-sub">N revealed ratings, 16 − N unseen</div>
+          <div id="userB-preds" class="pred-row"></div>
+        </div>
+      </div>
+      <div class="legend-line">
+        <span><span class="swatch" style="background:var(--color-header-end)"></span>revealed rating (training)</span>
+        <span><span class="swatch" style="background:#6f42c1"></span>held-out (truth, used only for accuracy)</span>
+      </div>
+
+      <div class="layout" style="margin-top:18px">
+        <div>
+          <div class="panel-title">Latent space (item vectors frozen)</div>
+          <div class="panel-sub">User B's vector slides as we reveal more ratings.</div>
+          <svg id="embed-svg" class="embed-svg" viewBox="0 0 520 380" preserveAspectRatio="xMidYMid meet"></svg>
+        </div>
+        <div>
+          <div class="panel-title">Cold-start curve</div>
+          <div class="panel-sub">Prediction quality on User B's <em>held-out</em> ratings as a function of N.</div>
+          <svg id="acc-svg" class="acc-svg" viewBox="0 0 360 180" preserveAspectRatio="none"></svg>
+          <div class="stat-grid">
+            <span class="lbl">N revealed</span>          <span class="val" id="stat-n">0</span>
+            <span class="lbl">held-out cells</span>      <span class="val" id="stat-held">16</span>
+            <span class="lbl">B accuracy (held-out)</span><span class="val" id="stat-acc">—</span>
+            <span class="lbl">B MAE (held-out)</span>   <span class="val" id="stat-mae">—</span>
+            <span class="lbl">A accuracy (all known)</span><span class="val" id="stat-accA">—</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="controls">
+        <div class="slider-wrap">
+          <label for="slider-N">N&nbsp;= <span id="N-val" style="color:var(--color-text);font-weight:600">0</span></label>
+          <input type="range" id="slider-N" min="0" max="16" value="0">
+        </div>
+        <button id="btn-userB" class="secondary">New user B</button>
+        <button id="btn-order" class="secondary">Re-shuffle order</button>
+        <span id="train-note" class="training-note">pre-training model…</span>
+      </div>
+    </div>
+
+    <aside class="explainer">
+      <h2>What's happening?</h2>
+      <p>
+        We pre-train MF on all 21 users (slide the slider only after the model is trained — about 1 second).
+        Then we freeze the item vectors $V$ and ask: given the first $N$ revealed ratings of User B,
+        what's the best $u_B$? With items fixed this is a closed-form ridge regression:
+        $u_B = (V_\Omega^{\!\top} V_\Omega + \lambda I)^{-1} V_\Omega^{\!\top} r_\Omega$.
+      </p>
+      <p>
+        At $N=0$ we have no signal: $u_B$ is the origin and predictions are flat.
+        At $N=16$, $u_B$ lands in its true quadrant and accuracy on held-out cells is high.
+        The interesting region is $N=1\!\dots\!4$ — the cliff. <em>Which item should we ask about first?</em>
+        That question is the bridge to the bandits half of W2.
+      </p>
+    </aside>
+  </main>
+  <footer class="eth-footer">CAS AINIT FS26 · W2 Recsys · 11 / 11</footer>
+
+  <script src="shared/data.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+  <script>
+  (function () {
+    const C = RECSYS.COLORS;
+    const PEOPLE = RECSYS.PEOPLE;
+    const ITEMS  = RECSYS.ITEMS;
+    const M = PEOPLE.length, N_ITEMS = ITEMS.length;
+    const K = 2;
+    const HP = { lr: 0.05, lambda: 0.05, initScale: 0.3, ridgeLambda: 0.5, preTrainEpochs: 250 };
+
+    const R = RECSYS.ratingsByEmbeddingOrder();
+    const observed = [];
+    for (let i = 0; i < M; i++) {
+      for (let j = 0; j < N_ITEMS; j++) {
+        if (!Number.isNaN(R[i][j])) observed.push([i, j, R[i][j]]);
+      }
+    }
+
+    function rngMaker(seed) {
+      let s = (seed >>> 0) || 1;
+      return function () {
+        s = (s + 0x6D2B79F5) >>> 0;
+        let t = s;
+        t = Math.imul(t ^ (t >>> 15), t | 1);
+        t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+        return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+      };
+    }
+    let rng = rngMaker(101);
+    function randn() {
+      const u = Math.max(rng(), 1e-9);
+      const v = rng();
+      return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+    }
+
+    // ----- Pre-train MF on full data -----
+    let U, V;
+    function pretrain() {
+      U = Array.from({ length: M }, () =>
+        Array.from({ length: K }, () => randn() * HP.initScale));
+      V = Array.from({ length: N_ITEMS }, () =>
+        Array.from({ length: K }, () => randn() * HP.initScale));
+      const lr = HP.lr, lam = HP.lambda;
+      for (let e = 0; e < HP.preTrainEpochs; e++) {
+        // shuffle
+        for (let k = observed.length - 1; k > 0; k--) {
+          const j = Math.floor(Math.random() * (k + 1));
+          const t = observed[k]; observed[k] = observed[j]; observed[j] = t;
+        }
+        for (const [i, j, r] of observed) {
+          const ui = U[i], vj = V[j];
+          let p = 0;
+          for (let k = 0; k < K; k++) p += ui[k] * vj[k];
+          const err = p - r;
+          for (let k = 0; k < K; k++) {
+            const guk = err * vj[k] + lam * ui[k];
+            const gvk = err * ui[k] + lam * vj[k];
+            ui[k] -= lr * guk;
+            vj[k] -= lr * gvk;
+          }
+        }
+      }
+    }
+
+    // ----- Closed-form ridge for one user given subset of items -----
+    // u = (V_subᵀ V_sub + λ I)⁻¹ V_subᵀ r_sub
+    function fitUser(itemIdxs, ratings) {
+      // Build VᵀV (K×K) and Vᵀr (K)
+      let A = [[HP.ridgeLambda, 0], [0, HP.ridgeLambda]];
+      let b = [0, 0];
+      for (let s = 0; s < itemIdxs.length; s++) {
+        const j = itemIdxs[s];
+        const v = V[j];
+        A[0][0] += v[0]*v[0]; A[0][1] += v[0]*v[1];
+        A[1][0] += v[1]*v[0]; A[1][1] += v[1]*v[1];
+        b[0] += v[0] * ratings[s];
+        b[1] += v[1] * ratings[s];
+      }
+      // Inverse 2×2
+      const det = A[0][0]*A[1][1] - A[0][1]*A[1][0];
+      if (Math.abs(det) < 1e-9) return [0, 0];
+      const inv = [
+        [ A[1][1]/det, -A[0][1]/det],
+        [-A[1][0]/det,  A[0][0]/det],
+      ];
+      return [
+        inv[0][0]*b[0] + inv[0][1]*b[1],
+        inv[1][0]*b[0] + inv[1][1]*b[1],
+      ];
+    }
+
+    function predict(u, j) { return u[0]*V[j][0] + u[1]*V[j][1]; }
+    function predSign(x) {
+      if (x > 0.4) return 1;
+      if (x < -0.4) return -1;
+      return 0;
+    }
+
+    // ----- Pick well-rated User A, choose User B -----
+    function pickUserA() {
+      // Choose the user with the most ratings (ties broken by index).
+      let best = 0, bestCount = -1;
+      for (let i = 0; i < M; i++) {
+        let c = 0;
+        for (let j = 0; j < N_ITEMS; j++) if (!Number.isNaN(R[i][j])) c++;
+        if (c > bestCount) { bestCount = c; best = i; }
+      }
+      return best;
+    }
+    let userA, userB;
+    let userBOrder; // permutation of 0..15 for revealing
+    let userBKnownIdxs; // indices j where R[userB][j] is known (subset for which we have truth)
+
+    function pickUserB(seed) {
+      const r = rngMaker(seed);
+      // Pick a user different from A whose true cluster contrasts (visually distinct)
+      const candidates = [];
+      const aCluster = PEOPLE[userA].cluster;
+      for (let i = 0; i < M; i++) {
+        if (i === userA) continue;
+        const c = PEOPLE[i].cluster;
+        candidates.push({ i, contrast: c !== aCluster ? 1 : 0 });
+      }
+      candidates.sort((x, y) => y.contrast - x.contrast || r() - 0.5);
+      // Top contrasting candidates → pick one randomly
+      const top = candidates.filter(x => x.contrast === candidates[0].contrast);
+      userB = top[Math.floor(r() * top.length)].i;
+      reshuffleOrder(seed * 31 + 7);
+    }
+
+    function reshuffleOrder(seed) {
+      const r = rngMaker(seed);
+      // Build the list of items where we DO know B's rating (so we can score held-out)
+      // Plus all 16 items for prediction display.
+      // userBOrder is a permutation of [0..15]; revealing follows this order.
+      userBOrder = Array.from({ length: N_ITEMS }, (_, j) => j);
+      for (let k = userBOrder.length - 1; k > 0; k--) {
+        const t = Math.floor(r() * (k + 1));
+        const tmp = userBOrder[k]; userBOrder[k] = userBOrder[t]; userBOrder[t] = tmp;
+      }
+      userBKnownIdxs = [];
+      for (let j = 0; j < N_ITEMS; j++) if (!Number.isNaN(R[userB][j])) userBKnownIdxs.push(j);
+    }
+
+    // ----- Compute current u_B given N revealed -----
+    function fitUserBForN(n) {
+      // From userBOrder, take first n items where rating is known (skip the '?')
+      const items = [], ratings = [];
+      let taken = 0, idx = 0;
+      while (taken < n && idx < userBOrder.length) {
+        const j = userBOrder[idx];
+        if (!Number.isNaN(R[userB][j])) {
+          items.push(j);
+          ratings.push(R[userB][j]);
+          taken++;
+        }
+        idx++;
+      }
+      // If we ran out of known cells, use whatever we have
+      if (items.length === 0) return { u: [0, 0], usedItems: [] };
+      return { u: fitUser(items, ratings), usedItems: items };
+    }
+
+    // Pre-compute the cold-start curve (accuracy on held-out as function of N).
+    function computeCurve() {
+      const pts = [];
+      // For each N from 0..16, fit u_B on first N (known) items in order,
+      // evaluate accuracy on the *remaining* known items.
+      const knownInOrder = [];
+      for (const j of userBOrder) if (!Number.isNaN(R[userB][j])) knownInOrder.push(j);
+      const totalKnown = knownInOrder.length;
+
+      for (let n = 0; n <= N_ITEMS; n++) {
+        // Build training set: first min(n, totalKnown_seen_so_far) known
+        // We define "first n in revealed order, restricted to known" so that
+        // n=16 trains on all known cells; held-out is then empty (acc undefined).
+        const train = [];
+        const trainRatings = [];
+        let taken = 0, idx = 0;
+        while (taken < n && idx < userBOrder.length) {
+          const j = userBOrder[idx];
+          if (!Number.isNaN(R[userB][j])) {
+            train.push(j); trainRatings.push(R[userB][j]); taken++;
+          }
+          idx++;
+        }
+        const u = train.length ? fitUser(train, trainRatings) : [0, 0];
+        // Held out: known items not in train
+        const trainSet = new Set(train);
+        let mae = 0, accCount = 0, heldCount = 0;
+        for (const j of knownInOrder) {
+          if (trainSet.has(j)) continue;
+          const p = predict(u, j);
+          mae += Math.abs(p - R[userB][j]);
+          if (predSign(p) === R[userB][j]) accCount++;
+          heldCount++;
+        }
+        pts.push({
+          n,
+          held: heldCount,
+          mae: heldCount ? mae / heldCount : NaN,
+          acc: heldCount ? accCount / heldCount : NaN,
+          uNorm: Math.hypot(u[0], u[1]),
+        });
+      }
+      return pts;
+    }
+
+    // ---------- Rendering ----------
+    const svg = d3.select('#embed-svg');
+    const W = 520, H = 380, PAD = 28;
+    const xScale = d3.scaleLinear().range([PAD, W - PAD]);
+    const yScale = d3.scaleLinear().range([H - PAD, PAD]);
+    const gAxis = svg.append('g');
+    const gGrid = svg.append('g');
+    const gItems = svg.append('g');
+    const gA = svg.append('g');
+    const gB = svg.append('g');
+    const gBPath = svg.append('g');
+
+    function fitScales() {
+      let max = 0.5;
+      for (let j = 0; j < N_ITEMS; j++) for (let k = 0; k < K; k++) max = Math.max(max, Math.abs(V[j][k]));
+      for (let i = 0; i < M; i++) for (let k = 0; k < K; k++) max = Math.max(max, Math.abs(U[i][k]));
+      const lim = max * 1.2 + 0.1;
+      xScale.domain([-lim, lim]);
+      yScale.domain([-lim, lim]);
+    }
+
+    function clusterColor(cluster) {
+      switch (cluster) {
+        case 'simple-indoor':  return C.indoor;
+        case 'simple-outdoor': return C.outdoor;
+        case 'tech-indoor':    return C.simple;
+        case 'tech-outdoor':   return C.tech;
+      }
+      return C.textMuted;
+    }
+
+    function renderEmbedFrame() {
+      gAxis.selectAll('*').remove();
+      gGrid.selectAll('*').remove();
+      gGrid.append('line')
+        .attr('x1', xScale(0)).attr('x2', xScale(0))
+        .attr('y1', PAD).attr('y2', H - PAD)
+        .attr('stroke', '#cdd2d8').attr('stroke-dasharray', '2 3');
+      gGrid.append('line')
+        .attr('y1', yScale(0)).attr('y2', yScale(0))
+        .attr('x1', PAD).attr('x2', W - PAD)
+        .attr('stroke', '#cdd2d8').attr('stroke-dasharray', '2 3');
+      gAxis.append('rect')
+        .attr('x', PAD).attr('y', PAD).attr('width', W - 2*PAD).attr('height', H - 2*PAD)
+        .attr('fill', 'none').attr('stroke', '#e0e3e7');
+    }
+
+    function renderItems() {
+      const sel = gItems.selectAll('text.item').data(ITEMS);
+      sel.enter().append('text')
+        .attr('class', 'item')
+        .attr('text-anchor', 'middle')
+        .attr('dominant-baseline', 'central')
+        .attr('paint-order', 'stroke')
+        .attr('stroke', 'white')
+        .attr('stroke-width', 3)
+        .style('font-size', '17px')
+        .merge(sel)
+        .attr('x', (d, j) => xScale(V[j][0]))
+        .attr('y', (d, j) => yScale(V[j][1]))
+        .text(d => d.icon);
+    }
+
+    function renderUserA() {
+      gA.selectAll('*').remove();
+      const ux = xScale(U[userA][0]);
+      const uy = yScale(U[userA][1]);
+      gA.append('circle')
+        .attr('cx', ux).attr('cy', uy).attr('r', 9)
+        .attr('fill', clusterColor(PEOPLE[userA].cluster))
+        .attr('stroke', 'white').attr('stroke-width', 2);
+      gA.append('text')
+        .attr('x', ux).attr('y', uy - 14)
+        .attr('text-anchor', 'middle').attr('font-size', 11)
+        .attr('fill', C.text).attr('font-weight', 600)
+        .text('A · ' + PEOPLE[userA].name);
+    }
+
+    function renderUserB(uB, opts={}) {
+      gB.selectAll('*').remove();
+      const ux = xScale(uB[0]);
+      const uy = yScale(uB[1]);
+      // Trail from origin (or last position)
+      gB.append('circle')
+        .attr('cx', ux).attr('cy', uy).attr('r', 11)
+        .attr('fill', clusterColor(PEOPLE[userB].cluster))
+        .attr('stroke', 'white').attr('stroke-width', 2);
+      gB.append('text')
+        .attr('x', ux).attr('y', uy - 16)
+        .attr('text-anchor', 'middle').attr('font-size', 11)
+        .attr('fill', C.text).attr('font-weight', 700)
+        .text('B · ' + PEOPLE[userB].name);
+      // Origin marker
+      gBPath.selectAll('*').remove();
+      gBPath.append('circle')
+        .attr('cx', xScale(0)).attr('cy', yScale(0)).attr('r', 3)
+        .attr('fill', '#bbb');
+      // Light dashed line from origin → B (the path the closed-form solution traversed conceptually)
+      gBPath.append('line')
+        .attr('x1', xScale(0)).attr('y1', yScale(0))
+        .attr('x2', ux).attr('y2', uy)
+        .attr('stroke', clusterColor(PEOPLE[userB].cluster))
+        .attr('stroke-width', 1).attr('stroke-dasharray', '2 3').attr('opacity', 0.55);
+    }
+
+    // ---- Pred rows for A and B ----
+    const predRowA = document.getElementById('userA-preds');
+    const predRowB = document.getElementById('userB-preds');
+    let predCellsA = [], predCellsB = [];
+
+    function buildPredRows() {
+      predRowA.innerHTML = ''; predRowB.innerHTML = '';
+      predCellsA = []; predCellsB = [];
+      for (let j = 0; j < N_ITEMS; j++) {
+        const cellA = document.createElement('div');
+        cellA.className = 'pred-cell';
+        cellA.title = ITEMS[j].name;
+        const ic = document.createElement('span'); ic.className = 'icon'; ic.textContent = ITEMS[j].icon;
+        cellA.appendChild(ic);
+        predRowA.appendChild(cellA); predCellsA.push(cellA);
+
+        const cellB = document.createElement('div');
+        cellB.className = 'pred-cell';
+        cellB.title = ITEMS[j].name;
+        const ic2 = document.createElement('span'); ic2.className = 'icon'; ic2.textContent = ITEMS[j].icon;
+        cellB.appendChild(ic2);
+        predRowB.appendChild(cellB); predCellsB.push(cellB);
+      }
+    }
+
+    function tintFor(p) {
+      const s = predSign(p);
+      const mag = Math.min(1, Math.abs(p) / 1.0);
+      const col = s > 0 ? C.posBg : (s < 0 ? C.negBg : C.neutralBg);
+      // blend white -> col by mag
+      const a = 0.25 + 0.65 * mag;
+      // We just return rgba blend. Use the bg as full color.
+      const h = col.replace('#', '');
+      const r = parseInt(h.slice(0,2),16), g = parseInt(h.slice(2,4),16), b = parseInt(h.slice(4,6),16);
+      return `rgba(${r},${g},${b},${a})`;
+    }
+
+    function updatePredRows(uB) {
+      // User A: trained predictions
+      for (let j = 0; j < N_ITEMS; j++) {
+        const p = predict(U[userA], j);
+        predCellsA[j].style.background = tintFor(p);
+        predCellsA[j].classList.remove('revealed', 'held');
+      }
+      // User B: predictions, plus border for revealed vs held-out
+      const N = +document.getElementById('slider-N').value;
+      const revealed = new Set();
+      let taken = 0, idx = 0;
+      while (taken < N && idx < userBOrder.length) {
+        const j = userBOrder[idx];
+        if (!Number.isNaN(R[userB][j])) { revealed.add(j); taken++; }
+        idx++;
+      }
+      for (let j = 0; j < N_ITEMS; j++) {
+        const p = predict(uB, j);
+        predCellsB[j].style.background = tintFor(p);
+        predCellsB[j].classList.remove('revealed', 'held');
+        if (revealed.has(j)) predCellsB[j].classList.add('revealed');
+        else if (!Number.isNaN(R[userB][j])) predCellsB[j].classList.add('held');
+      }
+    }
+
+    // ---- Cold-start curve ----
+    const accSvg = d3.select('#acc-svg');
+    const AW = 360, AH = 180, AP = 22;
+    const accAxis = accSvg.append('g');
+    const accLine = accSvg.append('path')
+      .attr('fill', 'none').attr('stroke', C.tech).attr('stroke-width', 2);
+    const maeLine = accSvg.append('path')
+      .attr('fill', 'none').attr('stroke', C.indoor).attr('stroke-width', 1.6).attr('stroke-dasharray', '3 3');
+    const cursor = accSvg.append('line')
+      .attr('stroke', C.headerEnd).attr('stroke-width', 1.5).attr('stroke-dasharray', '2 2').attr('opacity', 0.7);
+
+    function renderCurve(curve, currentN) {
+      accAxis.selectAll('*').remove();
+      const xs = d3.scaleLinear().domain([0, N_ITEMS]).range([AP + 6, AW - AP]);
+      const ys = d3.scaleLinear().domain([0, 1]).range([AH - AP, AP]);
+
+      // y-axis ticks (accuracy 0..1)
+      [0, 0.25, 0.5, 0.75, 1].forEach(t => {
+        accAxis.append('line')
+          .attr('x1', xs(0)).attr('x2', xs(N_ITEMS))
+          .attr('y1', ys(t)).attr('y2', ys(t))
+          .attr('stroke', '#eef0f3');
+        accAxis.append('text')
+          .attr('x', AP - 4).attr('y', ys(t) + 3)
+          .attr('text-anchor', 'end').attr('font-size', 9)
+          .attr('fill', C.textMuted).text(t.toFixed(2));
+      });
+      // x-axis
+      [0, 4, 8, 12, 16].forEach(n => {
+        accAxis.append('text')
+          .attr('x', xs(n)).attr('y', AH - AP + 12)
+          .attr('text-anchor', 'middle').attr('font-size', 9)
+          .attr('fill', C.textMuted).text(n);
+      });
+      accAxis.append('text')
+        .attr('x', (xs(0)+xs(N_ITEMS))/2).attr('y', AH - 2)
+        .attr('text-anchor', 'middle').attr('font-size', 9)
+        .attr('fill', C.textMuted).text('N revealed ratings');
+
+      // Accuracy line (only where defined)
+      const accPts = curve.filter(p => !Number.isNaN(p.acc)).map(p => [xs(p.n), ys(p.acc)]);
+      // MAE line (rescaled by /2 to share axis with accuracy)
+      const maePts = curve.filter(p => !Number.isNaN(p.mae)).map(p => [xs(p.n), ys(Math.max(0, 1 - p.mae / 2))]);
+      const lineGen = d3.line().curve(d3.curveMonotoneX);
+      accLine.attr('d', lineGen(accPts));
+      maeLine.attr('d', lineGen(maePts));
+
+      // Cursor
+      cursor.attr('x1', xs(currentN)).attr('x2', xs(currentN))
+            .attr('y1', AP).attr('y2', AH - AP);
+
+      // legend
+      accAxis.append('line').attr('x1', AW - 110).attr('x2', AW - 95)
+        .attr('y1', AP + 2).attr('y2', AP + 2).attr('stroke', C.tech).attr('stroke-width', 2);
+      accAxis.append('text').attr('x', AW - 92).attr('y', AP + 5)
+        .attr('font-size', 9).attr('fill', C.textMuted).text('accuracy');
+      accAxis.append('line').attr('x1', AW - 110).attr('x2', AW - 95)
+        .attr('y1', AP + 14).attr('y2', AP + 14).attr('stroke', C.indoor).attr('stroke-width', 1.6).attr('stroke-dasharray', '3 3');
+      accAxis.append('text').attr('x', AW - 92).attr('y', AP + 17)
+        .attr('font-size', 9).attr('fill', C.textMuted).text('1 − MAE/2');
+    }
+
+    // ---- Stats ----
+    function setStat(id, v) { document.getElementById(id).textContent = v; }
+    function renderStats(curve, n, uB) {
+      const point = curve[n];
+      setStat('stat-n', n);
+      setStat('stat-held', point.held);
+      setStat('stat-acc', Number.isNaN(point.acc) ? '—' : (point.acc * 100).toFixed(0) + '%');
+      setStat('stat-mae', Number.isNaN(point.mae) ? '—' : point.mae.toFixed(3));
+
+      // User A accuracy on its own known cells
+      let okA = 0, totA = 0;
+      for (let j = 0; j < N_ITEMS; j++) {
+        if (Number.isNaN(R[userA][j])) continue;
+        const p = predict(U[userA], j);
+        if (predSign(p) === R[userA][j]) okA++;
+        totA++;
+      }
+      setStat('stat-accA', totA ? (okA / totA * 100).toFixed(0) + '%' : '—');
+      document.getElementById('userA-name').textContent = 'User A · ' + PEOPLE[userA].name;
+      document.getElementById('userB-name').textContent = 'User B · ' + PEOPLE[userB].name;
+    }
+
+    // ---- Update everything for current slider N ----
+    let curveCache = null;
+    function updateForN() {
+      const n = +document.getElementById('slider-N').value;
+      document.getElementById('N-val').textContent = n;
+      const { u: uB } = fitUserBForN(n);
+      renderUserB(uB);
+      updatePredRows(uB);
+      renderStats(curveCache, n, uB);
+      // Cursor on curve
+      renderCurve(curveCache, n);
+    }
+
+    // ---- Boot ----
+    katex.render(
+      String.raw`u_B = (V_\Omega^{\!\top} V_\Omega + \lambda I)^{-1} V_\Omega^{\!\top}\,r_\Omega \quad\text{with item vectors } V \text{ frozen}`,
+      document.getElementById('formula'),
+      { displayMode: true, throwOnError: false }
+    );
+
+    // Pre-train (synchronous; ~1s on a recent MacBook for 250 epochs × 315 obs)
+    document.getElementById('train-note').textContent = 'pre-training model…';
+    // Defer to next tick so the "pre-training…" message paints first.
+    setTimeout(() => {
+      const t0 = performance.now();
+      pretrain();
+      const dt = performance.now() - t0;
+      document.getElementById('train-note').textContent =
+        `model pre-trained in ${dt.toFixed(0)} ms · slide N to reveal ratings`;
+
+      userA = pickUserA();
+      pickUserB(currentBSeed);
+      curveCache = computeCurve();
+
+      fitScales();
+      renderEmbedFrame();
+      renderItems();
+      renderUserA();
+      buildPredRows();
+
+      updateForN();
+    }, 30);
+
+    // ---- UI events ----
+    document.getElementById('slider-N').addEventListener('input', updateForN);
+    let currentBSeed = 5;
+    document.getElementById('btn-userB').onclick = () => {
+      currentBSeed = (Math.random() * 1e9) | 0;
+      pickUserB(currentBSeed);
+      curveCache = computeCurve();
+      document.getElementById('slider-N').value = 0;
+      renderUserA(); // unchanged
+      updateForN();
+    };
+    document.getElementById('btn-order').onclick = () => {
+      reshuffleOrder((Math.random() * 1e9) | 0);
+      curveCache = computeCurve();
+      document.getElementById('slider-N').value = 0;
+      updateForN();
+    };
+  })();
+  </script>
+</body>
+</html>

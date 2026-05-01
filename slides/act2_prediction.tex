@@ -1,0 +1,187 @@
+% =====================================================================
+% Act II — Prediction
+% Scenes 17–24 of the W2 lecture.
+% Pure section content: no preamble, no \documentclass.
+% Engine: LuaLaTeX. Theme: ainit-academic.
+% =====================================================================
+
+\renewcommand{\AINITsection}{Act II \textemdash{} Prediction}
+
+% ---------------------------------------------------------------------
+% Scene 17 (a) — The bandit problem: three urns / three campaigns
+% ---------------------------------------------------------------------
+\begin{frame}{The bandit problem}
+  Three marketing campaigns. Three urns. Each urn hides a conversion
+  rate $\mu_i$ that you do not know.
+
+  \medskip
+
+  \begin{itemize}
+    \item Each round, you pick one urn and draw a single ball.
+    \item A white ball is a conversion; a grey ball is nothing.
+    \item Your goal: \AINITemph{maximise total conversions} over $T$ rounds.
+  \end{itemize}
+
+  \medskip
+
+  \sidenote{A show of hands: who has run an A/B test?}
+
+  Every draw is information \AINITemph{and} payoff at the same time.
+  That double role is what makes the problem interesting.
+\end{frame}
+
+% ---------------------------------------------------------------------
+% Scene 17 (b) — The empirical estimator
+% ---------------------------------------------------------------------
+\equationslide{The empirical estimator}{%
+  \hat p_n \;=\; \frac{x_1 + x_2 + \ldots + x_n}{n}%
+}{Average and pick the best \textemdash{} the audience's natural instinct.}
+
+% ---------------------------------------------------------------------
+% Scene 18 — Explore vs exploit
+% ---------------------------------------------------------------------
+\begin{frame}{Explore vs exploit}
+  Two pressures pull in opposite directions.
+
+  \medskip
+
+  \begin{itemize}
+    \item \AINITemph{Exploit}: commit to the urn that looks best so far,
+          and harvest its conversions.
+    \item \AINITemph{Explore}: keep sampling the others, in case the
+          leader is only ahead by luck.
+  \end{itemize}
+
+  \medskip
+
+  Exploit too early and you may have crowned the wrong urn.
+  Explore too long and you waste rounds on losers. That tension has a
+  name, and the next twenty minutes are about it.
+\end{frame}
+
+% ---------------------------------------------------------------------
+% Scene 19 — Naive estimate-then-exploit
+% ---------------------------------------------------------------------
+\begin{frame}{Na\"\i ve: estimate then exploit}
+  A first attempt:
+
+  \medskip
+
+  \begin{enumerate}
+    \item Explore each urn $n$ times, round-robin.
+    \item Commit to the urn with the highest empirical mean $\hat p_n$.
+    \item Exploit that urn forever after.
+  \end{enumerate}
+
+  \medskip
+
+  Two drawbacks:
+
+  \begin{itemize}
+    \item If $n$ is too small, the empirical means are noisy and you
+          commit to the wrong urn.
+    \item If $n$ is too large, you waste many early rounds on the
+          losing urns before you start exploiting.
+  \end{itemize}
+
+  \medskip
+
+  The choice of $n$ \AINITemph{is} the problem. We have not solved it;
+  we have only displaced it.
+\end{frame}
+
+% ---------------------------------------------------------------------
+% Scene 20 — Three-Urn Casino (viz handoff)
+% ---------------------------------------------------------------------
+\vizhandoff{three-urn-casino.html}
+
+% ---------------------------------------------------------------------
+% Scene 21 — Epsilon-greedy
+% ---------------------------------------------------------------------
+\equationslide{$\varepsilon$-greedy}{%
+  A_t \;=\;
+  \begin{cases}
+    \text{random urn}, & \text{w.p. } \varepsilon \\[2pt]
+    \arg\max_i \hat p_{n_i}, & \text{w.p. } 1-\varepsilon
+  \end{cases}%
+}{Most of the time, exploit; a small fraction, explore. $\varepsilon$ is the dial between the two pressures. \textemdash{} Sutton \& Barto (1998/2018).}
+
+% ---------------------------------------------------------------------
+% Scene 22 (a) — Setup slide for the algorithm stadium
+% ---------------------------------------------------------------------
+\begin{frame}{Race the algorithms}
+  Five strategies, the same three urns, the same hidden biases:
+
+  \medskip
+
+  \begin{itemize}
+    \item Pure random \textemdash{} no learning at all.
+    \item Pure greedy \textemdash{} exploit from round one ($\varepsilon = 0$).
+    \item $\varepsilon$-greedy at three values of $\varepsilon$.
+  \end{itemize}
+
+  \medskip
+
+  Watch the cumulative-regret curves. The slope is the whole story:
+  random and greedy grow regret \AINITemph{linearly};
+  a well-tuned $\varepsilon$-greedy grows it \AINITemph{sublinearly}.
+\end{frame}
+
+% ---------------------------------------------------------------------
+% Scene 22 (b) — Algorithm stadium (viz handoff)
+% ---------------------------------------------------------------------
+\vizhandoff{algorithm\_stadium.html}
+
+% ---------------------------------------------------------------------
+% Scene 23 (a) — Setup slide for the distinguishability dial
+% ---------------------------------------------------------------------
+\begin{frame}{How many users do you need?}
+  It depends on the gap.
+
+  \medskip
+
+  Two urns with conversion rates $0.50$ and $0.40$ are easy to tell apart.
+  Two urns at $0.50$ and $0.49$ are nearly indistinguishable;
+  separating them takes \AINITemph{far} more samples.
+
+  \medskip
+
+  The required sample size scales roughly as $1 / (p_1 - p_2)^2$.
+  Halve the gap, and you need four times the data.
+
+  \medskip
+
+  \sidenote{This is what your statistician means when she says
+  ``we need a million users to A/B-test this.''}
+\end{frame}
+
+% ---------------------------------------------------------------------
+% Scene 23 (b) — Distinguishability Dial (viz handoff)
+% ---------------------------------------------------------------------
+\vizhandoff{distinguishability-dial.html}
+
+% ---------------------------------------------------------------------
+% Scene 24 — Lai & Robbins (1985)
+% ---------------------------------------------------------------------
+\equationslide{Lai \& Robbins (1985)}{%
+  \liminf_{T \to \infty}\frac{R_T}{\log T}
+  \;\geq\;
+  \sum_{i \neq i^*} \frac{\mu^* - \mu_i}{{\color{accentOxblood}\mathrm{KL}(\mu_i \,\|\, \mu^*)}}%
+}{No algorithm beats this rate. The hardest thing is telling apart distributions that look alike \textemdash{} and the cost is in KL divergence, the same Shannon used in 1948.}
+
+% ---------------------------------------------------------------------
+% Closing slide for Act II
+% ---------------------------------------------------------------------
+\begin{frame}{Two halves, one ceiling}
+  \AINITemph{Eckart\textendash{}Young} bounded compression.
+
+  \medskip
+
+  \AINITemph{Lai\textendash{}Robbins} bounds prediction.
+
+  \medskip
+
+  The two halves of this lecture share one ceiling \textemdash{} and we
+  have not yet named the quantity in which both ceilings are written.
+  That is the Epilogue.
+\end{frame}

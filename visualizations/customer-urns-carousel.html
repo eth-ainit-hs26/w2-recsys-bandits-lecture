@@ -1,0 +1,2116 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Customer urns carousel · W2 Recsys</title>
+  <link rel="stylesheet" href="shared/style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+  <style>
+    /* ============================================================
+       Stage container — used by all three stages.
+       Stages 1/2/3 swap content into #stage-root via setStage().
+       ============================================================ */
+    #stage-root {
+      position: relative;
+      min-height: 360px;
+    }
+
+    /* ---------- Top bar (stage controls + estimator legend) ---------- */
+    .stage-bar {
+      display: flex; align-items: center; gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--color-border);
+    }
+    .stage-bar .spacer { flex: 1; }
+    .stage-bar .stage-label {
+      font-size: 0.82rem;
+      color: var(--color-text-muted);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+    .stage-bar button {
+      background: var(--color-header-end);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 8px 14px;
+      font-size: 0.92rem;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .stage-bar button:hover { background: var(--color-header-start); }
+    .stage-bar button.secondary {
+      background: white;
+      color: var(--color-header-end);
+      border: 1px solid var(--color-border);
+    }
+    .stage-bar button.secondary:hover { background: var(--color-neu-bg); }
+
+    /* ---------- Layout: carousel + side tray ---------- */
+    .stage1-layout {
+      display: grid;
+      grid-template-columns: 1fr 200px;
+      gap: 18px;
+      align-items: stretch;
+    }
+    @media (max-width: 900px) {
+      .stage1-layout { grid-template-columns: 1fr; }
+    }
+
+    /* ---------- Carousel ---------- */
+    .carousel {
+      overflow-x: auto;
+      overflow-y: hidden;
+      padding: 12px 4px 20px;
+      scroll-behavior: smooth;
+      -webkit-overflow-scrolling: touch;
+      border: 1px solid var(--color-border);
+      border-radius: 10px;
+      background: var(--color-neu-bg);
+    }
+    .carousel::-webkit-scrollbar { height: 10px; }
+    .carousel::-webkit-scrollbar-track { background: transparent; }
+    .carousel::-webkit-scrollbar-thumb {
+      background: #ced4da; border-radius: 6px;
+    }
+
+    .carousel-track {
+      display: flex;
+      gap: 14px;
+      padding: 0 8px;
+    }
+
+    /* ---------- Single urn card ---------- */
+    .urn-card {
+      flex: 0 0 auto;
+      width: 116px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      padding: 8px 6px 10px;
+      background: white;
+      border: 1px solid var(--color-border);
+      border-radius: 10px;
+      cursor: pointer;
+      user-select: none;
+      transition: transform 0.12s, box-shadow 0.12s, border-color 0.12s;
+      position: relative;
+    }
+    .urn-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+      border-color: var(--color-header-end);
+    }
+    .urn-card:active { transform: translateY(0); }
+
+    .urn-card .urn-svg { display: block; }
+
+    .urn-card .reader-name {
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--color-text);
+      margin-top: 2px;
+      line-height: 1.1;
+    }
+    .urn-card .archetype-label {
+      font-size: 0.72rem;
+      color: var(--color-text-muted);
+      line-height: 1.1;
+    }
+
+    /* Estimator badge — top-right corner of each urn card */
+    .urn-card .estimator-badge {
+      position: absolute;
+      top: 6px; right: 6px;
+      font-size: 0.7rem;
+      font-variant-numeric: tabular-nums;
+      color: var(--color-text-muted);
+      background: rgba(255,255,255,0.85);
+      border: 1px solid var(--color-border);
+      border-radius: 4px;
+      padding: 1px 5px;
+      line-height: 1.3;
+      pointer-events: none;
+      min-width: 30px;
+      text-align: center;
+    }
+    .urn-card .estimator-badge.has-data {
+      color: var(--color-header-start);
+      background: white;
+    }
+    .urn-card .estimator-badge .est-ci {
+      display: block;
+      height: 2px;
+      background: var(--color-header-end);
+      opacity: 0.55;
+      border-radius: 1px;
+      margin: 1px auto 1px;
+    }
+
+    /* ---------- Side tray ---------- */
+    .tray {
+      background: var(--color-neu-bg);
+      border: 1px solid var(--color-border);
+      border-radius: 10px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      min-height: 240px;
+    }
+    .tray h3 {
+      font-weight: 500;
+      font-size: 0.95rem;
+      margin: 0;
+      color: var(--color-header-start);
+    }
+    .tray .sub {
+      font-size: 0.78rem;
+      color: var(--color-text-muted);
+      margin: 0;
+    }
+    .tray-balls {
+      display: flex; flex-wrap: wrap; gap: 4px;
+      align-content: flex-start;
+      min-height: 48px;
+      padding: 6px;
+      background: white;
+      border: 1px dashed var(--color-border);
+      border-radius: 6px;
+    }
+    .tray-ball {
+      width: 12px; height: 12px;
+      border-radius: 50%;
+      box-shadow: inset 0 -1px 2px rgba(0,0,0,0.18);
+    }
+    .tray .tray-stats {
+      font-size: 0.82rem;
+      color: var(--color-text);
+      font-variant-numeric: tabular-nums;
+    }
+    .tray .tray-stats strong { color: var(--color-header-start); }
+
+    /* Legend swatch */
+    .legend-row {
+      display: flex; gap: 14px; flex-wrap: wrap;
+      font-size: 0.82rem;
+      color: var(--color-text-muted);
+      margin-top: 8px;
+      align-items: center;
+    }
+    .legend-row .sw {
+      display: inline-block;
+      width: 12px; height: 12px;
+      border-radius: 50%;
+      margin-right: 5px;
+      vertical-align: -2px;
+      box-shadow: inset 0 -1px 2px rgba(0,0,0,0.18);
+    }
+
+    /* ---------- Flying ball overlay ---------- */
+    #fly-layer {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+      z-index: 9999;
+    }
+    .fly-ball {
+      position: absolute;
+      width: 14px; height: 14px;
+      border-radius: 50%;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.25), inset 0 -1px 2px rgba(0,0,0,0.18);
+      transition: top 0.55s cubic-bezier(0.4, 0.0, 0.2, 1),
+                  left 0.55s cubic-bezier(0.4, 0.0, 0.2, 1),
+                  transform 0.55s cubic-bezier(0.4, 0.0, 0.2, 1),
+                  opacity 0.3s 0.45s;
+    }
+
+    /* ---------- Stage 2: archetype compression ---------- */
+    .stage2-layout {
+      display: grid;
+      grid-template-columns: 1fr 240px;
+      gap: 18px;
+      align-items: stretch;
+    }
+    @media (max-width: 900px) {
+      .stage2-layout { grid-template-columns: 1fr; }
+    }
+    .stage2-main {
+      background: var(--color-neu-bg);
+      border: 1px solid var(--color-border);
+      border-radius: 10px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      position: relative;
+      min-height: 460px;
+    }
+    .stage2-anim {
+      position: relative;
+      width: 100%;
+      height: 220px;
+    }
+    .stage2-anim svg.anim-svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+    .archetype-caption {
+      text-align: center;
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+    }
+    .archetype-bias {
+      text-align: center;
+      font-size: 0.74rem;
+      color: var(--color-text-muted);
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* Reader badges strip */
+    .badge-strip {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      padding: 10px;
+      background: white;
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+      justify-content: center;
+    }
+    .reader-badge {
+      width: 78px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      padding: 5px 4px 6px;
+      background: var(--color-neu-bg);
+      border: 1px solid var(--color-border);
+      border-radius: 6px;
+    }
+    .reader-badge .rb-name {
+      font-size: 0.74rem;
+      font-weight: 600;
+      color: var(--color-text);
+      line-height: 1.1;
+      text-align: center;
+    }
+    .reader-badge .rb-mix {
+      width: 100%;
+      height: 6px;
+      display: flex;
+      border-radius: 3px;
+      overflow: hidden;
+      box-shadow: inset 0 0 0 1px rgba(0,0,0,0.08);
+    }
+    .reader-badge .rb-mix span { height: 100%; }
+    .reader-badge .rb-note {
+      font-size: 0.66rem;
+      color: var(--color-text-muted);
+      font-style: italic;
+      line-height: 1.1;
+      text-align: center;
+    }
+
+    /* Side panel for stage 2 */
+    .stage2-panel {
+      background: var(--color-neu-bg);
+      border: 1px solid var(--color-border);
+      border-radius: 10px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .stage2-panel h3 {
+      font-weight: 500;
+      font-size: 0.95rem;
+      margin: 0;
+      color: var(--color-header-start);
+    }
+    .stage2-panel .eqn {
+      background: white;
+      border: 1px solid var(--color-border);
+      border-radius: 6px;
+      padding: 12px;
+      text-align: center;
+      font-size: 1.05rem;
+    }
+    .stage2-panel .counter {
+      font-size: 0.86rem;
+      color: var(--color-text);
+      line-height: 1.4;
+    }
+    .stage2-panel .counter strong { color: var(--color-header-start); }
+    .stage2-panel .counter .sub {
+      display: block;
+      margin-top: 6px;
+      font-size: 0.78rem;
+      color: var(--color-text-muted);
+    }
+    .stage2-panel .legend-row { margin: 0; }
+
+    /* ---------- Stage placeholder (stages 2/3) ---------- */
+    .stage-placeholder {
+      padding: 60px 20px;
+      text-align: center;
+      color: var(--color-text-muted);
+      background: var(--color-neu-bg);
+      border: 1px dashed var(--color-border);
+      border-radius: 10px;
+    }
+    .stage-placeholder p { margin: 0; font-size: 1.05rem; }
+  </style>
+</head>
+<body>
+  <header class="eth-header">
+    <div class="eth-logo">ETH<em>zürich</em></div>
+    <nav><a href="index.html">← All visualizations</a></nav>
+  </header>
+  <main class="viz-container">
+    <h1>Customer urns: each reader is a Bernoulli</h1>
+    <p class="lede">
+      Each reader is an urn. Inside: 100 balls, where the fraction of
+      <strong style="color:var(--color-pos)">blue</strong> balls equals their probability of finishing
+      <em>A History of Western Philosophy</em> (Russell). Click an urn to draw one
+      ball — does this reader finish the book?
+    </p>
+
+    <div class="viz-card">
+      <div id="stage-root"></div>
+    </div>
+
+    <aside class="explainer">
+      <h2>What's happening?</h2>
+      <p>
+        We treat <em>“will reader <strong>i</strong> finish Russell?”</em> as a Bernoulli random
+        variable with bias <em>p<sub>i</sub></em>. Readers who liked similar demanding nonfiction
+        in the past have <em>p<sub>i</sub></em> ≈ 0.92; readers whose tastes diverge have ≈ 0.08;
+        the unknowns sit at 0.5. Stage 1 lets you sample these urns one ball at a time;
+        the running estimator <em>p̂ = whites / n</em> shrinks toward the true bias as you click.
+      </p>
+    </aside>
+  </main>
+  <footer class="eth-footer">CAS AINIT FS26 · W2 Recsys</footer>
+
+  <!-- Flying ball overlay (fixed, full-viewport) -->
+  <div id="fly-layer"></div>
+
+  <script src="shared/data.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+  <script>
+  /* ============================================================
+     ARCHITECTURE — Customer urns carousel
+     ------------------------------------------------------------
+     This file is built in three stages. Stage 1 is implemented
+     here; stages 2/3 are placeholders that the next agents will
+     extend.
+
+       Stage 1 — Carousel of 21 reader-urns.
+                 Click an urn → draw one ball, update estimator,
+                 fly to side tray.
+       Stage 2 — Compress / aggregate (TBD by next agent).
+       Stage 3 — TBD by next agent.
+
+     State is centralised in `state` and `setStage(n)` swaps
+     content into #stage-root by calling renderStage1/2/3.
+     Each renderer is responsible for clearing & rebuilding the
+     stage-root subtree. Cross-stage state (e.g. running counts)
+     lives on `state.drawn` so future stages can reuse it.
+
+     Public hooks for downstream agents:
+       setStage(n)         – switch active stage
+       state.drawn[id]     – running counts per reader
+       state.lastDrawn     – ring buffer of last 20 balls (any urn)
+       buildUrnSVG(...)    – reusable urn renderer
+     ============================================================ */
+  (function () {
+    const { READERS, RATINGS, ARCHETYPES, COLORS, getReader } = window.RECSYS;
+
+    // -------- Bias logic: probability reader finishes Russell --------
+    function biasFor(reader) {
+      const r = RATINGS[reader.id - 1][15]; // Russell column (book 16)
+      if (r === 1)  return 0.92;
+      if (r === -1) return 0.08;
+      return 0.50;
+    }
+
+    // Annotate each reader with its bias and ball layout once.
+    const URN_BALLS = 100;     // total balls per urn
+    const GRID_COLS = 10;      // 10x10 grid
+
+    // Pre-compute, per-reader, which grid positions are "blue" (will-finish).
+    // We use a deterministic pseudo-random scatter so the urns look organic
+    // but identical biases produce different patterns across readers.
+    function mulberry32(seed) {
+      let t = seed >>> 0;
+      return function () {
+        t = (t + 0x6D2B79F5) >>> 0;
+        let r = t;
+        r = Math.imul(r ^ (r >>> 15), r | 1);
+        r ^= r + Math.imul(r ^ (r >>> 7), r | 61);
+        return ((r ^ (r >>> 14)) >>> 0) / 4294967296;
+      };
+    }
+
+    function ballLayoutFor(reader) {
+      const bias = biasFor(reader);
+      const nBlue = Math.round(URN_BALLS * bias);
+      // start with all yellow (won't finish), then mark first nBlue as blue
+      // after a deterministic shuffle.
+      const idx = Array.from({ length: URN_BALLS }, (_, k) => k);
+      const rng = mulberry32(reader.id * 9173 + 1);
+      for (let i = idx.length - 1; i > 0; i--) {
+        const j = Math.floor(rng() * (i + 1));
+        const tmp = idx[i]; idx[i] = idx[j]; idx[j] = tmp;
+      }
+      const isBlue = new Uint8Array(URN_BALLS);
+      for (let k = 0; k < nBlue; k++) isBlue[idx[k]] = 1;
+      return { bias, nBlue, isBlue };
+    }
+
+    // Cache layouts on each reader object.
+    READERS.forEach(r => {
+      const { bias, nBlue, isBlue } = ballLayoutFor(r);
+      r._bias = bias;
+      r._nBlue = nBlue;
+      r._isBlue = isBlue;
+    });
+
+    // -------- Archetype label helper --------
+    function archetypeLabel(reader) {
+      const a = ARCHETYPES.find(a => a.id === reader.archetype);
+      if (a) return `${a.id} ${a.name}`;
+      // mixed / specials
+      if (reader.archetype === 'mixed') return 'mixed';
+      if (reader.archetype === 'A1?')   return 'A1?';
+      return reader.archetype;
+    }
+
+    // ============================================================
+    // STATE
+    // ============================================================
+    const state = {
+      current: 1,                    // active stage: 1, 2, or 3
+      drawn: {},                     // id -> { n, whites }
+      lastDrawn: [],                 // ring buffer of last 20 balls (any urn)
+      MAX_TRAY: 20,
+    };
+    READERS.forEach(r => { state.drawn[r.id] = { n: 0, whites: 0 }; });
+
+    // ============================================================
+    // URN SVG — flask shape with grid of balls.
+    // Returned as a detached SVG element; callers append it.
+    // The flask has stable coords; ball positions are stored in
+    // svg.dataset so we can compute screen positions for the fly
+    // animation later.
+    // ============================================================
+    const URN_W = 96;
+    const URN_H = 144;
+    const BALL_R = 3.6;
+
+    function buildUrnSVG(reader) {
+      const svgNS = 'http://www.w3.org/2000/svg';
+      const svg = document.createElementNS(svgNS, 'svg');
+      svg.setAttribute('class', 'urn-svg');
+      svg.setAttribute('width',  URN_W);
+      svg.setAttribute('height', URN_H);
+      svg.setAttribute('viewBox', `0 0 ${URN_W} ${URN_H}`);
+
+      // Flask outline: narrow neck on top, rounded body.
+      // Use a rounded-rect-ish path:
+      //   neck: x in [38, 58], y in [4, 28]
+      //   body: rounded rect with extra curvature, x in [10, 86], y in [28, 134]
+      const flask = document.createElementNS(svgNS, 'path');
+      const d = [
+        'M 38 6',
+        'L 38 24',
+        'C 38 28, 18 30, 14 44',
+        'C 8 60, 8 96, 14 116',
+        'C 22 138, 74 138, 82 116',
+        'C 88 96, 88 60, 82 44',
+        'C 78 30, 58 28, 58 24',
+        'L 58 6',
+        'Z'
+      ].join(' ');
+      flask.setAttribute('d', d);
+      flask.setAttribute('fill', '#FFFFFF');
+      flask.setAttribute('stroke', '#34495E');
+      flask.setAttribute('stroke-width', '1.4');
+      flask.setAttribute('stroke-linejoin', 'round');
+      svg.appendChild(flask);
+
+      // Cork / lip
+      const lip = document.createElementNS(svgNS, 'rect');
+      lip.setAttribute('x', '34');
+      lip.setAttribute('y', '2');
+      lip.setAttribute('width', '28');
+      lip.setAttribute('height', '6');
+      lip.setAttribute('rx', '1.5');
+      lip.setAttribute('fill', '#E9ECEF');
+      lip.setAttribute('stroke', '#34495E');
+      lip.setAttribute('stroke-width', '1.0');
+      svg.appendChild(lip);
+
+      // Ball grid: place 100 balls in a 10×10 grid inside the body.
+      // Body interior bounding box (approx): x in [18, 78], y in [42, 128].
+      const X0 = 20, X1 = 76;
+      const Y0 = 50, Y1 = 128;
+      const stepX = (X1 - X0) / (GRID_COLS - 1);
+      const stepY = (Y1 - Y0) / (GRID_COLS - 1);
+
+      const ballsLayer = document.createElementNS(svgNS, 'g');
+      ballsLayer.setAttribute('class', 'balls-layer');
+      svg.appendChild(ballsLayer);
+
+      // Mild jitter so the grid doesn't look mechanical.
+      const rng = mulberry32(reader.id * 7919 + 3);
+
+      const blueColor   = '#0072B2'; // --color-pos
+      const yellowColor = '#D55E00'; // --color-neg (vermillion = "won't finish")
+
+      const positions = [];
+      for (let k = 0; k < URN_BALLS; k++) {
+        const row = Math.floor(k / GRID_COLS);
+        const col = k % GRID_COLS;
+        const jx = (rng() - 0.5) * 1.6;
+        const jy = (rng() - 0.5) * 1.6;
+        const cx = X0 + col * stepX + jx;
+        const cy = Y0 + row * stepY + jy;
+        positions.push([cx, cy]);
+
+        const c = document.createElementNS(svgNS, 'circle');
+        c.setAttribute('cx', cx);
+        c.setAttribute('cy', cy);
+        c.setAttribute('r', BALL_R);
+        c.setAttribute('fill', reader._isBlue[k] ? blueColor : yellowColor);
+        c.setAttribute('stroke', 'rgba(0,0,0,0.18)');
+        c.setAttribute('stroke-width', '0.4');
+        ballsLayer.appendChild(c);
+      }
+
+      // Stash positions for animation
+      svg._ballPositions = positions;
+      return svg;
+    }
+
+    // ============================================================
+    // Side tray (last 20 balls drawn, plus running totals)
+    // ============================================================
+    function appendToTray(color) {
+      state.lastDrawn.push(color);
+      if (state.lastDrawn.length > state.MAX_TRAY) state.lastDrawn.shift();
+      renderTray();
+    }
+    function renderTray() {
+      const wrap = document.getElementById('tray-balls');
+      if (!wrap) return;
+      wrap.innerHTML = '';
+      state.lastDrawn.forEach(c => {
+        const b = document.createElement('span');
+        b.className = 'tray-ball';
+        b.style.background = c;
+        wrap.appendChild(b);
+      });
+
+      // tray totals
+      let totN = 0, totW = 0;
+      for (const id in state.drawn) {
+        totN += state.drawn[id].n;
+        totW += state.drawn[id].whites;
+      }
+      const stats = document.getElementById('tray-stats');
+      if (stats) {
+        if (totN === 0) {
+          stats.innerHTML = '<em style="color:var(--color-text-muted)">No draws yet.</em>';
+        } else {
+          stats.innerHTML =
+            `Total draws: <strong>${totN}</strong><br>` +
+            `Blue: <strong style="color:var(--color-pos)">${totW}</strong> · ` +
+            `Vermillion: <strong style="color:var(--color-neg)">${totN - totW}</strong>`;
+        }
+      }
+    }
+
+    // ============================================================
+    // Estimator badge (per urn)
+    // ============================================================
+    function updateEstimatorBadge(reader) {
+      const card = document.querySelector(`.urn-card[data-rid="${reader.id}"]`);
+      if (!card) return;
+      const badge = card.querySelector('.estimator-badge');
+      const { n, whites } = state.drawn[reader.id];
+      if (n === 0) {
+        badge.classList.remove('has-data');
+        badge.textContent = 'n=0';
+        return;
+      }
+      const phat = whites / n;
+      // 1/sqrt(n) confidence width as a tiny bar above the number
+      const halfW = 1 / Math.sqrt(n);          // 0..1
+      const barW  = Math.min(28, halfW * 56);  // px
+      badge.classList.add('has-data');
+      badge.innerHTML =
+        `<span class="est-ci" style="width:${barW.toFixed(1)}px"></span>` +
+        `p̂=${phat.toFixed(2)}<br>n=${n}`;
+    }
+
+    // ============================================================
+    // Click → draw a ball, fly to tray
+    // ============================================================
+    function drawBall(reader, urnSvg, cardEl) {
+      // Sample Bernoulli(bias)
+      const isBlue = Math.random() < reader._bias;
+      const color  = isBlue ? '#0072B2' : '#D55E00';
+
+      // Pick a random ball position inside the urn for the launch point.
+      const positions = urnSvg._ballPositions;
+      const k = Math.floor(Math.random() * positions.length);
+      const [bx, by] = positions[k];
+
+      // Convert urn-local svg coords → screen coords
+      const svgRect = urnSvg.getBoundingClientRect();
+      const sx = svgRect.left + (bx / URN_W) * svgRect.width;
+      const sy = svgRect.top  + (by / URN_H) * svgRect.height;
+
+      // Find tray target position
+      const tray = document.getElementById('tray-balls');
+      const trayRect = tray ? tray.getBoundingClientRect() : null;
+      const tx = trayRect ? (trayRect.left + trayRect.width  - 14) : (window.innerWidth - 30);
+      const ty = trayRect ? (trayRect.top  + 16)                  : 30;
+
+      // Build flying ball
+      const fly = document.createElement('div');
+      fly.className = 'fly-ball';
+      fly.style.background = color;
+      fly.style.left = (sx - 7) + 'px';
+      fly.style.top  = (sy - 7) + 'px';
+      fly.style.transform = 'scale(1)';
+      document.getElementById('fly-layer').appendChild(fly);
+
+      // Force layout, then animate.
+      // eslint-disable-next-line no-unused-expressions
+      fly.offsetHeight;
+      requestAnimationFrame(() => {
+        fly.style.left = (tx - 7) + 'px';
+        fly.style.top  = (ty - 7) + 'px';
+        fly.style.transform = 'scale(0.85)';
+      });
+
+      // Update state immediately so badges feel snappy.
+      state.drawn[reader.id].n      += 1;
+      state.drawn[reader.id].whites += isBlue ? 1 : 0;
+      updateEstimatorBadge(reader);
+
+      // tiny pop on the source urn
+      cardEl.animate(
+        [{ transform: 'translateY(-2px) scale(1.0)' },
+         { transform: 'translateY(-4px) scale(1.02)' },
+         { transform: 'translateY(0)    scale(1.0)' }],
+        { duration: 280, easing: 'ease-out' }
+      );
+
+      // When ball arrives, drop into tray + fade
+      setTimeout(() => {
+        appendToTray(color);
+        fly.style.opacity = '0';
+        setTimeout(() => fly.remove(), 320);
+      }, 560);
+    }
+
+    // ============================================================
+    // RENDERERS
+    // ============================================================
+    const stageRoot = () => document.getElementById('stage-root');
+
+    function buildStageBar(opts = {}) {
+      // opts: { showCompress, showBack, label }
+      const bar = document.createElement('div');
+      bar.className = 'stage-bar';
+
+      const lbl = document.createElement('span');
+      lbl.className = 'stage-label';
+      lbl.textContent = opts.label || `Stage ${state.current}`;
+      bar.appendChild(lbl);
+
+      const spacer = document.createElement('div');
+      spacer.className = 'spacer';
+      bar.appendChild(spacer);
+
+      if (opts.showBack) {
+        const btn = document.createElement('button');
+        btn.className = 'secondary';
+        btn.textContent = opts.backLabel || '← Back to Stage 1';
+        btn.addEventListener('click', opts.onBack || (() => setStage(1)));
+        bar.appendChild(btn);
+      }
+      if (opts.showCompress) {
+        const btn = document.createElement('button');
+        btn.textContent = 'Compress →';
+        btn.title = 'Move to Stage 2';
+        btn.addEventListener('click', () => setStage(2));
+        bar.appendChild(btn);
+      }
+      if (opts.showForward) {
+        const btn = document.createElement('button');
+        btn.textContent = opts.forwardLabel || 'Next →';
+        btn.title = opts.forwardTitle || '';
+        btn.addEventListener('click', opts.onForward || (() => {}));
+        bar.appendChild(btn);
+      }
+      return bar;
+    }
+
+    function renderStage1() {
+      const root = stageRoot();
+      root.innerHTML = '';
+
+      root.appendChild(buildStageBar({
+        label: 'Stage 1 · Sample one urn at a time',
+        showCompress: true,
+      }));
+
+      const layout = document.createElement('div');
+      layout.className = 'stage1-layout';
+      root.appendChild(layout);
+
+      // -------- Carousel --------
+      const carousel = document.createElement('div');
+      carousel.className = 'carousel';
+      const track = document.createElement('div');
+      track.className = 'carousel-track';
+      carousel.appendChild(track);
+      layout.appendChild(carousel);
+
+      READERS.forEach(reader => {
+        const card = document.createElement('div');
+        card.className = 'urn-card';
+        card.dataset.rid = reader.id;
+
+        const badge = document.createElement('div');
+        badge.className = 'estimator-badge';
+        badge.textContent = 'n=0';
+        card.appendChild(badge);
+
+        const svg = buildUrnSVG(reader);
+        card.appendChild(svg);
+
+        const name = document.createElement('div');
+        name.className = 'reader-name';
+        name.textContent = reader.name;
+        card.appendChild(name);
+
+        const arch = document.createElement('div');
+        arch.className = 'archetype-label';
+        arch.textContent = archetypeLabel(reader);
+        card.appendChild(arch);
+
+        card.addEventListener('click', () => drawBall(reader, svg, card));
+
+        track.appendChild(card);
+
+        // If the user already drew from this reader (returning from Stage 2),
+        // restore the badge.
+        if (state.drawn[reader.id].n > 0) updateEstimatorBadge(reader);
+      });
+
+      // -------- Side tray --------
+      const tray = document.createElement('div');
+      tray.className = 'tray';
+      tray.innerHTML = `
+        <h3>Drawn balls</h3>
+        <p class="sub">Last ${state.MAX_TRAY} draws (any urn).</p>
+        <div id="tray-balls" class="tray-balls"></div>
+        <div id="tray-stats" class="tray-stats"></div>
+        <div class="legend-row">
+          <span><span class="sw" style="background:#0072B2"></span>finishes Russell</span>
+          <span><span class="sw" style="background:#D55E00"></span>doesn't finish</span>
+        </div>
+      `;
+      layout.appendChild(tray);
+
+      renderTray();
+    }
+
+    // ============================================================
+    // STAGE 2 — Compression: 21 reader-urns -> 4 archetype urns
+    // ============================================================
+
+    // Reader-id -> archetype mixture (verbatim from spec).
+    const READER_MIXTURES = {
+       1: { A1: 1.00 },                                 // Alice
+       2: { A1: 1.00 },                                 // Ben
+       3: { A1: 1.00 },                                 // Clara
+       4: { A1: 1.00 },                                 // David
+       5: { A2: 1.00 },                                 // Eleni
+       6: { A2: 1.00 },                                 // Felix
+       7: { A2: 1.00 },                                 // Greta
+       8: { A2: 1.00 },                                 // Hugo
+       9: { A3: 1.00 },                                 // Iris
+      10: { A3: 1.00 },                                 // Jonas
+      11: { A3: 1.00 },                                 // Karin
+      12: { A3: 1.00 },                                 // Liam
+      13: { A4: 1.00 },                                 // Maya
+      14: { A4: 1.00 },                                 // Nico
+      15: { A4: 1.00 },                                 // Oksana
+      16: { A4: 1.00 },                                 // Petros
+      17: { A1: 0.50, A2: 0.50 },                       // Quinn
+      18: { A1: 0.50, A3: 0.50 },                       // Rosa
+      19: { A1: 0.50, A2: 0.25, A3: 0.25 },             // Samir
+      20: { A1: 1.00 },                                 // Tessa
+      21: { A1: 1.00 },                                 // Ursula
+    };
+
+    const READER_NOTES = {
+      20: '≡ Alice',
+      21: '+ Borges anomaly',
+    };
+
+    // CVD-safe Okabe-Ito archetype palette
+    const ARCH_COLOR = {
+      A1: '#56B4E9', // sky blue (Commuter)
+      A2: '#CC79A7', // reddish purple (Literary)
+      A3: '#E69F00', // orange (Practical)
+      A4: '#009E73', // bluish green (Scholar / Demanding)
+    };
+    const ARCH_INFO = [
+      { id: 'A1', name: 'Commuter',  members: [1,2,3,4,17,18,19,20,21] },
+      { id: 'A2', name: 'Literary',  members: [5,6,7,8] },
+      { id: 'A3', name: 'Practical', members: [9,10,11,12] },
+      { id: 'A4', name: 'Scholar',   members: [13,14,15,16] },
+    ];
+
+    // For the archetype-urn rendering, we want to display the mean Russell
+    // bias for that archetype. Map A1..A4 to the canonical pure-archetype
+    // members so the urn pattern is deterministic.
+    function archetypeMeanBias(archId) {
+      // Pure-archetype reader IDs (R1..R16 only) determine the visual.
+      const pure = { A1:[1,2,3,4], A2:[5,6,7,8], A3:[9,10,11,12], A4:[13,14,15,16] };
+      const ids = pure[archId];
+      let s = 0;
+      ids.forEach(i => { s += biasFor(getReader(i)); });
+      return s / ids.length;
+    }
+
+    // Build a "synthetic" reader for an archetype so we can reuse buildUrnSVG.
+    function archetypeUrnReader(archId) {
+      const bias = archetypeMeanBias(archId);
+      const nBlue = Math.round(URN_BALLS * bias);
+      const idx = Array.from({ length: URN_BALLS }, (_, k) => k);
+      // Stable seed per archetype.
+      const seed = ({ A1: 11, A2: 22, A3: 33, A4: 44 })[archId] * 9173 + 7;
+      const rng = mulberry32(seed);
+      for (let i = idx.length - 1; i > 0; i--) {
+        const j = Math.floor(rng() * (i + 1));
+        const t = idx[i]; idx[i] = idx[j]; idx[j] = t;
+      }
+      const isBlue = new Uint8Array(URN_BALLS);
+      for (let k = 0; k < nBlue; k++) isBlue[idx[k]] = 1;
+      return { id: 1000 + archId.charCodeAt(1), name: archId, _bias: bias, _isBlue: isBlue };
+    }
+
+    // Capture per-reader card rects from the current Stage-1 DOM (if any).
+    // Returns map: reader.id -> {left, top, width, height} or null.
+    function captureStage1Rects() {
+      const map = {};
+      let any = false;
+      READERS.forEach(r => {
+        const card = document.querySelector(`.urn-card[data-rid="${r.id}"]`);
+        if (card) {
+          const svg = card.querySelector('svg.urn-svg');
+          const target = svg || card;
+          const rect = target.getBoundingClientRect();
+          map[r.id] = {
+            left: rect.left, top: rect.top,
+            width: rect.width, height: rect.height,
+          };
+          any = true;
+        } else {
+          map[r.id] = null;
+        }
+      });
+      return any ? map : null;
+    }
+
+    // Pick which archetype slot a reader collapses into during the entry
+    // animation. For mixed readers, pick the dominant (largest weight).
+    function dominantArchetype(rid) {
+      const mix = READER_MIXTURES[rid];
+      let best = null, bestW = -1;
+      Object.keys(mix).forEach(k => {
+        if (mix[k] > bestW) { bestW = mix[k]; best = k; }
+      });
+      return best;
+    }
+
+    function renderStage2(opts) {
+      opts = opts || {};
+      const rectsBefore = opts.skipAnim ? null : captureStage1Rects();
+
+      const root = stageRoot();
+      root.innerHTML = '';
+
+      root.appendChild(buildStageBar({
+        label: 'Stage 2 · Compress',
+        showBack: true,
+        backLabel: '← Back to Stage 1',
+        onBack: () => stage2ExitToStage1(),
+        showForward: true,
+        forwardLabel: 'Cold-start with Vera →',
+        forwardTitle: 'Move to Stage 3',
+        onForward: () => setStage(3),
+      }));
+
+      const layout = document.createElement('div');
+      layout.className = 'stage2-layout';
+      root.appendChild(layout);
+
+      const main = document.createElement('div');
+      main.className = 'stage2-main';
+      layout.appendChild(main);
+
+      // -------- Archetype urn row (D3-managed SVG) --------
+      const animWrap = document.createElement('div');
+      animWrap.className = 'stage2-anim';
+      main.appendChild(animWrap);
+
+      // Caption row (separate from SVG so HTML/text wraps cleanly).
+      const captionRow = document.createElement('div');
+      captionRow.style.display = 'grid';
+      captionRow.style.gridTemplateColumns = 'repeat(4, 1fr)';
+      captionRow.style.gap = '8px';
+      ARCH_INFO.forEach(a => {
+        const cell = document.createElement('div');
+        const cap = document.createElement('div');
+        cap.className = 'archetype-caption';
+        cap.style.color = ARCH_COLOR[a.id];
+        cap.textContent = `${a.id} · ${a.name}`;
+        const bias = document.createElement('div');
+        bias.className = 'archetype-bias';
+        bias.textContent = `mean p = ${archetypeMeanBias(a.id).toFixed(2)}`;
+        cell.appendChild(cap);
+        cell.appendChild(bias);
+        captionRow.appendChild(cell);
+      });
+      main.appendChild(captionRow);
+
+      // -------- Reader badge strip --------
+      const strip = document.createElement('div');
+      strip.className = 'badge-strip';
+      READERS.forEach(reader => {
+        const badge = document.createElement('div');
+        badge.className = 'reader-badge';
+
+        const name = document.createElement('div');
+        name.className = 'rb-name';
+        name.textContent = reader.name;
+        badge.appendChild(name);
+
+        const mix = document.createElement('div');
+        mix.className = 'rb-mix';
+        const proportions = READER_MIXTURES[reader.id] || {};
+        ['A1','A2','A3','A4'].forEach(k => {
+          const w = proportions[k];
+          if (w && w > 0) {
+            const seg = document.createElement('span');
+            seg.style.background = ARCH_COLOR[k];
+            seg.style.flex = String(w);
+            mix.appendChild(seg);
+          }
+        });
+        badge.appendChild(mix);
+
+        if (READER_NOTES[reader.id]) {
+          const note = document.createElement('div');
+          note.className = 'rb-note';
+          note.textContent = READER_NOTES[reader.id];
+          badge.appendChild(note);
+        }
+        strip.appendChild(badge);
+      });
+      main.appendChild(strip);
+
+      // -------- Side panel --------
+      const panel = document.createElement('div');
+      panel.className = 'stage2-panel';
+      panel.innerHTML = `
+        <h3>Compression</h3>
+        <div class="eqn" id="stage2-eqn">p_i = u_i^\\top v</div>
+        <div class="counter">
+          <strong>21 urns → 4 archetype urns.</strong><br>
+          Compression ratio <strong>5×</strong>.
+          <span class="sub">On the full matrix: 357 cells → 16 archetype interactions, 22× compression.</span>
+        </div>
+        <div class="legend-row">
+          <span><span class="sw" style="background:${ARCH_COLOR.A1}"></span>A1 Commuter</span>
+          <span><span class="sw" style="background:${ARCH_COLOR.A2}"></span>A2 Literary</span>
+          <span><span class="sw" style="background:${ARCH_COLOR.A3}"></span>A3 Practical</span>
+          <span><span class="sw" style="background:${ARCH_COLOR.A4}"></span>A4 Scholar</span>
+        </div>
+      `;
+      layout.appendChild(panel);
+
+      // KaTeX render the equation
+      const eqnEl = panel.querySelector('#stage2-eqn');
+      if (window.katex && eqnEl) {
+        try {
+          window.katex.render('p_i = u_i^{\\top} v', eqnEl, { throwOnError: false });
+        } catch (e) { /* leave raw */ }
+      } else if (eqnEl) {
+        // KaTeX may load late; retry once
+        const retry = () => {
+          if (window.katex) {
+            try { window.katex.render('p_i = u_i^{\\top} v', eqnEl, { throwOnError: false }); }
+            catch (e) { /* */ }
+          } else {
+            setTimeout(retry, 120);
+          }
+        };
+        setTimeout(retry, 60);
+      }
+
+      // -------- Build the D3 SVG with the 4 archetype urns --------
+      // We render each archetype urn into a <g> at a target slot.
+      // Then we (optionally) animate 21 reader "ghost" urns from their
+      // captured rects into the slot centers.
+      // After the animation, we leave the 4 archetype urns visible.
+
+      function layoutAndDrawArchetypes() {
+        // wipe svg
+        d3.select(animWrap).select('svg.anim-svg').remove();
+
+        const wrapRect = animWrap.getBoundingClientRect();
+        const W = wrapRect.width;
+        const H = wrapRect.height;
+        const svg = d3.select(animWrap).append('svg').attr('class', 'anim-svg')
+          .attr('viewBox', `0 0 ${W} ${H}`)
+          .attr('preserveAspectRatio', 'xMidYMid meet');
+
+        // Slot centers
+        const slotXs = [0.125, 0.375, 0.625, 0.875].map(p => p * W);
+        const slotY = H / 2;
+        const archScale = Math.min(1.0, (H - 20) / URN_H);
+
+        // Archetype urns
+        const archGroups = ARCH_INFO.map((a, i) => {
+          const g = svg.append('g')
+            .attr('class', `arch-urn arch-${a.id}`)
+            .attr('transform', `translate(${slotXs[i] - (URN_W * archScale) / 2}, ${slotY - (URN_H * archScale) / 2}) scale(${archScale})`);
+          // tinted halo behind the urn
+          g.append('rect')
+            .attr('x', 4).attr('y', 4)
+            .attr('width', URN_W - 8).attr('height', URN_H - 8)
+            .attr('rx', 12)
+            .attr('fill', ARCH_COLOR[a.id])
+            .attr('opacity', 0.10);
+          const urnSvg = buildUrnSVG(archetypeUrnReader(a.id));
+          // Append children of the urn SVG into the group so they layer.
+          while (urnSvg.firstChild) g.node().appendChild(urnSvg.firstChild);
+          return { id: a.id, slotX: slotXs[i], slotY, scale: archScale, gNode: g.node() };
+        });
+
+        return { svg, archGroups, W, H, slotXs, slotY, archScale };
+      }
+
+      // Defer layout until after the layout/style flush so getBoundingClientRect
+      // returns real sizes for animWrap.
+      requestAnimationFrame(() => {
+        const built = layoutAndDrawArchetypes();
+        if (rectsBefore && !opts.skipAnim) {
+          runEntryAnimation(built, rectsBefore);
+        }
+      });
+
+      // Re-layout on resize
+      const onResize = () => layoutAndDrawArchetypes();
+      window.addEventListener('resize', onResize);
+      // Stash for cleanup if we leave Stage 2
+      stageRoot()._stage2Cleanup = () => {
+        window.removeEventListener('resize', onResize);
+      };
+    }
+
+    // Animate 21 small reader-urns from their Stage 1 screen positions into
+    // the 4 archetype urn centers. Uses a fixed overlay so coordinates are
+    // viewport-relative and unaffected by Stage 1 DOM removal.
+    function runEntryAnimation(built, rectsBefore) {
+      const overlay = document.createElement('div');
+      overlay.style.cssText = `
+        position: fixed; left: 0; top: 0;
+        width: 100%; height: 100%;
+        pointer-events: none; z-index: 9998;
+      `;
+      document.body.appendChild(overlay);
+
+      const animSvgEl = document.querySelector('.stage2-anim svg.anim-svg');
+      const animSvgRect = animSvgEl.getBoundingClientRect();
+      // Map archetype slot center (in svg coords) -> viewport coords.
+      const slotViewport = {};
+      ARCH_INFO.forEach((a, i) => {
+        // animSvg viewBox is in CSS pixels matching its bounding rect, so
+        // svg-coord (built.slotXs[i], built.slotY) maps linearly:
+        const sx = animSvgRect.left + (built.slotXs[i] / built.W) * animSvgRect.width;
+        const sy = animSvgRect.top  + (built.slotY      / built.H) * animSvgRect.height;
+        slotViewport[a.id] = { x: sx, y: sy };
+      });
+
+      // Ghost urns
+      const ghostSize = 56;
+      const ghosts = [];
+      READERS.forEach(r => {
+        const rect = rectsBefore[r.id];
+        if (!rect) return;
+        const startX = rect.left + rect.width / 2;
+        const startY = rect.top  + rect.height / 2;
+        const targetArch = dominantArchetype(r.id);
+        const tgt = slotViewport[targetArch];
+
+        const wrap = document.createElement('div');
+        wrap.style.cssText = `
+          position: absolute;
+          left: ${startX - ghostSize / 2}px;
+          top:  ${startY - ghostSize / 2}px;
+          width: ${ghostSize}px; height: ${ghostSize * (URN_H / URN_W)}px;
+          opacity: 0.95;
+          will-change: transform, opacity, left, top;
+          transition: none;
+        `;
+        const svg = buildUrnSVG(r);
+        svg.setAttribute('width', ghostSize);
+        svg.setAttribute('height', ghostSize * (URN_H / URN_W));
+        wrap.appendChild(svg);
+        overlay.appendChild(wrap);
+        ghosts.push({ wrap, tgt });
+      });
+
+      // Hide archetype urns until ghosts arrive
+      d3.selectAll('.stage2-anim svg.anim-svg .arch-urn')
+        .style('opacity', 0);
+
+      // Run d3 transitions
+      const DUR = 1000;
+      ghosts.forEach((g, i) => {
+        d3.select(g.wrap)
+          .transition()
+          .duration(DUR)
+          .ease(d3.easeCubicInOut)
+          .delay(i * 8)
+          .styleTween('left', function () {
+            const startL = parseFloat(g.wrap.style.left);
+            const endL = g.tgt.x - 14;
+            return t => `${startL + (endL - startL) * t}px`;
+          })
+          .styleTween('top', function () {
+            const startT = parseFloat(g.wrap.style.top);
+            const endT = g.tgt.y - 14;
+            return t => `${startT + (endT - startT) * t}px`;
+          })
+          .styleTween('transform', () => t => `scale(${1 - 0.7 * t})`)
+          .style('opacity', 0)
+          .on('end', () => g.wrap.remove());
+      });
+
+      // Fade in archetype urns near the end
+      d3.selectAll('.stage2-anim svg.anim-svg .arch-urn')
+        .transition()
+        .delay(DUR * 0.55)
+        .duration(DUR * 0.45)
+        .ease(d3.easeCubicInOut)
+        .style('opacity', 1);
+
+      // Cleanup overlay
+      setTimeout(() => overlay.remove(), DUR + 400);
+    }
+
+    // Reverse animation: archetype urns expand back into 21 reader-urns,
+    // then we render Stage 1.
+    function stage2ExitToStage1() {
+      // Capture target rects by speculatively rendering Stage 1 off-screen?
+      // Simpler: pre-compute positions of where Stage 1 cards would land
+      // by temporarily rendering Stage 1, capturing rects, then re-rendering
+      // Stage 2 (current state) and animating outward.
+      //
+      // To keep the implementation light: just snapshot current archetype
+      // slot positions, render Stage 1 immediately, capture its card rects,
+      // and animate ghosts from arch-slots -> rects. Run the Stage-1 render
+      // first so target rects are real.
+
+      // 1) Capture archetype slot positions in viewport coords NOW.
+      const animSvgEl = document.querySelector('.stage2-anim svg.anim-svg');
+      const slotViewport = {};
+      if (animSvgEl) {
+        const animSvgRect = animSvgEl.getBoundingClientRect();
+        // We need built dimensions; recompute from svg viewBox.
+        const vb = animSvgEl.getAttribute('viewBox').split(' ').map(Number);
+        const Wvb = vb[2], Hvb = vb[3];
+        const slotXs = [0.125, 0.375, 0.625, 0.875].map(p => p * Wvb);
+        const slotY = Hvb / 2;
+        ARCH_INFO.forEach((a, i) => {
+          const sx = animSvgRect.left + (slotXs[i] / Wvb) * animSvgRect.width;
+          const sy = animSvgRect.top  + (slotY     / Hvb) * animSvgRect.height;
+          slotViewport[a.id] = { x: sx, y: sy };
+        });
+      }
+
+      // 2) Run cleanup for Stage 2 (resize listeners).
+      const root = stageRoot();
+      if (root._stage2Cleanup) { try { root._stage2Cleanup(); } catch (e) {} }
+
+      // 3) Render Stage 1 (so we have real target rects).
+      state.current = 1;
+      renderStage1();
+
+      // 4) Capture target rects.
+      const rectsAfter = captureStage1Rects();
+      if (!rectsAfter || !animSvgEl) return; // nothing to animate against
+
+      // 5) Build overlay and animate ghosts outward.
+      const overlay = document.createElement('div');
+      overlay.style.cssText = `
+        position: fixed; left: 0; top: 0;
+        width: 100%; height: 100%;
+        pointer-events: none; z-index: 9998;
+      `;
+      document.body.appendChild(overlay);
+
+      const ghostSize = 56;
+      const DUR = 900;
+      READERS.forEach((r, i) => {
+        const rect = rectsAfter[r.id];
+        if (!rect) return;
+        const targetArch = dominantArchetype(r.id);
+        const start = slotViewport[targetArch];
+        if (!start) return;
+
+        const wrap = document.createElement('div');
+        const startW = ghostSize * 0.3;
+        wrap.style.cssText = `
+          position: absolute;
+          left: ${start.x - startW / 2}px;
+          top:  ${start.y - startW / 2}px;
+          width: ${ghostSize}px; height: ${ghostSize * (URN_H / URN_W)}px;
+          opacity: 0;
+          transform: scale(0.3);
+          will-change: transform, opacity, left, top;
+        `;
+        const svg = buildUrnSVG(r);
+        svg.setAttribute('width', ghostSize);
+        svg.setAttribute('height', ghostSize * (URN_H / URN_W));
+        wrap.appendChild(svg);
+        overlay.appendChild(wrap);
+
+        const endX = rect.left + rect.width / 2;
+        const endY = rect.top  + rect.height / 2;
+        const endL = endX - ghostSize / 2;
+        const endT = endY - (ghostSize * (URN_H / URN_W)) / 2;
+        const startL = parseFloat(wrap.style.left);
+        const startT = parseFloat(wrap.style.top);
+
+        d3.select(wrap)
+          .transition()
+          .duration(DUR)
+          .ease(d3.easeCubicInOut)
+          .delay(i * 6)
+          .styleTween('left', () => t => `${startL + (endL - startL) * t}px`)
+          .styleTween('top',  () => t => `${startT + (endT - startT) * t}px`)
+          .styleTween('transform', () => t => `scale(${0.3 + 0.7 * t})`)
+          .style('opacity', 1)
+          .transition()
+          .duration(180)
+          .style('opacity', 0)
+          .on('end', () => wrap.remove());
+      });
+
+      setTimeout(() => overlay.remove(), DUR + 500);
+    }
+
+    // ============================================================
+    // STAGE 3 — Cold-start with Vera: Naïve sampling vs Archetype Q&A
+    // ============================================================
+
+    // Vera's data — cold-start reader
+    const COLD = (window.RECSYS && window.RECSYS.COLD_START_READER) || {
+      id: 22,
+      name: 'Vera',
+      trueArchetype: 'A1',
+      trueEmbedding: [+1, +1],
+      visibleRatings: { 2: +1 },
+      profileQuestions: [
+        { q: 'Fiction or nonfiction?', options: ['fiction','nonfiction'], correctAnswer: 'fiction', axis: 'x', signalIfCorrect: +1 },
+        { q: 'Light or demanding?',    options: ['light','demanding'],    correctAnswer: 'light',   axis: 'y', signalIfCorrect: +1 },
+      ],
+    };
+    const VERA_TRUE_BIAS = 0.08; // A1 mean Russell bias
+    const RUSSELL_EMB = [-1, -1]; // book id 16
+
+    // Linear mapping from dot-product score (range -2..+2) to bias (0.08..0.92)
+    function scoreToBias(score) {
+      // -2 -> 0.08, 0 -> 0.50, +2 -> 0.92  ⇒  bias = 0.50 + 0.21 * score
+      return 0.50 + 0.21 * score;
+    }
+
+    // Local Stage-3 state (reset on entry)
+    const stage3State = {
+      pathA: { n: 0, whites: 0 },
+      pathB: { embedding: [0, 0], answered: { x: false, y: false } },
+    };
+
+    function resetPathA() {
+      stage3State.pathA = { n: 0, whites: 0 };
+    }
+    function resetPathB() {
+      stage3State.pathB = { embedding: [0, 0], answered: { x: false, y: false } };
+    }
+
+    function renderStage3() {
+      const root = stageRoot();
+      root.innerHTML = '';
+
+      // Reset the two demo paths every time we enter Stage 3 fresh.
+      resetPathA();
+      resetPathB();
+
+      root.appendChild(buildStageBar({
+        label: 'Stage 3 · Cold-start with Vera',
+        showBack: true,
+        backLabel: '← Back to Stage 2',
+        onBack: () => setStage(2),
+      }));
+
+      // Outer two-column layout
+      const layout = document.createElement('div');
+      layout.style.display = 'grid';
+      layout.style.gridTemplateColumns = '1fr 1fr';
+      layout.style.gap = '18px';
+      layout.style.alignItems = 'stretch';
+      layout.className = 'stage3-layout';
+      root.appendChild(layout);
+
+      // Stack on narrow screens
+      const mq = window.matchMedia('(max-width: 900px)');
+      const applyMq = () => {
+        layout.style.gridTemplateColumns = mq.matches ? '1fr' : '1fr 1fr';
+      };
+      applyMq();
+      mq.addEventListener('change', applyMq);
+
+      // Build the two panels
+      const panelA = buildPathAPanel();
+      const panelB = buildPathBPanel();
+      layout.appendChild(panelA);
+      layout.appendChild(panelB);
+      // Now that both panels are in the DOM, draw their initial state.
+      renderPathBState();
+
+      // -------- Comparison summary (bottom) --------
+      const summary = document.createElement('div');
+      summary.id = 'stage3-summary';
+      summary.style.cssText = `
+        margin-top: 18px;
+        background: var(--color-neu-bg);
+        border: 1px solid var(--color-border);
+        border-radius: 10px;
+        padding: 14px 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      `;
+      summary.innerHTML = `
+        <h3 style="margin:0;font-weight:500;font-size:0.98rem;color:var(--color-header-start);">
+          Comparison
+        </h3>
+        <div id="stage3-summary-rows" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;font-size:0.88rem;font-variant-numeric:tabular-nums;">
+          <div id="summary-A" style="background:white;border:1px solid var(--color-border);border-radius:8px;padding:10px 12px;">
+            <strong style="color:#0072B2">Path A · Naïve</strong><br>
+            <span style="color:var(--color-text-muted)">No draws yet. Click Vera's urn.</span>
+          </div>
+          <div id="summary-B" style="background:white;border:1px solid var(--color-border);border-radius:8px;padding:10px 12px;">
+            <strong style="color:#009E73">Path B · Archetype</strong><br>
+            <span style="color:var(--color-text-muted)">Answer the two questions.</span>
+          </div>
+        </div>
+        <p style="margin:4px 0 0;font-size:0.86rem;color:var(--color-text);line-height:1.5;">
+          The first 3 ratings of a new user are worth more than the next 30. Two yes/no
+          answers carry <strong>2 bits</strong> of information — exactly the entropy needed
+          to identify one of four archetypes.
+          <span style="color:var(--color-text-muted);font-style:italic;">(Shannon, 1948.)</span>
+        </p>
+      `;
+      root.appendChild(summary);
+
+      // Cleanup hook
+      stageRoot()._stage3Cleanup = () => {
+        mq.removeEventListener('change', applyMq);
+      };
+
+      // Initial summary update
+      updateStage3Summary();
+    }
+
+    // ---------------- Path A: Naïve sampling ----------------
+    function buildPathAPanel() {
+      const wrap = document.createElement('div');
+      wrap.style.cssText = `
+        background: var(--color-neu-bg);
+        border: 1px solid var(--color-border);
+        border-radius: 10px;
+        padding: 14px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        min-height: 460px;
+      `;
+
+      const head = document.createElement('div');
+      head.style.cssText = 'display:flex;align-items:center;gap:8px;justify-content:space-between;';
+      head.innerHTML = `
+        <h3 style="margin:0;font-size:1rem;font-weight:500;color:#0072B2;">
+          Path A · Naïve sampling
+        </h3>
+      `;
+      const resetBtn = document.createElement('button');
+      resetBtn.className = 'secondary';
+      resetBtn.textContent = 'Reset';
+      resetBtn.style.cssText = `
+        background: white; color: var(--color-header-end);
+        border: 1px solid var(--color-border); border-radius: 6px;
+        padding: 4px 10px; font-size: 0.78rem; cursor: pointer;
+      `;
+      resetBtn.addEventListener('click', () => {
+        resetPathA();
+        renderPathAState();
+      });
+      head.appendChild(resetBtn);
+      wrap.appendChild(head);
+
+      const sub = document.createElement('p');
+      sub.style.cssText = 'margin:0;font-size:0.82rem;color:var(--color-text-muted);';
+      sub.innerHTML = `
+        System knows only one rating from Vera (Christie · Light Fiction · ✓).
+        Estimate her bias on Russell by sampling.
+      `;
+      wrap.appendChild(sub);
+
+      // Vera urn (centered)
+      const urnHolder = document.createElement('div');
+      urnHolder.style.cssText = `
+        display:flex; flex-direction:column; align-items:center;
+        gap: 6px; padding: 8px;
+      `;
+      // Build a synthetic Vera urn reader using the true bias 0.08 (audience
+      // doesn't see this — they observe via draws).
+      const veraUrnReader = (function () {
+        const bias = VERA_TRUE_BIAS;
+        const nBlue = Math.round(URN_BALLS * bias);
+        const idx = Array.from({ length: URN_BALLS }, (_, k) => k);
+        const rng = mulberry32(2222);
+        for (let i = idx.length - 1; i > 0; i--) {
+          const j = Math.floor(rng() * (i + 1));
+          const t = idx[i]; idx[i] = idx[j]; idx[j] = t;
+        }
+        const isBlue = new Uint8Array(URN_BALLS);
+        for (let k = 0; k < nBlue; k++) isBlue[idx[k]] = 1;
+        return { id: 22, name: 'Vera', _bias: bias, _isBlue: isBlue };
+      })();
+
+      const urnSvg = buildUrnSVG(veraUrnReader);
+      urnSvg.style.cursor = 'pointer';
+      urnSvg.style.transition = 'transform 0.12s';
+      urnHolder.appendChild(urnSvg);
+
+      const nameLbl = document.createElement('div');
+      nameLbl.style.cssText = 'font-size:0.88rem;font-weight:600;';
+      nameLbl.textContent = 'Vera';
+      urnHolder.appendChild(nameLbl);
+
+      const drawBtn = document.createElement('button');
+      drawBtn.textContent = 'Draw a ball from Vera’s urn';
+      drawBtn.style.cssText = `
+        background: var(--color-header-end); color: white;
+        border: none; border-radius: 8px;
+        padding: 8px 14px; font-size: 0.9rem; cursor: pointer;
+      `;
+      drawBtn.addEventListener('click', () => {
+        if (stage3State.pathA.n >= 30) return;
+        const isBlue = Math.random() < VERA_TRUE_BIAS;
+        stage3State.pathA.n      += 1;
+        stage3State.pathA.whites += isBlue ? 1 : 0;
+        // tiny pop animation on the urn
+        urnSvg.animate(
+          [{ transform: 'scale(1.0)' },
+           { transform: 'scale(1.04)' },
+           { transform: 'scale(1.0)' }],
+          { duration: 220, easing: 'ease-out' }
+        );
+        renderPathAState();
+      });
+      urnSvg.addEventListener('click', () => drawBtn.click());
+      urnHolder.appendChild(drawBtn);
+      wrap.appendChild(urnHolder);
+
+      // Estimator readout + band
+      const readout = document.createElement('div');
+      readout.id = 'pathA-readout';
+      readout.style.cssText = `
+        background: white;
+        border: 1px solid var(--color-border);
+        border-radius: 8px;
+        padding: 10px 12px;
+        font-size: 0.88rem;
+        font-variant-numeric: tabular-nums;
+      `;
+      wrap.appendChild(readout);
+
+      // Confidence-band SVG (horizontal, 0..1 axis)
+      const bandSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      bandSvg.setAttribute('id', 'pathA-band');
+      bandSvg.setAttribute('width', '100%');
+      bandSvg.setAttribute('height', '52');
+      bandSvg.setAttribute('viewBox', '0 0 300 52');
+      bandSvg.setAttribute('preserveAspectRatio', 'none');
+      bandSvg.style.cssText = 'display:block;background:white;border:1px solid var(--color-border);border-radius:8px;';
+      wrap.appendChild(bandSvg);
+
+      // Save references for state-driven render
+      wrap._refs = { drawBtn, readout, bandSvg };
+      wrap.id = 'panelA';
+
+      renderPathAState();
+      return wrap;
+    }
+
+    function renderPathAState() {
+      const wrap = document.getElementById('panelA');
+      if (!wrap) return;
+      const { drawBtn, readout, bandSvg } = wrap._refs;
+      const { n, whites } = stage3State.pathA;
+      if (n === 0) {
+        readout.innerHTML = `
+          <div style="color:var(--color-text-muted)">No draws yet. Click the urn or button.</div>
+          <div style="margin-top:4px;">Counter: <strong>0 / 30</strong></div>
+        `;
+      } else {
+        const phat = whites / n;
+        const half = 1 / Math.sqrt(n);
+        const lo = Math.max(0, phat - half);
+        const hi = Math.min(1, phat + half);
+        readout.innerHTML = `
+          <div>Estimate: <strong style="color:#0072B2">p̂ = ${phat.toFixed(2)}</strong>
+            <span style="color:var(--color-text-muted)"> ± ${half.toFixed(2)}</span>
+          </div>
+          <div style="margin-top:4px;">
+            Counter: <strong>${n} / 30</strong>
+            · Blue: <strong style="color:#0072B2">${whites}</strong>
+            · Vermillion: <strong style="color:#D55E00">${n - whites}</strong>
+          </div>
+          <div style="margin-top:2px;color:var(--color-text-muted);font-size:0.78rem;">
+            CI = p̂ ± 1/√n = [${lo.toFixed(2)}, ${hi.toFixed(2)}]
+          </div>
+        `;
+      }
+      drawBtn.disabled = (n >= 30);
+      drawBtn.style.opacity = drawBtn.disabled ? '0.55' : '1';
+      drawBtn.style.cursor = drawBtn.disabled ? 'default' : 'pointer';
+      if (n >= 30) drawBtn.textContent = 'Done · 30 draws';
+
+      // Render band
+      drawBand(bandSvg, n, whites);
+      updateStage3Summary();
+    }
+
+    // Generic horizontal probability band SVG: axis 0..1, point at p̂,
+    // horizontal bar for [p̂ - half, p̂ + half].
+    function drawBand(svg, n, whites, opts) {
+      opts = opts || {};
+      while (svg.firstChild) svg.removeChild(svg.firstChild);
+      const W = 300, H = 52;
+      const PAD_L = 28, PAD_R = 14;
+      const xMin = PAD_L, xMax = W - PAD_R;
+      const xFor = p => xMin + p * (xMax - xMin);
+
+      // Axis line
+      const axis = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      axis.setAttribute('x1', xMin); axis.setAttribute('x2', xMax);
+      axis.setAttribute('y1', 36); axis.setAttribute('y2', 36);
+      axis.setAttribute('stroke', '#999'); axis.setAttribute('stroke-width', '1');
+      svg.appendChild(axis);
+
+      // Tick labels 0, 0.5, 1
+      [0, 0.5, 1].forEach(t => {
+        const tx = xFor(t);
+        const tick = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        tick.setAttribute('x1', tx); tick.setAttribute('x2', tx);
+        tick.setAttribute('y1', 32); tick.setAttribute('y2', 40);
+        tick.setAttribute('stroke', '#999'); tick.setAttribute('stroke-width', '1');
+        svg.appendChild(tick);
+        const lbl = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        lbl.setAttribute('x', tx); lbl.setAttribute('y', 50);
+        lbl.setAttribute('text-anchor', 'middle');
+        lbl.setAttribute('font-size', '9');
+        lbl.setAttribute('fill', '#666');
+        lbl.textContent = t.toFixed(1);
+        svg.appendChild(lbl);
+      });
+
+      // Truth marker (faint dashed) — 0.08
+      if (opts.showTruth !== false) {
+        const tx = xFor(0.08);
+        const tline = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        tline.setAttribute('x1', tx); tline.setAttribute('x2', tx);
+        tline.setAttribute('y1', 8); tline.setAttribute('y2', 30);
+        tline.setAttribute('stroke', '#888');
+        tline.setAttribute('stroke-width', '1');
+        tline.setAttribute('stroke-dasharray', '2,2');
+        svg.appendChild(tline);
+        const tlbl = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        tlbl.setAttribute('x', tx); tlbl.setAttribute('y', 8);
+        tlbl.setAttribute('text-anchor', 'middle');
+        tlbl.setAttribute('font-size', '8');
+        tlbl.setAttribute('fill', '#888');
+        tlbl.textContent = 'truth=0.08';
+        svg.appendChild(tlbl);
+      }
+
+      if (n === 0 && !opts.fixedP) return;
+
+      const phat = opts.fixedP != null ? opts.fixedP : whites / n;
+      const half = opts.fixedHalf != null ? opts.fixedHalf : 1 / Math.sqrt(n);
+      const lo = Math.max(0, phat - half);
+      const hi = Math.min(1, phat + half);
+      const color = opts.color || '#0072B2';
+
+      // Band rect
+      const band = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+      band.setAttribute('x', xFor(lo));
+      band.setAttribute('y', 22);
+      band.setAttribute('width', xFor(hi) - xFor(lo));
+      band.setAttribute('height', 8);
+      band.setAttribute('fill', color);
+      band.setAttribute('opacity', '0.28');
+      band.setAttribute('rx', '2');
+      svg.appendChild(band);
+
+      // End caps
+      [lo, hi].forEach(p => {
+        const cap = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        cap.setAttribute('x1', xFor(p)); cap.setAttribute('x2', xFor(p));
+        cap.setAttribute('y1', 19); cap.setAttribute('y2', 33);
+        cap.setAttribute('stroke', color); cap.setAttribute('stroke-width', '1.5');
+        svg.appendChild(cap);
+      });
+
+      // Point estimate
+      const dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      dot.setAttribute('cx', xFor(phat)); dot.setAttribute('cy', 26);
+      dot.setAttribute('r', 4);
+      dot.setAttribute('fill', color);
+      dot.setAttribute('stroke', 'white');
+      dot.setAttribute('stroke-width', '1.2');
+      svg.appendChild(dot);
+    }
+
+    // ---------------- Path B: Archetype Q&A ----------------
+    function buildPathBPanel() {
+      const wrap = document.createElement('div');
+      wrap.id = 'panelB';
+      wrap.style.cssText = `
+        background: var(--color-neu-bg);
+        border: 1px solid var(--color-border);
+        border-radius: 10px;
+        padding: 14px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        min-height: 460px;
+      `;
+
+      const head = document.createElement('div');
+      head.style.cssText = 'display:flex;align-items:center;gap:8px;justify-content:space-between;';
+      head.innerHTML = `
+        <h3 style="margin:0;font-size:1rem;font-weight:500;color:#009E73;">
+          Path B · Archetype Q&amp;A
+        </h3>
+      `;
+      const resetBtn = document.createElement('button');
+      resetBtn.className = 'secondary';
+      resetBtn.textContent = 'Reset';
+      resetBtn.style.cssText = `
+        background: white; color: var(--color-header-end);
+        border: 1px solid var(--color-border); border-radius: 6px;
+        padding: 4px 10px; font-size: 0.78rem; cursor: pointer;
+      `;
+      resetBtn.addEventListener('click', () => {
+        resetPathB();
+        renderPathBState();
+      });
+      head.appendChild(resetBtn);
+      wrap.appendChild(head);
+
+      const sub = document.createElement('p');
+      sub.style.cssText = 'margin:0;font-size:0.82rem;color:var(--color-text-muted);';
+      sub.innerHTML = `
+        Ask Vera two yes/no questions to place her in the 2-D archetype space,
+        then predict her bias on Russell as a dot product.
+      `;
+      wrap.appendChild(sub);
+
+      // 2D plot (centered)
+      const plotHolder = document.createElement('div');
+      plotHolder.style.cssText = 'display:flex;justify-content:center;padding:6px;';
+      const plot = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      plot.setAttribute('id', 'pathB-plot');
+      plot.setAttribute('width', '220');
+      plot.setAttribute('height', '220');
+      plot.setAttribute('viewBox', '0 0 220 220');
+      plot.style.cssText = 'background:white;border:1px solid var(--color-border);border-radius:8px;';
+      plotHolder.appendChild(plot);
+      wrap.appendChild(plotHolder);
+
+      // Question buttons row
+      const qWrap = document.createElement('div');
+      qWrap.id = 'pathB-questions';
+      qWrap.style.cssText = 'display:flex;flex-direction:column;gap:8px;';
+      wrap.appendChild(qWrap);
+
+      // Prediction readout
+      const pred = document.createElement('div');
+      pred.id = 'pathB-readout';
+      pred.style.cssText = `
+        background: white;
+        border: 1px solid var(--color-border);
+        border-radius: 8px;
+        padding: 10px 12px;
+        font-size: 0.88rem;
+        font-variant-numeric: tabular-nums;
+      `;
+      wrap.appendChild(pred);
+
+      // Confidence band (tight)
+      const bandSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      bandSvg.setAttribute('id', 'pathB-band');
+      bandSvg.setAttribute('width', '100%');
+      bandSvg.setAttribute('height', '52');
+      bandSvg.setAttribute('viewBox', '0 0 300 52');
+      bandSvg.setAttribute('preserveAspectRatio', 'none');
+      bandSvg.style.cssText = 'display:block;background:white;border:1px solid var(--color-border);border-radius:8px;';
+      wrap.appendChild(bandSvg);
+
+      const caption = document.createElement('p');
+      caption.style.cssText = 'margin:2px 0 0;font-size:0.82rem;color:var(--color-text);text-align:center;line-height:1.4;';
+      caption.innerHTML = `
+        2 questions = <strong>2 bits</strong> = exact archetype identification
+        <span style="color:var(--color-text-muted)">(Shannon).</span>
+      `;
+      wrap.appendChild(caption);
+
+      wrap._refs = { plot, qWrap, pred, bandSvg };
+      // Don't call renderPathBState() here — `wrap` isn't yet attached to the
+      // DOM, so document.getElementById('panelB') would return null and the
+      // function would early-bail. The caller (renderStage3) calls it after
+      // appending the panel.
+      return wrap;
+    }
+
+    // Plot constants
+    const PB = { W: 220, H: 220, PAD: 24 };
+    function pbX(x) { return PB.PAD + ((x + 1) / 2) * (PB.W - 2 * PB.PAD); }
+    function pbY(y) { return (PB.H - PB.PAD) - ((y + 1) / 2) * (PB.H - 2 * PB.PAD); }
+
+    function drawPathBPlot() {
+      const wrap = document.getElementById('panelB');
+      if (!wrap) return;
+      const { plot } = wrap._refs;
+      while (plot.firstChild) plot.removeChild(plot.firstChild);
+      const svgNS = 'http://www.w3.org/2000/svg';
+
+      // Quadrant tints (faint)
+      const corners = [
+        { id: 'A1', x:  1, y:  1 }, // top-right
+        { id: 'A2', x:  1, y: -1 }, // bottom-right
+        { id: 'A3', x: -1, y:  1 }, // top-left
+        { id: 'A4', x: -1, y: -1 }, // bottom-left
+      ];
+
+      // Axes
+      const xAx = document.createElementNS(svgNS, 'line');
+      xAx.setAttribute('x1', pbX(-1)); xAx.setAttribute('x2', pbX(1));
+      xAx.setAttribute('y1', pbY(0));  xAx.setAttribute('y2', pbY(0));
+      xAx.setAttribute('stroke', '#bbb'); xAx.setAttribute('stroke-width', '1');
+      plot.appendChild(xAx);
+      const yAx = document.createElementNS(svgNS, 'line');
+      yAx.setAttribute('x1', pbX(0)); yAx.setAttribute('x2', pbX(0));
+      yAx.setAttribute('y1', pbY(-1)); yAx.setAttribute('y2', pbY(1));
+      yAx.setAttribute('stroke', '#bbb'); yAx.setAttribute('stroke-width', '1');
+      plot.appendChild(yAx);
+
+      // Axis end labels (small)
+      const ax_lbls = [
+        { txt: 'fiction →',     x:  0.96, y:  0.08, anchor: 'end' },
+        { txt: '← nonfiction',  x: -0.96, y:  0.08, anchor: 'start' },
+        { txt: 'light',         x:  0.04, y:  0.96, anchor: 'start' },
+        { txt: 'demanding',     x:  0.04, y: -0.96, anchor: 'start' },
+      ];
+      ax_lbls.forEach(l => {
+        const t = document.createElementNS(svgNS, 'text');
+        t.setAttribute('x', pbX(l.x));
+        t.setAttribute('y', pbY(l.y));
+        t.setAttribute('font-size', '8.5');
+        t.setAttribute('fill', '#888');
+        t.setAttribute('text-anchor', l.anchor);
+        t.textContent = l.txt;
+        plot.appendChild(t);
+      });
+
+      // Corner archetype labels
+      corners.forEach(c => {
+        const dot = document.createElementNS(svgNS, 'circle');
+        dot.setAttribute('cx', pbX(c.x));
+        dot.setAttribute('cy', pbY(c.y));
+        dot.setAttribute('r', '4');
+        dot.setAttribute('fill', ARCH_COLOR[c.id]);
+        dot.setAttribute('stroke', 'white');
+        dot.setAttribute('stroke-width', '1.2');
+        plot.appendChild(dot);
+        const t = document.createElementNS(svgNS, 'text');
+        const dx = c.x > 0 ? -6 : 6;
+        const dy = c.y > 0 ? 12 : -6;
+        t.setAttribute('x', pbX(c.x) + dx);
+        t.setAttribute('y', pbY(c.y) + dy);
+        t.setAttribute('font-size', '11');
+        t.setAttribute('font-weight', '600');
+        t.setAttribute('fill', ARCH_COLOR[c.id]);
+        t.setAttribute('text-anchor', c.x > 0 ? 'end' : 'start');
+        t.textContent = c.id;
+        plot.appendChild(t);
+      });
+
+      // Russell marker (book at A4 = -1,-1)
+      const russ = document.createElementNS(svgNS, 'g');
+      russ.setAttribute('transform', `translate(${pbX(-1)}, ${pbY(-1)})`);
+      const rm = document.createElementNS(svgNS, 'path');
+      // tiny book glyph: rotated square outline
+      rm.setAttribute('d', 'M -4 -4 L 4 -4 L 4 4 L -4 4 Z');
+      rm.setAttribute('fill', 'none');
+      rm.setAttribute('stroke', '#444');
+      rm.setAttribute('stroke-width', '1.2');
+      russ.appendChild(rm);
+      plot.appendChild(russ);
+      // (label is already shown by A4 corner; skip duplicate)
+
+      // Vera dot — animated to current embedding
+      const [vx, vy] = stage3State.pathB.embedding;
+      const vera = document.createElementNS(svgNS, 'circle');
+      vera.setAttribute('id', 'vera-dot');
+      vera.setAttribute('cx', pbX(vx));
+      vera.setAttribute('cy', pbY(vy));
+      vera.setAttribute('r', '7');
+      vera.setAttribute('fill', '#009E73');
+      vera.setAttribute('stroke', 'white');
+      vera.setAttribute('stroke-width', '2');
+      plot.appendChild(vera);
+      const vlbl = document.createElementNS(svgNS, 'text');
+      vlbl.setAttribute('id', 'vera-label');
+      vlbl.setAttribute('x', pbX(vx) + 10);
+      vlbl.setAttribute('y', pbY(vy) - 8);
+      vlbl.setAttribute('font-size', '10');
+      vlbl.setAttribute('font-weight', '600');
+      vlbl.setAttribute('fill', '#009E73');
+      vlbl.textContent = 'Vera';
+      plot.appendChild(vlbl);
+    }
+
+    function animateVeraTo(targetX, targetY) {
+      const dot = document.getElementById('vera-dot');
+      const lbl = document.getElementById('vera-label');
+      if (!dot) return;
+      const startX = stage3State.pathB.embedding[0];
+      const startY = stage3State.pathB.embedding[1];
+      const t0 = performance.now();
+      const DUR = 480;
+      function step(t) {
+        const u = Math.min(1, (t - t0) / DUR);
+        const ease = u < 0.5 ? 2 * u * u : 1 - Math.pow(-2 * u + 2, 2) / 2;
+        const cx = startX + (targetX - startX) * ease;
+        const cy = startY + (targetY - startY) * ease;
+        dot.setAttribute('cx', pbX(cx));
+        dot.setAttribute('cy', pbY(cy));
+        if (lbl) {
+          lbl.setAttribute('x', pbX(cx) + 10);
+          lbl.setAttribute('y', pbY(cy) - 8);
+        }
+        if (u < 1) requestAnimationFrame(step);
+        else {
+          stage3State.pathB.embedding = [targetX, targetY];
+          renderPathBState();
+        }
+      }
+      requestAnimationFrame(step);
+    }
+
+    function renderPathBState() {
+      const wrap = document.getElementById('panelB');
+      if (!wrap) return;
+      const { qWrap, pred, bandSvg } = wrap._refs;
+
+      // Plot
+      drawPathBPlot();
+
+      // Build question UI
+      qWrap.innerHTML = '';
+      const ans = stage3State.pathB.answered;
+      const Q = COLD.profileQuestions;
+
+      const mkQ = (q, idx, disabled) => {
+        const row = document.createElement('div');
+        row.style.cssText = `
+          display:flex; align-items:center; gap:8px;
+          background: white; border:1px solid var(--color-border);
+          border-radius: 8px; padding: 8px 10px;
+          ${disabled ? 'opacity: 0.55;' : ''}
+        `;
+        const label = document.createElement('div');
+        label.style.cssText = 'flex:1;font-size:0.86rem;';
+        label.innerHTML = `<strong>Q${idx + 1}.</strong> ${q.q}`;
+        row.appendChild(label);
+
+        q.options.forEach(opt => {
+          const b = document.createElement('button');
+          b.textContent = opt[0].toUpperCase() + opt.slice(1);
+          b.style.cssText = `
+            background: var(--color-header-end); color: white;
+            border: none; border-radius: 6px;
+            padding: 5px 10px; font-size: 0.82rem;
+            cursor: ${disabled ? 'default' : 'pointer'};
+          `;
+          if (disabled) b.disabled = true;
+          b.addEventListener('click', () => {
+            const sign = (opt === q.correctAnswer) ? q.signalIfCorrect : -q.signalIfCorrect;
+            // Map answer to embedding axis
+            const cur = stage3State.pathB.embedding.slice();
+            if (q.axis === 'x') {
+              ans.x = true;
+              animateVeraTo(sign, cur[1]);
+            } else {
+              ans.y = true;
+              animateVeraTo(cur[0], sign);
+            }
+          });
+          row.appendChild(b);
+        });
+        return row;
+      };
+
+      // Q1 always visible; Q2 only after Q1 answered
+      qWrap.appendChild(mkQ(Q[0], 0, ans.x));
+      if (ans.x) qWrap.appendChild(mkQ(Q[1], 1, ans.y));
+      else {
+        const hint = document.createElement('div');
+        hint.style.cssText = 'font-size:0.78rem;color:var(--color-text-muted);font-style:italic;padding:0 4px;';
+        hint.textContent = 'Q2 unlocks after Q1.';
+        qWrap.appendChild(hint);
+      }
+
+      // Prediction readout + band
+      if (ans.x && ans.y) {
+        const [vx, vy] = stage3State.pathB.embedding;
+        const score = vx * RUSSELL_EMB[0] + vy * RUSSELL_EMB[1];
+        const bias = scoreToBias(score);
+        pred.innerHTML = `
+          <div>Vera's embedding: <strong>(${vx.toFixed(0)}, ${vy.toFixed(0)})</strong>
+            · Russell's: <strong>(-1, -1)</strong>
+          </div>
+          <div style="margin-top:4px;">
+            Predicted bias:
+            <strong style="color:#009E73">p̂ = ${bias.toFixed(2)}</strong>
+            <span style="color:var(--color-text-muted)"> ± 0.05</span>
+            <span style="color:var(--color-text-muted)"> · score = ${score.toFixed(0)}</span>
+          </div>
+        `;
+        drawBand(bandSvg, 0, 0, { fixedP: bias, fixedHalf: 0.05, color: '#009E73' });
+      } else {
+        pred.innerHTML = `
+          <div style="color:var(--color-text-muted)">
+            Answer both questions to predict Vera's bias on Russell.
+          </div>
+        `;
+        drawBand(bandSvg, 0, 0, { fixedP: null });
+      }
+      updateStage3Summary();
+    }
+
+    function updateStage3Summary() {
+      const sA = document.getElementById('summary-A');
+      const sB = document.getElementById('summary-B');
+      if (!sA || !sB) return;
+
+      const { n, whites } = stage3State.pathA;
+      if (n === 0) {
+        sA.innerHTML = `
+          <strong style="color:#0072B2">Path A · Naïve</strong><br>
+          <span style="color:var(--color-text-muted)">No draws yet. Click Vera's urn.</span>
+        `;
+      } else {
+        const phat = whites / n;
+        const half = 1 / Math.sqrt(n);
+        sA.innerHTML = `
+          <strong style="color:#0072B2">Path A · Naïve</strong><br>
+          ${n} draws · estimate <strong>p̂ = ${phat.toFixed(2)}</strong> ± ${half.toFixed(2)}<br>
+          <span style="color:var(--color-text-muted)">Time spent: ${n} click${n === 1 ? '' : 's'}.</span>
+        `;
+      }
+
+      const ans = stage3State.pathB.answered;
+      if (!ans.x || !ans.y) {
+        sB.innerHTML = `
+          <strong style="color:#009E73">Path B · Archetype</strong><br>
+          <span style="color:var(--color-text-muted)">
+            ${(ans.x ? 1 : 0) + (ans.y ? 1 : 0)} / 2 questions answered.
+          </span>
+        `;
+      } else {
+        const [vx, vy] = stage3State.pathB.embedding;
+        const score = vx * RUSSELL_EMB[0] + vy * RUSSELL_EMB[1];
+        const bias = scoreToBias(score);
+        sB.innerHTML = `
+          <strong style="color:#009E73">Path B · Archetype</strong><br>
+          2 clicks · estimate <strong>p̂ = ${bias.toFixed(2)}</strong> ± 0.05<br>
+          <span style="color:var(--color-text-muted)">Time spent: 2 clicks.</span>
+        `;
+      }
+    }
+
+    function setStage(n) {
+      state.current = n;
+      if (n === 1)      renderStage1();
+      else if (n === 2) renderStage2();
+      else if (n === 3) renderStage3();
+    }
+
+    // Expose hooks for downstream agents (Stages 2/3) and console debugging.
+    window.URNS = {
+      state,
+      setStage,
+      buildUrnSVG,
+      biasFor,
+      READERS,
+    };
+
+    // Initial render — honour ?stage=N or #stage=N for direct deep-link.
+    function initialStage() {
+      const m = (location.hash + location.search).match(/stage=([123])/);
+      return m ? parseInt(m[1], 10) : 1;
+    }
+    setStage(initialStage());
+  })();
+  </script>
+</body>
+</html>

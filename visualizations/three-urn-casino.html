@@ -1,0 +1,927 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Three-urn casino · W2 Recsys</title>
+  <link rel="stylesheet" href="shared/style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+  <style>
+    /* ---------- Layout ---------- */
+    .casino-top {
+      display: grid;
+      grid-template-columns: 1fr 260px;
+      gap: 18px;
+      align-items: stretch;
+    }
+    @media (max-width: 900px) {
+      .casino-top { grid-template-columns: 1fr; }
+    }
+
+    .urn-row {
+      display: flex;
+      gap: 18px;
+      justify-content: center;
+      flex-wrap: wrap;
+      padding: 12px 6px 18px;
+      background: var(--color-neu-bg);
+      border: 1px solid var(--color-border);
+      border-radius: 10px;
+    }
+
+    /* ---------- Urn card ---------- */
+    .urn-card {
+      flex: 0 0 auto;
+      width: 150px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      padding: 10px 8px 12px;
+      background: white;
+      border: 1px solid var(--color-border);
+      border-radius: 10px;
+      cursor: pointer;
+      user-select: none;
+      transition: transform 0.12s, box-shadow 0.12s, border-color 0.12s;
+      position: relative;
+    }
+    .urn-card:hover:not(.disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+      border-color: var(--color-header-end);
+    }
+    .urn-card.disabled {
+      cursor: not-allowed;
+      opacity: 0.78;
+    }
+    .urn-card.flash {
+      animation: flashPick 0.55s ease;
+    }
+    @keyframes flashPick {
+      0%   { box-shadow: 0 0 0 0 rgba(0,114,178,0.0); }
+      30%  { box-shadow: 0 0 0 8px rgba(0,114,178,0.25); transform: translateY(-3px); }
+      100% { box-shadow: 0 0 0 0 rgba(0,114,178,0.0); }
+    }
+
+    .urn-name {
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: var(--color-header-start);
+      letter-spacing: 0.04em;
+    }
+
+    .urn-stats {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      font-size: 0.78rem;
+      font-variant-numeric: tabular-nums;
+      color: var(--color-text-muted);
+    }
+    .urn-stats .est-bar-wrap {
+      width: 110px;
+      height: 5px;
+      background: var(--color-neu-bg);
+      border: 1px solid var(--color-border);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .urn-stats .est-bar {
+      height: 100%;
+      background: var(--color-pos);
+      width: 0%;
+      transition: width 0.25s ease;
+    }
+    .urn-stats .est-line {
+      color: var(--color-text);
+    }
+    .urn-stats .est-line strong { color: var(--color-header-start); }
+
+    .urn-bias {
+      font-size: 0.82rem;
+      color: var(--color-neg);
+      font-variant-numeric: tabular-nums;
+      font-weight: 600;
+      visibility: hidden;
+      min-height: 1.1em;
+    }
+    .urn-bias.shown { visibility: visible; }
+
+    .urn-svg { display: block; }
+
+    /* ---------- Side panel: round counter + buttons ---------- */
+    .side-panel {
+      background: var(--color-neu-bg);
+      border: 1px solid var(--color-border);
+      border-radius: 10px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .side-panel h3 {
+      font-weight: 500;
+      font-size: 0.95rem;
+      margin: 0;
+      color: var(--color-header-start);
+    }
+    .round-display {
+      background: white;
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+      padding: 10px 12px;
+      text-align: center;
+    }
+    .round-display .big {
+      font-size: 1.4rem;
+      font-weight: 600;
+      color: var(--color-header-start);
+      font-variant-numeric: tabular-nums;
+      letter-spacing: 0.02em;
+    }
+    .round-display .sub {
+      font-size: 0.78rem;
+      color: var(--color-text-muted);
+      margin-top: 2px;
+    }
+    .total-display {
+      background: white;
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+      padding: 10px 12px;
+      text-align: center;
+    }
+    .total-display .big {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--color-pos);
+      font-variant-numeric: tabular-nums;
+    }
+    .total-display .sub {
+      font-size: 0.78rem;
+      color: var(--color-text-muted);
+    }
+
+    .pick-buttons {
+      display: flex;
+      gap: 6px;
+    }
+    .pick-buttons button {
+      flex: 1;
+      background: var(--color-header-end);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 8px 0;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s, transform 0.05s;
+    }
+    .pick-buttons button:hover:not(:disabled) { background: var(--color-header-start); }
+    .pick-buttons button:active:not(:disabled) { transform: translateY(1px); }
+    .pick-buttons button:disabled {
+      background: #adb5bd;
+      cursor: not-allowed;
+    }
+
+    .last-draw {
+      font-size: 0.85rem;
+      text-align: center;
+      color: var(--color-text-muted);
+      min-height: 1.4em;
+    }
+    .last-draw .ball-dot {
+      display: inline-block;
+      width: 11px; height: 11px;
+      border-radius: 50%;
+      vertical-align: -1px;
+      margin: 0 4px;
+      box-shadow: inset 0 -1px 2px rgba(0,0,0,0.18);
+    }
+    .last-draw .ball-dot.win  { background: var(--color-pos); }
+    .last-draw .ball-dot.loss { background: var(--color-neg); }
+
+    /* ---------- Replay & seed controls ---------- */
+    .toolbar {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+      margin-top: 14px;
+      padding-top: 12px;
+      border-top: 1px solid var(--color-border);
+    }
+    .toolbar button {
+      background: var(--color-header-end);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 9px 16px;
+      font-size: 0.92rem;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .toolbar button:hover:not(:disabled) { background: var(--color-header-start); }
+    .toolbar button:disabled {
+      background: #adb5bd;
+      cursor: not-allowed;
+    }
+    .toolbar button.secondary {
+      background: white;
+      color: var(--color-header-end);
+      border: 1px solid var(--color-border);
+    }
+    .toolbar button.secondary:hover:not(:disabled) { background: var(--color-neu-bg); }
+    .toolbar .seed-line {
+      font-size: 0.82rem;
+      color: var(--color-text-muted);
+      font-variant-numeric: tabular-nums;
+      margin-left: auto;
+    }
+
+    /* ---------- Chart ---------- */
+    .chart-wrap {
+      margin-top: 8px;
+      background: white;
+      border: 1px solid var(--color-border);
+      border-radius: 10px;
+      padding: 12px 8px 6px;
+    }
+    .chart-wrap svg { display: block; width: 100%; height: auto; }
+    .chart-axis path,
+    .chart-axis line {
+      stroke: #adb5bd;
+      shape-rendering: crispEdges;
+    }
+    .chart-axis text {
+      fill: var(--color-text-muted);
+      font-size: 11px;
+    }
+    .chart-grid line {
+      stroke: var(--color-border);
+      stroke-dasharray: 2 3;
+    }
+    .chart-grid path { stroke: none; }
+
+    .legend-row {
+      display: flex; gap: 16px; flex-wrap: wrap;
+      justify-content: center;
+      margin-top: 6px;
+      font-size: 0.85rem;
+      color: var(--color-text);
+    }
+    .legend-swatch {
+      display: inline-block;
+      width: 14px; height: 3px;
+      vertical-align: 3px;
+      margin-right: 5px;
+      border-radius: 2px;
+    }
+    .legend-final {
+      font-variant-numeric: tabular-nums;
+      color: var(--color-text-muted);
+      font-size: 0.78rem;
+      margin-left: 4px;
+    }
+  </style>
+</head>
+<body>
+  <header class="eth-header">
+    <div class="eth-logo">ETH<em>zürich</em></div>
+    <nav><a href="index.html">← All visualizations</a></nav>
+  </header>
+
+  <main class="viz-container">
+    <h1>Three-urn casino</h1>
+    <p class="lede">
+      Three campaigns, three hidden conversion rates. You have 30 chances. Maximize total wins.
+    </p>
+
+    <div class="viz-card">
+      <div class="casino-top">
+        <div class="urn-row" id="urn-row"><!-- urns injected --></div>
+        <aside class="side-panel">
+          <h3>Round</h3>
+          <div class="round-display">
+            <div class="big" id="round-big">1 / 30</div>
+            <div class="sub">vote, then click an urn (or use a button)</div>
+          </div>
+          <div class="total-display">
+            <div class="big" id="total-big">0</div>
+            <div class="sub">total wins so far</div>
+          </div>
+          <div class="pick-buttons" id="pick-buttons">
+            <button data-pick="0">Pick A</button>
+            <button data-pick="1">Pick B</button>
+            <button data-pick="2">Pick C</button>
+          </div>
+          <div class="last-draw" id="last-draw">&nbsp;</div>
+        </aside>
+      </div>
+
+      <div class="toolbar">
+        <button id="reveal-btn" disabled>Reveal &amp; Replay</button>
+        <button class="secondary" id="reset-btn">New session</button>
+        <button class="secondary" id="randomize-btn">Randomize biases</button>
+        <span class="seed-line" id="seed-line">seed —</span>
+      </div>
+
+      <div class="chart-wrap">
+        <svg id="chart" viewBox="0 0 720 320" preserveAspectRatio="xMidYMid meet"></svg>
+        <div class="legend-row">
+          <span><span class="legend-swatch" style="background:var(--color-pos)"></span>Audience<span class="legend-final" id="leg-aud"></span></span>
+          <span><span class="legend-swatch" style="background:var(--color-neg)"></span>Naive (5×3 explore, then exploit)<span class="legend-final" id="leg-nai"></span></span>
+          <span><span class="legend-swatch" style="background:var(--color-demanding)"></span>ε-greedy (ε = 0.10)<span class="legend-final" id="leg-eps"></span></span>
+          <span><span class="legend-swatch" style="background:#6C757D"></span>Optimal (always best)<span class="legend-final" id="leg-opt"></span></span>
+        </div>
+      </div>
+    </div>
+
+    <aside class="explainer">
+      <h2>What's happening?</h2>
+      <p>
+        Each urn has a <em>hidden</em> Bernoulli bias — the chance that a single draw is a "win".
+        On every round, the audience votes which urn to sample; that decision uses only the running
+        empirical means <em>p̂ = wins / picks</em>. After 30 rounds, click <strong>Reveal &amp; Replay</strong>
+        to expose the biases and re-run two algorithms — naive explore-then-exploit, and ε-greedy —
+        on the <em>same</em> hidden draws. The cumulative-reward curves show how each strategy spent
+        its 30 chances.
+      </p>
+    </aside>
+  </main>
+  <footer class="eth-footer">CAS AINIT FS26 · W2 Recsys</footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+  <script>
+  (function () {
+    // ============================================================
+    // Constants & config
+    // ============================================================
+    const N_ROUNDS = 30;
+    const URN_NAMES = ['A', 'B', 'C'];
+    const DEFAULT_BIASES = [0.30, 0.55, 0.75];
+    const EPSILON = 0.10;
+    const NAIVE_EXPLORE_PER_URN = 5; // 5 × 3 = 15 explore rounds, 15 exploit
+
+    // ============================================================
+    // RNG  —  identical to carousel viz
+    // ============================================================
+    function mulberry32(seed) {
+      let t = seed >>> 0;
+      return function () {
+        t = (t + 0x6D2B79F5) >>> 0;
+        let r = t;
+        r = Math.imul(r ^ (r >>> 15), r | 1);
+        r ^= r + Math.imul(r ^ (r >>> 7), r | 61);
+        return ((r ^ (r >>> 14)) >>> 0) / 4294967296;
+      };
+    }
+
+    // Deterministic per-(urn,round) Bernoulli draw using the session seed.
+    // The replays use the SAME function so the audience and the algorithms
+    // experience the same underlying randomness in the same rounds.
+    function ballAtRound(urnIdx, round, seed, biases) {
+      const r = mulberry32(
+        (seed ^ (urnIdx * 73856093) ^ (round * 19349663)) >>> 0
+      )();
+      return r < biases[urnIdx] ? 1 : 0;
+    }
+
+    // Independent stream for ε-greedy's coin flip & uniform tie-break.
+    // Different mixing constants → independent of ballAtRound.
+    function epsilonCoin(round, seed) {
+      return mulberry32(
+        (seed ^ 0xA53FE9C7 ^ (round * 2654435761)) >>> 0
+      )();
+    }
+    function epsilonPick(round, seed) {
+      const r = mulberry32(
+        (seed ^ 0x1F83D9AB ^ (round * 374761393)) >>> 0
+      )();
+      return Math.floor(r * 3);
+    }
+    function tiebreak(round, seed) {
+      return mulberry32(
+        (seed ^ 0xCBF29CE4 ^ (round * 1099511628)) >>> 0
+      )();
+    }
+
+    // ============================================================
+    // STATE
+    // ============================================================
+    let state;
+    function freshState(opts = {}) {
+      const seed = (opts.seed != null)
+        ? (opts.seed >>> 0)
+        : (Date.now() & 0xffffffff);
+      const biases = opts.biases ? opts.biases.slice() : DEFAULT_BIASES.slice();
+      return {
+        seed,
+        biases,
+        revealed: false,
+        round: 0,                      // next round to play (0..N_ROUNDS)
+        picks: [],                     // per-round urn index
+        wins:  [],                     // per-round 0/1
+        counts: [0, 0, 0],
+        winsBy: [0, 0, 0],
+        cumAud: [],                    // cumulative reward, audience
+      };
+    }
+
+    // ============================================================
+    // URN SVG  —  flask shape (simplified from carousel).
+    // 60 balls in a 6×10 grid; positions deterministic from seed
+    // so replays show the same ball lighting up.
+    // ============================================================
+    const URN_W = 110;
+    const URN_H = 150;
+    const BALL_R = 4.6;
+    const URN_COLS = 6;
+    const URN_ROWS = 10;
+    const BALLS_PER_URN = URN_COLS * URN_ROWS;
+
+    function buildUrnSVG(urnIdx) {
+      const svgNS = 'http://www.w3.org/2000/svg';
+      const svg = document.createElementNS(svgNS, 'svg');
+      svg.setAttribute('class', 'urn-svg');
+      svg.setAttribute('width',  URN_W);
+      svg.setAttribute('height', URN_H);
+      svg.setAttribute('viewBox', `0 0 ${URN_W} ${URN_H}`);
+
+      // Flask outline (scaled from carousel: original [0..96] × [0..144]).
+      // We scale to URN_W × URN_H.
+      const sx = URN_W / 96, sy = URN_H / 144;
+      const S = (x, y) => `${x * sx} ${y * sy}`;
+      const flask = document.createElementNS(svgNS, 'path');
+      const d = [
+        `M ${S(38, 6)}`,
+        `L ${S(38, 24)}`,
+        `C ${S(38, 28)}, ${S(18, 30)}, ${S(14, 44)}`,
+        `C ${S(8, 60)}, ${S(8, 96)}, ${S(14, 116)}`,
+        `C ${S(22, 138)}, ${S(74, 138)}, ${S(82, 116)}`,
+        `C ${S(88, 96)}, ${S(88, 60)}, ${S(82, 44)}`,
+        `C ${S(78, 30)}, ${S(58, 28)}, ${S(58, 24)}`,
+        `L ${S(58, 6)}`,
+        'Z'
+      ].join(' ');
+      flask.setAttribute('d', d);
+      flask.setAttribute('fill', '#FFFFFF');
+      flask.setAttribute('stroke', '#34495E');
+      flask.setAttribute('stroke-width', '1.4');
+      flask.setAttribute('stroke-linejoin', 'round');
+      svg.appendChild(flask);
+
+      // Lip
+      const lip = document.createElementNS(svgNS, 'rect');
+      lip.setAttribute('x', 34 * sx);
+      lip.setAttribute('y', 2 * sy);
+      lip.setAttribute('width',  28 * sx);
+      lip.setAttribute('height',  6 * sy);
+      lip.setAttribute('rx', 1.5);
+      lip.setAttribute('fill', '#E9ECEF');
+      lip.setAttribute('stroke', '#34495E');
+      lip.setAttribute('stroke-width', '1.0');
+      svg.appendChild(lip);
+
+      // ?-mark inside the urn body until biases are revealed.
+      const qmark = document.createElementNS(svgNS, 'text');
+      qmark.setAttribute('x', URN_W / 2);
+      qmark.setAttribute('y', URN_H * 0.66);
+      qmark.setAttribute('text-anchor', 'middle');
+      qmark.setAttribute('font-size', URN_H * 0.42);
+      qmark.setAttribute('font-weight', '300');
+      qmark.setAttribute('fill', '#ADB5BD');
+      qmark.setAttribute('font-family',
+        '-apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif');
+      qmark.textContent = '?';
+      qmark.setAttribute('class', 'urn-qmark');
+      svg.appendChild(qmark);
+
+      // Ball layer (hidden until reveal).
+      const ballsLayer = document.createElementNS(svgNS, 'g');
+      ballsLayer.setAttribute('class', 'balls-layer');
+      ballsLayer.setAttribute('opacity', '0');
+      svg.appendChild(ballsLayer);
+
+      // 6×10 grid inside body.
+      const X0 = 22 * sx, X1 = 74 * sx;
+      const Y0 = 50 * sy, Y1 = 128 * sy;
+      const stepX = (X1 - X0) / (URN_COLS - 1);
+      const stepY = (Y1 - Y0) / (URN_ROWS - 1);
+
+      // Deterministic shuffle so each urn looks different.
+      const rng = mulberry32(urnIdx * 7919 + 3);
+
+      for (let k = 0; k < BALLS_PER_URN; k++) {
+        const row = Math.floor(k / URN_COLS);
+        const col = k % URN_COLS;
+        const jx = (rng() - 0.5) * 1.4;
+        const jy = (rng() - 0.5) * 1.4;
+        const cx = X0 + col * stepX + jx;
+        const cy = Y0 + row * stepY + jy;
+        const c = document.createElementNS(svgNS, 'circle');
+        c.setAttribute('cx', cx);
+        c.setAttribute('cy', cy);
+        c.setAttribute('r', BALL_R);
+        c.setAttribute('fill', '#E9ECEF');
+        c.setAttribute('stroke', 'rgba(0,0,0,0.18)');
+        c.setAttribute('stroke-width', '0.4');
+        ballsLayer.appendChild(c);
+      }
+
+      svg._ballsLayer = ballsLayer;
+      svg._qmark = qmark;
+      return svg;
+    }
+
+    // After reveal: paint nBlue balls in --color-pos, rest in --color-neg.
+    // Deterministic from urnIdx (independent of session seed) so each urn
+    // has a stable look once revealed.
+    function revealUrnBalls(svg, bias) {
+      const layer = svg._ballsLayer;
+      const balls = layer.querySelectorAll('circle');
+      const nBlue = Math.round(BALLS_PER_URN * bias);
+      const idx = Array.from({ length: BALLS_PER_URN }, (_, k) => k);
+      // urn-specific shuffle (decoupled from session seed)
+      const rng = mulberry32(0xBADCAB1E + 17);
+      for (let i = idx.length - 1; i > 0; i--) {
+        const j = Math.floor(rng() * (i + 1));
+        const tmp = idx[i]; idx[i] = idx[j]; idx[j] = tmp;
+      }
+      const isBlue = new Uint8Array(BALLS_PER_URN);
+      for (let k = 0; k < nBlue; k++) isBlue[idx[k]] = 1;
+      const blue = '#0072B2', vermillion = '#D55E00';
+      balls.forEach((c, k) => {
+        c.setAttribute('fill', isBlue[k] ? blue : vermillion);
+      });
+      svg._qmark.style.transition = 'opacity 0.4s ease';
+      svg._qmark.style.opacity = '0';
+      layer.style.transition = 'opacity 0.4s ease';
+      layer.setAttribute('opacity', '1');
+    }
+
+    // ============================================================
+    // RENDER  —  urns + side panel
+    // ============================================================
+    function renderUrns() {
+      const row = document.getElementById('urn-row');
+      row.innerHTML = '';
+      URN_NAMES.forEach((name, i) => {
+        const card = document.createElement('div');
+        card.className = 'urn-card';
+        card.dataset.urn = i;
+
+        const nameEl = document.createElement('div');
+        nameEl.className = 'urn-name';
+        nameEl.textContent = `Urn ${name}`;
+        card.appendChild(nameEl);
+
+        const biasEl = document.createElement('div');
+        biasEl.className = 'urn-bias';
+        biasEl.id = `bias-${i}`;
+        biasEl.textContent = `p = ${state.biases[i].toFixed(2)}`;
+        card.appendChild(biasEl);
+
+        const svg = buildUrnSVG(i);
+        card.appendChild(svg);
+        card._svg = svg;
+
+        const stats = document.createElement('div');
+        stats.className = 'urn-stats';
+        stats.innerHTML = `
+          <div class="est-line"><strong id="wins-${i}">0</strong> wins / <span id="picks-${i}">0</span> picks</div>
+          <div class="est-bar-wrap"><div class="est-bar" id="bar-${i}"></div></div>
+          <div id="phat-${i}">p̂ = —</div>
+        `;
+        card.appendChild(stats);
+
+        card.addEventListener('click', () => playRound(i));
+        row.appendChild(card);
+      });
+    }
+
+    function setUrnsDisabled(disabled) {
+      document.querySelectorAll('.urn-card').forEach(c => {
+        c.classList.toggle('disabled', !!disabled);
+      });
+      document.querySelectorAll('#pick-buttons button').forEach(b => {
+        b.disabled = !!disabled;
+      });
+    }
+
+    function refreshStats() {
+      for (let i = 0; i < 3; i++) {
+        const n = state.counts[i];
+        const w = state.winsBy[i];
+        document.getElementById(`wins-${i}`).textContent = w;
+        document.getElementById(`picks-${i}`).textContent = n;
+        const phat = n === 0 ? null : w / n;
+        document.getElementById(`phat-${i}`).textContent =
+          phat == null ? 'p̂ = —' : `p̂ = ${phat.toFixed(2)}`;
+        document.getElementById(`bar-${i}`).style.width =
+          phat == null ? '0%' : `${(phat * 100).toFixed(1)}%`;
+      }
+      document.getElementById('round-big').textContent =
+        `${Math.min(state.round + 1, N_ROUNDS)} / ${N_ROUNDS}`;
+      const totalWins = state.wins.reduce((a, b) => a + b, 0);
+      document.getElementById('total-big').textContent = totalWins;
+      document.getElementById('seed-line').textContent =
+        `seed 0x${state.seed.toString(16).padStart(8, '0')}`;
+      // Reveal button enabled after 5 played rounds.
+      document.getElementById('reveal-btn').disabled =
+        state.revealed || state.round < 5;
+    }
+
+    function flashLastDraw(urnIdx, win) {
+      const el = document.getElementById('last-draw');
+      const dotCls = win ? 'win' : 'loss';
+      const word = win ? 'win' : 'loss';
+      el.innerHTML =
+        `Urn <strong>${URN_NAMES[urnIdx]}</strong> → ` +
+        `<span class="ball-dot ${dotCls}"></span>${word}`;
+    }
+
+    // ============================================================
+    // GAME LOOP
+    // ============================================================
+    function playRound(urnIdx) {
+      if (state.round >= N_ROUNDS) return;
+      const draw = ballAtRound(urnIdx, state.round, state.seed, state.biases);
+      state.picks.push(urnIdx);
+      state.wins.push(draw);
+      state.counts[urnIdx] += 1;
+      state.winsBy[urnIdx] += draw;
+      const prev = state.cumAud.length ? state.cumAud[state.cumAud.length - 1] : 0;
+      state.cumAud.push(prev + draw);
+      state.round += 1;
+
+      // Visual flash on the picked card.
+      const card = document.querySelector(`.urn-card[data-urn="${urnIdx}"]`);
+      if (card) {
+        card.classList.remove('flash');
+        // force reflow so animation re-fires
+        void card.offsetWidth;
+        card.classList.add('flash');
+      }
+
+      flashLastDraw(urnIdx, draw === 1);
+      refreshStats();
+      drawChart({ animate: false });
+
+      if (state.round >= N_ROUNDS) {
+        setUrnsDisabled(true);
+      }
+    }
+
+    // ============================================================
+    // ALGORITHMS  —  played on the SAME hidden urns / same seed.
+    // Each returns { picks, wins, cum }.
+    // ============================================================
+    function argmaxPhat(counts, winsBy, roundForTiebreak, seed) {
+      const phats = counts.map((n, i) => n === 0 ? -1 : winsBy[i] / n);
+      let best = -Infinity, ties = [];
+      for (let i = 0; i < 3; i++) {
+        if (phats[i] > best + 1e-12) { best = phats[i]; ties = [i]; }
+        else if (Math.abs(phats[i] - best) < 1e-12) ties.push(i);
+      }
+      if (ties.length === 1) return ties[0];
+      return ties[Math.floor(tiebreak(roundForTiebreak, seed) * ties.length)];
+    }
+
+    function runNaive(seed, biases) {
+      const counts = [0, 0, 0], winsBy = [0, 0, 0];
+      const picks = [], wins = [], cum = [];
+      let total = 0;
+      for (let r = 0; r < N_ROUNDS; r++) {
+        let urnIdx;
+        if (r < NAIVE_EXPLORE_PER_URN * 3) {
+          // round-robin: A,B,C,A,B,C,...
+          urnIdx = r % 3;
+        } else {
+          urnIdx = argmaxPhat(counts, winsBy, r, seed);
+        }
+        const w = ballAtRound(urnIdx, r, seed, biases);
+        counts[urnIdx]++; winsBy[urnIdx] += w;
+        picks.push(urnIdx); wins.push(w); total += w; cum.push(total);
+      }
+      return { picks, wins, cum };
+    }
+
+    function runEpsilon(seed, biases) {
+      const counts = [0, 0, 0], winsBy = [0, 0, 0];
+      const picks = [], wins = [], cum = [];
+      let total = 0;
+      for (let r = 0; r < N_ROUNDS; r++) {
+        let urnIdx;
+        if (counts.some(n => n === 0)) {
+          // Bootstrap: pick an unsampled urn first (round-robin among unsampled).
+          urnIdx = counts.indexOf(0);
+        } else if (epsilonCoin(r, seed) < EPSILON) {
+          urnIdx = epsilonPick(r, seed);
+        } else {
+          urnIdx = argmaxPhat(counts, winsBy, r, seed);
+        }
+        const w = ballAtRound(urnIdx, r, seed, biases);
+        counts[urnIdx]++; winsBy[urnIdx] += w;
+        picks.push(urnIdx); wins.push(w); total += w; cum.push(total);
+      }
+      return { picks, wins, cum };
+    }
+
+    function runOptimal(seed, biases) {
+      // "Always pick best" — needs to know the true argmax, used as proxy ceiling.
+      let best = 0;
+      for (let i = 1; i < 3; i++) if (biases[i] > biases[best]) best = i;
+      const cum = [];
+      let total = 0;
+      for (let r = 0; r < N_ROUNDS; r++) {
+        const w = ballAtRound(best, r, seed, biases);
+        total += w; cum.push(total);
+      }
+      return { cum, bestIdx: best };
+    }
+
+    // ============================================================
+    // CHART  —  cumulative reward curves.
+    // ============================================================
+    const CHART = { w: 720, h: 320, m: { l: 44, r: 14, t: 12, b: 30 } };
+
+    function chartScales() {
+      const innerW = CHART.w - CHART.m.l - CHART.m.r;
+      const innerH = CHART.h - CHART.m.t - CHART.m.b;
+      const x = d3.scaleLinear().domain([0, N_ROUNDS]).range([0, innerW]);
+      const y = d3.scaleLinear().domain([0, N_ROUNDS]).range([innerH, 0]);
+      return { x, y, innerW, innerH };
+    }
+
+    function drawChartFrame() {
+      const svg = d3.select('#chart');
+      svg.selectAll('*').remove();
+      const { x, y, innerW, innerH } = chartScales();
+      const g = svg.append('g')
+        .attr('transform', `translate(${CHART.m.l},${CHART.m.t})`);
+
+      // Grid
+      g.append('g').attr('class', 'chart-grid')
+        .call(d3.axisLeft(y).ticks(6).tickSize(-innerW).tickFormat(''));
+
+      // Axes
+      g.append('g').attr('class', 'chart-axis')
+        .attr('transform', `translate(0,${innerH})`)
+        .call(d3.axisBottom(x).ticks(6));
+      g.append('g').attr('class', 'chart-axis')
+        .call(d3.axisLeft(y).ticks(6));
+
+      // Axis labels
+      g.append('text')
+        .attr('x', innerW / 2).attr('y', innerH + 25)
+        .attr('text-anchor', 'middle')
+        .attr('fill', 'var(--color-text-muted)')
+        .attr('font-size', 11)
+        .text('round');
+      g.append('text')
+        .attr('transform', `translate(-32,${innerH / 2}) rotate(-90)`)
+        .attr('text-anchor', 'middle')
+        .attr('fill', 'var(--color-text-muted)')
+        .attr('font-size', 11)
+        .text('cumulative reward');
+
+      return { g, x, y, innerW, innerH };
+    }
+
+    function pathFor(cum, x, y) {
+      // Step path through (round, cum[round-1]). Start at (0, 0).
+      const pts = [[0, 0]];
+      cum.forEach((v, i) => pts.push([i + 1, v]));
+      const line = d3.line().x(d => x(d[0])).y(d => y(d[1]));
+      return line(pts);
+    }
+
+    function drawChart({ animate }) {
+      const { g, x, y } = drawChartFrame();
+
+      // Audience curve (always static).
+      if (state.cumAud.length > 0) {
+        g.append('path')
+          .attr('class', 'curve-aud')
+          .attr('fill', 'none')
+          .attr('stroke', 'var(--color-pos)')
+          .attr('stroke-width', 2.4)
+          .attr('d', pathFor(state.cumAud, x, y));
+      }
+
+      // Replay curves only if revealed.
+      if (state.revealed) {
+        const drawAnimated = (cum, color, cls) => {
+          const path = g.append('path')
+            .attr('class', cls)
+            .attr('fill', 'none')
+            .attr('stroke', color)
+            .attr('stroke-width', 2.4)
+            .attr('d', pathFor(cum, x, y));
+          if (animate) {
+            const len = path.node().getTotalLength();
+            path
+              .attr('stroke-dasharray', `${len} ${len}`)
+              .attr('stroke-dashoffset', len)
+              .transition()
+              .duration(2000)
+              .ease(d3.easeCubicInOut)
+              .attr('stroke-dashoffset', 0);
+          }
+        };
+        // Optimal first (background reference).
+        drawAnimated(state.cumOpt, '#6C757D', 'curve-opt');
+        drawAnimated(state.cumNaive, 'var(--color-neg)', 'curve-naive');
+        drawAnimated(state.cumEps,   'var(--color-demanding)', 'curve-eps');
+
+        document.getElementById('leg-aud').textContent = ` (${state.cumAud[state.cumAud.length - 1]})`;
+        document.getElementById('leg-nai').textContent = ` (${state.cumNaive[state.cumNaive.length - 1]})`;
+        document.getElementById('leg-eps').textContent = ` (${state.cumEps[state.cumEps.length - 1]})`;
+        document.getElementById('leg-opt').textContent = ` (${state.cumOpt[state.cumOpt.length - 1]})`;
+      } else {
+        ['leg-aud', 'leg-nai', 'leg-eps', 'leg-opt'].forEach(id => {
+          document.getElementById(id).textContent = '';
+        });
+      }
+    }
+
+    // ============================================================
+    // REVEAL & REPLAY
+    // ============================================================
+    function reveal() {
+      if (state.revealed) return;
+      state.revealed = true;
+
+      // Show biases above each urn.
+      for (let i = 0; i < 3; i++) {
+        const el = document.getElementById(`bias-${i}`);
+        el.textContent = `p = ${state.biases[i].toFixed(2)}`;
+        el.classList.add('shown');
+        // Reveal balls inside flask.
+        const card = document.querySelector(`.urn-card[data-urn="${i}"]`);
+        if (card && card._svg) revealUrnBalls(card._svg, state.biases[i]);
+      }
+
+      // Run replays.
+      const naive = runNaive(state.seed, state.biases);
+      const eps   = runEpsilon(state.seed, state.biases);
+      const opt   = runOptimal(state.seed, state.biases);
+      state.cumNaive = naive.cum;
+      state.cumEps   = eps.cum;
+      state.cumOpt   = opt.cum;
+
+      setUrnsDisabled(true);
+      document.getElementById('reveal-btn').disabled = true;
+
+      drawChart({ animate: true });
+    }
+
+    // ============================================================
+    // BUTTONS
+    // ============================================================
+    function bindControls() {
+      document.querySelectorAll('#pick-buttons button').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const i = parseInt(btn.dataset.pick, 10);
+          playRound(i);
+        });
+      });
+      document.getElementById('reveal-btn').addEventListener('click', reveal);
+      document.getElementById('reset-btn').addEventListener('click', () => {
+        state = freshState({ biases: state.biases }); // keep current biases
+        renderUrns();
+        setUrnsDisabled(false);
+        document.getElementById('last-draw').innerHTML = '&nbsp;';
+        refreshStats();
+        drawChart({ animate: false });
+      });
+      document.getElementById('randomize-btn').addEventListener('click', () => {
+        // Random biases in [0.10, 0.90], spread out a bit.
+        const rng = mulberry32(Date.now() & 0xffffffff);
+        const b = [0, 1, 2].map(() => +(0.10 + rng() * 0.80).toFixed(2));
+        state = freshState({ biases: b });
+        renderUrns();
+        setUrnsDisabled(false);
+        document.getElementById('last-draw').innerHTML = '&nbsp;';
+        refreshStats();
+        drawChart({ animate: false });
+      });
+    }
+
+    // ============================================================
+    // INIT
+    // ============================================================
+    state = freshState();
+    renderUrns();
+    bindControls();
+    refreshStats();
+    drawChart({ animate: false });
+  })();
+  </script>
+</body>
+</html>

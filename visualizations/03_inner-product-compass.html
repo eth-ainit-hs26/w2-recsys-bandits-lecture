@@ -1,0 +1,483 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Inner-product compass · W2 Recsys</title>
+  <link rel="stylesheet" href="shared/style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+  <style>
+    .compass-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 280px;
+      gap: 24px;
+      align-items: start;
+    }
+    @media (max-width: 1024px) {
+      .compass-grid { grid-template-columns: 1fr; }
+    }
+
+    .plane-wrap {
+      position: relative;
+      width: 100%;
+      max-width: 720px;
+      aspect-ratio: 1 / 1;
+      margin: 0 auto;
+    }
+    .plane-wrap canvas,
+    .plane-wrap svg {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+    }
+    .plane-wrap svg { z-index: 2; }
+    .plane-wrap canvas { z-index: 1; border-radius: 8px; }
+
+    .axis-end {
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .item-icon { font-size: 22px; user-select: none; pointer-events: none; }
+    .item-halo { transition: stroke 0.15s, stroke-width 0.15s; }
+    .item-label { font-size: 10px; fill: var(--color-text-muted); text-anchor: middle; pointer-events: none; }
+
+    .user-arrow { stroke: #222; stroke-width: 2.5; fill: none; }
+    .user-tip {
+      fill: #222;
+      stroke: white;
+      stroke-width: 2;
+      cursor: grab;
+    }
+    .user-tip:active { cursor: grabbing; }
+    .user-label {
+      font-size: 12px; font-weight: 600; fill: #222;
+      pointer-events: none;
+      paint-order: stroke;
+      stroke: white; stroke-width: 3;
+    }
+
+    /* Sidebar */
+    .ranking {
+      background: var(--color-neu-bg);
+      border-radius: 8px;
+      border: 1px solid var(--color-border);
+      padding: 12px;
+    }
+    .ranking h3 {
+      margin: 0 0 8px;
+      font-size: 0.95rem;
+      font-weight: 500;
+    }
+    .ranking-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      max-height: 460px;
+      overflow-y: auto;
+    }
+    .rank-item {
+      display: grid;
+      grid-template-columns: 22px 22px 1fr 50px;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 4px;
+      border-bottom: 1px solid var(--color-border);
+      font-size: 0.85rem;
+      transition: background 0.2s;
+    }
+    .rank-item:last-child { border-bottom: none; }
+    .rank-item .rk { color: var(--color-text-muted); font-size: 0.78rem; text-align: right; }
+    .rank-item .ic { font-size: 1.1rem; text-align: center; }
+    .rank-item .nm { color: var(--color-text); }
+    .rank-item .sc {
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+      font-weight: 500;
+    }
+
+    .preset-tray {
+      margin-top: 12px;
+      padding: 10px 12px;
+      background: white;
+      border-radius: 8px;
+      border: 1px solid var(--color-border);
+    }
+    .preset-tray h3 {
+      margin: 0 0 6px;
+      font-size: 0.9rem;
+      font-weight: 500;
+    }
+    .preset-tray p {
+      margin: 0 0 8px;
+      font-size: 0.78rem;
+      color: var(--color-text-muted);
+    }
+    .preset-buttons {
+      display: flex; flex-wrap: wrap; gap: 5px;
+    }
+    .preset-buttons button {
+      padding: 4px 9px;
+      font-size: 0.78rem;
+      background: white;
+      color: var(--color-text);
+      border: 1px solid var(--color-border);
+      border-radius: 12px;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .preset-buttons button:hover {
+      background: var(--color-neu-bg);
+      border-color: var(--color-text-muted);
+    }
+    .preset-buttons button.active {
+      background: var(--color-tech);
+      color: white;
+      border-color: var(--color-tech);
+    }
+    .preset-buttons button.cluster-tag {
+      border-left-width: 4px;
+    }
+
+    .formula-bar {
+      margin-top: 12px;
+      padding: 10px 12px;
+      background: white;
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+      font-size: 0.92rem;
+    }
+    .formula-bar code {
+      font-family: -apple-system, monospace;
+    }
+  </style>
+</head>
+<body>
+  <header class="eth-header">
+    <div class="eth-logo">ETH<em>zürich</em></div>
+    <nav><a href="index.html">← All visualizations</a></nav>
+  </header>
+  <main class="viz-container">
+    <h1>Inner-product compass</h1>
+    <p class="lede">Drag the user arrow. The plane shows alignment <em>u·p</em> at every point — green where tastes agree, red where they clash. Recommendations re-rank in real time.</p>
+
+    <div class="viz-card">
+      <div class="compass-grid">
+        <div>
+          <div class="plane-wrap" id="plane-wrap">
+            <canvas id="heatmap" width="200" height="200"></canvas>
+            <svg id="plane" viewBox="0 0 600 600" preserveAspectRatio="xMidYMid meet"></svg>
+          </div>
+          <div class="formula-bar" id="formula-bar"></div>
+        </div>
+
+        <div>
+          <div class="ranking">
+            <h3>Top recommendations</h3>
+            <ul class="ranking-list" id="rank-list"></ul>
+          </div>
+
+          <div class="preset-tray">
+            <h3>Snap to a user</h3>
+            <p>Click a name to place the user vector at their cluster centroid.</p>
+            <div class="preset-buttons" id="preset-buttons"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <aside class="explainer">
+      <h2>What's happening?</h2>
+      <p>Every item has a fixed position in the 2D latent plane. The user is a vector <em>u</em> from the origin. The score for an item at point <em>p</em> is the inner product <em>u · p = u₁p₁ + u₂p₂</em> — positive (green) when <em>u</em> and <em>p</em> point the same way, negative (red) when they oppose.</p>
+      <p>Rotating <em>u</em> rotates a green half-plane. Items inside it become recommendations; items behind it are suppressed. <strong>The same items, ranked differently, depending only on the user's direction.</strong></p>
+    </aside>
+  </main>
+  <footer class="eth-footer">CAS AINIT FS26 · W2 Recsys</footer>
+
+  <script src="shared/data.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+  <script>
+  (function () {
+    const W = 600, H = 600, PAD = 50;
+    const RANGE = 2.0;  // plane spans [-2, 2]
+    const xScale = d3.scaleLinear().domain([-RANGE, RANGE]).range([PAD, W - PAD]);
+    const yScale = d3.scaleLinear().domain([-RANGE, RANGE]).range([H - PAD, PAD]);
+
+    const svg = d3.select('#plane');
+    const canvas = document.getElementById('heatmap');
+    const ctx = canvas.getContext('2d');
+
+    // ----------------------------------------------------------
+    // Heatmap drawing on canvas (low-res, then CSS-stretched)
+    // ----------------------------------------------------------
+    const HM_W = canvas.width, HM_H = canvas.height;
+    const hmImage = ctx.createImageData(HM_W, HM_H);
+
+    // Heatmap value range: |u| · RANGE is the worst case
+    function drawHeatmap(u) {
+      const data = hmImage.data;
+      const maxAbs = Math.max(0.01, (Math.abs(u[0]) + Math.abs(u[1])) * RANGE);
+      let idx = 0;
+      for (let py = 0; py < HM_H; py++) {
+        // map py -> y in [-RANGE, RANGE]; image y grows downward
+        const t = py / (HM_H - 1);
+        const yv = RANGE - t * 2 * RANGE;
+        for (let px = 0; px < HM_W; px++) {
+          const s = px / (HM_W - 1);
+          const xv = -RANGE + s * 2 * RANGE;
+          const dot = u[0] * xv + u[1] * yv;
+          const norm = Math.max(-1, Math.min(1, dot / maxAbs));
+          // Map norm in [-1,1] to a soft red->white->green ramp
+          let r, g, b;
+          if (norm >= 0) {
+            // white (255,255,255) -> green (40,167,69)
+            const k = norm;
+            r = Math.round(255 + k * (40 - 255));
+            g = Math.round(255 + k * (167 - 255));
+            b = Math.round(255 + k * (69 - 255));
+          } else {
+            const k = -norm;
+            r = Math.round(255 + k * (220 - 255));
+            g = Math.round(255 + k * (53 - 255));
+            b = Math.round(255 + k * (69 - 255));
+          }
+          // soften saturation to keep text readable
+          r = Math.round(r * 0.55 + 255 * 0.45);
+          g = Math.round(g * 0.55 + 255 * 0.45);
+          b = Math.round(b * 0.55 + 255 * 0.45);
+          data[idx++] = r;
+          data[idx++] = g;
+          data[idx++] = b;
+          data[idx++] = 255;
+        }
+      }
+      ctx.putImageData(hmImage, 0, 0);
+    }
+
+    // ----------------------------------------------------------
+    // Static SVG layers
+    // ----------------------------------------------------------
+    // Axes
+    const gAxes = svg.append('g');
+    gAxes.append('line')
+      .attr('x1', xScale(-RANGE)).attr('y1', yScale(0))
+      .attr('x2', xScale(RANGE)).attr('y2', yScale(0))
+      .attr('stroke', '#888').attr('stroke-width', 1);
+    gAxes.append('line')
+      .attr('x1', xScale(0)).attr('y1', yScale(-RANGE))
+      .attr('x2', xScale(0)).attr('y2', yScale(RANGE))
+      .attr('stroke', '#888').attr('stroke-width', 1);
+    // Axis end labels (matching slide vocabulary)
+    gAxes.append('text')
+      .attr('x', xScale(RANGE) - 4).attr('y', yScale(0) - 6)
+      .attr('text-anchor', 'end').attr('class', 'axis-end')
+      .style('fill', RECSYS.COLORS.tech).text('Technology →');
+    gAxes.append('text')
+      .attr('x', xScale(-RANGE) + 4).attr('y', yScale(0) - 6)
+      .attr('text-anchor', 'start').attr('class', 'axis-end')
+      .style('fill', RECSYS.COLORS.simple).text('← Simple');
+    gAxes.append('text')
+      .attr('x', xScale(0) + 6).attr('y', yScale(RANGE) + 12)
+      .attr('class', 'axis-end')
+      .style('fill', RECSYS.COLORS.outdoor).text('↑ Outdoor');
+    gAxes.append('text')
+      .attr('x', xScale(0) + 6).attr('y', yScale(-RANGE) - 4)
+      .attr('class', 'axis-end')
+      .style('fill', RECSYS.COLORS.indoor).text('↓ Indoor');
+
+    // ----------------------------------------------------------
+    // Items
+    // ----------------------------------------------------------
+    function jitter(name) {
+      let h = 0;
+      for (let i = 0; i < name.length; i++) h = (h * 31 + name.charCodeAt(i)) | 0;
+      const a = ((h & 0xff) / 255 - 0.5) * 0.55;
+      const b = (((h >> 8) & 0xff) / 255 - 0.5) * 0.55;
+      return [a, b];
+    }
+    const items = RECSYS.ITEMS.map(d => {
+      const [jx, jy] = jitter(d.name);
+      return Object.assign({ _x: d.embedding[0] + jx, _y: d.embedding[1] + jy }, d);
+    });
+
+    const gItems = svg.append('g');
+    const itemG = gItems.selectAll('g.item').data(items).enter().append('g')
+      .attr('class', 'item')
+      .attr('transform', d => `translate(${xScale(d._x)}, ${yScale(d._y)})`);
+
+    itemG.append('circle')
+      .attr('class', 'item-halo')
+      .attr('r', 22)
+      .attr('fill', 'white')
+      .attr('stroke', '#bbb')
+      .attr('stroke-width', 2);
+
+    itemG.append('text')
+      .attr('class', 'item-icon')
+      .attr('text-anchor', 'middle')
+      .attr('dominant-baseline', 'central')
+      .attr('y', 1)
+      .text(d => d.icon);
+
+    itemG.append('text')
+      .attr('class', 'item-label')
+      .attr('y', 36)
+      .text(d => d.name);
+
+    // ----------------------------------------------------------
+    // User vector arrow (draggable)
+    // ----------------------------------------------------------
+    let u = [-1, 1];   // start at Michael-cluster
+    let activePreset = null;
+
+    const gUser = svg.append('g');
+    const userLine = gUser.append('line').attr('class', 'user-arrow');
+    // arrowhead via marker
+    svg.append('defs').append('marker')
+      .attr('id', 'arrow').attr('viewBox', '0 -5 10 10')
+      .attr('refX', 8).attr('refY', 0).attr('markerWidth', 8).attr('markerHeight', 8)
+      .attr('orient', 'auto')
+      .append('path').attr('d', 'M0,-5L10,0L0,5').attr('fill', '#222');
+    userLine.attr('marker-end', 'url(#arrow)');
+
+    const userTip = gUser.append('circle')
+      .attr('class', 'user-tip')
+      .attr('r', 11);
+
+    const userLabel = gUser.append('text')
+      .attr('class', 'user-label')
+      .attr('text-anchor', 'middle')
+      .attr('y', -16)
+      .text('user u');
+
+    // ----------------------------------------------------------
+    // Drag behavior — translate svg-pixel pointer to data coords
+    // ----------------------------------------------------------
+    const drag = d3.drag()
+      .on('start', () => { activePreset = null; renderPresetButtons(); })
+      .on('drag', function (event) {
+        const [px, py] = d3.pointer(event, svg.node());
+        const xv = xScale.invert(px);
+        const yv = yScale.invert(py);
+        u = [
+          Math.max(-RANGE, Math.min(RANGE, xv)),
+          Math.max(-RANGE, Math.min(RANGE, yv))
+        ];
+        update();
+      });
+    userTip.call(drag);
+
+    // ----------------------------------------------------------
+    // Update routine
+    // ----------------------------------------------------------
+    const POS = '#0072B2';   // CVD-safe blue (was green)
+    const NEG = '#D55E00';   // CVD-safe vermillion (was red)
+    const NEU = '#bbb';
+
+    function haloColor(score, maxAbs) {
+      const n = Math.max(-1, Math.min(1, score / maxAbs));
+      // mix toward POS or NEG
+      function lerp(a, b, t) { return Math.round(a + (b - a) * t); }
+      const grey = [187, 187, 187];
+      let target;
+      if (n >= 0) target = [0, 114, 178];     // #0072B2 blue
+      else target = [213, 94, 0];              // #D55E00 vermillion
+      const k = Math.abs(n);
+      return `rgb(${lerp(grey[0], target[0], k)}, ${lerp(grey[1], target[1], k)}, ${lerp(grey[2], target[2], k)})`;
+    }
+
+    function update() {
+      drawHeatmap(u);
+
+      // user arrow
+      userLine
+        .attr('x1', xScale(0)).attr('y1', yScale(0))
+        .attr('x2', xScale(u[0])).attr('y2', yScale(u[1]));
+      userTip
+        .attr('cx', xScale(u[0])).attr('cy', yScale(u[1]));
+      userLabel
+        .attr('x', xScale(u[0])).attr('y', yScale(u[1]) - 16);
+
+      // scores
+      const scored = items.map(d => ({
+        ...d,
+        score: u[0] * d.embedding[0] + u[1] * d.embedding[1]
+      }));
+      const maxAbs = Math.max(0.01, ...scored.map(s => Math.abs(s.score)));
+
+      itemG.select('.item-halo')
+        .attr('stroke', d => {
+          const s = u[0] * d.embedding[0] + u[1] * d.embedding[1];
+          return haloColor(s, maxAbs);
+        })
+        .attr('stroke-width', d => {
+          const s = u[0] * d.embedding[0] + u[1] * d.embedding[1];
+          return 2 + 4 * Math.abs(s) / maxAbs;
+        });
+
+      // ranked list
+      scored.sort((a, b) => b.score - a.score);
+      const list = d3.select('#rank-list');
+      const rows = list.selectAll('li').data(scored, d => d.name);
+      rows.enter().append('li').attr('class', 'rank-item')
+        .html(d => `<span class="rk"></span><span class="ic"></span><span class="nm"></span><span class="sc"></span>`)
+        .merge(rows)
+        .order()
+        .each(function (d, i) {
+          const li = d3.select(this);
+          li.select('.rk').text((i + 1) + '.');
+          li.select('.ic').text(d.icon);
+          li.select('.nm').text(d.name);
+          const sc = li.select('.sc');
+          sc.text(d.score.toFixed(2));
+          sc.style('color', d.score > 0.05 ? POS : (d.score < -0.05 ? NEG : 'var(--color-text-muted)'));
+        });
+      rows.exit().remove();
+
+      // formula bar
+      const dotEl = document.getElementById('formula-bar');
+      try {
+        katex.render(
+          `u = (${u[0].toFixed(2)},\\ ${u[1].toFixed(2)})\\quad\\Rightarrow\\quad u \\cdot p = ${u[0].toFixed(2)}\\,p_1 + ${u[1].toFixed(2)}\\,p_2`,
+          dotEl, { throwOnError: false, displayMode: false }
+        );
+      } catch (e) {
+        dotEl.textContent = `u = (${u[0].toFixed(2)}, ${u[1].toFixed(2)})  ⇒  u·p = ${u[0].toFixed(2)} p₁ + ${u[1].toFixed(2)} p₂`;
+      }
+    }
+
+    // ----------------------------------------------------------
+    // Preset buttons (21 named users)
+    // ----------------------------------------------------------
+    const CLUSTER_TAG_COLOR = {
+      'simple-indoor':  RECSYS.COLORS.indoor,
+      'simple-outdoor': RECSYS.COLORS.outdoor,
+      'tech-indoor':    RECSYS.COLORS.tech,
+      'tech-outdoor':   RECSYS.COLORS.simple,
+    };
+
+    const presetTray = document.getElementById('preset-buttons');
+    function renderPresetButtons() {
+      presetTray.innerHTML = '';
+      RECSYS.PEOPLE.forEach(p => {
+        const b = document.createElement('button');
+        b.textContent = p.name;
+        b.className = 'cluster-tag' + (activePreset === p.name ? ' active' : '');
+        b.style.borderLeftColor = CLUSTER_TAG_COLOR[p.cluster];
+        b.addEventListener('click', () => {
+          u = [p.embedding[0], p.embedding[1]];
+          activePreset = p.name;
+          renderPresetButtons();
+          update();
+        });
+        presetTray.appendChild(b);
+      });
+    }
+    renderPresetButtons();
+
+    update();
+  })();
+  </script>
+</body>
+</html>

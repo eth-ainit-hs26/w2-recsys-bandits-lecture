@@ -1,0 +1,1295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Beta Bloom — Thompson Sampling Live</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<style>
+  :root {
+    --cream: #fdf6ee;
+    --warm-white: #fffaf4;
+    --sand: #f0e6d3;
+    --sand-dark: #e0cdb5;
+    --terra: #c17f4e;
+    --terra-dark: #a0623a;
+    --rust: #d4622a;
+    --ochre: #d49a3a;
+    --sage: #6a8f73;
+    --sage-light: #8fb098;
+    --ink: #2c2416;
+    --ink-light: #5a4a36;
+    --ink-muted: #8a7660;
+    --orange-ball: #f97316;
+    --white-ball: #fef9f0;
+    --success: #4a9055;
+    --error: #c0392b;
+    --border: rgba(193, 127, 78, 0.2);
+    --shadow: 0 4px 24px rgba(44,36,22,0.08);
+    --shadow-lg: 0 8px 40px rgba(44,36,22,0.12);
+
+    /* Arm palette — Wong color-blind-safe palette
+       Distinguishable under deuteranopia, protanopia, tritanopia. */
+    --arm1: #0072B2; /* blue */
+    --arm2: #D55E00; /* vermillion */
+    --arm3: #009E73; /* bluish green */
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--cream);
+    color: var(--ink);
+    min-height: 100vh;
+    background-image:
+      radial-gradient(ellipse at 10% 0%, rgba(193,127,78,0.08) 0%, transparent 60%),
+      radial-gradient(ellipse at 90% 100%, rgba(106,143,115,0.06) 0%, transparent 60%);
+  }
+
+  .shell { display: flex; flex-direction: column; min-height: 100vh; }
+  .main { flex: 1; padding: 40px 56px; max-width: 980px; margin: 0 auto; width: 100%; }
+
+  .page-header { margin-bottom: 28px; }
+  .page-title {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--ink);
+    line-height: 1.2;
+    margin-bottom: 10px;
+  }
+  .page-subtitle {
+    font-size: 15px;
+    color: var(--ink-muted);
+    line-height: 1.6;
+    max-width: 720px;
+  }
+
+  h2.section-title {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 19px;
+    font-weight: 600;
+    color: var(--terra-dark);
+    margin: 32px 0 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  h2.section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  p.prose {
+    font-size: 14.5px;
+    line-height: 1.75;
+    color: var(--ink-light);
+    margin-bottom: 16px;
+    max-width: 720px;
+  }
+
+  .card {
+    background: var(--warm-white);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 20px;
+    box-shadow: var(--shadow);
+  }
+  .card-title {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .callout {
+    border-left: 3px solid var(--terra);
+    background: rgba(193,127,78,0.06);
+    padding: 14px 18px;
+    border-radius: 0 10px 10px 0;
+    margin: 16px 0;
+  }
+  .callout p { font-size: 14px; color: var(--ink-light); margin: 0; line-height: 1.65; }
+  .callout strong { color: var(--terra-dark); }
+
+  .info-box {
+    background: rgba(106,143,115,0.08);
+    border: 1px solid rgba(106,143,115,0.25);
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin: 16px 0;
+  }
+  .info-box p { font-size: 13.5px; color: var(--ink-light); margin: 0; line-height: 1.65; }
+
+  .formula-box {
+    background: var(--sand);
+    border: 1px solid var(--sand-dark);
+    border-radius: 12px;
+    padding: 18px 24px;
+    margin: 12px 0 4px;
+    text-align: center;
+    font-size: 16px;
+    color: var(--ink);
+  }
+  .formula-label {
+    font-size: 12px;
+    color: var(--ink-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 8px;
+  }
+
+  /* ── Canvas wrap ───────────────────────── */
+  .canvas-wrap {
+    background: var(--sand);
+    border-radius: 12px;
+    padding: 16px;
+    margin: 8px 0 16px;
+    position: relative;
+    overflow: hidden;
+  }
+  canvas#beta {
+    display: block;
+    width: 100%;
+    height: auto;
+    border-radius: 8px;
+    background: var(--warm-white);
+  }
+
+  /* ── Controls row ───────────────────────── */
+  .controls {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+    margin-top: 6px;
+  }
+  .ctrl-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--ink-muted);
+  }
+  .ctrl-group label {
+    font-weight: 500;
+    color: var(--ink-light);
+    white-space: nowrap;
+  }
+  .ctrl-group input[type=range] {
+    width: 130px;
+    accent-color: var(--terra);
+  }
+  .ctrl-group .val {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 12px;
+    min-width: 38px;
+    color: var(--ink);
+  }
+
+  .btn {
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    transition: all 0.18s;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--terra), var(--rust));
+    color: white;
+    box-shadow: 0 3px 12px rgba(193,127,78,0.3);
+  }
+  .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 5px 16px rgba(193,127,78,0.4); }
+  .btn-secondary {
+    background: var(--warm-white);
+    color: var(--ink-light);
+    border: 1px solid var(--sand-dark);
+  }
+  .btn-secondary:hover { background: var(--sand-dark); }
+  .btn-ghost {
+    background: rgba(106,143,115,0.1);
+    color: var(--sage);
+    border: 1px solid rgba(106,143,115,0.3);
+  }
+  .btn-ghost:hover { background: rgba(106,143,115,0.2); }
+
+  /* ── Toggle ─────────────────────────────── */
+  .toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    font-size: 13px;
+    color: var(--ink-light);
+    user-select: none;
+  }
+  .toggle input { display: none; }
+  .toggle-track {
+    width: 36px; height: 20px;
+    background: var(--sand-dark);
+    border-radius: 20px;
+    position: relative;
+    transition: background 0.2s;
+  }
+  .toggle-track::after {
+    content: '';
+    position: absolute;
+    top: 2px; left: 2px;
+    width: 16px; height: 16px;
+    background: var(--warm-white);
+    border-radius: 50%;
+    transition: transform 0.2s;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  }
+  .toggle input:checked + .toggle-track { background: var(--terra); }
+  .toggle input:checked + .toggle-track::after { transform: translateX(16px); }
+
+  /* ── Stats ──────────────────────────────── */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-top: 8px;
+  }
+  .stat {
+    background: var(--warm-white);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+  }
+  .stat-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--ink-muted);
+    margin-bottom: 4px;
+  }
+  .stat-value {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--ink);
+  }
+  .stat-value.regret { color: var(--terra-dark); }
+  .stat-value.reward { color: var(--sage); }
+
+  /* ── Arm cards ──────────────────────────── */
+  .arms-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-top: 12px;
+  }
+  .arm-card {
+    background: var(--warm-white);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px 14px;
+    border-left: 4px solid var(--ink-muted);
+  }
+  .arm-card.arm-1 { border-left-color: var(--arm1); }
+  .arm-card.arm-2 { border-left-color: var(--arm2); }
+  .arm-card.arm-3 { border-left-color: var(--arm3); }
+  .arm-name {
+    font-family: Georgia, serif;
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--ink);
+    margin-bottom: 4px;
+  }
+  .arm-meta {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 12px;
+    color: var(--ink-muted);
+    line-height: 1.55;
+  }
+  .arm-meta strong { color: var(--ink); font-weight: 700; }
+  .arm-truth {
+    display: inline-block;
+    margin-left: 6px;
+    padding: 1px 7px;
+    border-radius: 12px;
+    font-size: 10px;
+    font-weight: 700;
+    background: rgba(44,36,22,0.06);
+    color: var(--ink-light);
+    letter-spacing: 0.05em;
+  }
+  .arm-truth.hidden { display: none; }
+
+  /* ── Round log ───────────────────────────── */
+  .log-strip {
+    background: rgba(44,36,22,0.04);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 8px 12px;
+    margin-top: 12px;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 12px;
+    color: var(--ink-muted);
+    min-height: 36px;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+    overflow: hidden;
+  }
+  .log-pill {
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    background: var(--warm-white);
+    border: 1px solid var(--border);
+    white-space: nowrap;
+  }
+  .log-pill.success { background: rgba(74,144,85,0.12); color: #2d6b38; border-color: rgba(74,144,85,0.3); }
+  .log-pill.fail { background: rgba(192,57,43,0.08); color: #8b2a1f; border-color: rgba(192,57,43,0.25); }
+  .log-empty { font-style: italic; opacity: 0.7; }
+
+  .legend {
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+    align-items: center;
+    margin-bottom: 8px;
+    font-size: 12px;
+    color: var(--ink-muted);
+  }
+  .legend-item { display: inline-flex; align-items: center; gap: 6px; }
+  /* SVG-based line-style swatches. Inline SVG carries the dash pattern, so
+     line-style (solid/dashed/dotted) is a redundant non-color signal. */
+  .legend-line { display: inline-block; vertical-align: middle; }
+  .legend-marker { display: inline-block; vertical-align: middle; }
+  .legend-line.arm-1, .legend-marker.arm-1 { color: var(--arm1); }
+  .legend-line.arm-2, .legend-marker.arm-2 { color: var(--arm2); }
+  .legend-line.arm-3, .legend-marker.arm-3 { color: var(--arm3); }
+  .legend-dart {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: var(--ink);
+    border: 2px solid var(--warm-white);
+    box-shadow: 0 0 0 1px var(--ink);
+  }
+
+  .divider { height: 1px; background: var(--border); margin: 28px 0; }
+
+  @media (max-width: 768px) {
+    .main { padding: 24px 18px; }
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    .arms-row { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="shell">
+<main class="main">
+
+<div class="page-header">
+  <h1 class="page-title">Beta Bloom — Thompson Sampling, Live</h1>
+  <p class="page-subtitle">
+    Three slot machines, hidden payout rates. How do you balance
+    <em>exploration</em> (trying every arm) and <em>exploitation</em> (cashing in on the best one)
+    when you don't even know which is best? Watch the posteriors bloom.
+  </p>
+</div>
+
+<div class="card">
+  <div class="card-title">Posterior beliefs over each arm's success probability</div>
+
+  <div class="legend">
+    <span class="legend-item">
+      <svg class="legend-line arm-1" width="22" height="10" aria-hidden="true">
+        <line x1="1" y1="5" x2="21" y2="5" stroke="currentColor" stroke-width="2.2"/>
+      </svg>
+      <svg class="legend-marker arm-1" width="12" height="12" aria-hidden="true">
+        <circle cx="6" cy="6" r="4" fill="currentColor" stroke="#fffaf4" stroke-width="1.2"/>
+      </svg>
+      Arm 1 (solid, circle)
+    </span>
+    <span class="legend-item">
+      <svg class="legend-line arm-2" width="22" height="10" aria-hidden="true">
+        <line x1="1" y1="5" x2="21" y2="5" stroke="currentColor" stroke-width="2.2" stroke-dasharray="8 4"/>
+      </svg>
+      <svg class="legend-marker arm-2" width="12" height="12" aria-hidden="true">
+        <rect x="2" y="2" width="8" height="8" fill="currentColor" stroke="#fffaf4" stroke-width="1.2"/>
+      </svg>
+      Arm 2 (dashed, square)
+    </span>
+    <span class="legend-item">
+      <svg class="legend-line arm-3" width="22" height="10" aria-hidden="true">
+        <line x1="1" y1="5" x2="21" y2="5" stroke="currentColor" stroke-width="2.2" stroke-dasharray="2 4"/>
+      </svg>
+      <svg class="legend-marker arm-3" width="12" height="12" aria-hidden="true">
+        <polygon points="6,1 11,11 1,11" fill="currentColor" stroke="#fffaf4" stroke-width="1.2"/>
+      </svg>
+      Arm 3 (dotted, triangle)
+    </span>
+    <span class="legend-item"><span class="legend-dart"></span>Sampled <em>θ</em> (a "dart")</span>
+  </div>
+
+  <div class="canvas-wrap">
+    <canvas id="beta" width="1800" height="700"></canvas>
+  </div>
+
+  <div class="controls">
+    <button class="btn btn-primary" id="btn-play">Play</button>
+    <button class="btn btn-secondary" id="btn-step">Step (1 round)</button>
+    <button class="btn btn-secondary" id="btn-reset">Reset</button>
+    <button class="btn btn-ghost" id="btn-randomize">Randomize arms</button>
+
+    <div class="ctrl-group">
+      <label for="speed">Speed</label>
+      <input type="range" id="speed" min="1" max="100" value="6" step="1">
+      <span class="val" id="speed-val">6/s</span>
+    </div>
+
+    <label class="toggle">
+      <input type="checkbox" id="show-truth">
+      <span class="toggle-track"></span>
+      <span>Show truth</span>
+    </label>
+  </div>
+
+  <div class="log-strip" id="log">
+    <span class="log-empty">Round log will appear here…</span>
+  </div>
+
+  <div class="arms-row" id="arms"></div>
+</div>
+
+<div class="card">
+  <div class="card-title">Live statistics</div>
+  <div class="stats-grid">
+    <div class="stat">
+      <div class="stat-label">Rounds</div>
+      <div class="stat-value" id="stat-rounds">0</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Cumulative reward</div>
+      <div class="stat-value reward" id="stat-reward">0</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Cumulative regret</div>
+      <div class="stat-value regret" id="stat-regret">0.00</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Best arm so far</div>
+      <div class="stat-value" id="stat-best">—</div>
+    </div>
+  </div>
+
+  <div class="formula-box">
+    <div class="formula-label">Posterior update after observing reward <em>r</em> ∈ {0, 1}</div>
+    <div id="formula-update"></div>
+  </div>
+</div>
+
+<div class="callout">
+  <p>
+    <strong>The trick.</strong> Instead of asking "which arm has the highest mean?",
+    Thompson sampling asks "which arm is most likely <em>the best</em>?". Each round we draw
+    one sample from each posterior — those wobbly darts you see — and pull the arm whose
+    sample is largest. Wide curves yield wild darts (free exploration); narrow curves yield
+    confident darts (automatic exploitation). One algorithm, no hand-tuned ε.
+  </p>
+</div>
+
+<div class="info-box">
+  <p>
+    <strong>What to look for.</strong> Early on, all three Beta(1,1) curves are flat — every arm
+    gets sampled. Within ~30 rounds the worst arm's curve has slid left and gone narrow; within
+    ~150 the best arm dominates. Cumulative regret grows fast at first, then flattens — exactly
+    the sub-linear curve theory predicts.
+  </p>
+</div>
+
+</main>
+</div>
+
+<script>
+// ════════════════════════════════════════════════════════════════
+// KaTeX: render the Beta update rule
+// ════════════════════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', () => {
+  if (typeof katex !== 'undefined') {
+    katex.render(
+      '\\alpha_i \\leftarrow \\alpha_i + r,\\qquad \\beta_i \\leftarrow \\beta_i + (1 - r)',
+      document.getElementById('formula-update'),
+      { throwOnError: false, displayMode: true }
+    );
+  }
+});
+
+// ════════════════════════════════════════════════════════════════
+// Math helpers
+// ════════════════════════════════════════════════════════════════
+
+// Marsaglia-Tsang Gamma sampler (shape >= 1). Returns Gamma(shape, 1).
+function gammaSampleMT(shape) {
+  // Boost by 1 if shape < 1 (we won't hit this with α,β>=1, but safe)
+  let boost = 1;
+  if (shape < 1) {
+    boost = Math.pow(Math.random(), 1 / shape);
+    shape += 1;
+  }
+  const d = shape - 1/3;
+  const c = 1 / Math.sqrt(9 * d);
+  while (true) {
+    let x, v;
+    do {
+      // Box-Muller for standard normal
+      const u1 = Math.random();
+      const u2 = Math.random();
+      x = Math.sqrt(-2 * Math.log(u1 || 1e-300)) * Math.cos(2 * Math.PI * u2);
+      v = 1 + c * x;
+    } while (v <= 0);
+    v = v * v * v;
+    const u = Math.random();
+    if (u < 1 - 0.0331 * x * x * x * x) return d * v * boost;
+    if (Math.log(u) < 0.5 * x * x + d * (1 - v + Math.log(v))) return d * v * boost;
+  }
+}
+
+// Beta sample via two Gammas.
+function betaSample(a, b) {
+  const x = gammaSampleMT(a);
+  const y = gammaSampleMT(b);
+  return x / (x + y);
+}
+
+// Beta PDF on a grid, normalized numerically.
+// We work with the unnormalized log density to avoid overflow when α+β is large.
+function betaPDFGrid(a, b, n) {
+  const xs = new Float32Array(n);
+  const ys = new Float32Array(n);
+  // Find log peak first for stable normalization
+  let logMax = -Infinity;
+  const logVals = new Float64Array(n);
+  for (let i = 0; i < n; i++) {
+    const x = (i + 0.5) / n; // midpoints (avoids 0 and 1 endpoints)
+    xs[i] = x;
+    const lv = (a - 1) * Math.log(x) + (b - 1) * Math.log(1 - x);
+    logVals[i] = lv;
+    if (lv > logMax) logMax = lv;
+  }
+  // Convert to actual values (relative), then normalize so integral = 1.
+  let area = 0;
+  const dx = 1 / n;
+  for (let i = 0; i < n; i++) {
+    const v = Math.exp(logVals[i] - logMax);
+    ys[i] = v;
+    area += v * dx;
+  }
+  if (area > 0) {
+    for (let i = 0; i < n; i++) ys[i] /= area;
+  }
+  return { xs, ys };
+}
+
+// ════════════════════════════════════════════════════════════════
+// State
+// ════════════════════════════════════════════════════════════════
+
+// Wong color-blind-safe palette. Each arm carries a redundant non-color signal:
+//   - dash: line dash pattern for the Beta curve & truth line (solid/dashed/dotted)
+//   - shape: marker shape for the dart ('circle' | 'square' | 'triangle')
+const PALETTE = [
+  { id: 1, name: 'Arm 1', stroke: '#0072B2', fill: 'rgba(0,114,178,0.18)',  dart: '#005A8E', dash: [],     shape: 'circle'   },
+  { id: 2, name: 'Arm 2', stroke: '#D55E00', fill: 'rgba(213,94,0,0.18)',   dart: '#A04700', dash: [8, 4], shape: 'square'   },
+  { id: 3, name: 'Arm 3', stroke: '#009E73', fill: 'rgba(0,158,115,0.20)',  dart: '#007054', dash: [2, 4], shape: 'triangle' }
+];
+
+const GRID_N = 256;
+
+const state = {
+  truths: [0.30, 0.55, 0.75],
+  alpha: [1, 1, 1],
+  beta: [1, 1, 1],
+  pulls: [0, 0, 0],
+  successes: [0, 0, 0],
+  rounds: 0,
+  cumReward: 0,
+  cumRegret: 0,
+  log: [], // last ~20 rounds
+  playing: false,
+  speed: 6,
+  showTruth: false,
+  // Animation accumulator (rounds-per-second budget)
+  carry: 0,
+  lastFrameTime: 0,
+  // Active dart animation (only meaningful at low speeds)
+  dart: null, // { armChosen, samples:[θ1,θ2,θ3], chosenY:number, t0, dur, reward, phase }
+  // Tween: previous PDFs that ease toward current ones
+  prevPdfs: null,
+  curPdfs: null,
+  pdfTweenStart: 0,
+  pdfTweenDur: 220,
+};
+
+function recomputePdfs() {
+  const out = [];
+  for (let i = 0; i < 3; i++) {
+    out.push(betaPDFGrid(state.alpha[i], state.beta[i], GRID_N));
+  }
+  return out;
+}
+state.curPdfs = recomputePdfs();
+state.prevPdfs = state.curPdfs;
+
+// ════════════════════════════════════════════════════════════════
+// DOM refs
+// ════════════════════════════════════════════════════════════════
+const canvas = document.getElementById('beta');
+const ctx = canvas.getContext('2d');
+
+const btnPlay = document.getElementById('btn-play');
+const btnStep = document.getElementById('btn-step');
+const btnReset = document.getElementById('btn-reset');
+const btnRand = document.getElementById('btn-randomize');
+const speedSlider = document.getElementById('speed');
+const speedVal = document.getElementById('speed-val');
+const truthToggle = document.getElementById('show-truth');
+const armsRow = document.getElementById('arms');
+const logStrip = document.getElementById('log');
+
+// Stats refs
+const elRounds = document.getElementById('stat-rounds');
+const elReward = document.getElementById('stat-reward');
+const elRegret = document.getElementById('stat-regret');
+const elBest = document.getElementById('stat-best');
+
+// SVG snippets matching the canvas line dash + dart shape per arm.
+// These appear in each arm card so the legend redundancy (line style, marker
+// shape, label) is visible even if color is unreadable.
+const ARM_SVG = [
+  // Arm 1: solid line + circle marker
+  `<svg width="34" height="12" aria-hidden="true" style="vertical-align:middle">
+     <line x1="1" y1="6" x2="22" y2="6" stroke="currentColor" stroke-width="2.2"/>
+     <circle cx="28" cy="6" r="4" fill="currentColor" stroke="#fffaf4" stroke-width="1.2"/>
+   </svg>`,
+  // Arm 2: dashed line + square marker
+  `<svg width="34" height="12" aria-hidden="true" style="vertical-align:middle">
+     <line x1="1" y1="6" x2="22" y2="6" stroke="currentColor" stroke-width="2.2" stroke-dasharray="8 4"/>
+     <rect x="24" y="2" width="8" height="8" fill="currentColor" stroke="#fffaf4" stroke-width="1.2"/>
+   </svg>`,
+  // Arm 3: dotted line + triangle marker
+  `<svg width="34" height="12" aria-hidden="true" style="vertical-align:middle">
+     <line x1="1" y1="6" x2="22" y2="6" stroke="currentColor" stroke-width="2.2" stroke-dasharray="2 4"/>
+     <polygon points="28,1 33,11 23,11" fill="currentColor" stroke="#fffaf4" stroke-width="1.2"/>
+   </svg>`,
+];
+const ARM_STYLE_LABEL = ['solid · circle', 'dashed · square', 'dotted · triangle'];
+
+// Build arm cards
+function buildArmCards() {
+  armsRow.innerHTML = '';
+  for (let i = 0; i < 3; i++) {
+    const card = document.createElement('div');
+    card.className = `arm-card arm-${i + 1}`;
+    card.innerHTML = `
+      <div class="arm-name" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+        <span style="color:${PALETTE[i].stroke}">${ARM_SVG[i]}</span>
+        ${PALETTE[i].name}
+        <span class="arm-truth ${state.showTruth ? '' : 'hidden'}" id="arm-truth-${i}">
+          true p = ${state.truths[i].toFixed(2)}
+        </span>
+      </div>
+      <div class="arm-meta">
+        <span style="color:${PALETTE[i].stroke};font-weight:600">${ARM_STYLE_LABEL[i]}</span>
+        <br>
+        Beta(<strong id="arm-a-${i}">${state.alpha[i]}</strong>,
+             <strong id="arm-b-${i}">${state.beta[i]}</strong>)
+        &nbsp;·&nbsp; pulls: <strong id="arm-pulls-${i}">0</strong>
+        &nbsp;·&nbsp; mean ≈ <strong id="arm-mean-${i}">0.50</strong>
+      </div>
+    `;
+    armsRow.appendChild(card);
+  }
+}
+buildArmCards();
+
+function updateArmCards() {
+  for (let i = 0; i < 3; i++) {
+    document.getElementById(`arm-a-${i}`).textContent = state.alpha[i];
+    document.getElementById(`arm-b-${i}`).textContent = state.beta[i];
+    document.getElementById(`arm-pulls-${i}`).textContent = state.pulls[i];
+    const mean = state.alpha[i] / (state.alpha[i] + state.beta[i]);
+    document.getElementById(`arm-mean-${i}`).textContent = mean.toFixed(2);
+    const tEl = document.getElementById(`arm-truth-${i}`);
+    if (tEl) {
+      tEl.classList.toggle('hidden', !state.showTruth);
+      tEl.textContent = `true p = ${state.truths[i].toFixed(2)}`;
+    }
+  }
+}
+
+function updateStats() {
+  elRounds.textContent = state.rounds;
+  elReward.textContent = state.cumReward;
+  elRegret.textContent = state.cumRegret.toFixed(2);
+  // Best arm = highest posterior mean among pulled arms; "—" if no pulls.
+  if (state.rounds === 0) {
+    elBest.textContent = '—';
+  } else {
+    let best = 0, bestMean = -1;
+    for (let i = 0; i < 3; i++) {
+      const m = state.alpha[i] / (state.alpha[i] + state.beta[i]);
+      if (m > bestMean) { bestMean = m; best = i; }
+    }
+    elBest.textContent = `#${best + 1}`;
+    elBest.style.color = PALETTE[best].stroke;
+  }
+}
+
+function updateLog() {
+  if (state.log.length === 0) {
+    logStrip.innerHTML = '<span class="log-empty">Round log will appear here…</span>';
+    return;
+  }
+  // Show last 14
+  const tail = state.log.slice(-14);
+  logStrip.innerHTML = tail.map(r => {
+    const cls = r.reward ? 'success' : 'fail';
+    const symbol = r.reward ? '✓' : '✗';
+    return `<span class="log-pill ${cls}" style="border-left:3px solid ${PALETTE[r.arm].stroke};">
+      #${r.round} arm${r.arm + 1} ${symbol}
+    </span>`;
+  }).join('');
+}
+
+// ════════════════════════════════════════════════════════════════
+// Round logic
+// ════════════════════════════════════════════════════════════════
+
+// Run a single round; if `withDart` and animation is allowed, set up dart anim.
+function runRound(withDart) {
+  // 1. Sample θ from each posterior
+  const samples = [
+    betaSample(state.alpha[0], state.beta[0]),
+    betaSample(state.alpha[1], state.beta[1]),
+    betaSample(state.alpha[2], state.beta[2]),
+  ];
+  // 2. Pick argmax
+  let chosen = 0;
+  for (let i = 1; i < 3; i++) if (samples[i] > samples[chosen]) chosen = i;
+  // 3. Pull
+  const reward = Math.random() < state.truths[chosen] ? 1 : 0;
+  // 4. Update
+  if (reward === 1) state.alpha[chosen] += 1;
+  else state.beta[chosen] += 1;
+  state.pulls[chosen] += 1;
+  state.successes[chosen] += reward;
+  state.rounds += 1;
+  state.cumReward += reward;
+  const pMax = Math.max(...state.truths);
+  state.cumRegret += pMax - state.truths[chosen];
+  state.log.push({ round: state.rounds, arm: chosen, reward, samples });
+
+  // Tween bookkeeping
+  state.prevPdfs = state.curPdfs;
+  state.curPdfs = recomputePdfs();
+  state.pdfTweenStart = performance.now();
+
+  if (withDart) {
+    state.dart = {
+      samples,
+      chosen,
+      reward,
+      t0: performance.now(),
+      dur: 240,
+    };
+  } else {
+    state.dart = null;
+  }
+}
+
+// ════════════════════════════════════════════════════════════════
+// Drawing
+// ════════════════════════════════════════════════════════════════
+
+// Plot area in canvas pixels (before DPR scaling done in resize).
+let plotL, plotT, plotR, plotB, plotW, plotH;
+
+function resizeCanvas() {
+  const dpr = window.devicePixelRatio || 1;
+  // Use the parent's content width
+  const wrap = canvas.parentElement;
+  const cssW = wrap.clientWidth - 32; // padding
+  const cssH = Math.max(280, Math.min(420, cssW * 0.42));
+  canvas.style.width = cssW + 'px';
+  canvas.style.height = cssH + 'px';
+  canvas.width = Math.floor(cssW * dpr);
+  canvas.height = Math.floor(cssH * dpr);
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+  plotL = 50;
+  plotT = 24;
+  plotR = cssW - 18;
+  plotB = cssH - 38;
+  plotW = plotR - plotL;
+  plotH = plotB - plotT;
+}
+window.addEventListener('resize', () => { resizeCanvas(); });
+resizeCanvas();
+
+function xToPx(x) { return plotL + x * plotW; }
+
+// Determine y-axis max density across the three current PDFs (and prev for tweening)
+function getYMax() {
+  let m = 1;
+  for (const p of state.curPdfs) for (let i = 0; i < p.ys.length; i++) if (p.ys[i] > m) m = p.ys[i];
+  if (state.prevPdfs && state.prevPdfs !== state.curPdfs) {
+    for (const p of state.prevPdfs) for (let i = 0; i < p.ys.length; i++) if (p.ys[i] > m) m = p.ys[i];
+  }
+  return m * 1.05;
+}
+
+function yToPx(yDensity, yMax) {
+  return plotB - (yDensity / yMax) * plotH;
+}
+
+function drawAxes() {
+  ctx.strokeStyle = 'rgba(44,36,22,0.15)';
+  ctx.lineWidth = 1;
+  // Vertical (left)
+  ctx.beginPath();
+  ctx.moveTo(plotL, plotT);
+  ctx.lineTo(plotL, plotB);
+  ctx.stroke();
+  // Horizontal (bottom)
+  ctx.beginPath();
+  ctx.moveTo(plotL, plotB);
+  ctx.lineTo(plotR, plotB);
+  ctx.stroke();
+
+  // x ticks at 0, 0.25, 0.5, 0.75, 1
+  ctx.fillStyle = '#8a7660';
+  ctx.font = '11px -apple-system, "Segoe UI", sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'top';
+  for (const t of [0, 0.25, 0.5, 0.75, 1]) {
+    const px = xToPx(t);
+    ctx.beginPath();
+    ctx.strokeStyle = 'rgba(44,36,22,0.12)';
+    ctx.moveTo(px, plotB); ctx.lineTo(px, plotB + 4); ctx.stroke();
+    ctx.fillText(t.toFixed(2), px, plotB + 6);
+  }
+
+  // Axis labels
+  ctx.textAlign = 'center';
+  ctx.fillStyle = '#5a4a36';
+  ctx.font = '12px -apple-system, "Segoe UI", sans-serif';
+  ctx.fillText('success probability  p', (plotL + plotR) / 2, plotB + 20);
+
+  ctx.save();
+  ctx.translate(16, (plotT + plotB) / 2);
+  ctx.rotate(-Math.PI / 2);
+  ctx.fillText('posterior density', 0, 0);
+  ctx.restore();
+}
+
+function drawCurves(yMax) {
+  // Tween factor
+  let t = 1;
+  if (state.prevPdfs && state.prevPdfs !== state.curPdfs) {
+    const elapsed = performance.now() - state.pdfTweenStart;
+    t = Math.min(1, elapsed / state.pdfTweenDur);
+    t = t * t * (3 - 2 * t); // smoothstep
+    if (t >= 1) state.prevPdfs = state.curPdfs;
+  }
+
+  // Track each curve's peak (in the tweened state) so we can place a label there.
+  const peaks = [];
+
+  for (let i = 0; i < 3; i++) {
+    const cur = state.curPdfs[i];
+    const prev = state.prevPdfs ? state.prevPdfs[i] : cur;
+    const n = cur.xs.length;
+
+    let peakY = -Infinity, peakIdx = 0;
+
+    // Build path
+    ctx.beginPath();
+    for (let k = 0; k < n; k++) {
+      const x = cur.xs[k];
+      const y = prev.ys[k] + (cur.ys[k] - prev.ys[k]) * t;
+      if (y > peakY) { peakY = y; peakIdx = k; }
+      const px = xToPx(x);
+      const py = yToPx(y, yMax);
+      if (k === 0) ctx.moveTo(px, py);
+      else ctx.lineTo(px, py);
+    }
+
+    // Filled area under curve (no dash on fill)
+    ctx.lineTo(xToPx(cur.xs[n - 1]), plotB);
+    ctx.lineTo(xToPx(cur.xs[0]), plotB);
+    ctx.closePath();
+    ctx.fillStyle = PALETTE[i].fill;
+    ctx.fill();
+
+    // Stroke (re-build path for stroke without floor closure).
+    // Apply per-arm dash pattern: redundant non-color signal.
+    ctx.save();
+    ctx.setLineDash(PALETTE[i].dash);
+    ctx.beginPath();
+    for (let k = 0; k < n; k++) {
+      const x = cur.xs[k];
+      const y = prev.ys[k] + (cur.ys[k] - prev.ys[k]) * t;
+      const px = xToPx(x);
+      const py = yToPx(y, yMax);
+      if (k === 0) ctx.moveTo(px, py);
+      else ctx.lineTo(px, py);
+    }
+    ctx.strokeStyle = PALETTE[i].stroke;
+    ctx.lineWidth = 2.2;
+    ctx.lineJoin = 'round';
+    ctx.stroke();
+    ctx.restore();
+
+    peaks.push({ x: cur.xs[peakIdx], y: peakY });
+  }
+
+  // Numeric labels near each curve's peak — text itself is the redundant signal.
+  ctx.save();
+  ctx.setLineDash([]);
+  ctx.font = 'bold 11px -apple-system, "Segoe UI", sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'bottom';
+  for (let i = 0; i < 3; i++) {
+    const px = xToPx(peaks[i].x);
+    let py = yToPx(peaks[i].y, yMax) - 4;
+    if (py < plotT + 10) py = plotT + 10;
+    // White halo for readability over filled areas
+    ctx.lineWidth = 3;
+    ctx.strokeStyle = 'rgba(255,250,244,0.95)';
+    ctx.strokeText(PALETTE[i].name, px, py);
+    ctx.fillStyle = PALETTE[i].stroke;
+    ctx.fillText(PALETTE[i].name, px, py);
+  }
+  ctx.restore();
+}
+
+function drawTruths() {
+  if (!state.showTruth) return;
+  // Use the per-arm dash pattern as a redundant signal; promote 'solid' to a
+  // long-dash pattern so the truth line never blends into a continuous stroke
+  // (still distinguishable from arm-2/arm-3 by pattern).
+  const truthDash = [
+    [12, 5],   // Arm 1 — long dash (redundant w/ solid curve)
+    [8, 4],    // Arm 2 — dashed (matches curve)
+    [2, 4],    // Arm 3 — dotted (matches curve)
+  ];
+  for (let i = 0; i < 3; i++) {
+    const px = xToPx(state.truths[i]);
+    ctx.save();
+    ctx.strokeStyle = PALETTE[i].dart;
+    ctx.setLineDash(truthDash[i]);
+    ctx.lineWidth = 1.4;
+    ctx.beginPath();
+    ctx.moveTo(px, plotT);
+    ctx.lineTo(px, plotB);
+    ctx.stroke();
+    ctx.restore();
+    // small label at top
+    ctx.fillStyle = PALETTE[i].dart;
+    ctx.font = '10px "Courier New", monospace';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
+    ctx.fillText(`p${i + 1}=${state.truths[i].toFixed(2)}`, px, plotT - 1);
+  }
+}
+
+// Compute the y value of arm i's current PDF at sample x (linear interp).
+function pdfAt(armIdx, x) {
+  const p = state.curPdfs[armIdx];
+  const n = p.xs.length;
+  // grid is at midpoints; binary search
+  let lo = 0, hi = n - 1;
+  while (lo < hi) {
+    const mid = (lo + hi) >> 1;
+    if (p.xs[mid] < x) lo = mid + 1;
+    else hi = mid;
+  }
+  if (lo === 0) return p.ys[0];
+  if (lo === n - 1 && p.xs[lo] < x) return p.ys[n - 1];
+  const x0 = p.xs[lo - 1], x1 = p.xs[lo];
+  const y0 = p.ys[lo - 1], y1 = p.ys[lo];
+  const t = (x - x0) / (x1 - x0);
+  return y0 + t * (y1 - y0);
+}
+
+// Build a marker path of the requested shape at (cx, cy) with size r.
+// 'circle' | 'square' | 'triangle' — redundant non-color signal per arm.
+function dartPath(shape, cx, cy, r) {
+  ctx.beginPath();
+  if (shape === 'circle') {
+    ctx.arc(cx, cy, r, 0, Math.PI * 2);
+  } else if (shape === 'square') {
+    const s = r * 1.7; // visually comparable area
+    ctx.rect(cx - s / 2, cy - s / 2, s, s);
+  } else { // triangle (equilateral, point up)
+    const h = r * 1.85;
+    ctx.moveTo(cx, cy - h * 0.62);
+    ctx.lineTo(cx + h * 0.55, cy + h * 0.40);
+    ctx.lineTo(cx - h * 0.55, cy + h * 0.40);
+    ctx.closePath();
+  }
+}
+
+function drawDart(yMax) {
+  if (!state.dart) return;
+  const elapsed = performance.now() - state.dart.t0;
+  const dur = state.dart.dur;
+  const t = Math.min(1, elapsed / dur);
+  // ease out
+  const ease = 1 - Math.pow(1 - t, 3);
+
+  // Draw all 3 darts; chosen arm bigger / glowing
+  for (let i = 0; i < 3; i++) {
+    const x = state.dart.samples[i];
+    const px = xToPx(x);
+    // dart starts above plot at y=plotT-20, descends to PDF height at sample
+    const targetDensity = pdfAt(i, x);
+    const targetY = yToPx(targetDensity, yMax);
+    const startY = plotT - 22;
+    const py = startY + (targetY - startY) * ease;
+
+    const isChosen = (i === state.dart.chosen);
+    const r = isChosen ? 7 : 5;
+
+    // Drop line from baseline to dart for chosen arm — emphasizes "this θ won"
+    if (isChosen && t > 0.7) {
+      ctx.save();
+      ctx.strokeStyle = PALETTE[i].dart;
+      ctx.globalAlpha = (t - 0.7) / 0.3;
+      ctx.setLineDash([2, 3]);
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      ctx.moveTo(px, py);
+      ctx.lineTo(px, plotB);
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    // Glow halo for chosen
+    if (isChosen) {
+      ctx.save();
+      const gradient = ctx.createRadialGradient(px, py, 1, px, py, 18);
+      gradient.addColorStop(0, PALETTE[i].dart + 'cc');
+      gradient.addColorStop(1, PALETTE[i].dart + '00');
+      ctx.fillStyle = gradient;
+      ctx.beginPath();
+      ctx.arc(px, py, 18, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    // Dart body — per-arm shape (redundant non-color signal).
+    ctx.save();
+    ctx.setLineDash([]);
+    dartPath(PALETTE[i].shape, px, py, r);
+    ctx.fillStyle = PALETTE[i].dart;
+    ctx.fill();
+    ctx.strokeStyle = '#fffaf4';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  // After dart lands, briefly show reward as ✓/✗ near chosen dart
+  if (t >= 1) {
+    const i = state.dart.chosen;
+    const x = state.dart.samples[i];
+    const px = xToPx(x);
+    const py = yToPx(pdfAt(i, x), yMax);
+    ctx.font = 'bold 16px Georgia, serif';
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'middle';
+    if (state.dart.reward) {
+      ctx.fillStyle = '#2d6b38';
+      ctx.fillText('✓ +1', px + 11, py - 2);
+    } else {
+      ctx.fillStyle = '#8b2a1f';
+      ctx.fillText('✗  0', px + 11, py - 2);
+    }
+  }
+
+  // Expire dart after a short hold past landing
+  if (elapsed > dur + 220) state.dart = null;
+}
+
+function drawScene() {
+  const W = canvas.clientWidth;
+  const H = canvas.clientHeight;
+  ctx.clearRect(0, 0, W, H);
+
+  // Plot bg
+  ctx.fillStyle = '#fffaf4';
+  ctx.fillRect(plotL - 8, plotT - 8, plotW + 16, plotH + 16);
+
+  // Subtle grid
+  ctx.strokeStyle = 'rgba(44,36,22,0.05)';
+  ctx.lineWidth = 1;
+  for (const t of [0.25, 0.5, 0.75]) {
+    const px = xToPx(t);
+    ctx.beginPath();
+    ctx.moveTo(px, plotT);
+    ctx.lineTo(px, plotB);
+    ctx.stroke();
+  }
+
+  const yMax = getYMax();
+  drawAxes();
+  drawCurves(yMax);
+  drawTruths();
+  drawDart(yMax);
+}
+
+// ════════════════════════════════════════════════════════════════
+// Main loop
+// ════════════════════════════════════════════════════════════════
+function frame(now) {
+  if (!state.lastFrameTime) state.lastFrameTime = now;
+  const dt = (now - state.lastFrameTime) / 1000; // seconds
+  state.lastFrameTime = now;
+
+  if (state.playing) {
+    state.carry += dt * state.speed; // rounds owed this tick
+
+    // If a dart anim is active and we're at low speed, wait for it to finish
+    // before starting a new round. At high speed, skip dart animation entirely.
+    const animatedThreshold = 12; // rounds/sec above which we batch silently
+
+    if (state.speed <= animatedThreshold) {
+      if (!state.dart && state.carry >= 1) {
+        runRound(true);
+        state.carry -= 1;
+      }
+      // If dart present and many rounds owed, drop them (we don't queue forever)
+      if (state.dart && state.carry > 4) state.carry = 4;
+    } else {
+      // Batch mode: run as many rounds as we owe this frame.
+      // No darts.
+      let n = Math.floor(state.carry);
+      // Cap per-frame to keep us responsive
+      if (n > 500) n = 500;
+      for (let k = 0; k < n; k++) runRound(false);
+      state.carry -= n;
+      if (n > 0) {
+        // Squash tween to instant in batch mode for snappy feel
+        state.prevPdfs = state.curPdfs;
+      }
+    }
+
+    // Update DOM stats periodically (every frame is fine, cheap)
+    updateArmCards();
+    updateStats();
+    updateLog();
+  }
+
+  drawScene();
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+
+// ════════════════════════════════════════════════════════════════
+// Controls
+// ════════════════════════════════════════════════════════════════
+function setPlaying(p) {
+  state.playing = p;
+  btnPlay.textContent = p ? 'Pause' : 'Play';
+  if (p) {
+    state.lastFrameTime = 0;
+    state.carry = 0;
+  }
+}
+
+btnPlay.addEventListener('click', () => setPlaying(!state.playing));
+
+btnStep.addEventListener('click', () => {
+  if (state.playing) setPlaying(false);
+  // Always animate single steps with dart
+  if (state.dart) state.dart = null;
+  runRound(true);
+  updateArmCards();
+  updateStats();
+  updateLog();
+});
+
+btnReset.addEventListener('click', () => {
+  setPlaying(false);
+  state.alpha = [1, 1, 1];
+  state.beta = [1, 1, 1];
+  state.pulls = [0, 0, 0];
+  state.successes = [0, 0, 0];
+  state.rounds = 0;
+  state.cumReward = 0;
+  state.cumRegret = 0;
+  state.log = [];
+  state.dart = null;
+  state.curPdfs = recomputePdfs();
+  state.prevPdfs = state.curPdfs;
+  updateArmCards();
+  updateStats();
+  updateLog();
+});
+
+btnRand.addEventListener('click', () => {
+  // Sample 3 means in [0.1, 0.9], not all clumped.
+  const ts = [];
+  while (ts.length < 3) {
+    const v = 0.1 + Math.random() * 0.8;
+    if (ts.every(t => Math.abs(t - v) > 0.08)) ts.push(v);
+  }
+  ts.sort((a, b) => a - b);
+  state.truths = ts.map(v => Math.round(v * 100) / 100);
+  // Reset like reset button
+  setPlaying(false);
+  state.alpha = [1, 1, 1];
+  state.beta = [1, 1, 1];
+  state.pulls = [0, 0, 0];
+  state.successes = [0, 0, 0];
+  state.rounds = 0;
+  state.cumReward = 0;
+  state.cumRegret = 0;
+  state.log = [];
+  state.dart = null;
+  state.curPdfs = recomputePdfs();
+  state.prevPdfs = state.curPdfs;
+  updateArmCards();
+  updateStats();
+  updateLog();
+});
+
+speedSlider.addEventListener('input', () => {
+  state.speed = parseInt(speedSlider.value, 10);
+  speedVal.textContent = state.speed + '/s';
+});
+
+truthToggle.addEventListener('change', () => {
+  state.showTruth = truthToggle.checked;
+  updateArmCards();
+});
+
+// Initial paint
+updateArmCards();
+updateStats();
+updateLog();
+</script>
+
+</body>
+</html>

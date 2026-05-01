@@ -1,0 +1,1558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Beat the Bandit — CAS AINIT FS26</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+  onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]});"></script>
+<style>
+  :root {
+    --cream: #fdf6ee;
+    --warm-white: #fffaf4;
+    --sand: #f0e6d3;
+    --sand-dark: #e0cdb5;
+    --terra: #c17f4e;
+    --terra-dark: #a0623a;
+    --rust: #d4622a;
+    --ochre: #d49a3a;
+    --sage: #6a8f73;
+    --sage-light: #8fb098;
+    --ink: #2c2416;
+    --ink-light: #5a4a36;
+    --ink-muted: #8a7660;
+    --success: #4a9055;
+    --error: #c0392b;
+    --border: rgba(193, 127, 78, 0.2);
+    --shadow: 0 4px 24px rgba(44,36,22,0.08);
+    --shadow-lg: 0 8px 40px rgba(44,36,22,0.12);
+
+    /* Wong colour-blind-safe palette — arm identities */
+    --arm-a: #0072B2;          /* blue */
+    --arm-b: #D55E00;          /* vermillion */
+    --arm-c: #009E73;          /* bluish green */
+    --arm-a-soft: rgba(0,114,178,0.16);
+    --arm-b-soft: rgba(213,94,0,0.16);
+    --arm-c-soft: rgba(0,158,115,0.16);
+
+    /* Player palette — distinct from arms via shape + line style */
+    --you: #2c2416;            /* ink */
+    --ucb: #003C5F;            /* dark blue (darker than arm-a) */
+    --thompson: #CC79A7;       /* reddish purple */
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--cream);
+    color: var(--ink);
+    min-height: 100vh;
+    background-image:
+      radial-gradient(ellipse at 10% 0%, rgba(193,127,78,0.08) 0%, transparent 60%),
+      radial-gradient(ellipse at 90% 100%, rgba(106,143,115,0.06) 0%, transparent 60%);
+  }
+
+  .shell { display: flex; flex-direction: column; min-height: 100vh; }
+  .main { flex: 1; padding: 36px 56px 60px; max-width: 1240px; margin: 0 auto; width: 100%; }
+
+  /* Typography */
+  .page-header { margin-bottom: 24px; }
+  .page-title {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--ink);
+    line-height: 1.2;
+    margin-bottom: 10px;
+  }
+  .page-subtitle {
+    font-size: 15px;
+    color: var(--ink-muted);
+    line-height: 1.6;
+    max-width: 760px;
+  }
+  h2.section-title {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 19px;
+    font-weight: 600;
+    color: var(--terra-dark);
+    margin: 28px 0 12px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  h2.section-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  /* Cards */
+  .card {
+    background: var(--warm-white);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 22px 24px;
+    margin-bottom: 18px;
+    box-shadow: var(--shadow);
+  }
+  .card-title {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 12px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .callout {
+    border-left: 3px solid var(--terra);
+    background: rgba(193,127,78,0.06);
+    padding: 14px 18px;
+    border-radius: 0 10px 10px 0;
+    margin: 14px 0;
+  }
+  .callout p { font-size: 14px; color: var(--ink-light); margin: 0; line-height: 1.65; }
+  .callout strong { color: var(--terra-dark); }
+  .info-box {
+    background: rgba(106,143,115,0.08);
+    border: 1px solid rgba(106,143,115,0.25);
+    border-radius: 12px;
+    padding: 14px 18px;
+    margin: 14px 0;
+  }
+  .info-box p { font-size: 13.5px; color: var(--ink-light); margin: 0; line-height: 1.65; }
+
+  /* Buttons */
+  .btn {
+    padding: 9px 18px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all 0.18s;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    letter-spacing: 0.02em;
+  }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--terra), var(--rust));
+    color: white;
+    box-shadow: 0 3px 12px rgba(193,127,78,0.3);
+  }
+  .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 5px 16px rgba(193,127,78,0.4); }
+  .btn-secondary {
+    background: var(--sand);
+    color: var(--ink-light);
+    border: 1px solid var(--sand-dark);
+  }
+  .btn-secondary:hover { background: var(--sand-dark); }
+  .btn-ghost {
+    background: rgba(106,143,115,0.1);
+    color: var(--sage);
+    border: 1px solid rgba(106,143,115,0.3);
+  }
+  .btn-ghost:hover { background: rgba(106,143,115,0.2); }
+  .btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none !important; }
+
+  /* Controls */
+  .controls-row {
+    display: flex; gap: 18px 26px; flex-wrap: wrap;
+    align-items: center;
+  }
+  .ctrl {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 13px; color: var(--ink-light);
+  }
+  .ctrl label { font-weight: 600; color: var(--ink-light); font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em; }
+  .seg { display: inline-flex; border: 1px solid var(--sand-dark); border-radius: 8px; overflow: hidden; }
+  .seg button {
+    background: var(--warm-white);
+    color: var(--ink-light);
+    border: none;
+    padding: 6px 12px;
+    font-size: 12.5px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    letter-spacing: 0.02em;
+    transition: background 0.15s, color 0.15s;
+  }
+  .seg button + button { border-left: 1px solid var(--sand-dark); }
+  .seg button:hover:not(.active) { background: var(--sand); }
+  .seg button.active { background: var(--terra); color: white; }
+  .ctrl-buttons { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+
+  .toggle {
+    display: inline-flex; align-items: center; gap: 8px;
+    cursor: pointer; user-select: none;
+    font-size: 13px; color: var(--ink-light);
+  }
+  .toggle input { display: none; }
+  .toggle .switch {
+    width: 34px; height: 19px; border-radius: 10px;
+    background: var(--sand-dark); position: relative;
+    transition: background 0.18s;
+  }
+  .toggle .switch::after {
+    content: '';
+    position: absolute;
+    top: 2px; left: 2px;
+    width: 15px; height: 15px;
+    border-radius: 50%;
+    background: white;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    transition: left 0.18s;
+  }
+  .toggle input:checked + .switch { background: var(--sage); }
+  .toggle input:checked + .switch::after { left: 17px; }
+
+  /* Game layout */
+  .game-grid {
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    gap: 18px;
+    align-items: stretch;
+  }
+  @media (max-width: 1080px) {
+    .game-grid { grid-template-columns: 1fr; }
+  }
+
+  /* Arms */
+  .arms-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin: 8px 0 4px;
+  }
+  .arm-btn {
+    position: relative;
+    background: var(--warm-white);
+    border: 2px solid;
+    border-radius: 18px;
+    padding: 18px 14px 16px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: transform 0.15s, box-shadow 0.15s;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    text-align: center;
+    min-height: 168px;
+    display: flex; flex-direction: column; align-items: center; justify-content: space-between;
+  }
+  .arm-btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: var(--shadow-lg); }
+  .arm-btn:disabled { cursor: not-allowed; opacity: 0.85; }
+  .arm-btn.A { border-color: var(--arm-a); }
+  .arm-btn.B { border-color: var(--arm-b); }
+  .arm-btn.C { border-color: var(--arm-c); }
+
+  .arm-letter {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 48px;
+    font-weight: 700;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+  .arm-btn.A .arm-letter { color: var(--arm-a); }
+  .arm-btn.B .arm-letter { color: var(--arm-b); }
+  .arm-btn.C .arm-letter { color: var(--arm-c); }
+
+  .arm-marker {
+    font-size: 22px;
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+  .arm-btn.A .arm-marker { color: var(--arm-a); }
+  .arm-btn.B .arm-marker { color: var(--arm-b); }
+  .arm-btn.C .arm-marker { color: var(--arm-c); }
+
+  .arm-stats {
+    font-size: 12.5px;
+    color: var(--ink-muted);
+    line-height: 1.45;
+  }
+  .arm-stats .mean {
+    font-family: 'Courier New', Courier, monospace;
+    font-weight: 700;
+    color: var(--ink);
+    font-size: 14px;
+  }
+  .arm-hint {
+    margin-top: 8px;
+    font-size: 11px;
+    color: var(--ink-muted);
+    line-height: 1.4;
+    min-height: 28px;
+  }
+  .arm-hint .pick {
+    display: inline-block;
+    padding: 1px 6px;
+    border-radius: 4px;
+    margin: 1px 2px;
+    font-weight: 700;
+    font-size: 10.5px;
+    letter-spacing: 0.04em;
+  }
+  .arm-hint .pick.ucb { background: rgba(0,60,95,0.12); color: var(--ucb); }
+  .arm-hint .pick.thompson { background: rgba(204,121,167,0.18); color: var(--thompson); }
+
+  /* Reward flash overlay */
+  .arm-flash {
+    position: absolute; inset: 0;
+    border-radius: 16px;
+    pointer-events: none;
+    opacity: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 90px;
+    font-weight: 800;
+    line-height: 1;
+  }
+  .arm-flash.win {
+    background: rgba(74,144,85,0.85);
+    color: white;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.25);
+  }
+  .arm-flash.lose {
+    background: rgba(213,94,0,0.85);
+    color: white;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.25);
+  }
+  .arm-flash.flash {
+    animation: flashFade 320ms ease-out forwards;
+  }
+  @keyframes flashFade {
+    0%   { opacity: 0; transform: scale(0.85); }
+    25%  { opacity: 1; transform: scale(1.05); }
+    70%  { opacity: 0.95; transform: scale(1); }
+    100% { opacity: 0; transform: scale(1); }
+  }
+
+  /* Reward fly-up */
+  .arm-fly {
+    position: absolute;
+    left: 50%; top: 35%;
+    transform: translate(-50%, 0);
+    font-size: 22px;
+    font-weight: 700;
+    pointer-events: none;
+    opacity: 0;
+    font-family: 'Courier New', Courier, monospace;
+  }
+  .arm-fly.fly {
+    animation: flyUp 720ms ease-out forwards;
+  }
+  .arm-fly.win  { color: var(--success); }
+  .arm-fly.lose { color: var(--error); }
+  @keyframes flyUp {
+    0%   { opacity: 0; transform: translate(-50%, 10px); }
+    20%  { opacity: 1; transform: translate(-50%, 0); }
+    100% { opacity: 0; transform: translate(-50%, -42px); }
+  }
+
+  /* Round indicator */
+  .round-bar {
+    display: flex; align-items: center; gap: 12px;
+    font-size: 13px; color: var(--ink-muted);
+    margin: 6px 0 12px;
+  }
+  .round-prog {
+    flex: 1;
+    height: 6px;
+    background: var(--sand);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .round-prog .fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--terra), var(--rust));
+    transition: width 0.25s;
+  }
+  .round-text {
+    font-family: 'Courier New', Courier, monospace;
+    font-weight: 700;
+    color: var(--ink);
+    font-size: 13.5px;
+    min-width: 96px; text-align: right;
+  }
+
+  /* Scoreboard */
+  .scoreboard {
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .score-row {
+    display: grid;
+    grid-template-columns: 24px 1fr auto;
+    align-items: center;
+    gap: 10px;
+    background: var(--warm-white);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 10px 14px;
+  }
+  .score-row .marker {
+    font-size: 16px; line-height: 1;
+    text-align: center;
+    font-weight: 700;
+  }
+  .score-row.you { border-left: 4px solid var(--you); }
+  .score-row.ucb { border-left: 4px solid var(--ucb); }
+  .score-row.thompson { border-left: 4px solid var(--thompson); }
+  .score-row.you .marker  { color: var(--you); }
+  .score-row.ucb .marker  { color: var(--ucb); }
+  .score-row.thompson .marker { color: var(--thompson); }
+  .score-name {
+    font-size: 13px; font-weight: 600;
+    color: var(--ink);
+  }
+  .score-name .style-tag {
+    font-size: 10.5px;
+    color: var(--ink-muted);
+    font-weight: 500;
+    margin-left: 6px;
+    letter-spacing: 0.04em;
+  }
+  .score-val {
+    font-family: 'Courier New', Courier, monospace;
+    font-weight: 700;
+    color: var(--ink);
+    font-size: 16px;
+  }
+  .score-val .of { color: var(--ink-muted); font-size: 12px; font-weight: 500; }
+
+  /* Charts */
+  canvas.chart {
+    display: block;
+    width: 100%;
+    border-radius: 8px;
+    background: var(--warm-white);
+  }
+  .chart-wrap {
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 10px;
+    background: var(--warm-white);
+  }
+
+  /* Last-round summary */
+  .last-round {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-top: 6px;
+  }
+  .lr-cell {
+    background: var(--sand);
+    border-radius: 8px;
+    padding: 8px 10px;
+    font-size: 12px;
+    color: var(--ink-light);
+  }
+  .lr-cell .who { font-weight: 700; color: var(--ink); margin-right: 4px; }
+  .lr-cell .arm-tag {
+    display: inline-block;
+    width: 18px; height: 18px;
+    border-radius: 4px;
+    font-size: 11px; font-weight: 700;
+    color: white;
+    text-align: center; line-height: 18px;
+    margin-right: 4px;
+    vertical-align: -3px;
+  }
+  .lr-cell .arm-tag.A { background: var(--arm-a); }
+  .lr-cell .arm-tag.B { background: var(--arm-b); }
+  .lr-cell .arm-tag.C { background: var(--arm-c); }
+  .lr-cell .res {
+    display: inline-block;
+    font-weight: 700;
+    margin-left: 2px;
+  }
+  .lr-cell .res.win  { color: var(--success); }
+  .lr-cell .res.lose { color: var(--error); }
+
+  /* End-game modal-ish overlay (in-flow card) */
+  .endgame {
+    background: var(--warm-white);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px 26px;
+    margin-bottom: 20px;
+    box-shadow: var(--shadow-lg);
+    display: none;
+  }
+  .endgame.show { display: block; }
+  .endgame-title {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 24px; font-weight: 700;
+    color: var(--ink);
+    margin-bottom: 6px;
+  }
+  .endgame-sub {
+    font-size: 14px; color: var(--ink-muted);
+    margin-bottom: 16px;
+    line-height: 1.6;
+  }
+  .endgame-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+    margin-top: 10px;
+  }
+  @media (max-width: 900px) { .endgame-grid { grid-template-columns: 1fr; } }
+
+  .truth-box {
+    background: var(--sand);
+    border-radius: 10px;
+    padding: 12px 16px;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 13px;
+    color: var(--ink);
+    line-height: 1.7;
+    display: none;
+    margin-top: 10px;
+  }
+  .truth-box.show { display: block; }
+  .truth-box .arm-name {
+    display: inline-block;
+    width: 14px; height: 14px;
+    border-radius: 3px;
+    vertical-align: -2px;
+    margin-right: 6px;
+  }
+
+  /* Formula box */
+  .formula-mini {
+    background: var(--sand);
+    border: 1px solid var(--sand-dark);
+    border-radius: 10px;
+    padding: 10px 14px;
+    margin: 8px 0;
+    font-size: 13px;
+    color: var(--ink);
+  }
+  .formula-mini .label {
+    font-size: 10.5px;
+    color: var(--ink-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 600;
+    margin-bottom: 4px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
+
+  .legend {
+    display: flex; flex-wrap: wrap; gap: 14px;
+    font-size: 12px; color: var(--ink-muted);
+    margin-top: 6px;
+  }
+  .legend-item { display: inline-flex; align-items: center; gap: 6px; }
+  .legend-swatch {
+    width: 22px; height: 3px;
+    border-radius: 2px;
+    position: relative;
+  }
+  .legend-swatch.you      { background: var(--you); }
+  .legend-swatch.ucb      { background: transparent; border-top: 3px dashed var(--ucb); height: 0; }
+  .legend-swatch.thompson { background: transparent; border-top: 3px dotted var(--thompson); height: 0; }
+  .legend-marker { font-size: 12px; line-height: 1; }
+  .legend-marker.you      { color: var(--you); }
+  .legend-marker.ucb      { color: var(--ucb); }
+  .legend-marker.thompson { color: var(--thompson); }
+
+  .footer-note {
+    font-size: 12px;
+    color: var(--ink-muted);
+    margin-top: 18px;
+    line-height: 1.6;
+  }
+
+  .pulse-dot {
+    display: inline-block;
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--sage);
+    margin-right: 4px;
+    vertical-align: middle;
+    animation: pulse 1.6s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 0.4; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.3); }
+  }
+</style>
+</head>
+<body>
+<div class="shell"><div class="main">
+
+<header class="page-header">
+  <div class="page-title">Beat the Bandit</div>
+  <p class="page-subtitle">
+    Three slot machines. Hidden win-rates. Fifty rounds. UCB and Thompson sampling are playing the same
+    machines beside you, on independent draws. Can you out-decide them?
+  </p>
+</header>
+
+<!-- ── CONTROLS ──────────────────────────────── -->
+<section class="card">
+  <div class="card-title">Setup</div>
+  <div class="controls-row">
+    <div class="ctrl">
+      <label>Difficulty</label>
+      <div class="seg" id="diffSeg">
+        <button data-diff="easy">Easy</button>
+        <button data-diff="medium" class="active">Medium</button>
+        <button data-diff="hard">Hard</button>
+      </div>
+    </div>
+    <div class="ctrl">
+      <label>Rounds</label>
+      <div class="seg" id="roundsSeg">
+        <button data-rounds="30">30</button>
+        <button data-rounds="50" class="active">50</button>
+        <button data-rounds="100">100</button>
+      </div>
+    </div>
+    <label class="toggle">
+      <input type="checkbox" id="hintToggle">
+      <span class="switch"></span>
+      <span>Show algorithm hints</span>
+    </label>
+    <div class="ctrl-buttons" style="margin-left:auto">
+      <button class="btn btn-secondary" id="resetBtn">Reset / new run</button>
+    </div>
+  </div>
+  <div class="callout" style="margin-top:14px">
+    <p>
+      Each round, all three players (you, UCB, Thompson) pick an arm. The bandit then draws a separate
+      Bernoulli reward for each player from the same hidden mean. <strong>So the comparison is policy
+      vs. policy</strong> — luck cancels in expectation, the policy gap doesn't.
+    </p>
+  </div>
+</section>
+
+<!-- ── GAME ──────────────────────────────── -->
+<div class="game-grid">
+  <!-- LEFT: arms + chart -->
+  <section class="card">
+    <div class="card-title">
+      <span class="pulse-dot"></span>
+      <span id="phaseText">Round 1 — pick an arm</span>
+    </div>
+    <div class="round-bar">
+      <div class="round-prog"><div class="fill" id="roundFill" style="width:0%"></div></div>
+      <div class="round-text" id="roundText">0 / 50</div>
+    </div>
+
+    <div class="arms-row" id="armsRow">
+      <button class="arm-btn A" data-arm="0" aria-label="Arm A">
+        <div class="arm-letter">A</div>
+        <div class="arm-marker">●</div>
+        <div class="arm-stats">
+          <div class="mean" id="meanA">— from 0 pulls</div>
+        </div>
+        <div class="arm-hint" id="hintA"></div>
+        <div class="arm-flash" id="flashA"></div>
+        <div class="arm-fly" id="flyA"></div>
+      </button>
+      <button class="arm-btn B" data-arm="1" aria-label="Arm B">
+        <div class="arm-letter">B</div>
+        <div class="arm-marker">■</div>
+        <div class="arm-stats">
+          <div class="mean" id="meanB">— from 0 pulls</div>
+        </div>
+        <div class="arm-hint" id="hintB"></div>
+        <div class="arm-flash" id="flashB"></div>
+        <div class="arm-fly" id="flyB"></div>
+      </button>
+      <button class="arm-btn C" data-arm="2" aria-label="Arm C">
+        <div class="arm-letter">C</div>
+        <div class="arm-marker">▲</div>
+        <div class="arm-stats">
+          <div class="mean" id="meanC">— from 0 pulls</div>
+        </div>
+        <div class="arm-hint" id="hintC"></div>
+        <div class="arm-flash" id="flashC"></div>
+        <div class="arm-fly" id="flyC"></div>
+      </button>
+    </div>
+
+    <div class="last-round" id="lastRound" style="margin-top:12px">
+      <div class="lr-cell"><span class="who">You</span> <span class="muted">— waiting for first pick</span></div>
+      <div class="lr-cell"><span class="who">UCB</span> <span class="muted">—</span></div>
+      <div class="lr-cell"><span class="who">Thompson</span> <span class="muted">—</span></div>
+    </div>
+
+    <h2 class="section-title" style="margin-top:22px">Cumulative reward</h2>
+    <div class="chart-wrap">
+      <canvas class="chart" id="cumChart" height="240"></canvas>
+    </div>
+    <div class="legend">
+      <span class="legend-item"><span class="legend-swatch you"></span><span class="legend-marker you">●</span> You (solid)</span>
+      <span class="legend-item"><span class="legend-swatch ucb"></span><span class="legend-marker ucb">◆</span> UCB1 (dashed)</span>
+      <span class="legend-item"><span class="legend-swatch thompson"></span><span class="legend-marker thompson">▲</span> Thompson (dotted)</span>
+    </div>
+  </section>
+
+  <!-- RIGHT: scoreboard + formulas -->
+  <aside>
+    <section class="card">
+      <div class="card-title">Live scoreboard</div>
+      <div class="scoreboard">
+        <div class="score-row you">
+          <div class="marker">●</div>
+          <div class="score-name">You<span class="style-tag">solid</span></div>
+          <div class="score-val"><span id="scoreYou">0</span><span class="of"> / <span id="scoreOfYou">50</span></span></div>
+        </div>
+        <div class="score-row ucb">
+          <div class="marker">◆</div>
+          <div class="score-name">UCB1<span class="style-tag">dashed</span></div>
+          <div class="score-val"><span id="scoreUcb">0</span><span class="of"> / <span id="scoreOfUcb">50</span></span></div>
+        </div>
+        <div class="score-row thompson">
+          <div class="marker">▲</div>
+          <div class="score-name">Thompson<span class="style-tag">dotted</span></div>
+          <div class="score-val"><span id="scoreThom">0</span><span class="of"> / <span id="scoreOfThom">50</span></span></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card-title">What they're computing</div>
+      <div class="formula-mini">
+        <div class="label">UCB1 picks</div>
+        $\arg\max_i \left(\hat{\mu}_i + \sqrt{\frac{2 \ln t}{n_i}}\right)$
+      </div>
+      <div class="formula-mini">
+        <div class="label">Thompson picks</div>
+        $\theta_i \sim \text{Beta}(\alpha_i, \beta_i),\ \arg\max_i \theta_i$
+      </div>
+      <p class="prose" style="font-size:13px;color:var(--ink-light);line-height:1.65;margin-top:6px">
+        UCB adds an exploration bonus that shrinks as an arm gets pulled. Thompson keeps a Beta
+        belief per arm and picks by sampling. Both have perfect memory of their own history.
+      </p>
+    </section>
+  </aside>
+</div>
+
+<!-- ── END GAME ──────────────────────────────── -->
+<section class="endgame" id="endgame">
+  <div class="endgame-title" id="endTitle">Game over</div>
+  <p class="endgame-sub" id="endSub">Here's how everyone did.</p>
+
+  <div class="endgame-grid">
+    <div>
+      <h2 class="section-title" style="margin-top:0">Final totals vs. expected best</h2>
+      <div class="chart-wrap">
+        <canvas class="chart" id="finalChart" height="220"></canvas>
+      </div>
+      <p class="prose" style="font-size:13px;color:var(--ink-light);line-height:1.65;margin-top:10px" id="finalCaption"></p>
+
+      <div class="ctrl-buttons" style="margin-top:14px">
+        <button class="btn btn-primary" id="playAgainBtn">Play again (new seed)</button>
+        <button class="btn btn-ghost" id="revealBtn">Reveal true means</button>
+      </div>
+      <div class="truth-box" id="truthBox"></div>
+    </div>
+    <div>
+      <h2 class="section-title" style="margin-top:0">If 200 UCB players ran this same bandit…</h2>
+      <div class="chart-wrap">
+        <canvas class="chart" id="popChart" height="220"></canvas>
+      </div>
+      <p class="prose" style="font-size:13px;color:var(--ink-light);line-height:1.65;margin-top:10px" id="popCaption"></p>
+      <div class="info-box">
+        <p>
+          Single runs are noisy — sometimes you beat UCB by luck, sometimes UCB beats the optimal
+          benchmark by luck. The histogram shows where UCB's distribution actually lives. The policy
+          gap is structural; the run-to-run variance is not.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<p class="footer-note">
+  CAS AINIT FS26 · Week 2 — Bandits · Colour-blind-safe Wong palette + redundant shape/line encoding ·
+  No external data, no tracking, runs entirely in your browser.
+</p>
+
+</div></div>
+
+<script>
+"use strict";
+
+// ─────────────────────────────────────────────────────────
+// RNG — seeded mulberry32 so we can re-run reproducibly per game
+// ─────────────────────────────────────────────────────────
+function mulberry32(seed) {
+  let s = seed >>> 0;
+  return function() {
+    s = (s + 0x6D2B79F5) >>> 0;
+    let t = s;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+// Standard normal via Box-Muller
+function randn(rng) {
+  let u = 0, v = 0;
+  while (u === 0) u = rng();
+  while (v === 0) v = rng();
+  return Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
+}
+
+// Gamma sample (Marsaglia-Tsang) for shape >= 1; recurse for shape < 1
+function gammaSample(shape, rng) {
+  if (shape < 1) {
+    return gammaSample(shape + 1, rng) * Math.pow(rng(), 1 / shape);
+  }
+  const d = shape - 1 / 3;
+  const c = 1 / Math.sqrt(9 * d);
+  while (true) {
+    let x, v;
+    do {
+      x = randn(rng);
+      v = 1 + c * x;
+    } while (v <= 0);
+    v = v * v * v;
+    const u = rng();
+    if (u < 1 - 0.0331 * x * x * x * x) return d * v;
+    if (Math.log(u) < 0.5 * x * x + d * (1 - v + Math.log(v))) return d * v;
+  }
+}
+
+function betaSample(a, b, rng) {
+  const x = gammaSample(a, rng);
+  const y = gammaSample(b, rng);
+  return x / (x + y);
+}
+
+// ─────────────────────────────────────────────────────────
+// CONFIG
+// ─────────────────────────────────────────────────────────
+const DIFFICULTIES = {
+  easy:   [0.20, 0.45, 0.75],
+  medium: [0.30, 0.50, 0.65],
+  hard:   [0.45, 0.50, 0.55],
+};
+const ARM_LETTERS = ['A', 'B', 'C'];
+const ARM_COLORS  = ['#0072B2', '#D55E00', '#009E73'];
+const ARM_MARKERS = ['●', '■', '▲'];
+const PLAYER_COLORS = { you: '#2c2416', ucb: '#003C5F', thompson: '#CC79A7' };
+
+// ─────────────────────────────────────────────────────────
+// GAME STATE
+// ─────────────────────────────────────────────────────────
+const state = {
+  difficulty: 'medium',
+  T: 50,
+  hint: false,
+  // Per-run
+  trueMeans: [],
+  permutation: [0, 1, 2],     // remap displayed arms to underlying means (so optimal arm isn't always C)
+  rng: null,                   // bandit reward RNG (independent draws per player)
+  decisionRng: null,           // for Thompson sampling and any internal random tie-breaks
+  popRng: null,                // for population sims
+  round: 0,                    // rounds completed
+  phase: 'idle',               // idle | flashing | gameover
+  // Per-player state
+  you: emptyPlayer(),
+  ucb: emptyPlayer(),
+  thom: emptyPlayer(),
+  // Cumulative history (length T+1; index 0 = 0)
+  cumYou: [0],
+  cumUcb: [0],
+  cumThom: [0],
+  // Algo plan for the current round (computed BEFORE the click so hints can show)
+  ucbPick: null,
+  thomPick: null,
+  // Population sim cache
+  popResults: null,
+  popMeanUcb: 0,
+  popStdUcb: 0,
+};
+
+function emptyPlayer() {
+  return {
+    n:    [0, 0, 0],   // pull counts
+    sum:  [0, 0, 0],   // total reward per arm
+    total: 0,           // cumulative reward
+    history: [],        // {arm, reward} per round
+    // Thompson posteriors
+    alpha: [1, 1, 1],
+    beta:  [1, 1, 1],
+  };
+}
+
+// ─────────────────────────────────────────────────────────
+// SETUP
+// ─────────────────────────────────────────────────────────
+function newGame() {
+  const baseSeed = Math.floor(Math.random() * 0xFFFFFFFF);
+  state.rng         = mulberry32(baseSeed);
+  state.decisionRng = mulberry32(baseSeed ^ 0xA1B2C3D4);
+  state.popRng      = mulberry32(baseSeed ^ 0xDEADBEEF);
+
+  const base = DIFFICULTIES[state.difficulty].slice();
+  // Shuffle permutation so optimal arm isn't predictable
+  const perm = [0, 1, 2];
+  for (let i = perm.length - 1; i > 0; i--) {
+    const j = Math.floor(state.rng() * (i + 1));
+    [perm[i], perm[j]] = [perm[j], perm[i]];
+  }
+  state.permutation = perm;
+  // Display arm i has true mean base[perm[i]]
+  state.trueMeans = perm.map(p => base[p]);
+  state.round = 0;
+  state.phase = 'idle';
+  state.you  = emptyPlayer();
+  state.ucb  = emptyPlayer();
+  state.thom = emptyPlayer();
+  state.cumYou = [0];
+  state.cumUcb = [0];
+  state.cumThom = [0];
+  state.popResults = null;
+
+  document.getElementById('endgame').classList.remove('show');
+  document.getElementById('truthBox').classList.remove('show');
+  document.getElementById('revealBtn').textContent = 'Reveal true means';
+
+  computeAlgoPicks();
+  render();
+}
+
+// ─────────────────────────────────────────────────────────
+// ALGORITHMS
+// ─────────────────────────────────────────────────────────
+function ucbPick(p, t /* 1-indexed round about to play */) {
+  // Pull each arm at least once first
+  for (let i = 0; i < 3; i++) if (p.n[i] === 0) return i;
+  let bestI = 0, bestV = -Infinity;
+  for (let i = 0; i < 3; i++) {
+    const muHat = p.sum[i] / p.n[i];
+    const bonus = Math.sqrt(2 * Math.log(t) / p.n[i]);
+    const v = muHat + bonus;
+    if (v > bestV) { bestV = v; bestI = i; }
+  }
+  return bestI;
+}
+
+function thompsonPick(p, rng) {
+  let bestI = 0, bestV = -Infinity;
+  for (let i = 0; i < 3; i++) {
+    const theta = betaSample(p.alpha[i], p.beta[i], rng);
+    if (theta > bestV) { bestV = theta; bestI = i; }
+  }
+  return bestI;
+}
+
+function updatePlayer(p, arm, reward) {
+  p.n[arm]   += 1;
+  p.sum[arm] += reward;
+  p.total    += reward;
+  p.history.push({ arm, reward });
+  if (reward === 1) p.alpha[arm] += 1;
+  else              p.beta[arm]  += 1;
+}
+
+function computeAlgoPicks() {
+  // For round (state.round + 1), 1-indexed t for UCB
+  const t = state.round + 1;
+  state.ucbPick  = ucbPick(state.ucb, t);
+  state.thomPick = thompsonPick(state.thom, state.decisionRng);
+}
+
+// ─────────────────────────────────────────────────────────
+// PLAY ONE ROUND
+// ─────────────────────────────────────────────────────────
+function playRound(youArm) {
+  if (state.phase !== 'idle') return;
+  if (state.round >= state.T) return;
+
+  const t = state.round + 1;
+  const yArm = youArm;
+  const uArm = state.ucbPick;     // already computed
+  const tArm = state.thomPick;
+
+  // Independent reward draws per player
+  const draw = (arm) => state.rng() < state.trueMeans[arm] ? 1 : 0;
+  const yReward = draw(yArm);
+  const uReward = draw(uArm);
+  const tReward = draw(tArm);
+
+  updatePlayer(state.you,  yArm, yReward);
+  updatePlayer(state.ucb,  uArm, uReward);
+  updatePlayer(state.thom, tArm, tReward);
+
+  state.cumYou.push(state.you.total);
+  state.cumUcb.push(state.ucb.total);
+  state.cumThom.push(state.thom.total);
+
+  state.round += 1;
+  state.phase = 'flashing';
+
+  // Flash the YOU button (the rest happens silently)
+  flashArm(yArm, yReward);
+  // Reflect last-round in the small recap
+  updateLastRound(yArm, yReward, uArm, uReward, tArm, tReward);
+
+  render(); // updates means, scoreboard, chart
+
+  setTimeout(() => {
+    state.phase = 'idle';
+    if (state.round >= state.T) {
+      endGame();
+    } else {
+      computeAlgoPicks();
+      render();
+    }
+  }, 320);
+}
+
+function flashArm(arm, reward) {
+  const flash = document.getElementById('flash' + ARM_LETTERS[arm]);
+  const fly   = document.getElementById('fly'   + ARM_LETTERS[arm]);
+  flash.classList.remove('flash', 'win', 'lose');
+  fly.classList.remove('fly', 'win', 'lose');
+  // Reflow to restart animation
+  void flash.offsetWidth;
+  void fly.offsetWidth;
+  if (reward === 1) {
+    flash.classList.add('win', 'flash');
+    flash.textContent = '✓';
+    fly.classList.add('win', 'fly');
+    fly.textContent = '+1';
+  } else {
+    flash.classList.add('lose', 'flash');
+    flash.textContent = '✗';
+    fly.classList.add('lose', 'fly');
+    fly.textContent = '0';
+  }
+}
+
+// ─────────────────────────────────────────────────────────
+// END GAME
+// ─────────────────────────────────────────────────────────
+function endGame() {
+  state.phase = 'gameover';
+  // Run population simulations
+  state.popResults = simulateUcbPopulation(200);
+  const totals = state.popResults;
+  const mean = totals.reduce((a,b) => a + b, 0) / totals.length;
+  const variance = totals.reduce((a,b) => a + (b - mean) ** 2, 0) / totals.length;
+  state.popMeanUcb = mean;
+  state.popStdUcb  = Math.sqrt(variance);
+  render();
+  showEndgame();
+}
+
+function simulateUcbPopulation(N) {
+  const totals = [];
+  for (let s = 0; s < N; s++) {
+    const rng = state.popRng; // shared sequence is fine; each iteration consumes its own draws
+    const p = emptyPlayer();
+    for (let t = 1; t <= state.T; t++) {
+      const arm = ucbPick(p, t);
+      const r = rng() < state.trueMeans[arm] ? 1 : 0;
+      updatePlayer(p, arm, r);
+    }
+    totals.push(p.total);
+  }
+  return totals;
+}
+
+function showEndgame() {
+  const eg = document.getElementById('endgame');
+  eg.classList.add('show');
+
+  const yT = state.you.total, uT = state.ucb.total, tT = state.thom.total;
+  const optExp = state.T * Math.max(...state.trueMeans);
+
+  // Title
+  const ranking = [
+    { name: 'You', total: yT },
+    { name: 'UCB', total: uT },
+    { name: 'Thompson', total: tT },
+  ].sort((a, b) => b.total - a.total);
+
+  let title;
+  if (ranking[0].name === 'You') {
+    title = `You won this run with ${yT} reward${yT === 1 ? '' : 's'}.`;
+  } else if (ranking[0].name === 'Thompson') {
+    title = `Thompson took the lead with ${tT}. You got ${yT}.`;
+  } else {
+    title = `UCB took the lead with ${uT}. You got ${yT}.`;
+  }
+  document.getElementById('endTitle').textContent = title;
+  document.getElementById('endSub').textContent =
+    `Optimal-in-expectation = ${state.T} × ${Math.max(...state.trueMeans).toFixed(2)} = ${optExp.toFixed(1)}. ` +
+    `Each player faced independent reward draws on the same hidden means, so the gap reflects policy quality more than luck.`;
+
+  drawFinalChart(yT, uT, tT, optExp);
+  drawPopChart(state.popResults, yT, uT);
+
+  // Captions
+  const optBest = state.trueMeans.indexOf(Math.max(...state.trueMeans));
+  const ucbHist = state.ucb.history;
+  const thomHist = state.thom.history;
+  const lastChunk = (h, k) => h.slice(Math.max(0, h.length - k)).map(x => x.arm);
+  const tail = 10;
+  const ucbTail = lastChunk(ucbHist, tail);
+  const thomTail = lastChunk(thomHist, tail);
+  const ucbTailBest = ucbTail.filter(a => a === optBest).length;
+  const thomTailBest = thomTail.filter(a => a === optBest).length;
+  const ucbInitExploration = ucbHist.slice(0, 6).map(x => ARM_LETTERS[x.arm]).join(', ');
+
+  const yourArmCounts = state.you.n;
+  const yourBestPulls = yourArmCounts[optBest];
+  const yourTotalPulls = yourArmCounts.reduce((a,b) => a + b, 0);
+
+  document.getElementById('finalCaption').innerHTML =
+    `<strong>What UCB did:</strong> first six pulls were ${ucbInitExploration} (forced exploration), then it ` +
+    `played the best arm ${ucbTailBest}/${tail} times in the final ${tail} rounds. ` +
+    `<strong>What Thompson did:</strong> sampled from its Beta belief each round; in the last ${tail} ` +
+    `rounds it picked the truly-best arm ${thomTailBest}/${tail} times. ` +
+    `<strong>You:</strong> ${yourBestPulls}/${yourTotalPulls} of your pulls landed on the best arm.`;
+
+  // Population caption
+  const yourPercentile = (state.popResults.filter(x => x <= yT).length / state.popResults.length) * 100;
+  const popMin = Math.min(...state.popResults);
+  const popMax = Math.max(...state.popResults);
+  document.getElementById('popCaption').innerHTML =
+    `Across 200 simulated UCB runs on this same bandit, totals ranged from <strong>${popMin}</strong> ` +
+    `to <strong>${popMax}</strong> (mean ${state.popMeanUcb.toFixed(1)}, sd ${state.popStdUcb.toFixed(1)}). ` +
+    `Your score of <strong>${yT}</strong> sits at the <strong>${yourPercentile.toFixed(0)}th percentile</strong> ` +
+    `of UCB's distribution. The algorithm has perfect memory of every pull and zero impulse — ` +
+    `that's a structural edge no human matches without those same superpowers.`;
+}
+
+// ─────────────────────────────────────────────────────────
+// RENDER
+// ─────────────────────────────────────────────────────────
+function render() {
+  // Round bar
+  document.getElementById('roundFill').style.width = (state.round / state.T * 100) + '%';
+  document.getElementById('roundText').textContent = `${state.round} / ${state.T}`;
+
+  // Phase
+  let pt;
+  if (state.phase === 'gameover') pt = 'Game over';
+  else if (state.round === 0)     pt = 'Round 1 — pick an arm';
+  else                            pt = `Round ${state.round + 1} — pick an arm`;
+  document.getElementById('phaseText').textContent = pt;
+
+  // Arm stats
+  for (let i = 0; i < 3; i++) {
+    const n = state.you.n[i];
+    const m = n === 0 ? '—' : (state.you.sum[i] / n).toFixed(2);
+    document.getElementById('mean' + ARM_LETTERS[i]).textContent =
+      `${m} from ${n} pull${n === 1 ? '' : 's'}`;
+  }
+
+  // Hints
+  const hintEls = ['hintA','hintB','hintC'].map(id => document.getElementById(id));
+  for (let i = 0; i < 3; i++) hintEls[i].innerHTML = '';
+  if (state.hint && state.phase !== 'gameover') {
+    if (state.ucbPick != null) {
+      hintEls[state.ucbPick].innerHTML +=
+        `<span class="pick ucb">UCB picks here</span> `;
+    }
+    if (state.thomPick != null) {
+      hintEls[state.thomPick].innerHTML +=
+        `<span class="pick thompson">Thompson picks here</span>`;
+    }
+  }
+
+  // Disable arms during flash / endgame
+  const armsDisabled = (state.phase !== 'idle');
+  document.querySelectorAll('.arm-btn').forEach(b => { b.disabled = armsDisabled; });
+
+  // Scoreboard
+  document.getElementById('scoreYou').textContent  = state.you.total;
+  document.getElementById('scoreUcb').textContent  = state.ucb.total;
+  document.getElementById('scoreThom').textContent = state.thom.total;
+  document.getElementById('scoreOfYou').textContent  = state.T;
+  document.getElementById('scoreOfUcb').textContent  = state.T;
+  document.getElementById('scoreOfThom').textContent = state.T;
+
+  // Cum chart
+  drawCumChart();
+}
+
+function updateLastRound(yArm, yR, uArm, uR, tArm, tR) {
+  const lr = document.getElementById('lastRound');
+  const cell = (who, arm, r) => {
+    const tag = `<span class="arm-tag ${ARM_LETTERS[arm]}">${ARM_LETTERS[arm]}</span>`;
+    const res = r === 1
+      ? `<span class="res win">✓ +1</span>`
+      : `<span class="res lose">✗ 0</span>`;
+    return `<div class="lr-cell"><span class="who">${who}</span> ${tag}${res}</div>`;
+  };
+  lr.innerHTML = cell('You', yArm, yR) + cell('UCB', uArm, uR) + cell('Thompson', tArm, tR);
+}
+
+// ─────────────────────────────────────────────────────────
+// CHART — cumulative reward
+// ─────────────────────────────────────────────────────────
+function setupCanvas(canvas) {
+  const dpr = window.devicePixelRatio || 1;
+  const rect = canvas.getBoundingClientRect();
+  const w = rect.width;
+  const h = canvas.height;
+  canvas.width  = Math.round(w * dpr);
+  canvas.height = Math.round(h * dpr);
+  canvas.style.height = h + 'px';
+  const ctx = canvas.getContext('2d');
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  return { ctx, w, h };
+}
+
+function drawCumChart() {
+  const canvas = document.getElementById('cumChart');
+  const { ctx, w, h } = setupCanvas(canvas);
+  ctx.clearRect(0, 0, w, h);
+
+  const padL = 40, padR = 80, padT = 14, padB = 28;
+  const plotW = w - padL - padR;
+  const plotH = h - padT - padB;
+
+  // Y range: 0 .. T
+  const yMax = state.T;
+  // X range: 0 .. T
+
+  // Background grid
+  ctx.strokeStyle = 'rgba(193,127,78,0.12)';
+  ctx.lineWidth = 1;
+  ctx.fillStyle = '#8a7660';
+  ctx.font = '11px -apple-system, BlinkMacSystemFont, sans-serif';
+  ctx.textAlign = 'right';
+  ctx.textBaseline = 'middle';
+  for (let y = 0; y <= yMax; y += Math.max(1, Math.round(yMax / 5))) {
+    const py = padT + plotH - (y / yMax) * plotH;
+    ctx.beginPath(); ctx.moveTo(padL, py); ctx.lineTo(padL + plotW, py); ctx.stroke();
+    ctx.fillText(String(y), padL - 6, py);
+  }
+  // X axis labels
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'top';
+  const xTicks = state.T <= 30 ? 6 : state.T <= 50 ? 5 : 5;
+  for (let k = 0; k <= xTicks; k++) {
+    const r = Math.round((k / xTicks) * state.T);
+    const px = padL + (r / state.T) * plotW;
+    ctx.fillText(String(r), px, padT + plotH + 4);
+  }
+  ctx.fillStyle = '#8a7660';
+  ctx.textAlign = 'right';
+  ctx.fillText('rounds →', padL + plotW + 60, padT + plotH + 4);
+
+  // Helper to draw a series
+  const drawSeries = (data, color, dash, marker, labelText) => {
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 2;
+    ctx.setLineDash(dash);
+    ctx.beginPath();
+    for (let i = 0; i < data.length; i++) {
+      const px = padL + (i / state.T) * plotW;
+      const py = padT + plotH - (data[i] / yMax) * plotH;
+      if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+    }
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // Markers every 5 rounds
+    ctx.fillStyle = color;
+    ctx.font = 'bold 12px -apple-system, BlinkMacSystemFont, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    for (let i = 0; i < data.length; i += 5) {
+      const px = padL + (i / state.T) * plotW;
+      const py = padT + plotH - (data[i] / yMax) * plotH;
+      ctx.fillText(marker, px, py);
+    }
+    // End label
+    if (data.length > 0) {
+      const i = data.length - 1;
+      const px = padL + (i / state.T) * plotW;
+      const py = padT + plotH - (data[i] / yMax) * plotH;
+      ctx.fillStyle = color;
+      ctx.font = 'bold 12px -apple-system, BlinkMacSystemFont, sans-serif';
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(`${labelText} ${data[i]}`, px + 8, py);
+    }
+  };
+
+  drawSeries(state.cumYou,  PLAYER_COLORS.you,      [],         '●', 'You');
+  drawSeries(state.cumUcb,  PLAYER_COLORS.ucb,      [8, 4],     '◆', 'UCB');
+  drawSeries(state.cumThom, PLAYER_COLORS.thompson, [2, 4],     '▲', 'TS');
+
+  // Y axis title
+  ctx.save();
+  ctx.fillStyle = '#8a7660';
+  ctx.font = '11px -apple-system, BlinkMacSystemFont, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.translate(12, padT + plotH / 2);
+  ctx.rotate(-Math.PI / 2);
+  ctx.fillText('cumulative reward', 0, 0);
+  ctx.restore();
+}
+
+// ─────────────────────────────────────────────────────────
+// CHART — final bars
+// ─────────────────────────────────────────────────────────
+function drawFinalChart(yT, uT, tT, optExp) {
+  const canvas = document.getElementById('finalChart');
+  const { ctx, w, h } = setupCanvas(canvas);
+  ctx.clearRect(0, 0, w, h);
+
+  const bars = [
+    { label: 'You',      val: yT,     color: PLAYER_COLORS.you,      pattern: 'solid'  },
+    { label: 'UCB1',     val: uT,     color: PLAYER_COLORS.ucb,      pattern: 'hatch'  },
+    { label: 'Thompson', val: tT,     color: PLAYER_COLORS.thompson, pattern: 'dot'    },
+    { label: 'Optimal*', val: optExp, color: '#6a8f73',              pattern: 'open'   },
+  ];
+
+  const padL = 56, padR = 16, padT = 16, padB = 40;
+  const plotW = w - padL - padR;
+  const plotH = h - padT - padB;
+  const maxV = Math.max(state.T, optExp, yT, uT, tT) * 1.05;
+
+  // Y grid
+  ctx.strokeStyle = 'rgba(193,127,78,0.12)';
+  ctx.fillStyle = '#8a7660';
+  ctx.font = '11px -apple-system, BlinkMacSystemFont, sans-serif';
+  ctx.textAlign = 'right';
+  ctx.textBaseline = 'middle';
+  const ySteps = 5;
+  for (let k = 0; k <= ySteps; k++) {
+    const v = (maxV / ySteps) * k;
+    const py = padT + plotH - (v / maxV) * plotH;
+    ctx.beginPath(); ctx.moveTo(padL, py); ctx.lineTo(padL + plotW, py); ctx.stroke();
+    ctx.fillText(v.toFixed(0), padL - 6, py);
+  }
+
+  const bw = plotW / bars.length * 0.62;
+  bars.forEach((b, i) => {
+    const cx = padL + (i + 0.5) * (plotW / bars.length);
+    const x = cx - bw / 2;
+    const y = padT + plotH - (b.val / maxV) * plotH;
+    const hh = padT + plotH - y;
+
+    // Pattern fill
+    ctx.save();
+    if (b.pattern === 'solid') {
+      ctx.fillStyle = b.color;
+      ctx.fillRect(x, y, bw, hh);
+    } else if (b.pattern === 'hatch') {
+      ctx.fillStyle = b.color;
+      ctx.fillRect(x, y, bw, hh);
+      ctx.strokeStyle = 'rgba(255,255,255,0.55)';
+      ctx.lineWidth = 1.5;
+      for (let xx = x - hh; xx < x + bw; xx += 6) {
+        ctx.beginPath();
+        ctx.moveTo(xx, y + hh);
+        ctx.lineTo(xx + hh, y);
+        ctx.stroke();
+      }
+      ctx.strokeStyle = b.color; ctx.lineWidth = 2;
+      ctx.strokeRect(x, y, bw, hh);
+    } else if (b.pattern === 'dot') {
+      ctx.fillStyle = b.color;
+      ctx.fillRect(x, y, bw, hh);
+      ctx.fillStyle = 'rgba(255,255,255,0.7)';
+      for (let xx = x + 4; xx < x + bw; xx += 7) {
+        for (let yy = y + 4; yy < y + hh; yy += 7) {
+          ctx.beginPath();
+          ctx.arc(xx, yy, 1.4, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+      ctx.strokeStyle = b.color; ctx.lineWidth = 2;
+      ctx.strokeRect(x, y, bw, hh);
+    } else { /* open */
+      ctx.strokeStyle = b.color;
+      ctx.lineWidth = 2;
+      ctx.setLineDash([5, 4]);
+      ctx.strokeRect(x, y, bw, hh);
+      ctx.setLineDash([]);
+      ctx.fillStyle = 'rgba(106,143,115,0.18)';
+      ctx.fillRect(x, y, bw, hh);
+    }
+    ctx.restore();
+
+    // Value label above
+    ctx.fillStyle = '#2c2416';
+    ctx.font = 'bold 13px -apple-system, BlinkMacSystemFont, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'bottom';
+    ctx.fillText(b.val.toFixed(b.val % 1 === 0 ? 0 : 1), cx, y - 4);
+
+    // X label below
+    ctx.fillStyle = '#5a4a36';
+    ctx.font = '12px -apple-system, BlinkMacSystemFont, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
+    ctx.fillText(b.label, cx, padT + plotH + 6);
+  });
+
+  ctx.fillStyle = '#8a7660';
+  ctx.font = 'italic 11px -apple-system, BlinkMacSystemFont, sans-serif';
+  ctx.textAlign = 'left';
+  ctx.fillText('* expected best = T × max μᵢ', padL, padT + plotH + 26);
+}
+
+// ─────────────────────────────────────────────────────────
+// CHART — population histogram
+// ─────────────────────────────────────────────────────────
+function drawPopChart(totals, yourScore, ucbScore) {
+  const canvas = document.getElementById('popChart');
+  const { ctx, w, h } = setupCanvas(canvas);
+  ctx.clearRect(0, 0, w, h);
+
+  const padL = 40, padR = 16, padT = 14, padB = 40;
+  const plotW = w - padL - padR;
+  const plotH = h - padT - padB;
+
+  const minV = 0;
+  const maxV = state.T;
+  // Bin into integer-width bins (or 2-wide if T > 50)
+  const binW = state.T <= 50 ? 1 : 2;
+  const nBins = Math.ceil((maxV - minV) / binW) + 1;
+  const counts = new Array(nBins).fill(0);
+  for (const t of totals) {
+    const idx = Math.max(0, Math.min(nBins - 1, Math.floor((t - minV) / binW)));
+    counts[idx] += 1;
+  }
+  const maxCount = Math.max(...counts);
+
+  // Axes
+  ctx.strokeStyle = 'rgba(193,127,78,0.12)';
+  ctx.lineWidth = 1;
+  ctx.fillStyle = '#8a7660';
+  ctx.font = '11px -apple-system, BlinkMacSystemFont, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'top';
+  const xTicks = 6;
+  for (let k = 0; k <= xTicks; k++) {
+    const v = (maxV / xTicks) * k;
+    const px = padL + (v / maxV) * plotW;
+    ctx.beginPath(); ctx.moveTo(px, padT); ctx.lineTo(px, padT + plotH); ctx.stroke();
+    ctx.fillText(v.toFixed(0), px, padT + plotH + 4);
+  }
+
+  // Bars
+  for (let i = 0; i < nBins; i++) {
+    const c = counts[i];
+    if (c === 0) continue;
+    const v0 = minV + i * binW;
+    const px = padL + (v0 / maxV) * plotW;
+    const bw = (binW / maxV) * plotW - 1;
+    const py = padT + plotH - (c / maxCount) * plotH * 0.92;
+    const hh = padT + plotH - py;
+    ctx.fillStyle = 'rgba(0,60,95,0.45)';
+    ctx.fillRect(px, py, Math.max(2, bw), hh);
+    ctx.strokeStyle = 'rgba(0,60,95,0.85)';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(px, py, Math.max(2, bw), hh);
+  }
+
+  // Mean / sd lines
+  const mean = totals.reduce((a,b) => a+b, 0) / totals.length;
+  const meanX = padL + (mean / maxV) * plotW;
+  ctx.strokeStyle = PLAYER_COLORS.ucb;
+  ctx.lineWidth = 2;
+  ctx.setLineDash([6, 4]);
+  ctx.beginPath(); ctx.moveTo(meanX, padT); ctx.lineTo(meanX, padT + plotH); ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillStyle = PLAYER_COLORS.ucb;
+  ctx.font = 'bold 11px -apple-system, BlinkMacSystemFont, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'bottom';
+  ctx.fillText(`UCB mean ${mean.toFixed(1)}`, meanX, padT - 2);
+
+  // Your score marker
+  const yourX = padL + (yourScore / maxV) * plotW;
+  ctx.strokeStyle = PLAYER_COLORS.you;
+  ctx.lineWidth = 3;
+  ctx.beginPath(); ctx.moveTo(yourX, padT); ctx.lineTo(yourX, padT + plotH); ctx.stroke();
+  ctx.fillStyle = PLAYER_COLORS.you;
+  ctx.textAlign = 'left';
+  ctx.fillText(`● You ${yourScore}`, yourX + 6, padT + 12);
+
+  // Axis title
+  ctx.fillStyle = '#5a4a36';
+  ctx.font = '12px -apple-system, BlinkMacSystemFont, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('UCB total reward over 200 simulated runs', padL + plotW / 2, padT + plotH + 22);
+}
+
+// ─────────────────────────────────────────────────────────
+// EVENTS
+// ─────────────────────────────────────────────────────────
+document.querySelectorAll('.arm-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const arm = parseInt(btn.dataset.arm, 10);
+    playRound(arm);
+  });
+});
+
+document.getElementById('diffSeg').addEventListener('click', e => {
+  const t = e.target.closest('button[data-diff]');
+  if (!t) return;
+  document.querySelectorAll('#diffSeg button').forEach(b => b.classList.remove('active'));
+  t.classList.add('active');
+  state.difficulty = t.dataset.diff;
+  newGame();
+});
+
+document.getElementById('roundsSeg').addEventListener('click', e => {
+  const t = e.target.closest('button[data-rounds]');
+  if (!t) return;
+  document.querySelectorAll('#roundsSeg button').forEach(b => b.classList.remove('active'));
+  t.classList.add('active');
+  state.T = parseInt(t.dataset.rounds, 10);
+  newGame();
+});
+
+document.getElementById('hintToggle').addEventListener('change', e => {
+  state.hint = e.target.checked;
+  render();
+});
+
+document.getElementById('resetBtn').addEventListener('click', () => newGame());
+document.getElementById('playAgainBtn').addEventListener('click', () => newGame());
+
+document.getElementById('revealBtn').addEventListener('click', () => {
+  const tb = document.getElementById('truthBox');
+  const btn = document.getElementById('revealBtn');
+  if (tb.classList.contains('show')) {
+    tb.classList.remove('show');
+    btn.textContent = 'Reveal true means';
+  } else {
+    let html = '<strong>Hidden Bernoulli means (this run):</strong><br>';
+    for (let i = 0; i < 3; i++) {
+      const c = ARM_COLORS[i];
+      html += `<span class="arm-name" style="background:${c}"></span>` +
+              `Arm ${ARM_LETTERS[i]} ${ARM_MARKERS[i]}: μ = ${state.trueMeans[i].toFixed(2)}<br>`;
+    }
+    const best = state.trueMeans.indexOf(Math.max(...state.trueMeans));
+    html += `<br>Best arm: <strong>${ARM_LETTERS[best]}</strong> with μ = ${state.trueMeans[best].toFixed(2)}.`;
+    tb.innerHTML = html;
+    tb.classList.add('show');
+    btn.textContent = 'Hide true means';
+  }
+});
+
+window.addEventListener('resize', () => {
+  drawCumChart();
+  if (state.phase === 'gameover' && state.popResults) {
+    const optExp = state.T * Math.max(...state.trueMeans);
+    drawFinalChart(state.you.total, state.ucb.total, state.thom.total, optExp);
+    drawPopChart(state.popResults, state.you.total, state.ucb.total);
+  }
+});
+
+// ─────────────────────────────────────────────────────────
+// BOOT
+// ─────────────────────────────────────────────────────────
+newGame();
+
+</script>
+</body>
+</html>

@@ -1,0 +1,79 @@
+% demo.tex — exercises every template of the AINIT Academic Beamer theme.
+% Compile with: lualatex demo.tex (run twice for cross-references).
+
+\documentclass[aspectratio=169,11pt]{beamer}
+
+% Load our theme. The .sty files live in the same directory as this demo.
+\usetheme{AINITAcademic}
+
+\usepackage{appendixnumberbeamer}
+
+% Lecture identity
+\title{Two Engines}
+\subtitle{Memory, prediction, and the difference between them}
+\author{\textsc{Carlos Cotrini Jiménez}}
+\institute{ETH Zürich \,|\, CAS AINIT FS26}
+\date{Week 2 \textemdash{} Spring 2026}
+
+% Page-furniture defaults; per-frame overrides below.
+\renewcommand{\AINITshorttitle}{Two engines}
+\renewcommand{\AINITsection}{}
+
+\begin{document}
+
+% =============================== 1. TITLE ================================
+\AINITmaketitle
+
+% =========================== 2. SECTION DIVIDER ==========================
+\sectiondivider%
+  {``A man's memory is bound to be a distraction unless it can be discarded;\\ then a sleeper or a savant might think clearly.''}%
+  {Jorge Luis Borges, \textit{Funes the Memorious}}%
+  {Act I \textemdash{} Memory}
+
+% =============================== 3. CONTENT ==============================
+\renewcommand{\AINITsection}{Act I \textemdash{} Memory}
+\begin{frame}{Two engines, one question}
+  \sidenote{The distinction is older than statistics: see Hume's \textit{Treatise} on causation versus constant conjunction.}
+  We will spend the next ninety minutes inside a single question:
+
+  \begin{itemize}
+    \item what does it mean for a system to \AINITemph{remember}, as opposed to \AINITemph{predict}?
+    \item where in your organisation is each engine appropriate?
+    \item and what changes when the data is sparse, drifting, or adversarial?
+  \end{itemize}
+
+  The two engines look the same from the outside. They are not the same on the inside, and the difference will matter to every procurement decision you make this year.
+\end{frame}
+
+% ============================== 4. EQUATION ==============================
+\renewcommand{\AINITsection}{Act II \textemdash{} Prediction}
+\equationslide%
+  {Cross-entropy, decomposed}%
+  {\text{cross-entropy} \;=\; H(p) \;+\; {\color{accentOxblood}\mathrm{KL}\!\left(p \,\|\, \hat p\right)}}%
+  {Only the second term is yours to minimise; the first is the world's irreducible surprise.}
+
+% ============================ 5. VIZ HANDOFF =============================
+\vizhandoff{customer-urns-carousel.html}
+
+% ============================== 6. CLOSING ===============================
+% Section indicator hidden on the closing slide for cleanliness.
+\renewcommand{\AINITsection}{}
+\closingslide%
+  {Funes remembered everything and could think nothing.}%
+  {Machine learning forgets almost everything \textemdash{} and that is why it understands.}
+
+% ============================ 7. REFERENCES ==============================
+\appendix
+\renewcommand{\AINITshorttitle}{Two engines \textemdash{} references}
+\begin{frame}{References}
+  \footnotesize
+  \begin{enumerate}
+    \item J.~L. Borges, ``Funes el memorioso,'' in \textit{Ficciones}, 1944.
+    \item D.~Hume, \textit{A Treatise of Human Nature}, Book I, 1739.
+    \item T.~M. Cover and J.~A. Thomas, \textit{Elements of Information Theory}, 2nd ed., Wiley, 2006.
+    \item C.~M. Bishop, \textit{Pattern Recognition and Machine Learning}, Springer, 2006, ch.~1.
+    \item E.~T. Jaynes, \textit{Probability Theory: The Logic of Science}, CUP, 2003.
+  \end{enumerate}
+\end{frame}
+
+\end{document}

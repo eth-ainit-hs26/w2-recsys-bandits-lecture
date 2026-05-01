@@ -1,0 +1,32 @@
+% prologue.tex --- Prologue (Scenes 1--3)
+% Inputted by lecture.tex; assumes the AINITAcademic theme is loaded
+% and \title/\subtitle/\author/\institute/\date are already set.
+
+% ---------------------------------------------------------------------------
+% Scene 1 --- Title slide
+% ---------------------------------------------------------------------------
+\renewcommand{\AINITsection}{}
+\AINITmaketitle
+
+% ---------------------------------------------------------------------------
+% Scene 2 --- Funes opener
+% Full-page italic epigraph; attribution in small caps, mutedWarmGray.
+% Empty third argument suppresses the section title underneath.
+% ---------------------------------------------------------------------------
+\sectiondivider%
+  {``To think is to forget differences, generalize, abstract.''}%
+  {Jorge Luis Borges, \textit{Funes the Memorious}, 1942}%
+  {}%
+
+% ---------------------------------------------------------------------------
+% Scene 3 --- Thesis paragraph
+% Standard content slide, left-aligned, no bullets.
+% ---------------------------------------------------------------------------
+\begin{frame}{The promise}
+  Machine learning is the engineering of two old theorems.
+  \AINITemph{Compression} \textemdash{} the shortest faithful description of
+  the past \textemdash{} and \AINITemph{prediction} \textemdash{} the best
+  bet about the future \textemdash{} are two views of the same subject,
+  governed by Shannon's 1948 theorems. We will build them in two halves and
+  collapse them in the third.
+\end{frame}

@@ -1,0 +1,165 @@
+% beamerinnerthemeAINITAcademic.sty
+% Inner theme: itemize markers, blocks, title-slide layout, and the
+% custom slide-template macros (sectiondivider, equationslide,
+% vizhandoff, closingslide, sidenote).
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{beamerinnerthemeAINITAcademic}[2026/05/01 AINIT Academic inner]
+
+\RequirePackage{tikz}
+\RequirePackage{etoolbox}
+\usetikzlibrary{calc}
+
+% --- Itemize markers: small ink en-dash, no bullets, no triangles -------
+\setbeamertemplate{itemize item}{\textendash}
+\setbeamertemplate{itemize subitem}{\textperiodcentered}
+\setbeamertemplate{itemize subsubitem}{\textperiodcentered}
+\setbeamertemplate{enumerate item}{\insertenumlabel.}
+
+% --- Blocks: borderless, italic title, no fill --------------------------
+\setbeamertemplate{block begin}{%
+  \par\vspace{.5em}%
+  {\usebeamerfont{block title}\usebeamercolor[fg]{block title}\insertblocktitle}%
+  \par\vspace{.2em}%
+}
+\setbeamertemplate{block end}{\par\vspace{.5em}}
+
+% Disable navigation symbols entirely
+\setbeamertemplate{navigation symbols}{}
+
+% --- Title slide template -----------------------------------------------
+% Full-bleed cream; large serif title; italic subtitle; small-caps author;
+% ETH wordmark in lower right.
+\setbeamertemplate{title page}{%
+  \begin{tikzpicture}[remember picture, overlay]
+    % Generous left margin (~12% slide width)
+    \node[anchor=north west,
+          text width=.76\paperwidth,
+          align=left,
+          inner sep=0pt] at ($(current page.north west) + (0.12\paperwidth, -0.32\paperheight)$) {%
+      {\usebeamerfont{title}\usebeamercolor[fg]{title}\inserttitle\par}%
+      \vspace{1.2em}%
+      {\usebeamerfont{subtitle}\usebeamercolor[fg]{subtitle}\insertsubtitle\par}%
+      \vspace{2.4em}%
+      {\usebeamerfont{author}\usebeamercolor[fg]{author}\insertauthor\par}%
+      \vspace{0.4em}%
+      {\usebeamerfont{institute}\usebeamercolor[fg]{institute}\insertinstitute\par}%
+      \vspace{0.4em}%
+      {\usebeamerfont{date}\usebeamercolor[fg]{date}\insertdate\par}%
+    };
+    % ETH wordmark in lower-right corner — text-only fallback so no
+    % external image is required for the demo to compile.
+    \node[anchor=south east,
+          inner sep=0pt,
+          text=mutedWarmGray] at ($(current page.south east) + (-0.06\paperwidth, 0.06\paperheight)$) {%
+      {\sffamily\scshape\small ETH zürich}%
+    };
+  \end{tikzpicture}%
+}
+
+% Provide a custom \maketitle convenience that just calls beamer's
+% titlepage template inside a plain frame.
+\providecommand{\AINITmaketitle}{%
+  \begin{frame}[plain, noframenumbering]
+    \titlepage
+  \end{frame}%
+}
+
+% --- Section divider -----------------------------------------------------
+% Full-page italic epigraph centered, attribution below in small caps,
+% then the act title in small caps below that.
+\newcommand{\sectiondivider}[3]{%
+  % #1 epigraph, #2 attribution, #3 act-title
+  \begin{frame}[plain, noframenumbering]
+    \begin{tikzpicture}[remember picture, overlay]
+      \node[anchor=center,
+            text width=.7\paperwidth,
+            align=center,
+            inner sep=0pt] at (current page.center) {%
+        {\rmfamily\itshape\large #1\par}%
+        \vspace{1.4em}%
+        {\rmfamily\scshape\small\color{mutedWarmGray} #2\par}%
+        \vspace{3.2em}%
+        {\rmfamily\scshape\normalsize\color{accentOxblood} #3\par}%
+      };
+    \end{tikzpicture}%
+  \end{frame}%
+}
+
+% --- Equation slide ------------------------------------------------------
+% Centered display equation with generous whitespace, italic caption.
+\newcommand{\equationslide}[3]{%
+  % #1 frame title, #2 equation body (TeX), #3 italic caption
+  \begin{frame}{#1}
+    \rmfamily
+    \vspace{1.2em}
+    \begin{center}
+      $\displaystyle #2$
+    \end{center}
+    \vspace{1.2em}
+    \begin{center}
+      {\rmfamily\itshape\color{mutedWarmGray}\small #3}
+    \end{center}
+  \end{frame}%
+}
+
+% --- Viz handoff slide ---------------------------------------------------
+% Inverse colors: ink background, cream text. Centered serif italic.
+\newcommand{\vizhandoff}[1]{%
+  {%
+    \setbeamercolor{background canvas}{bg=ink}
+    \setbeamercolor{normal text}{fg=bgCream, bg=ink}
+    \begin{frame}[plain, noframenumbering]
+      \begin{tikzpicture}[remember picture, overlay]
+        \node[anchor=center,
+              text width=.7\paperwidth,
+              align=center,
+              text=bgCream,
+              inner sep=0pt] at (current page.center) {%
+          {\rmfamily\itshape\large Now switching to:\par}%
+          \vspace{1em}%
+          {\rmfamily\large #1\par}%
+        };
+      \end{tikzpicture}%
+    \end{frame}%
+  }%
+}
+
+% --- Closing slide -------------------------------------------------------
+% Pure black background, white serif text, two centered lines.
+\newcommand{\closingslide}[2]{%
+  {%
+    \setbeamercolor{background canvas}{bg=black}
+    \setbeamercolor{normal text}{fg=white, bg=black}
+    \begin{frame}[plain, noframenumbering]
+      \begin{tikzpicture}[remember picture, overlay]
+        \node[anchor=center,
+              text width=.74\paperwidth,
+              align=center,
+              text=white,
+              inner sep=0pt] at (current page.center) {%
+          {\rmfamily\itshape\large #1\par}%
+          \vspace{1.0em}%
+          {\rmfamily\itshape\large #2\par}%
+        };
+      \end{tikzpicture}%
+    \end{frame}%
+  }%
+}
+
+% --- Sidenote (Tufte-style left-margin aside) ---------------------------
+% Lives entirely in the slide's left chrome margin (~12% of the slide)
+% so it never overlaps the body. We use a tikz overlay anchored to the
+% current page so it doesn't disturb the body flow.
+\newcommand{\sidenote}[1]{%
+  \begin{tikzpicture}[remember picture, overlay]
+    \node[anchor=north west,
+          text width=0.095\paperwidth,
+          align=left,
+          font=\rmfamily\itshape\scriptsize,
+          text=mutedWarmGray,
+          inner sep=0pt] at ($(current page.north west) + (0.02\paperwidth, -0.30\paperheight)$) {#1};
+  \end{tikzpicture}%
+}
+
+\endinput

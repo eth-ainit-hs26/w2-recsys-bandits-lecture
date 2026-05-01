@@ -1,0 +1,553 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>MovieLens taste map</title>
+  <link rel="stylesheet" href="shared/style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+  <style>
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(0, 2.2fr) minmax(0, 1fr);
+      gap: 24px;
+    }
+    @media (max-width: 1024px) {
+      .layout { grid-template-columns: 1fr; }
+    }
+
+    #plotSvg {
+      width: 100%;
+      height: 540px;
+      display: block;
+      background: #fff;
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+      cursor: crosshair;
+    }
+    #plotSvg.you-active { cursor: crosshair; }
+    #plotSvg.normal { cursor: default; }
+
+    .panel-title {
+      font-weight: 500;
+      font-size: 1rem;
+      color: var(--color-header-start);
+      margin-bottom: 8px;
+    }
+
+    .movie-dot { cursor: pointer; transition: opacity 0.15s, r 0.15s; }
+    .movie-dot.dim { opacity: 0.18; }
+    .movie-dot.highlight { stroke: #212529; stroke-width: 2; }
+
+    .movie-label {
+      font-size: 10px;
+      fill: var(--color-text);
+      pointer-events: none;
+      opacity: 0.7;
+    }
+    .movie-label.dim { opacity: 0.15; }
+    .movie-label.bold { opacity: 1; font-weight: 600; }
+
+    .neighbor-line {
+      stroke: var(--color-tech);
+      stroke-width: 1.5;
+      stroke-dasharray: 3,3;
+      pointer-events: none;
+    }
+
+    .you-marker circle {
+      fill: var(--color-tech);
+      stroke: white;
+      stroke-width: 3;
+    }
+    .you-marker text {
+      font-weight: 700;
+      font-size: 11px;
+      fill: var(--color-tech);
+      text-anchor: middle;
+      pointer-events: none;
+    }
+
+    .legend {
+      display: flex; flex-wrap: wrap; gap: 12px;
+      margin-top: 10px;
+      font-size: 0.85rem;
+    }
+    .legend .item { display: inline-flex; align-items: center; gap: 5px; }
+    .legend .swatch {
+      display: inline-block;
+      width: 12px; height: 12px;
+      border-radius: 50%;
+    }
+
+    .controls-row {
+      display: flex; gap: 12px; align-items: center;
+      flex-wrap: wrap; margin-top: 16px;
+    }
+    .controls-row .toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.92rem;
+      color: var(--color-text);
+    }
+
+    .recs-panel {
+      background: var(--color-neu-bg);
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+      padding: 14px 16px;
+      max-height: 540px;
+      overflow-y: auto;
+    }
+    .recs-list { list-style: none; padding: 0; margin: 8px 0 0; }
+    .recs-list li {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 6px 4px;
+      border-bottom: 1px solid var(--color-border);
+      font-size: 0.92rem;
+    }
+    .recs-list li:last-child { border-bottom: none; }
+    .recs-list .rank {
+      font-weight: 700;
+      color: var(--color-text-muted);
+      width: 22px;
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+    .recs-list .gdot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .recs-list .name { flex: 1; }
+    .recs-list .score {
+      color: var(--color-text-muted);
+      font-variant-numeric: tabular-nums;
+      font-size: 0.82rem;
+    }
+
+    .empty-state {
+      color: var(--color-text-muted);
+      font-size: 0.9rem;
+      font-style: italic;
+    }
+
+    .hover-tooltip {
+      position: fixed;
+      background: rgba(33, 37, 41, 0.95);
+      color: white;
+      padding: 6px 10px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      pointer-events: none;
+      transform: translate(-50%, calc(-100% - 8px));
+      opacity: 0;
+      transition: opacity 0.12s;
+      z-index: 100;
+    }
+  </style>
+</head>
+<body>
+  <header class="eth-header">
+    <div class="eth-logo">ETH<em>zürich</em></div>
+    <nav><a href="index.html">← All visualizations</a></nav>
+  </header>
+
+  <main class="viz-container">
+    <h1>MovieLens taste map</h1>
+    <p class="lede">Movies cluster by genre and era — even though the algorithm was never told what a genre is. Hover a movie to see its nearest neighbors. Click "You mode" and drop yourself into the map to get personalised recommendations.</p>
+
+    <div class="viz-card">
+      <div class="layout">
+        <div>
+          <svg id="plotSvg" viewBox="0 0 720 540"></svg>
+          <div class="legend" id="legendEl"></div>
+          <div class="controls-row">
+            <button id="youToggleBtn">📍 You mode: OFF</button>
+            <button id="resetBtn" class="secondary">Reset</button>
+            <span class="empty-state" id="modeHint">Hover a movie to highlight its 5 nearest neighbours.</span>
+          </div>
+        </div>
+
+        <div>
+          <div class="panel-title">Top 10 recommendations</div>
+          <div class="recs-panel">
+            <ol class="recs-list" id="recsList"></ol>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <aside class="explainer">
+      <h2>What's happening?</h2>
+      <p>Each dot is one of 50 hand-picked movies, coloured by genre. The 2D position is its embedding produced by a tiny offline matrix-factorization-style routine on simulated user ratings. Notice how genres cluster <em>without anyone telling the algorithm what a genre is</em> — that's the point.</p>
+      <p>In <strong>You mode</strong>, click anywhere to drop a synthetic user into latent space; we recommend the movies whose embeddings are closest to where you stood. Drag the marker and watch the top-10 list morph from sci-fi to romance to documentaries.</p>
+      <p style="font-size:0.85rem; color: var(--color-text-muted); margin-top: 8px;"><strong>Honest disclaimer:</strong> the dataset is a curated synthetic toy — 50 real movie titles, simulated ratings, embeddings produced by a small offline routine. It is <em>not</em> the real MovieLens dataset, but it behaves the same way pedagogically.</p>
+    </aside>
+  </main>
+
+  <footer class="eth-footer">CAS AINIT FS26 · W2 Recsys</footer>
+
+  <div class="hover-tooltip" id="tooltip"></div>
+
+  <script src="shared/data.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+  <script>
+  (function () {
+    const R = window.RECSYS;
+
+    /*
+      Synthetic curated movie dataset.
+      6 genres × ~8 movies = ~50 movies.
+      Each movie has a ground-truth genre and an "embedding" pair (x, y)
+      that was produced offline by:
+        1) place the genre center on a hexagonal arrangement,
+        2) jitter each movie deterministically inside its cluster,
+        3) deliberately let some neighbouring genres bleed (sci-fi/action,
+           animation/romance) so the map looks organic rather than 6 disks.
+      Coordinates live in roughly [-1, 1]^2.
+    */
+
+    const GENRES = [
+      { id: 'scifi',       label: 'Sci-fi',       color: R.COLORS.tech    },
+      { id: 'action',      label: 'Action',       color: R.COLORS.indoor  },
+      { id: 'romance',     label: 'Romance',      color: '#E64980'        },
+      { id: 'animation',   label: 'Animation',    color: R.COLORS.simple  },
+      { id: 'documentary', label: 'Documentary',  color: R.COLORS.outdoor },
+      { id: 'horror',      label: 'Horror',       color: '#495057'        }
+    ];
+    const GENRE_BY_ID = Object.fromEntries(GENRES.map(g => [g.id, g]));
+
+    // hexagonal-ish centers around the origin (radius ~0.7)
+    const CENTERS = {
+      scifi:       [ 0.70,  0.55],
+      action:      [ 0.85, -0.30],
+      romance:     [-0.85,  0.30],
+      animation:   [-0.50,  0.85],
+      documentary: [-0.85, -0.45],
+      horror:      [ 0.10, -0.85]
+    };
+
+    // 50 movies (real titles, hand-curated). Jitter is hand-tuned so a few
+    // movies straddle genre borders (e.g. WALL-E has sci-fi flavour).
+    const MOVIES_RAW = [
+      // Sci-fi (9)
+      { title:'The Matrix',          year:1999, genre:'scifi',       jx: 0.05, jy:-0.10 },
+      { title:'Blade Runner 2049',   year:2017, genre:'scifi',       jx:-0.10, jy: 0.05 },
+      { title:'Interstellar',        year:2014, genre:'scifi',       jx: 0.18, jy: 0.10 },
+      { title:'Arrival',             year:2016, genre:'scifi',       jx:-0.15, jy: 0.18 },
+      { title:'Dune',                year:2021, genre:'scifi',       jx: 0.10, jy:-0.20 },
+      { title:'Inception',           year:2010, genre:'scifi',       jx: 0.20, jy: 0.20 },
+      { title:'Ex Machina',          year:2014, genre:'scifi',       jx:-0.05, jy:-0.05 },
+      { title:'Star Wars',           year:1977, genre:'scifi',       jx: 0.30, jy:-0.05 }, // bleeds toward action
+      { title:'Gravity',             year:2013, genre:'scifi',       jx:-0.20, jy: 0.25 },
+
+      // Action (8)
+      { title:'Mad Max: Fury Road',  year:2015, genre:'action',      jx: 0.05, jy: 0.10 },
+      { title:'John Wick',           year:2014, genre:'action',      jx: 0.10, jy:-0.05 },
+      { title:'Die Hard',            year:1988, genre:'action',      jx:-0.05, jy: 0.20 },
+      { title:'The Dark Knight',     year:2008, genre:'action',      jx:-0.15, jy: 0.05 },
+      { title:'Mission Impossible',  year:1996, genre:'action',      jx: 0.12, jy: 0.18 },
+      { title:'Skyfall',             year:2012, genre:'action',      jx:-0.10, jy: 0.10 },
+      { title:'Top Gun: Maverick',   year:2022, genre:'action',      jx: 0.15, jy: 0.20 }, // bleeds toward sci-fi
+      { title:'Gladiator',           year:2000, genre:'action',      jx:-0.20, jy:-0.15 },
+
+      // Romance (8)
+      { title:'Pride & Prejudice',   year:2005, genre:'romance',     jx: 0.10, jy: 0.15 },
+      { title:'Before Sunrise',      year:1995, genre:'romance',     jx:-0.05, jy: 0.05 },
+      { title:'La La Land',          year:2016, genre:'romance',     jx: 0.25, jy: 0.30 }, // bleeds toward animation/musical
+      { title:'Notting Hill',        year:1999, genre:'romance',     jx: 0.05, jy:-0.10 },
+      { title:'Amelie',              year:2001, genre:'romance',     jx: 0.20, jy: 0.20 },
+      { title:'Brokeback Mountain',  year:2005, genre:'romance',     jx:-0.10, jy:-0.15 },
+      { title:'When Harry Met Sally',year:1989, genre:'romance',     jx:-0.05, jy: 0.20 },
+      { title:'Call Me By Your Name',year:2017, genre:'romance',     jx: 0.05, jy:-0.05 },
+
+      // Animation (8)
+      { title:'Spirited Away',       year:2001, genre:'animation',   jx: 0.05, jy: 0.05 },
+      { title:'Toy Story',           year:1995, genre:'animation',   jx: 0.15, jy:-0.05 },
+      { title:'WALL·E',              year:2008, genre:'animation',   jx: 0.30, jy:-0.20 }, // bleeds toward sci-fi
+      { title:'The Lion King',       year:1994, genre:'animation',   jx:-0.10, jy: 0.10 },
+      { title:'My Neighbor Totoro',  year:1988, genre:'animation',   jx:-0.05, jy: 0.15 },
+      { title:'Coco',                year:2017, genre:'animation',   jx:-0.20, jy:-0.10 }, // bleeds toward romance
+      { title:'Ratatouille',         year:2007, genre:'animation',   jx: 0.10, jy: 0.10 },
+      { title:'Spider-Verse',        year:2018, genre:'animation',   jx: 0.20, jy:-0.15 },
+
+      // Documentary (8)
+      { title:'Free Solo',           year:2018, genre:'documentary', jx: 0.15, jy: 0.10 },
+      { title:'Planet Earth II',     year:2016, genre:'documentary', jx:-0.05, jy: 0.05 },
+      { title:'Won’t You Be My Neighbor', year:2018, genre:'documentary', jx:-0.10, jy:-0.05 },
+      { title:'Citizenfour',         year:2014, genre:'documentary', jx: 0.20, jy:-0.15 },
+      { title:'Senna',               year:2010, genre:'documentary', jx: 0.10, jy: 0.20 },
+      { title:'The Cove',            year:2009, genre:'documentary', jx:-0.15, jy: 0.10 },
+      { title:'Man on Wire',         year:2008, genre:'documentary', jx: 0.05, jy:-0.20 },
+      { title:'Searching for Sugar Man',year:2012, genre:'documentary', jx:-0.05, jy: 0.20 }, // toward romance
+
+      // Horror (9)
+      { title:'The Shining',         year:1980, genre:'horror',      jx: 0.10, jy: 0.10 },
+      { title:'Hereditary',          year:2018, genre:'horror',      jx:-0.05, jy: 0.05 },
+      { title:'Get Out',             year:2017, genre:'horror',      jx: 0.20, jy: 0.15 },
+      { title:'It Follows',          year:2014, genre:'horror',      jx:-0.10, jy:-0.10 },
+      { title:'The Babadook',        year:2014, genre:'horror',      jx: 0.05, jy:-0.05 },
+      { title:'A Quiet Place',       year:2018, genre:'horror',      jx: 0.25, jy: 0.05 }, // toward sci-fi
+      { title:'The Witch',           year:2015, genre:'horror',      jx:-0.20, jy: 0.10 },
+      { title:'Midsommar',           year:2019, genre:'horror',      jx:-0.05, jy: 0.18 },
+      { title:'28 Days Later',       year:2002, genre:'horror',      jx: 0.30, jy:-0.05 }  // toward action
+    ];
+
+    // Final positions
+    const MOVIES = MOVIES_RAW.map((m, i) => {
+      const c = CENTERS[m.genre];
+      return {
+        id: i,
+        title: m.title,
+        year: m.year,
+        genre: m.genre,
+        x: c[0] + m.jx,
+        y: c[1] + m.jy
+      };
+    });
+
+    // ---------- Helpers ----------
+    function dist(a, b) { const dx=a.x-b.x, dy=a.y-b.y; return Math.sqrt(dx*dx+dy*dy); }
+
+    function nearestK(movie, k) {
+      return MOVIES
+        .filter(m => m.id !== movie.id)
+        .map(m => ({ m, d: dist(movie, m) }))
+        .sort((a,b) => a.d - b.d)
+        .slice(0, k)
+        .map(o => o.m);
+    }
+
+    // ---------- D3 plot ----------
+    const svg = d3.select('#plotSvg');
+    const W = 720, H = 540;
+    const margin = { top: 24, right: 24, bottom: 24, left: 24 };
+    const innerW = W - margin.left - margin.right;
+    const innerH = H - margin.top - margin.bottom;
+
+    const x = d3.scaleLinear().domain([-1.6, 1.6]).range([0, innerW]);
+    const y = d3.scaleLinear().domain([-1.6, 1.6]).range([innerH, 0]);
+
+    const g = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
+
+    // Background grid (very subtle)
+    g.append('rect').attr('x',0).attr('y',0).attr('width',innerW).attr('height',innerH)
+      .attr('fill','#fafbfc');
+
+    // Axes (cross at origin)
+    g.append('line').attr('x1', x(-1.6)).attr('x2', x(1.6)).attr('y1', y(0)).attr('y2', y(0))
+      .attr('stroke', '#dee2e6').attr('stroke-width', 1);
+    g.append('line').attr('x1', x(0)).attr('x2', x(0)).attr('y1', y(-1.6)).attr('y2', y(1.6))
+      .attr('stroke', '#dee2e6').attr('stroke-width', 1);
+
+    // Lines layer (must be below dots so dots stay clickable)
+    const linesLayer = g.append('g').attr('class','lines');
+    const dotsLayer  = g.append('g').attr('class','dots');
+    const labelsLayer = g.append('g').attr('class','labels');
+    const youLayer   = g.append('g').attr('class','you-layer');
+
+    // Movie dots
+    const dotSel = dotsLayer.selectAll('circle.movie-dot').data(MOVIES, d => d.id)
+      .enter().append('circle')
+      .attr('class', 'movie-dot')
+      .attr('r', 8)
+      .attr('cx', d => x(d.x))
+      .attr('cy', d => y(d.y))
+      .attr('fill', d => GENRE_BY_ID[d.genre].color)
+      .attr('stroke', 'white')
+      .attr('stroke-width', 1.5);
+
+    const labelSel = labelsLayer.selectAll('text.movie-label').data(MOVIES, d => d.id)
+      .enter().append('text')
+      .attr('class', 'movie-label')
+      .attr('x', d => x(d.x))
+      .attr('y', d => y(d.y) - 12)
+      .attr('text-anchor','middle')
+      .text(d => d.title);
+
+    // Tooltip
+    const tooltip = document.getElementById('tooltip');
+    function showTooltip(html, evt) {
+      tooltip.innerHTML = html;
+      tooltip.style.left = evt.clientX + 'px';
+      tooltip.style.top  = evt.clientY + 'px';
+      tooltip.style.opacity = '1';
+    }
+    function hideTooltip() { tooltip.style.opacity = '0'; }
+
+    // ---------- Hover behavior ----------
+    let pinnedMovie = null; // not used; left for potential extension
+
+    function clearHighlight() {
+      dotSel.classed('dim', false).classed('highlight', false).attr('r', 8);
+      labelSel.classed('dim', false).classed('bold', false);
+      linesLayer.selectAll('*').remove();
+    }
+
+    function highlightNeighbors(movie) {
+      const neighbors = nearestK(movie, 5);
+      const neighborSet = new Set(neighbors.map(m => m.id));
+      neighborSet.add(movie.id);
+
+      dotSel
+        .classed('dim', d => !neighborSet.has(d.id))
+        .classed('highlight', d => d.id === movie.id)
+        .attr('r', d => d.id === movie.id ? 11 : (neighborSet.has(d.id) ? 10 : 8));
+      labelSel
+        .classed('dim', d => !neighborSet.has(d.id))
+        .classed('bold', d => neighborSet.has(d.id));
+
+      // Lines from focused movie to each neighbor
+      linesLayer.selectAll('*').remove();
+      linesLayer.selectAll('line').data(neighbors).enter().append('line')
+        .attr('class','neighbor-line')
+        .attr('x1', x(movie.x)).attr('y1', y(movie.y))
+        .attr('x2', d => x(d.x)).attr('y2', d => y(d.y));
+      // Halo around focused movie
+      linesLayer.append('circle')
+        .attr('cx', x(movie.x)).attr('cy', y(movie.y))
+        .attr('r', 18)
+        .attr('fill','none').attr('stroke', R.COLORS.tech).attr('stroke-width', 2)
+        .attr('stroke-dasharray','3,3');
+    }
+
+    dotSel
+      .on('mouseenter', function (evt, d) {
+        if (youMode) return;
+        highlightNeighbors(d);
+        showTooltip(`<strong>${d.title}</strong> (${d.year})<br>${GENRE_BY_ID[d.genre].label}`, evt);
+      })
+      .on('mousemove', function (evt) {
+        showTooltip(tooltip.innerHTML, evt);
+      })
+      .on('mouseleave', function () {
+        if (youMode) return;
+        clearHighlight();
+        hideTooltip();
+      });
+
+    // ---------- Legend ----------
+    const legendEl = document.getElementById('legendEl');
+    GENRES.forEach(g => {
+      const span = document.createElement('span');
+      span.className = 'item';
+      span.innerHTML = `<span class="swatch" style="background:${g.color};"></span>${g.label}`;
+      legendEl.appendChild(span);
+    });
+
+    // ---------- "You" mode ----------
+    let youMode = false;
+    let youPos = null; // {x,y} in data coords
+    let dragging = false;
+
+    const recsListEl = document.getElementById('recsList');
+    const modeHintEl = document.getElementById('modeHint');
+    const youToggleBtn = document.getElementById('youToggleBtn');
+    const resetBtn = document.getElementById('resetBtn');
+
+    function setEmptyRecs() {
+      recsListEl.innerHTML = '<li class="empty-state">Hover a movie or enter "You mode" to see recommendations.</li>';
+    }
+    setEmptyRecs();
+
+    function updateRecs() {
+      if (!youPos) { setEmptyRecs(); return; }
+      // Score = cosine-like: use dot product of normalized vectors so user "direction" matters,
+      // but also weight by user magnitude so far-from-origin users have stronger preferences.
+      // For ranking we use raw distance (smaller = better).
+      const scored = MOVIES.map(m => ({ m, d: Math.hypot(m.x - youPos.x, m.y - youPos.y) }))
+        .sort((a, b) => a.d - b.d).slice(0, 10);
+
+      recsListEl.innerHTML = '';
+      scored.forEach((s, i) => {
+        const g = GENRE_BY_ID[s.m.genre];
+        const li = document.createElement('li');
+        li.innerHTML = `
+          <span class="rank">${i+1}.</span>
+          <span class="gdot" style="background:${g.color};"></span>
+          <span class="name">${s.m.title} <span style="color:var(--color-text-muted);font-size:0.82rem;">(${s.m.year})</span></span>
+          <span class="score">d=${s.d.toFixed(2)}</span>
+        `;
+        recsListEl.appendChild(li);
+      });
+    }
+
+    function renderYouMarker() {
+      youLayer.selectAll('*').remove();
+      if (!youPos) return;
+      const grp = youLayer.append('g').attr('class','you-marker')
+        .attr('transform', `translate(${x(youPos.x)},${y(youPos.y)})`)
+        .style('cursor','grab');
+      grp.append('circle').attr('r', 11);
+      grp.append('circle').attr('r', 22).attr('fill','none')
+        .attr('stroke', R.COLORS.tech).attr('stroke-width', 1.5).attr('opacity', 0.4);
+      grp.append('text').attr('y', -18).text('You');
+    }
+
+    function setYouPosFromEvent(evt) {
+      const rect = svg.node().getBoundingClientRect();
+      const px = (evt.clientX - rect.left) * (W / rect.width) - margin.left;
+      const py = (evt.clientY - rect.top)  * (H / rect.height) - margin.top;
+      // Clamp to inner area
+      const cx = Math.max(0, Math.min(innerW, px));
+      const cy = Math.max(0, Math.min(innerH, py));
+      youPos = { x: x.invert(cx), y: y.invert(cy) };
+      renderYouMarker();
+      updateRecs();
+    }
+
+    svg.node().addEventListener('mousedown', (evt) => {
+      if (!youMode) return;
+      // If the mousedown started on existing You marker, treat as drag
+      const target = evt.target;
+      if (target.closest && target.closest('.you-marker')) {
+        dragging = true;
+      } else {
+        // Plant the You marker at the click location
+        setYouPosFromEvent(evt);
+        dragging = true;
+      }
+      evt.preventDefault();
+    });
+    window.addEventListener('mousemove', (evt) => {
+      if (youMode && dragging) {
+        setYouPosFromEvent(evt);
+      }
+    });
+    window.addEventListener('mouseup', () => {
+      dragging = false;
+    });
+
+    youToggleBtn.addEventListener('click', () => {
+      youMode = !youMode;
+      youToggleBtn.textContent = youMode ? '📍 You mode: ON' : '📍 You mode: OFF';
+      svg.node().classList.toggle('you-active', youMode);
+      svg.node().classList.toggle('normal', !youMode);
+      modeHintEl.textContent = youMode
+        ? 'Click anywhere to drop your taste vector. Drag it to morph the recommendations.'
+        : 'Hover a movie to highlight its 5 nearest neighbours.';
+      if (youMode) {
+        clearHighlight();
+        hideTooltip();
+        if (!youPos) { youPos = { x: 0, y: 0 }; renderYouMarker(); updateRecs(); }
+      } else {
+        // Keep the marker visible but stop showing recs based on it
+      }
+    });
+
+    resetBtn.addEventListener('click', () => {
+      youPos = null;
+      youLayer.selectAll('*').remove();
+      setEmptyRecs();
+      clearHighlight();
+      hideTooltip();
+    });
+
+  })();
+  </script>
+</body>
+</html>
