@@ -466,93 +466,223 @@
   \end{itemize}
 \end{frame}
 
+% =====================================================================
+% Stage 3 --- Act II: Two urns and algorithms
+%   Mirrors original deck slides 15-21; proto-Thompson dropped, proto
+%   prefix removed from UCB, epsilon-greedy added between drawbacks
+%   and UCB.
+%
+%   1. Act II: Two urns               bring the cup back; p^C and p^M
+%   2. Naive (visual)                 two urns + customer; the setup
+%   3. Naive (algorithm)              three steps of estimate-then-exploit
+%   4. Drawbacks                      n too small / n too large
+%   5. epsilon-greedy                 first fix to the n problem
+%   6. UCB sampling                   confidence-interval algorithm
+%   7. Race the algorithms (setup)    framing for the comparison
+%   8. Algorithm stadium (viz)        the interactive race
+%   9. Agenda                         mile-marker before Act III
+% =====================================================================
+
 % ---------------------------------------------------------------------
-% Scene 18 — Explore vs exploit
+% Stage 3, Slide 1 --- Act II: Two urns (original deck slide 15)
 % ---------------------------------------------------------------------
-\begin{frame}{Explore vs exploit}
-  Two pressures pull in opposite directions.
+\begin{frame}{Act II: Two urns}
+  Bring back the cup.  Now two products, two probabilities.
 
   \medskip
-
-  \begin{itemize}
-    \item \AINITemph{Exploit}: commit to the urn that looks best so far,
-          and harvest its conversions.
-    \item \AINITemph{Explore}: keep sampling the others, in case the
-          leader is only ahead by luck.
-  \end{itemize}
-
-  \medskip
-
-  Exploit too early and you may have crowned the wrong urn.
-  Explore too long and you waste rounds on losers. That tension has a
-  name, and the next twenty minutes are about it.
+  \begin{center}
+    \begin{tikzpicture}[every node/.style={inner sep=1pt}]
+      \castSeller{-3.5}{0}
+      \productCard{0}{+0.7}{Cup}{p^C}{clusterLF}
+      \productCard{0}{-0.7}{Movie}{p^M}{clusterLN}
+      \castCustomer{3.5}{0}
+      \draw[mutedWarmGray, ->, line width=0.4pt, >=Latex]
+        (1.05, +0.7) -- (3.0, +0.2);
+      \draw[mutedWarmGray, ->, line width=0.4pt, >=Latex]
+        (1.05, -0.7) -- (3.0, -0.2);
+    \end{tikzpicture}
+  \end{center}
 \end{frame}
 
 % ---------------------------------------------------------------------
-% Scene 19 — Naive estimate-then-exploit
+% Stage 3, Slide 2 --- Naive estimate-then-exploit, visual setup
+% (original deck slide 16).
 % ---------------------------------------------------------------------
-\begin{frame}[t]{Na\"\i ve: estimate then exploit}
-  A first attempt:
+\begin{frame}{Na\"\i ve: estimate then exploit}
+  Two urns, one customer, finite budget.
+
+  \medskip
+  \begin{center}
+    \begin{tikzpicture}[every node/.style={inner sep=1pt}]
+      \urnIcon{-1.5}{+0.6}{$p^C$}
+      \urnIcon{-1.5}{-1.0}{$p^M$}
+      \castCustomer{2}{-0.2}
+    \end{tikzpicture}
+  \end{center}
+
+  \medskip
+  \begin{center}
+    \itshape\color{mutedWarmGray}
+    What is the simplest possible algorithm?
+  \end{center}
+\end{frame}
+
+% ---------------------------------------------------------------------
+% Stage 3, Slide 3 --- Naive estimate-then-exploit, algorithm steps
+% (original deck slide 17).
+% ---------------------------------------------------------------------
+\begin{frame}{Na\"\i ve: estimate then exploit}
+  \begin{center}
+    \begin{tikzpicture}[every node/.style={inner sep=1pt}]
+      \urnIcon{-3.5}{+0.5}{$p^C$}
+      \urnIcon{-3.5}{-1.0}{$p^M$}
+      \castCustomer{-0.5}{-0.25}
+      \node[anchor=west, align=left, font=\footnotesize]
+        at (1.2, -0.2)
+        {1.~Choose a number $n$. \\[6pt]
+         2.~Compute estimators $\hat p_n^C, \hat p_n^M$. \\[6pt]
+         3.~Exploit the urn with the largest estimate.};
+    \end{tikzpicture}
+  \end{center}
+\end{frame}
+
+% ---------------------------------------------------------------------
+% Stage 3, Slide 4 --- Drawbacks (original deck slide 18).  Same
+% picture, same algorithm, plus the two failure modes of the choice
+% of n.
+% ---------------------------------------------------------------------
+\begin{frame}{Drawbacks!}
+  \begin{center}
+    \begin{tikzpicture}[every node/.style={inner sep=1pt}]
+      \urnIcon{-3.5}{+0.5}{$p^C$}
+      \urnIcon{-3.5}{-1.0}{$p^M$}
+      \castCustomer{-0.5}{-0.25}
+      \node[anchor=west, align=left, font=\footnotesize]
+        at (1.2, -0.2)
+        {1.~Choose a number $n$. \\[4pt]
+         2.~Compute $\hat p_n^C, \hat p_n^M$. \\[4pt]
+         3.~Exploit the largest.};
+    \end{tikzpicture}
+  \end{center}
+
+  \medskip
+  \begin{itemize}
+    \setlength{\itemsep}{0.3em}
+    \item If $p^C$ and $p^M$ are close and $n$ is too small,
+          you exploit the \AINITemph{wrong urn}.
+    \item If $p^C$ and $p^M$ are far apart and $n$ is too large,
+          you \AINITemph{waste rounds} estimating the loser.
+  \end{itemize}
+\end{frame}
+
+% ---------------------------------------------------------------------
+% Stage 3, Slide 5 --- epsilon-greedy.  NEW: positioned as the first
+% fix to the n problem.  Never commit; randomise instead.
+% ---------------------------------------------------------------------
+\begin{frame}{$\varepsilon$-greedy: a first fix}
+  Don't commit.  At each round, with probability:
+
+  \medskip
+  \begin{itemize}
+    \setlength{\itemsep}{0.5em}
+    \item $1 - \varepsilon$: \AINITemph{exploit} the urn with the
+          largest current estimate;
+    \item $\varepsilon$: \AINITemph{explore} a random urn.
+  \end{itemize}
+
+  \medskip
+  \begin{center}
+    \itshape\color{mutedWarmGray}
+    Most rounds, exploit.  A small fraction, explore.
+    The dial $\varepsilon$ chooses between the two pressures.
+  \end{center}
+
+  \begin{center}
+    \tiny\color{mutedWarmGray}
+    Sutton \& Barto, \emph{Reinforcement Learning: An Introduction}, 1998/2018.
+  \end{center}
+\end{frame}
+
+% ---------------------------------------------------------------------
+% Stage 3, Slide 6 --- UCB sampling (original deck slide 20, retitled
+% from "proto-UCB" to "UCB").  Confidence-interval algorithm.
+% ---------------------------------------------------------------------
+\begin{frame}{UCB sampling}
+  \begin{center}
+    \begin{tikzpicture}[every node/.style={inner sep=1pt}]
+      \urnIcon{-2.6}{0}{$p^C$}
+      \node[anchor=south, font=\footnotesize, color=mutedWarmGray]
+        at (-2.6, 0.45) {$[\,0,\;1\,]$};
+      \urnIcon{0}{0}{$p^M$}
+      \node[anchor=south, font=\footnotesize, color=mutedWarmGray]
+        at (0, 0.45) {$[\,0,\;1\,]$};
+      \castCustomer{2.6}{0}
+    \end{tikzpicture}
+  \end{center}
+
+  \medskip
+  \footnotesize
   \begin{enumerate}
-    \item Explore each urn $n$ times, round-robin.
-    \item Commit to the urn with the highest empirical mean $\hat p_n$.
-    \item Exploit that urn forever after.
+    \setlength{\itemsep}{0.2em}
+    \item For each urn $u$, start with $c_u = [0, 1]$.
+    \item For $t = 1, 2, \ldots$:
+      \begin{enumerate}
+        \setlength{\itemsep}{0.1em}
+        \item find the urn $\hat u$ with the
+              \AINITemph{highest upper bound};
+        \item draw a ball $x$ from $\hat u$;
+        \item if $x = 1$, get the reward;
+        \item recompute the confidence interval of $\hat u$.
+      \end{enumerate}
   \end{enumerate}
-
-  \smallskip
-  Two drawbacks:
-  \begin{itemize}
-    \item If $n$ is too small, the empirical means are noisy and you
-          commit to the wrong urn.
-    \item If $n$ is too large, you waste rounds on losers before
-          exploiting.
-  \end{itemize}
-
-  \smallskip
-  \AINITemph{The choice of $n$ is itself the problem.}
 \end{frame}
 
 % ---------------------------------------------------------------------
-% Scene 20 — three-urn-casino viz handoff has moved to Stage 2 (Act I)
-% as the bridge before Act II.  Removed from here to avoid duplication.
-% ---------------------------------------------------------------------
-
-% ---------------------------------------------------------------------
-% Scene 21 — Epsilon-greedy
-% ---------------------------------------------------------------------
-\equationslide{$\varepsilon$-greedy}{%
-  A_t \;=\;
-  \begin{cases}
-    \text{random urn}, & \text{w.p. } \varepsilon \\[2pt]
-    \arg\max_i \hat p_{n_i}, & \text{w.p. } 1-\varepsilon
-  \end{cases}%
-}{Most of the time, exploit; a small fraction, explore. $\varepsilon$ is the dial between the two pressures. \textemdash{} Sutton \& Barto (1998/2018).}
-
-% ---------------------------------------------------------------------
-% Scene 22 (a) — Setup slide for the algorithm stadium
+% Stage 3, Slide 7 --- Race the algorithms (kept from current 22a,
+% adjusted to four strategies including UCB).
 % ---------------------------------------------------------------------
 \begin{frame}{Race the algorithms}
-  Five strategies, the same three urns, the same hidden biases:
+  Four strategies, the same urns, the same hidden biases:
 
   \medskip
-
   \begin{itemize}
+    \setlength{\itemsep}{0.4em}
     \item Pure random \textemdash{} no learning at all.
-    \item Pure greedy \textemdash{} exploit from round one ($\varepsilon = 0$).
-    \item $\varepsilon$-greedy at three values of $\varepsilon$.
+    \item Pure greedy \textemdash{} exploit the leader from round one.
+    \item $\varepsilon$-greedy \textemdash{} explore with probability $\varepsilon$.
+    \item UCB \textemdash{} pick the urn with the highest upper bound.
   \end{itemize}
 
   \medskip
-
-  Watch the cumulative-regret curves. The slope is the whole story:
+  Watch the cumulative-regret curves.  The slope is the whole story:
   random and greedy grow regret \AINITemph{linearly};
-  a well-tuned $\varepsilon$-greedy grows it \AINITemph{sublinearly}.
+  $\varepsilon$-greedy and UCB grow it \AINITemph{sublinearly}.
 \end{frame}
 
 % ---------------------------------------------------------------------
-% Scene 22 (b) — Algorithm stadium (viz handoff)
+% Stage 3, Slide 8 --- Algorithm stadium (viz handoff, kept).
 % ---------------------------------------------------------------------
 \vizhandoff{algorithm\_stadium.html}
+
+% ---------------------------------------------------------------------
+% Stage 3, Slide 9 --- Agenda recap (original deck slide 21).
+% Mile-marker before Act III.
+% ---------------------------------------------------------------------
+\begin{frame}{Agenda}
+  \medskip
+  \begin{itemize}
+    \setlength{\itemsep}{1.0em}
+    \item[\textbf{\textcolor{clusterLF}{1.}}]
+          \AINITemph{Estimating one probability.} \\[1pt]
+          {\scriptsize\color{mutedWarmGray}Customers as urns.}
+    \item[\textbf{\textcolor{clusterDF}{2.}}]
+          \AINITemph{Multiple probabilities and multiple urns.} \\[1pt]
+          {\scriptsize\color{mutedWarmGray}$\varepsilon$-greedy and UCB.}
+    \item[\textbf{\textcolor{clusterDN}{3.}}]
+          \AINITemph{Many customers and items.} \\[1pt]
+          {\scriptsize\color{mutedWarmGray}Contextual urns.}
+  \end{itemize}
+\end{frame}
 
 % ---------------------------------------------------------------------
 % Scene 23 (a) — Setup slide for the distinguishability dial
