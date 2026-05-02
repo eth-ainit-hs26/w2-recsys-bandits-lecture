@@ -8,7 +8,17 @@
 
 \RequirePackage{tikz}
 \RequirePackage{etoolbox}
+\RequirePackage{graphicx}
 \usetikzlibrary{calc}
+
+% Portrait images live alongside the theme. Search several relative paths
+% so this works whether the master is compiled from slides/ or from the
+% theme dir itself.
+\graphicspath{%
+  {../theme/ainit-academic/portraits/}%
+  {theme/ainit-academic/portraits/}%
+  {portraits/}%
+}
 
 % --- Itemize markers: small ink en-dash, no bullets, no triangles -------
 \setbeamertemplate{itemize item}{\textendash}
@@ -84,6 +94,57 @@
       };
     \end{tikzpicture}%
   \end{frame}%
+}
+
+% --- Section divider WITH portrait --------------------------------------
+% Same as \sectiondivider but with a small portrait above the quote.
+% #1 image filename (resolved via \graphicspath), #2 epigraph,
+% #3 attribution, #4 act-title.
+\newcommand{\sectiondividerwithportrait}[4]{%
+  \begin{frame}[plain, noframenumbering]
+    \begin{tikzpicture}[remember picture, overlay]
+      % Portrait — small, above the quote, with a thin oxblood frame.
+      \node[anchor=south,
+            inner sep=0pt] at ($(current page.center) + (0, 1.25cm)$) {%
+        \begin{tikzpicture}
+          \node[draw=accentOxblood, line width=0.4pt,
+                inner sep=0pt] {%
+            \includegraphics[width=2.4cm,keepaspectratio]{#1}%
+          };
+        \end{tikzpicture}%
+      };
+      % Quote + attribution + act title — same layout as \sectiondivider
+      % but offset down to make room for the portrait.
+      \node[anchor=north,
+            text width=.7\paperwidth,
+            align=center,
+            inner sep=0pt] at ($(current page.center) + (0, 0.6cm)$) {%
+        {\rmfamily\itshape\large #2\par}%
+        \vspace{1.0em}%
+        {\rmfamily\scshape\small\color{mutedWarmGray} #3\par}%
+        \vspace{2.2em}%
+        {\rmfamily\scshape\normalsize\color{accentOxblood} #4\par}%
+      };
+    \end{tikzpicture}%
+  \end{frame}%
+}
+
+% --- Portrait corner overlay --------------------------------------------
+% Drops a small portrait in the upper-right corner of the current frame,
+% intended for content slides where a personality is being discussed.
+% Use inside \begin{frame}{...} ... \end{frame} as the first command.
+\newcommand{\portraitcorner}[1]{%
+  \begin{tikzpicture}[remember picture, overlay]
+    \node[anchor=north east,
+          inner sep=0pt] at ($(current page.north east) + (-0.07\paperwidth, -0.16\paperheight)$) {%
+      \begin{tikzpicture}
+        \node[draw=accentOxblood, line width=0.4pt,
+              inner sep=0pt] {%
+          \includegraphics[width=1.8cm,keepaspectratio]{#1}%
+        };
+      \end{tikzpicture}%
+    };
+  \end{tikzpicture}%
 }
 
 % --- Equation slide ------------------------------------------------------
