@@ -922,6 +922,159 @@
 \end{frame}
 
 % ---------------------------------------------------------------------
+% Phase 5 --- Readers and books in the same plane.
+% Show the embedding scatter with both readers (filled circles) and
+% books (filled squares) at the four corners.  When a reader and a
+% book share a coordinate they sit a hair apart so neither hides the
+% other.  This sets up Phase 6 where the matrix and the plane appear
+% side by side.
+% ---------------------------------------------------------------------
+\begin{frame}{Readers and books, same plane}
+  Each reader \emph{and} each book has two coordinates ---
+  the same Cartesian plane carries them both.
+
+  \medskip
+  \begin{center}
+    \begin{tikzpicture}[every node/.style={inner sep=1pt}]
+      \draw[ink, thick, ->] (-3, 0) -- (3, 0)
+        node[right, font=\scshape\scriptsize, color=mutedWarmGray] {nonfiction};
+      \draw[ink, thick, ->] (0, -2.4) -- (0, 2.4)
+        node[above, font=\scshape\scriptsize, color=mutedWarmGray] {demanding};
+      \node[left,  font=\scshape\scriptsize, color=mutedWarmGray] at (-3,    0) {fiction};
+      \node[below, font=\scshape\scriptsize, color=mutedWarmGray] at ( 0, -2.4) {light};
+
+      % Reader markers (circles), slightly above corner-y
+      \node[circle, fill=clusterLF, inner sep=2.5pt] at (-1.5, -1.0) {};
+      \node[circle, fill=clusterDF, inner sep=2.5pt] at (-1.5, +1.5) {};
+      \node[circle, fill=clusterLN, inner sep=2.5pt] at (+1.5, -1.0) {};
+      \node[circle, fill=clusterDN, inner sep=2.5pt] at (+1.5, +1.5) {};
+
+      % Book markers (squares), slightly below corner-y
+      \node[rectangle, fill=clusterLF, inner sep=2.0pt] at (-1.5, -1.5) {};
+      \node[rectangle, fill=clusterDF, inner sep=2.0pt] at (-1.5, +1.0) {};
+      \node[rectangle, fill=clusterLN, inner sep=2.0pt] at (+1.5, -1.5) {};
+      \node[rectangle, fill=clusterDN, inner sep=2.0pt] at (+1.5, +1.0) {};
+
+      % Reader labels
+      \node[font=\itshape\footnotesize, color=clusterLF, anchor=east] at (-1.65, -1.0) {Alice};
+      \node[font=\itshape\footnotesize, color=clusterDF, anchor=east] at (-1.65, +1.5) {Eleni};
+      \node[font=\itshape\footnotesize, color=clusterLN, anchor=west] at (+1.65, -1.0) {Iris};
+      \node[font=\itshape\footnotesize, color=clusterDN, anchor=west] at (+1.65, +1.5) {Maya};
+
+      % Book labels
+      \node[font=\itshape\footnotesize, color=clusterLF, anchor=east] at (-1.65, -1.5) {Potter};
+      \node[font=\itshape\footnotesize, color=clusterDF, anchor=east] at (-1.65, +1.0) {Ulysses};
+      \node[font=\itshape\footnotesize, color=clusterLN, anchor=west] at (+1.65, -1.5) {Eat Pray Love};
+      \node[font=\itshape\footnotesize, color=clusterDN, anchor=west] at (+1.65, +1.0) {Russell};
+
+      % Legend, top-left, well clear of the markers
+      \node[circle, fill=mutedWarmGray, inner sep=2.0pt] at (-2.7, 2.05) {};
+      \node[font=\scriptsize, color=mutedWarmGray, anchor=west] at (-2.55, 2.05) {reader};
+      \node[rectangle, fill=mutedWarmGray, inner sep=1.7pt] at (-2.7, 1.65) {};
+      \node[font=\scriptsize, color=mutedWarmGray, anchor=west] at (-2.55, 1.65) {book};
+    \end{tikzpicture}
+  \end{center}
+
+  \medskip
+  \begin{center}
+    \scriptsize\itshape\color{mutedWarmGray}
+    Eight markers, four corners.  At each corner one reader and one
+    book share a coordinate, offset slightly so neither hides the other.
+  \end{center}
+\end{frame}
+
+% ---------------------------------------------------------------------
+% Phase 6 --- The matrix arose from the embeddings.  Show the heatmap
+% on the left and the embedding scatter on the right so the audience
+% reads each matrix cell as one inner product of two points in the
+% same plane.
+% ---------------------------------------------------------------------
+\begin{frame}{The matrix arose from the embeddings}
+  Each cell of the matrix is the inner product of two points in the
+  plane: a \AINITemph{reader} times a \AINITemph{book}.
+
+  \begin{columns}[T,onlytextwidth]
+    \column{0.50\textwidth}
+    \centering
+    \begin{tikzpicture}[
+      every node/.style={inner sep=1pt},
+      hdr/.style={font=\itshape\scriptsize},
+      val/.style={font=\bfseries\scriptsize}
+    ]
+      % Column headers (book names; abbreviated to fit narrow cells)
+      \foreach \cn/\col [count=\c from 0] in {%
+        Potter/clusterLF, Ulysses/clusterDF, {Eat Pray}/clusterLN, Russell/clusterDN%
+      }{%
+        \node[hdr, color=\col] at (0.7 + \c*1.3, 2.95) {\cn};
+      }
+      % Row headers (reader names)
+      \foreach \rn/\col [count=\r from 0] in {%
+        Alice/clusterLF, Eleni/clusterDF, Iris/clusterLN, Maya/clusterDN%
+      }{%
+        \node[hdr, color=\col, anchor=east] at (0.0, 2.30 - \r*0.65) {\rn};
+      }
+      % Diagonal cells: +2
+      \foreach \i in {0,1,2,3}{%
+        \fill[accentPrussian!22, rounded corners=2pt]
+          (0.05+\i*1.3, 1.97-\i*0.65) rectangle (1.35+\i*1.3, 2.62-\i*0.65);
+        \node[val, color=accentPrussian] at (0.7+\i*1.3, 2.30-\i*0.65) {$+2$};
+      }
+      % Anti-diagonal cells: -2
+      \foreach \r/\c in {0/3, 1/2, 2/1, 3/0}{%
+        \fill[accentOxblood!22, rounded corners=2pt]
+          (0.05+\c*1.3, 1.97-\r*0.65) rectangle (1.35+\c*1.3, 2.62-\r*0.65);
+        \node[val, color=accentOxblood] at (0.7+\c*1.3, 2.30-\r*0.65) {$-2$};
+      }
+      % Off-diagonal cells: 0
+      \foreach \r/\c in {0/1, 0/2, 1/0, 1/3, 2/0, 2/3, 3/1, 3/2}{%
+        \fill[mutedWarmGray!10, rounded corners=2pt]
+          (0.05+\c*1.3, 1.97-\r*0.65) rectangle (1.35+\c*1.3, 2.62-\r*0.65);
+        \node[val, color=mutedWarmGray!90] at (0.7+\c*1.3, 2.30-\r*0.65) {$0$};
+      }
+    \end{tikzpicture}
+
+    \column{0.50\textwidth}
+    \centering
+    \begin{tikzpicture}[every node/.style={inner sep=1pt}]
+      \draw[ink, thick, ->] (-1.95, 0) -- (1.95, 0)
+        node[right, font=\scshape\tiny, color=mutedWarmGray] {nonfiction};
+      \draw[ink, thick, ->] (0, -1.95) -- (0, 1.95)
+        node[above, font=\scshape\tiny, color=mutedWarmGray] {demanding};
+      \node[left,  font=\scshape\tiny, color=mutedWarmGray] at (-1.95,     0) {fiction};
+      \node[below, font=\scshape\tiny, color=mutedWarmGray] at (    0, -1.95) {light};
+
+      % Reader markers (circles)
+      \node[circle, fill=clusterLF, inner sep=2.0pt] at (-1.1, -0.9) {};
+      \node[circle, fill=clusterDF, inner sep=2.0pt] at (-1.1, +1.3) {};
+      \node[circle, fill=clusterLN, inner sep=2.0pt] at (+1.1, -0.9) {};
+      \node[circle, fill=clusterDN, inner sep=2.0pt] at (+1.1, +1.3) {};
+
+      % Book markers (squares)
+      \node[rectangle, fill=clusterLF, inner sep=1.6pt] at (-1.1, -1.3) {};
+      \node[rectangle, fill=clusterDF, inner sep=1.6pt] at (-1.1, +0.9) {};
+      \node[rectangle, fill=clusterLN, inner sep=1.6pt] at (+1.1, -1.3) {};
+      \node[rectangle, fill=clusterDN, inner sep=1.6pt] at (+1.1, +0.9) {};
+
+      % Labels
+      \node[font=\itshape\tiny, color=clusterLF, anchor=east] at (-1.22, -0.9) {Alice};
+      \node[font=\itshape\tiny, color=clusterDF, anchor=east] at (-1.22, +1.3) {Eleni};
+      \node[font=\itshape\tiny, color=clusterLN, anchor=west] at (+1.22, -0.9) {Iris};
+      \node[font=\itshape\tiny, color=clusterDN, anchor=west] at (+1.22, +1.3) {Maya};
+
+      \node[font=\itshape\tiny, color=clusterLF, anchor=east] at (-1.22, -1.3) {Potter};
+      \node[font=\itshape\tiny, color=clusterDF, anchor=east] at (-1.22, +0.9) {Ulysses};
+      \node[font=\itshape\tiny, color=clusterLN, anchor=west] at (+1.22, -1.3) {Eat Pray};
+      \node[font=\itshape\tiny, color=clusterDN, anchor=west] at (+1.22, +0.9) {Russell};
+    \end{tikzpicture}
+  \end{columns}
+
+  \begin{center}
+    \scriptsize\itshape\color{mutedWarmGray}
+    Each matrix cell is one inner product of two points.
+  \end{center}
+\end{frame}
+
+% ---------------------------------------------------------------------
 % Scene 8 --- Dot product equation (recap, kept)
 % Sits between the two concrete examples and the matrix-product reveal.
 % ---------------------------------------------------------------------
