@@ -117,20 +117,28 @@
 
 % ---------------------------------------------------------------------
 % Scene 5b --- The matrix, sorted, with the four book clusters marked.
-% Same 336 cells as Scene 4b, but now rows are grouped by archetype
-% and columns by quadrant.  Reader names on the left; book names on
-% top; four coloured stripes mark the four piles of books.
+% Same 336 cells as Scene 4b, but rows grouped by archetype and
+% columns by quadrant.  White-space gaps between groups make the four
+% likes-blocks pop on the diagonal; the books and readers are tinted
+% by cluster so the whole page reads as four colour-coded families.
 % ---------------------------------------------------------------------
 \begin{frame}{Sort the readers, sort the books}
+  % Cell-position helper with inter-group gaps:
+  %   col-gap of 0.06cm after every 4 columns;
+  %   row-gap of 0.06cm after every 4 rows (specials capped at row-group 4).
   \def\smcell#1#2#3{%
+    \pgfmathtruncatemacro{\colgrp}{int(#1/4)}%
+    \pgfmathtruncatemacro{\rowgrp}{min(int(#2/4),4)}%
+    \pgfmathsetmacro{\xc}{#1*0.36+\colgrp*0.06+0.18}%
+    \pgfmathsetmacro{\yc}{-#2*0.18-\rowgrp*0.06-0.09}%
     \pgfmathparse{int(#3)}%
     \ifnum\pgfmathresult=1\relax
-      \fill[color=accentPrussian] (#1*0.36+0.18,-#2*0.18-0.09) circle (1.6pt);%
+      \fill[color=accentPrussian] (\xc,\yc) circle (1.6pt);%
     \else
       \ifnum\pgfmathresult=-1\relax
-        \fill[color=accentOxblood] (#1*0.36+0.18,-#2*0.18-0.09) circle (1.6pt);%
+        \fill[color=accentOxblood] (\xc,\yc) circle (1.6pt);%
       \else
-        \fill[mutedWarmGray!60] (#1*0.36+0.18,-#2*0.18-0.09) circle (0.5pt);%
+        \fill[mutedWarmGray!60] (\xc,\yc) circle (0.5pt);%
       \fi
     \fi
   }
@@ -141,33 +149,38 @@
   }
   \begin{center}
     \begin{tikzpicture}[every node/.style={inner sep=0.4pt}]
-      % Cluster-colour stripes above the matrix
-      \fill[clusterLF] (0,        0.05) rectangle (4*0.36,  0.13);
-      \fill[clusterDF] (4*0.36,   0.05) rectangle (8*0.36,  0.13);
-      \fill[clusterLN] (8*0.36,   0.05) rectangle (12*0.36, 0.13);
-      \fill[clusterDN] (12*0.36,  0.05) rectangle (16*0.36, 0.13);
+      % Cluster-colour stripes above the matrix, with gaps between groups.
+      \fill[clusterLF] (0.00, 0.05) rectangle (1.44, 0.13);
+      \fill[clusterDF] (1.50, 0.05) rectangle (2.94, 0.13);
+      \fill[clusterLN] (3.00, 0.05) rectangle (4.44, 0.13);
+      \fill[clusterDN] (4.50, 0.05) rectangle (5.94, 0.13);
 
-      % Vertical book labels above the stripes
-      \foreach \book [count=\c from 0] in {%
-        Potter, Christie, Hunger, DaVinci,
-        Ulysses, {War \& Peace}, Borges, Lighthouse,
-        {Eat Pray Love}, Switzerland, {7 Habits}, {Joy of Cooking},
-        Kant, Smith, Darwin, Russell%
+      % Book labels (full titles, cluster-coloured), vertical
+      \foreach \book/\colour [count=\c from 0] in {%
+        {Potter}/clusterLF, {Christie}/clusterLF, {Hunger Games}/clusterLF, {Da Vinci Code}/clusterLF,
+        {Ulysses}/clusterDF, {War \& Peace}/clusterDF, {Borges}/clusterDF, {Lighthouse}/clusterDF,
+        {Eat Pray Love}/clusterLN, {Switzerland}/clusterLN, {7 Habits}/clusterLN, {Joy of Cooking}/clusterLN,
+        {Kant}/clusterDN, {Smith}/clusterDN, {Darwin}/clusterDN, {Russell}/clusterDN%
       }{%
-        \node[rotate=90, anchor=west, font=\tiny, color=mutedWarmGray]
-          at (\c*0.36+0.18, 0.16) {\book};
+        \pgfmathtruncatemacro{\colgrp}{int(\c/4)}%
+        \pgfmathsetmacro{\xc}{\c*0.36+\colgrp*0.06+0.18}%
+        \node[rotate=90, anchor=west, font=\tiny\itshape, text=\colour]
+          at (\xc, 0.16) {\book};
       }
 
-      % Reader names on the left
-      \foreach \name [count=\r from 0] in {%
-        Alice, Ben, Clara, David,
-        Eleni, Felix, Greta, Hugo,
-        Iris, Jonas, Karin, Liam,
-        Maya, Nico, Oksana, Petros,
-        Quinn, Rosa, Samir, Tessa, Ursula%
+      % Reader names (archetype-coloured); specials Q/R/S in muted gray.
+      \foreach \name/\colour [count=\r from 0] in {%
+        {Alice}/clusterLF, {Ben}/clusterLF, {Clara}/clusterLF, {David}/clusterLF,
+        {Eleni}/clusterDF, {Felix}/clusterDF, {Greta}/clusterDF, {Hugo}/clusterDF,
+        {Iris}/clusterLN, {Jonas}/clusterLN, {Karin}/clusterLN, {Liam}/clusterLN,
+        {Maya}/clusterDN, {Nico}/clusterDN, {Oksana}/clusterDN, {Petros}/clusterDN,
+        {Quinn}/mutedWarmGray, {Rosa}/mutedWarmGray, {Samir}/mutedWarmGray,
+        {Tessa}/clusterLF, {Ursula}/clusterLF%
       }{%
-        \node[anchor=east, font=\tiny, color=mutedWarmGray]
-          at (-0.05, -\r*0.18-0.09) {\name};
+        \pgfmathtruncatemacro{\rowgrp}{min(int(\r/4),4)}%
+        \pgfmathsetmacro{\yc}{-\r*0.18-\rowgrp*0.06-0.09}%
+        \node[anchor=east, font=\tiny\itshape, text=\colour]
+          at (-0.05, \yc) {\name};
       }
 
       % Rating cells in canonical sorted order
@@ -192,18 +205,31 @@
       \smrow{1,0,1,0,0,0,0,0,0,0,0,0,-1,0,-1,0}{18}      % Samir
       \smrow{1,1,1,1,0,0,0,0,0,0,0,0,-1,-1,-1,-1}{19}    % Tessa
       \smrow{1,1,1,1,0,0,1,0,0,0,0,0,-1,-1,-1,-1}{20}    % Ursula
+
+      % Diagonal block outlines (the four likes-blocks).  Each frame is
+      % drawn in its column's cluster colour to tie the matrix block to
+      % the stripe above and to the books below.
+      \draw[clusterLF, line width=0.5pt, rounded corners=1pt]
+        (-0.02, 0.02) rectangle (1.46, -0.74);
+      \draw[clusterDF, line width=0.5pt, rounded corners=1pt]
+        ( 1.48,-0.76) rectangle (2.96, -1.52);
+      \draw[clusterLN, line width=0.5pt, rounded corners=1pt]
+        ( 2.98,-1.54) rectangle (4.46, -2.30);
+      \draw[clusterDN, line width=0.5pt, rounded corners=1pt]
+        ( 4.48,-2.32) rectangle (5.96, -3.08);
     \end{tikzpicture}
   \end{center}
 
   \begin{center}
-    \itshape Sort the rows, sort the columns --- four piles of books
-    fall out.
+    \scriptsize\itshape\color{mutedWarmGray}
+    Sort the rows, sort the columns --- four piles of books fall out.
   \end{center}
 \end{frame}
 
 % ---------------------------------------------------------------------
-% Scene 5c --- The four piles isolated.  No matrix; just the four
-% groups of book titles, with a question for the audience.
+% Scene 5c --- The four piles isolated.  Coloured bars above; titles
+% below tinted in the same cluster colour so the colour starts to
+% become a memory tag for the audience.
 % ---------------------------------------------------------------------
 \begin{frame}{Four piles of books.  What is the pattern?}
   \begin{center}
@@ -218,10 +244,10 @@
       \node[bar, fill=clusterLN] at ( 1.8, 1.6) {};
       \node[bar, fill=clusterDN] at ( 5.4, 1.6) {};
 
-      \node[pile] at (-5.4, 1.5) {Potter\\Christie\\Hunger Games\\Da Vinci Code};
-      \node[pile] at (-1.8, 1.5) {Ulysses\\War \& Peace\\Borges\\Lighthouse};
-      \node[pile] at ( 1.8, 1.5) {Eat Pray Love\\Switzerland\\7 Habits\\Joy of Cooking};
-      \node[pile] at ( 5.4, 1.5) {Kant\\Smith\\Darwin\\Russell};
+      \node[pile, text=clusterLF] at (-5.4, 1.5) {Potter\\Christie\\Hunger Games\\Da Vinci Code};
+      \node[pile, text=clusterDF] at (-1.8, 1.5) {Ulysses\\War \& Peace\\Borges\\Lighthouse};
+      \node[pile, text=clusterLN] at ( 1.8, 1.5) {Eat Pray Love\\Switzerland\\7 Habits\\Joy of Cooking};
+      \node[pile, text=clusterDN] at ( 5.4, 1.5) {Kant\\Smith\\Darwin\\Russell};
     \end{tikzpicture}
   \end{center}
 
@@ -232,18 +258,18 @@
 \end{frame}
 
 % ---------------------------------------------------------------------
-% Scene 5d --- All sixteen books on a single line.  The first
-% distinction --- fiction vs nonfiction --- collapses the books into
-% just two stacks.  Borges and Potter share a coordinate; one axis
-% cannot tell them apart.
+% Scene 5d --- All sixteen books on a single line.  Books are
+% interleaved by cluster (LF/DF alternate on the fiction side; LN/DN
+% on the nonfiction side) and tinted in their cluster colours.  The
+% audience sees: each stack carries TWO colours --- one axis cannot
+% separate them.
 % ---------------------------------------------------------------------
 \begin{frame}{Sixteen books on one line}
   \begin{center}
     \begin{tikzpicture}[
-      book/.style={font=\itshape\footnotesize, color=mutedWarmGray,
-                   inner sep=2pt, anchor=south}
+      book/.style={font=\itshape\footnotesize, inner sep=2pt, anchor=south}
     ]
-      % the line
+      % the line and its tick marks
       \draw[ink, thick] (-6.2, 0) -- (6.2, 0);
       \draw[ink, thick] (-3.5, -0.10) -- (-3.5, 0.10);
       \draw[ink, thick] ( 3.5, -0.10) -- ( 3.5, 0.10);
@@ -252,36 +278,44 @@
       \node[font=\scshape\scriptsize, color=mutedWarmGray, anchor=north]
         at ( 3.5, -0.18) {nonfiction};
 
-      % Fiction stack (x = -3.5)
-      \node[book] at (-3.5, 0.18) {Potter};
-      \node[book] at (-3.5, 0.48) {Christie};
-      \node[book] at (-3.5, 0.78) {Hunger Games};
-      \node[book] at (-3.5, 1.08) {Da Vinci Code};
-      \node[book] at (-3.5, 1.38) {Ulysses};
-      \node[book] at (-3.5, 1.68) {War \& Peace};
-      \node[book] at (-3.5, 1.98) {Borges};
-      \node[book] at (-3.5, 2.28) {Lighthouse};
+      % Position markers --- two-colour mini-stripes show each
+      % position carries TWO clusters.
+      \fill[clusterLF] (-3.62, -0.06) rectangle (-3.50, 0.06);
+      \fill[clusterDF] (-3.50, -0.06) rectangle (-3.38, 0.06);
+      \fill[clusterLN] ( 3.38, -0.06) rectangle ( 3.50, 0.06);
+      \fill[clusterDN] ( 3.50, -0.06) rectangle ( 3.62, 0.06);
 
-      % Nonfiction stack (x = +3.5)
-      \node[book] at ( 3.5, 0.18) {Eat Pray Love};
-      \node[book] at ( 3.5, 0.48) {Switzerland};
-      \node[book] at ( 3.5, 0.78) {7 Habits};
-      \node[book] at ( 3.5, 1.08) {Joy of Cooking};
-      \node[book] at ( 3.5, 1.38) {Kant};
-      \node[book] at ( 3.5, 1.68) {Smith};
-      \node[book] at ( 3.5, 1.98) {Darwin};
-      \node[book] at ( 3.5, 2.28) {Russell};
+      % Fiction stack --- LF and DF interleaved, cluster-coloured.
+      \node[book, text=clusterLF] at (-3.5, 0.18) {Potter};
+      \node[book, text=clusterDF] at (-3.5, 0.48) {Ulysses};
+      \node[book, text=clusterLF] at (-3.5, 0.78) {Christie};
+      \node[book, text=clusterDF] at (-3.5, 1.08) {War \& Peace};
+      \node[book, text=clusterLF] at (-3.5, 1.38) {Hunger Games};
+      \node[book, text=clusterDF] at (-3.5, 1.68) {Borges};
+      \node[book, text=clusterLF] at (-3.5, 1.98) {Da Vinci Code};
+      \node[book, text=clusterDF] at (-3.5, 2.28) {Lighthouse};
+
+      % Nonfiction stack --- LN and DN interleaved, cluster-coloured.
+      \node[book, text=clusterLN] at ( 3.5, 0.18) {Eat Pray Love};
+      \node[book, text=clusterDN] at ( 3.5, 0.48) {Kant};
+      \node[book, text=clusterLN] at ( 3.5, 0.78) {Switzerland};
+      \node[book, text=clusterDN] at ( 3.5, 1.08) {Smith};
+      \node[book, text=clusterLN] at ( 3.5, 1.38) {7 Habits};
+      \node[book, text=clusterDN] at ( 3.5, 1.68) {Darwin};
+      \node[book, text=clusterLN] at ( 3.5, 1.98) {Joy of Cooking};
+      \node[book, text=clusterDN] at ( 3.5, 2.28) {Russell};
     \end{tikzpicture}
   \end{center}
 
   \medskip
-  One axis collapses sixteen books into \AINITemph{two stacks}.
-  Borges and Potter share a coordinate.  One axis is not enough.
+  Sixteen books collapse to \AINITemph{two stacks}.  Yet each stack
+  carries \emph{two colours} --- one axis is not enough.
 \end{frame}
 
 % ---------------------------------------------------------------------
-% Scene 5e --- Add the second axis.  Now each book finds its own
-% corner.  (Was Scene 6b.)
+% Scene 5e --- Add the second axis.  Each book finds its corner; the
+% same cluster colours from 5b/5c/5d carry through so the audience
+% sees the four piles arrive at four corners.  (Was Scene 6b.)
 % ---------------------------------------------------------------------
 \begin{frame}{Add a second axis.  Each book finds its corner.}
   \begin{center}
@@ -295,56 +329,85 @@
       \node[left,font=\scshape\scriptsize,mutedWarmGray] at (-4.2,0) {fiction};
       \node[below,font=\scshape\scriptsize,mutedWarmGray] at (0,-2.8) {light};
 
-      % quadrant tints
-      \fill[accentOxblood,opacity=0.04] (-4,0) rectangle (0,2.6);
-      \fill[accentOxblood,opacity=0.04] (0,-2.6) rectangle (4,0);
+      % top-left: demanding fiction (DF) --- green
+      \node[book, text=clusterDF] at (-3.0, 2.1) {Ulysses};
+      \node[book, text=clusterDF] at (-1.5, 1.6) {Borges};
+      \node[book, text=clusterDF] at (-2.7, 1.1) {War \& Peace};
+      \node[book, text=clusterDF] at (-1.2, 0.5) {Lighthouse};
 
-      % top-left: demanding fiction (DF)
-      \node[book] at (-3.0, 2.1) {Ulysses};
-      \node[book] at (-1.5, 1.6) {Borges};
-      \node[book] at (-2.7, 1.1) {War \& Peace};
-      \node[book] at (-1.2, 0.5) {Lighthouse};
+      % top-right: demanding nonfiction (DN) --- blue
+      \node[book, text=clusterDN] at ( 1.2, 2.3) {Russell};
+      \node[book, text=clusterDN] at ( 2.7, 1.7) {Kant};
+      \node[book, text=clusterDN] at ( 1.6, 1.0) {Smith};
+      \node[book, text=clusterDN] at ( 3.2, 0.5) {Darwin};
 
-      % top-right: demanding nonfiction (DN)
-      \node[book] at ( 1.2, 2.3) {Russell};
-      \node[book] at ( 2.7, 1.7) {Kant};
-      \node[book] at ( 1.6, 1.0) {Smith};
-      \node[book] at ( 3.2, 0.5) {Darwin};
+      % bottom-left: light fiction (LF) --- orange
+      \node[book, text=clusterLF] at (-2.8,-0.6) {Christie};
+      \node[book, text=clusterLF] at (-1.4,-1.2) {Potter};
+      \node[book, text=clusterLF] at (-3.1,-1.8) {Hunger Games};
+      \node[book, text=clusterLF] at (-1.2,-2.3) {Da Vinci Code};
 
-      % bottom-left: light fiction (LF)
-      \node[book] at (-2.8,-0.6) {Christie};
-      \node[book] at (-1.4,-1.2) {Potter};
-      \node[book] at (-3.1,-1.8) {Hunger Games};
-      \node[book] at (-1.2,-2.3) {Da Vinci Code};
-
-      % bottom-right: light nonfiction (LN)
-      \node[book] at ( 1.4,-0.6) {Eat Pray Love};
-      \node[book] at ( 3.0,-1.1) {Joy of Cooking};
-      \node[book] at ( 1.7,-1.9) {7 Habits};
-      \node[book] at ( 3.1,-2.3) {Switzerland};
+      % bottom-right: light nonfiction (LN) --- purple
+      \node[book, text=clusterLN] at ( 1.4,-0.6) {Eat Pray Love};
+      \node[book, text=clusterLN] at ( 3.0,-1.1) {Joy of Cooking};
+      \node[book, text=clusterLN] at ( 1.7,-1.9) {7 Habits};
+      \node[book, text=clusterLN] at ( 3.1,-2.3) {Switzerland};
     \end{tikzpicture}
   \end{center}
 \end{frame}
 
 % ---------------------------------------------------------------------
-% Scene 5f --- The geometry was always there.  (Was Scene 6a, moved
-% here to land as the synthesis after the visual journey.)
+% Scene 5f --- The geometry was always there.  A tiny three-icon
+% sparkline at the top traces the journey: block-diagonal matrix ->
+% four piles -> four corners.  (Was Scene 6a.)
 % ---------------------------------------------------------------------
 \begin{frame}{The geometry was always there}
   \sidenote{Both axes are old library science: Dewey decimal (1876)
             gives Fiction vs.\ Nonfiction; Flesch (1948) and Lexile (1989)
             give Light vs.\ Demanding.}
-  Two binary distinctions, four corners.  This is how librarians and
-  educators have sorted books for a century.
+  \begin{center}
+    \begin{tikzpicture}[scale=0.7, every node/.style={inner sep=0pt}]
+      % Icon 1: block-diagonal mini matrix
+      \fill[clusterLF] (0.00, 1.20) rectangle (0.40, 1.60);
+      \fill[clusterDF] (0.40, 0.80) rectangle (0.80, 1.20);
+      \fill[clusterLN] (0.80, 0.40) rectangle (1.20, 0.80);
+      \fill[clusterDN] (1.20, 0.00) rectangle (1.60, 0.40);
+      \draw[mutedWarmGray, line width=0.3pt] (0,0) rectangle (1.6,1.6);
 
-  \vspace{0.8em}
+      % Arrow 1
+      \draw[mutedWarmGray, ->, line width=0.4pt, >=Latex]
+        (1.85, 0.8) -- (2.35, 0.8);
 
-  We did not impose these axes.  We \AINITemph{recovered} them ---
-  from a matrix of likes and dislikes alone.
+      % Icon 2: four piles (vertical bars)
+      \fill[clusterLF] (2.60, 0.00) rectangle (2.90, 1.60);
+      \fill[clusterDF] (3.00, 0.00) rectangle (3.30, 1.60);
+      \fill[clusterLN] (3.40, 0.00) rectangle (3.70, 1.60);
+      \fill[clusterDN] (3.80, 0.00) rectangle (4.10, 1.60);
+
+      % Arrow 2
+      \draw[mutedWarmGray, ->, line width=0.4pt, >=Latex]
+        (4.35, 0.8) -- (4.85, 0.8);
+
+      % Icon 3: four corners (tiny scatter)
+      \draw[mutedWarmGray, line width=0.3pt] (5.10, 0.80) -- (6.70, 0.80);
+      \draw[mutedWarmGray, line width=0.3pt] (5.90, 0.00) -- (5.90, 1.60);
+      \fill[clusterDF] (5.40, 1.30) circle (3pt);
+      \fill[clusterDN] (6.40, 1.30) circle (3pt);
+      \fill[clusterLF] (5.40, 0.30) circle (3pt);
+      \fill[clusterLN] (6.40, 0.30) circle (3pt);
+    \end{tikzpicture}
+  \end{center}
 
   \vspace{0.4em}
 
-  The books told us their geometry, and we listened.
+  Two binary distinctions, four corners.  This is how librarians and
+  educators have sorted books for a century.
+
+  \vspace{0.6em}
+
+  We did not impose these axes.  We \AINITemph{recovered} them ---
+  from a matrix of likes and dislikes alone.  The books told us their
+  geometry, and we listened.
 \end{frame}
 
 % ---------------------------------------------------------------------
