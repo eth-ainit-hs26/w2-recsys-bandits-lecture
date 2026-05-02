@@ -47,22 +47,21 @@
         \foreach \c in {0,...,15} {
           \pgfmathtruncatemacro{\h}{mod(\r*7+\c*3,11)}
           \ifnum\h<4
-            \fill[ink!85] (\c*0.32,-\r*0.22) circle (1.6pt);
+            \fill[ink!85] (\c*0.26,-\r*0.18) circle (1.3pt);
           \else
             \ifnum\h<7
-              \fill[mutedWarmGray] (\c*0.32,-\r*0.22) circle (1.0pt);
+              \fill[mutedWarmGray] (\c*0.26,-\r*0.18) circle (0.8pt);
             \else
-              \draw[mutedWarmGray!50] (\c*0.32,-\r*0.22) circle (1.4pt);
+              \draw[mutedWarmGray!50] (\c*0.26,-\r*0.18) circle (1.1pt);
             \fi
           \fi
         }
       }
-      \node[font=\itshape\small,mutedWarmGray] at (2.4,0.6) {16 books $\rightarrow$};
-      \node[font=\itshape\small,mutedWarmGray,rotate=90] at (-0.9,-2.2) {$\leftarrow$ 21 readers};
+      \node[font=\itshape\small,mutedWarmGray] at (2.0,0.5) {16 books $\rightarrow$};
+      \node[font=\itshape\small,mutedWarmGray,rotate=90] at (-0.7,-1.8) {$\leftarrow$ 21 readers};
     \end{tikzpicture}
   \end{center}
 
-  \vspace{0.4em}
   \begin{center}
     \itshape Three hundred and fifty-seven cells. Can your brain remember them?
   \end{center}
@@ -77,16 +76,15 @@
 % Scene 6a --- The four-corner reveal: the axes named
 % ---------------------------------------------------------------------
 \begin{frame}{The geometry was always there}
+  \sidenote{Both axes are old library science: Dewey decimal (1876) gives Fiction vs.\ Nonfiction; Flesch (1948) and Lexile (1989) give Light vs.\ Demanding.}
   When the matrix is sorted by hand, two axes appear:
 
   \vspace{0.6em}
 
   \begin{itemize}
     \setlength{\itemsep}{0.4em}
-    \item \AINITemph{Fiction} versus \AINITemph{Nonfiction}\sidenote{The
-      oldest taxonomic axis in libraries; Dewey codifies it in 1876.}
-    \item \AINITemph{Light} versus \AINITemph{Demanding}\sidenote{Readability
-      indices --- Flesch (1948), Lexile (1989) --- measure exactly this.}
+    \item \AINITemph{Fiction} versus \AINITemph{Nonfiction}
+    \item \AINITemph{Light} versus \AINITemph{Demanding}
   \end{itemize}
 
   \vspace{0.8em}

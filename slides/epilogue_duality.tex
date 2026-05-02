@@ -14,31 +14,19 @@
 % ---------------------------------------------------------------------
 % Scene 25a --- Compression-Prediction Twin (framing slide)
 % ---------------------------------------------------------------------
-\begin{frame}{A perfect predictor is a perfect compressor}
+\begin{frame}[t]{A perfect predictor is a perfect compressor}
   Two halves of one subject.
-
   \begin{itemize}
-    \item A \AINITemph{forecaster} assigns probabilities to the next symbol;
-          her loss is the average $-\log \hat p$ she pays per draw.
-    \item An \AINITemph{encoder} assigns short codewords to likely symbols;
-          his cost is the average bits per draw.
-    \item Shannon (1948) proved these two numbers are the same number.
-          Both bottom out at $H(p)$.
+    \item A \AINITemph{forecaster} assigns $\hat p$ to the next symbol;
+          her loss is $-\log \hat p$ per draw.
+    \item An \AINITemph{encoder} writes short codewords for likely symbols;
+          his cost is bits per draw.
+    \item Shannon (1948) proved these are the same number, bottoming out at $H(p)$.
   \end{itemize}
 
-  \vspace{0.5em}
-  Hence the slogan, due to Hutter\textsuperscript{1}:
-  \AINITemph{compression is comprehension.}
-  And the empirical confirmation, due to Del\'etang et al.\textsuperscript{2}:
-  a large language model, trained only on text, compresses ImageNet
-  pixels better than PNG.
-
-  \vfill
-  {\footnotesize
-   \textsuperscript{1}\,Hutter, M. (2005). \emph{Universal Artificial Intelligence};
-   the Hutter Prize for lossless text compression.\\
-   \textsuperscript{2}\,Del\'etang, G.\ et al.\ (2023).
-   \emph{Language Modeling Is Compression}.}
+  \smallskip
+  Hutter calls this \AINITemph{compression is comprehension}; Del\'etang
+  et al.\ (2023) confirm it: a text-trained LM compresses ImageNet better than PNG.
 \end{frame}
 
 % ---------------------------------------------------------------------

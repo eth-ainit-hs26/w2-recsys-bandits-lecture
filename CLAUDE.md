@@ -1,6 +1,6 @@
 # CLAUDE.md — context for future Claude sessions
 
-This is the working repo for **Week 2 of CAS AINIT FS26 at ETH Zürich** — a 90-minute lecture on recommendation systems and bandits, taught to managers without a technical background. Carlos Cotrini Jiménez is the lecturer. The deck was rebuilt from scratch in May 2026; this file gives the next Claude session enough context to keep going.
+This is the working repo for **Week 2 of *AI in Industry* at ETH Zürich** — a 90-minute lecture on recommendation systems and bandits, taught to managers without a technical background. Carlos Cotrini is the lecturer. The deck was rebuilt from scratch in May 2026; this file gives the next Claude session enough context to keep going.
 
 ## The lecture, in 5 lines
 

@@ -1,4 +1,4 @@
-# Two Engines · CAS AINIT FS26 Week 2
+# Two Engines · AI in Industry · Week 2
 
 ### → **[https://eth-ainit-fs26.github.io/recsys_bandits_lecture/](https://eth-ainit-fs26.github.io/recsys_bandits_lecture/)** ←
 
@@ -10,8 +10,8 @@ archive. Everything browsable, everything linkable.
 
 A 90-minute lecture on recommendation systems and bandits, taught to managers, framed as a single question: *what is the difference between **memory** and **prediction**?*
 
-- **Lecturer:** Carlos Cotrini Jiménez, ETH Zürich
-- **Course:** [CAS AINIT FS26](https://cas-ainit.ethz.ch), Week 2
+- **Lecturer:** Carlos Cotrini, ETH Zürich
+- **Course:** AI in Industry, Week 2
 - **Source:** [github.com/eth-ainit-fs26/recsys_bandits_lecture](https://github.com/eth-ainit-fs26/recsys_bandits_lecture)
 - **Deploy:** every push to `main` runs `.github/workflows/pages.yml`, which deploys the whole repo to GitHub Pages (enable once at *Settings → Pages → Source: GitHub Actions*).
 

@@ -62,32 +62,25 @@
 % ---------------------------------------------------------------------
 % Scene 19 — Naive estimate-then-exploit
 % ---------------------------------------------------------------------
-\begin{frame}{Na\"\i ve: estimate then exploit}
+\begin{frame}[t]{Na\"\i ve: estimate then exploit}
   A first attempt:
-
-  \medskip
-
   \begin{enumerate}
     \item Explore each urn $n$ times, round-robin.
     \item Commit to the urn with the highest empirical mean $\hat p_n$.
     \item Exploit that urn forever after.
   \end{enumerate}
 
-  \medskip
-
+  \smallskip
   Two drawbacks:
-
   \begin{itemize}
     \item If $n$ is too small, the empirical means are noisy and you
           commit to the wrong urn.
-    \item If $n$ is too large, you waste many early rounds on the
-          losing urns before you start exploiting.
+    \item If $n$ is too large, you waste rounds on losers before
+          exploiting.
   \end{itemize}
 
-  \medskip
-
-  The choice of $n$ \AINITemph{is} the problem. We have not solved it;
-  we have only displaced it.
+  \smallskip
+  \AINITemph{The choice of $n$ is itself the problem.}
 \end{frame}
 
 % ---------------------------------------------------------------------
