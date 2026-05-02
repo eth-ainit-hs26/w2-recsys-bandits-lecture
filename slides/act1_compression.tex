@@ -102,35 +102,188 @@
 % ---------------------------------------------------------------------
 \vizhandoff{01\_block-diagonal-puzzle.html}
 
+% =====================================================================
+% Scenes 5b -- 5f: gradual reveal from the scrambled matrix to the
+% two-axis geometry.  Each step adds one piece of structure --- sort,
+% cluster, isolate, project to one axis, then to two.
+% =====================================================================
+
+% Cluster colours (Wong CVD-safe palette).  Used in 5b's top stripes
+% and 5c's pile bars.
+\definecolor{clusterLF}{RGB}{230,159,0}    % orange
+\definecolor{clusterDF}{RGB}{0,158,115}    % bluish green
+\definecolor{clusterLN}{RGB}{204,121,167}  % reddish purple
+\definecolor{clusterDN}{RGB}{86,180,233}   % sky blue
+
 % ---------------------------------------------------------------------
-% Scene 6a --- The four-corner reveal: the axes named
+% Scene 5b --- The matrix, sorted, with the four book clusters marked.
+% Same 336 cells as Scene 4b, but now rows are grouped by archetype
+% and columns by quadrant.  Reader names on the left; book names on
+% top; four coloured stripes mark the four piles of books.
 % ---------------------------------------------------------------------
-\begin{frame}{The geometry was always there}
-  \sidenote{Both axes are old library science: Dewey decimal (1876) gives Fiction vs.\ Nonfiction; Flesch (1948) and Lexile (1989) give Light vs.\ Demanding.}
-  When the matrix is sorted by hand, two axes appear:
+\begin{frame}{Sort the readers, sort the books}
+  \def\smcell#1#2#3{%
+    \pgfmathparse{int(#3)}%
+    \ifnum\pgfmathresult=1\relax
+      \fill[color=accentPrussian] (#1*0.36+0.18,-#2*0.18-0.09) circle (1.6pt);%
+    \else
+      \ifnum\pgfmathresult=-1\relax
+        \fill[color=accentOxblood] (#1*0.36+0.18,-#2*0.18-0.09) circle (1.6pt);%
+      \else
+        \fill[mutedWarmGray!60] (#1*0.36+0.18,-#2*0.18-0.09) circle (0.5pt);%
+      \fi
+    \fi
+  }
+  \def\smrow#1#2{%
+    \foreach \v [count=\c from 0] in {#1} {%
+      \smcell{\c}{#2}{\v}%
+    }%
+  }
+  \begin{center}
+    \begin{tikzpicture}[every node/.style={inner sep=0.4pt}]
+      % Cluster-colour stripes above the matrix
+      \fill[clusterLF] (0,        0.05) rectangle (4*0.36,  0.13);
+      \fill[clusterDF] (4*0.36,   0.05) rectangle (8*0.36,  0.13);
+      \fill[clusterLN] (8*0.36,   0.05) rectangle (12*0.36, 0.13);
+      \fill[clusterDN] (12*0.36,  0.05) rectangle (16*0.36, 0.13);
 
-  \vspace{0.6em}
+      % Vertical book labels above the stripes
+      \foreach \book [count=\c from 0] in {%
+        Potter, Christie, Hunger, DaVinci,
+        Ulysses, {War \& Peace}, Borges, Lighthouse,
+        {Eat Pray Love}, Switzerland, {7 Habits}, {Joy of Cooking},
+        Kant, Smith, Darwin, Russell%
+      }{%
+        \node[rotate=90, anchor=west, font=\tiny, color=mutedWarmGray]
+          at (\c*0.36+0.18, 0.16) {\book};
+      }
 
-  \begin{itemize}
-    \setlength{\itemsep}{0.4em}
-    \item \AINITemph{Fiction} versus \AINITemph{Nonfiction}
-    \item \AINITemph{Light} versus \AINITemph{Demanding}
-  \end{itemize}
+      % Reader names on the left
+      \foreach \name [count=\r from 0] in {%
+        Alice, Ben, Clara, David,
+        Eleni, Felix, Greta, Hugo,
+        Iris, Jonas, Karin, Liam,
+        Maya, Nico, Oksana, Petros,
+        Quinn, Rosa, Samir, Tessa, Ursula%
+      }{%
+        \node[anchor=east, font=\tiny, color=mutedWarmGray]
+          at (-0.05, -\r*0.18-0.09) {\name};
+      }
 
-  \vspace{0.8em}
+      % Rating cells in canonical sorted order
+      \smrow{1,1,1,1,0,0,0,0,0,0,0,0,-1,-1,-1,-1}{0}     % Alice  (A1)
+      \smrow{1,1,1,1,0,0,0,0,0,0,0,0,-1,-1,-1,-1}{1}     % Ben    (A1)
+      \smrow{1,1,1,1,0,0,0,0,0,0,0,0,-1,-1,-1,-1}{2}     % Clara  (A1)
+      \smrow{1,1,1,1,0,0,0,0,0,0,0,0,-1,-1,-1,-1}{3}     % David  (A1)
+      \smrow{0,0,0,0,1,1,1,1,-1,-1,-1,-1,0,0,0,0}{4}     % Eleni  (A2)
+      \smrow{0,0,0,0,1,1,1,1,-1,-1,-1,-1,0,0,0,0}{5}     % Felix  (A2)
+      \smrow{0,0,0,0,1,1,1,1,-1,-1,-1,-1,0,0,0,0}{6}     % Greta  (A2)
+      \smrow{0,0,0,0,1,1,1,1,-1,-1,-1,-1,0,0,0,0}{7}     % Hugo   (A2)
+      \smrow{0,0,0,0,-1,-1,-1,-1,1,1,1,1,0,0,0,0}{8}     % Iris   (A3)
+      \smrow{0,0,0,0,-1,-1,-1,-1,1,1,1,1,0,0,0,0}{9}     % Jonas  (A3)
+      \smrow{0,0,0,0,-1,-1,-1,-1,1,1,1,1,0,0,0,0}{10}    % Karin  (A3)
+      \smrow{0,0,0,0,-1,-1,-1,-1,1,1,1,1,0,0,0,0}{11}    % Liam   (A3)
+      \smrow{-1,-1,-1,-1,0,0,0,0,0,0,0,0,1,1,1,1}{12}    % Maya   (A4)
+      \smrow{-1,-1,-1,-1,0,0,0,0,0,0,0,0,1,1,1,1}{13}    % Nico   (A4)
+      \smrow{-1,-1,-1,-1,0,0,0,0,0,0,0,0,1,1,1,1}{14}    % Oksana (A4)
+      \smrow{-1,-1,-1,-1,0,0,0,0,0,0,0,0,1,1,1,1}{15}    % Petros (A4)
+      \smrow{1,1,1,1,1,1,1,1,-1,-1,-1,-1,-1,-1,-1,-1}{16} % Quinn
+      \smrow{1,1,1,1,-1,-1,-1,-1,1,1,1,1,-1,-1,-1,-1}{17} % Rosa
+      \smrow{1,0,1,0,0,0,0,0,0,0,0,0,-1,0,-1,0}{18}      % Samir
+      \smrow{1,1,1,1,0,0,0,0,0,0,0,0,-1,-1,-1,-1}{19}    % Tessa
+      \smrow{1,1,1,1,0,0,1,0,0,0,0,0,-1,-1,-1,-1}{20}    % Ursula
+    \end{tikzpicture}
+  \end{center}
 
-  Neither axis was invented for this dataset. They are how librarians and
-  educators have sorted books for a century.
-
-  \vspace{0.4em}
-
-  We did not impose them. We \AINITemph{recovered} them.
+  \begin{center}
+    \itshape Sort the rows, sort the columns --- four piles of books
+    fall out.
+  \end{center}
 \end{frame}
 
 % ---------------------------------------------------------------------
-% Scene 6b --- The 16 books placed in 4 quadrants
+% Scene 5c --- The four piles isolated.  No matrix; just the four
+% groups of book titles, with a question for the audience.
 % ---------------------------------------------------------------------
-\begin{frame}{Sixteen books, four quadrants}
+\begin{frame}{Four piles of books.  What is the pattern?}
+  \begin{center}
+    \begin{tikzpicture}[
+      pile/.style={align=center, text width=3.0cm, anchor=north,
+                   font=\itshape\small},
+      bar/.style={minimum width=3.0cm, minimum height=0.20cm,
+                  inner sep=0pt, anchor=south}
+    ]
+      \node[bar, fill=clusterLF] at (-5.4, 1.6) {};
+      \node[bar, fill=clusterDF] at (-1.8, 1.6) {};
+      \node[bar, fill=clusterLN] at ( 1.8, 1.6) {};
+      \node[bar, fill=clusterDN] at ( 5.4, 1.6) {};
+
+      \node[pile] at (-5.4, 1.5) {Potter\\Christie\\Hunger Games\\Da Vinci Code};
+      \node[pile] at (-1.8, 1.5) {Ulysses\\War \& Peace\\Borges\\Lighthouse};
+      \node[pile] at ( 1.8, 1.5) {Eat Pray Love\\Switzerland\\7 Habits\\Joy of Cooking};
+      \node[pile] at ( 5.4, 1.5) {Kant\\Smith\\Darwin\\Russell};
+    \end{tikzpicture}
+  \end{center}
+
+  \vspace{0.4em}
+  \begin{center}
+    \itshape What two things does each pile share?
+  \end{center}
+\end{frame}
+
+% ---------------------------------------------------------------------
+% Scene 5d --- All sixteen books on a single line.  The first
+% distinction --- fiction vs nonfiction --- collapses the books into
+% just two stacks.  Borges and Potter share a coordinate; one axis
+% cannot tell them apart.
+% ---------------------------------------------------------------------
+\begin{frame}{Sixteen books on one line}
+  \begin{center}
+    \begin{tikzpicture}[
+      book/.style={font=\itshape\footnotesize, color=mutedWarmGray,
+                   inner sep=2pt, anchor=south}
+    ]
+      % the line
+      \draw[ink, thick] (-6.2, 0) -- (6.2, 0);
+      \draw[ink, thick] (-3.5, -0.10) -- (-3.5, 0.10);
+      \draw[ink, thick] ( 3.5, -0.10) -- ( 3.5, 0.10);
+      \node[font=\scshape\scriptsize, color=mutedWarmGray, anchor=north]
+        at (-3.5, -0.18) {fiction};
+      \node[font=\scshape\scriptsize, color=mutedWarmGray, anchor=north]
+        at ( 3.5, -0.18) {nonfiction};
+
+      % Fiction stack (x = -3.5)
+      \node[book] at (-3.5, 0.18) {Potter};
+      \node[book] at (-3.5, 0.48) {Christie};
+      \node[book] at (-3.5, 0.78) {Hunger Games};
+      \node[book] at (-3.5, 1.08) {Da Vinci Code};
+      \node[book] at (-3.5, 1.38) {Ulysses};
+      \node[book] at (-3.5, 1.68) {War \& Peace};
+      \node[book] at (-3.5, 1.98) {Borges};
+      \node[book] at (-3.5, 2.28) {Lighthouse};
+
+      % Nonfiction stack (x = +3.5)
+      \node[book] at ( 3.5, 0.18) {Eat Pray Love};
+      \node[book] at ( 3.5, 0.48) {Switzerland};
+      \node[book] at ( 3.5, 0.78) {7 Habits};
+      \node[book] at ( 3.5, 1.08) {Joy of Cooking};
+      \node[book] at ( 3.5, 1.38) {Kant};
+      \node[book] at ( 3.5, 1.68) {Smith};
+      \node[book] at ( 3.5, 1.98) {Darwin};
+      \node[book] at ( 3.5, 2.28) {Russell};
+    \end{tikzpicture}
+  \end{center}
+
+  \medskip
+  One axis collapses sixteen books into \AINITemph{two stacks}.
+  Borges and Potter share a coordinate.  One axis is not enough.
+\end{frame}
+
+% ---------------------------------------------------------------------
+% Scene 5e --- Add the second axis.  Now each book finds its own
+% corner.  (Was Scene 6b.)
+% ---------------------------------------------------------------------
+\begin{frame}{Add a second axis.  Each book finds its corner.}
   \begin{center}
     \begin{tikzpicture}[
       every node/.style={font=\footnotesize},
@@ -146,7 +299,6 @@
       \fill[accentOxblood,opacity=0.04] (-4,0) rectangle (0,2.6);
       \fill[accentOxblood,opacity=0.04] (0,-2.6) rectangle (4,0);
 
-      % Books and quadrants per BOOKS_MATRIX.md (the matrix that drives every viz).
       % top-left: demanding fiction (DF)
       \node[book] at (-3.0, 2.1) {Ulysses};
       \node[book] at (-1.5, 1.6) {Borges};
@@ -172,6 +324,27 @@
       \node[book] at ( 3.1,-2.3) {Switzerland};
     \end{tikzpicture}
   \end{center}
+\end{frame}
+
+% ---------------------------------------------------------------------
+% Scene 5f --- The geometry was always there.  (Was Scene 6a, moved
+% here to land as the synthesis after the visual journey.)
+% ---------------------------------------------------------------------
+\begin{frame}{The geometry was always there}
+  \sidenote{Both axes are old library science: Dewey decimal (1876)
+            gives Fiction vs.\ Nonfiction; Flesch (1948) and Lexile (1989)
+            give Light vs.\ Demanding.}
+  Two binary distinctions, four corners.  This is how librarians and
+  educators have sorted books for a century.
+
+  \vspace{0.8em}
+
+  We did not impose these axes.  We \AINITemph{recovered} them ---
+  from a matrix of likes and dislikes alone.
+
+  \vspace{0.4em}
+
+  The books told us their geometry, and we listened.
 \end{frame}
 
 % ---------------------------------------------------------------------
@@ -439,7 +612,7 @@
       mat/.style={draw=mutedWarmGray, line width=0.4pt, fill=bgCream},
       hl/.style={font=\itshape\scriptsize, color=mutedWarmGray},
       ent/.style={font=\small, inner sep=1pt},
-      pos/.style={font=\bfseries\small, color=accentPrussian, inner sep=1pt},
+      psv/.style={font=\bfseries\small, color=accentPrussian, inner sep=1pt},
       neg/.style={font=\bfseries\small, color=accentOxblood, inner sep=1pt},
       neu/.style={font=\small, color=mutedWarmGray, inner sep=1pt},
       bigsym/.style={font=\Large}
@@ -480,11 +653,11 @@
       \draw[mutedWarmGray!60, line width=0.15pt] (9.9, 0) -- (9.9, -2.1);
       \draw[mutedWarmGray!60, line width=0.15pt] (11.3, 0) -- (11.3, -2.1);
       % Alice row
-      \node[pos] at (9.2, -0.35) {$+2$}; \node[neu] at (10.6, -0.35) {$0$};  \node[neg] at (12.0, -0.35) {$-2$};
+      \node[psv] at (9.2, -0.35) {$+2$}; \node[neu] at (10.6, -0.35) {$0$};  \node[neg] at (12.0, -0.35) {$-2$};
       % Eleni row
-      \node[neu] at (9.2, -1.05) {$0$};  \node[pos] at (10.6, -1.05) {$+2$}; \node[neu] at (12.0, -1.05) {$0$};
+      \node[neu] at (9.2, -1.05) {$0$};  \node[psv] at (10.6, -1.05) {$+2$}; \node[neu] at (12.0, -1.05) {$0$};
       % Maya row
-      \node[neg] at (9.2, -1.75) {$-2$}; \node[neu] at (10.6, -1.75) {$0$};  \node[pos] at (12.0, -1.75) {$+2$};
+      \node[neg] at (9.2, -1.75) {$-2$}; \node[neu] at (10.6, -1.75) {$0$};  \node[psv] at (12.0, -1.75) {$+2$};
       \node[hl] at (9.2, 0.20) {Potter};
       \node[hl] at (10.6, 0.20) {Borges};
       \node[hl] at (12.0, 0.20) {Russell};
