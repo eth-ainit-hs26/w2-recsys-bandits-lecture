@@ -179,12 +179,350 @@
 % ---------------------------------------------------------------------
 \vizhandoff{02\_latent-axes-lab.html}
 
+% =====================================================================
+% Gradual transition from "books in a plane" to "matrix factorization".
+% Eight slides, building from concrete (one reader meets one book) to
+% abstract (two skinny matrices multiply to give the ratings matrix).
+% Alice is the running protagonist throughout.
+% =====================================================================
+
 % ---------------------------------------------------------------------
-% Scene 8 --- Dot product equation
+% Scene 7b --- Each book gets two numbers
+% Adds explicit (x, y) labels to the four-quadrant scatter so the
+% audience sees that each book's place is a pair of numbers.
+% ---------------------------------------------------------------------
+\begin{frame}{Each book gets two numbers}
+  \begin{center}
+    \begin{tikzpicture}[
+      every node/.style={font=\footnotesize},
+      book/.style={font=\itshape\scriptsize, inner sep=1pt},
+      coords/.style={font=\bfseries\footnotesize, color=accentOxblood, inner sep=1pt}
+    ]
+      \draw[ink, thick, ->] (-4.2,0) -- (4.2,0) node[right, font=\scshape\scriptsize, mutedWarmGray] {nonfiction};
+      \draw[ink, thick, ->] (0,-2.8) -- (0,2.8) node[above, font=\scshape\scriptsize, mutedWarmGray] {demanding};
+      \node[left,  font=\scshape\scriptsize, mutedWarmGray] at (-4.2, 0) {fiction};
+      \node[below, font=\scshape\scriptsize, mutedWarmGray] at (0, -2.8) {light};
+      \fill[accentOxblood, opacity=0.04] (-4,0)  rectangle (0, 2.6);
+      \fill[accentOxblood, opacity=0.04] (0,-2.6) rectangle (4, 0);
+
+      % DF top-left
+      \node[book] at (-3.0, 2.1) {Ulysses};
+      \node[book] at (-1.5, 1.6) {Borges};
+      \node[book] at (-2.7, 1.1) {War \& Peace};
+      \node[book] at (-1.2, 0.5) {Lighthouse};
+      \node[coords] at (-2, 2.6) {$(-1,\,+1)$};
+
+      % DN top-right
+      \node[book] at ( 1.2, 2.3) {Russell};
+      \node[book] at ( 2.7, 1.7) {Kant};
+      \node[book] at ( 1.6, 1.0) {Smith};
+      \node[book] at ( 3.2, 0.5) {Darwin};
+      \node[coords] at ( 2.2, 2.6) {$(+1,\,+1)$};
+
+      % LF bottom-left
+      \node[book] at (-2.8,-0.6) {Christie};
+      \node[book] at (-1.4,-1.2) {Potter};
+      \node[book] at (-3.1,-1.8) {Hunger Games};
+      \node[book] at (-1.2,-2.3) {Da Vinci Code};
+      \node[coords] at (-2,-2.6) {$(-1,\,-1)$};
+
+      % LN bottom-right
+      \node[book] at ( 1.4,-0.6) {Eat Pray Love};
+      \node[book] at ( 3.0,-1.1) {Joy of Cooking};
+      \node[book] at ( 1.7,-1.9) {7 Habits};
+      \node[book] at ( 3.1,-2.3) {Switzerland};
+      \node[coords] at ( 2.2,-2.6) {$(+1,\,-1)$};
+    \end{tikzpicture}
+  \end{center}
+
+  \medskip
+  Each book's place in the plane is its pair of numbers.  We will call
+  this pair the book's \AINITemph{vector}.
+\end{frame}
+
+% ---------------------------------------------------------------------
+% Scene 7c --- And readers, too
+% Same plane; Alice's dot prominently shown to set up the next two
+% slides where she's the protagonist.
+% ---------------------------------------------------------------------
+\begin{frame}{And readers, too}
+  \begin{center}
+    \begin{tikzpicture}[
+      every node/.style={font=\footnotesize},
+      book/.style={font=\itshape\scriptsize, color=mutedWarmGray, inner sep=1pt},
+      coords/.style={font=\bfseries\footnotesize, color=accentOxblood, inner sep=1pt},
+      reader/.style={circle, fill=accentPrussian, inner sep=2.6pt},
+      readerlabel/.style={font=\bfseries\footnotesize, color=accentPrussian, inner sep=1pt}
+    ]
+      \draw[ink, thick, ->] (-4.2,0) -- (4.2,0) node[right, font=\scshape\scriptsize, mutedWarmGray] {nonfiction};
+      \draw[ink, thick, ->] (0,-2.8) -- (0,2.8) node[above, font=\scshape\scriptsize, mutedWarmGray] {demanding};
+      \node[left,  font=\scshape\scriptsize, mutedWarmGray] at (-4.2, 0) {fiction};
+      \node[below, font=\scshape\scriptsize, mutedWarmGray] at (0, -2.8) {light};
+      \fill[accentOxblood, opacity=0.04] (-4,0)  rectangle (0, 2.6);
+      \fill[accentOxblood, opacity=0.04] (0,-2.6) rectangle (4, 0);
+
+      % muted books in the background
+      \node[book] at (-3.0, 2.1) {Ulysses};
+      \node[book] at (-1.5, 1.6) {Borges};
+      \node[book] at (-2.7, 1.1) {War \& Peace};
+      \node[book] at (-1.2, 0.5) {Lighthouse};
+      \node[book] at ( 1.2, 2.3) {Russell};
+      \node[book] at ( 2.7, 1.7) {Kant};
+      \node[book] at ( 1.6, 1.0) {Smith};
+      \node[book] at ( 3.2, 0.5) {Darwin};
+      \node[book] at (-2.8,-0.6) {Christie};
+      \node[book] at (-1.4,-1.2) {Potter};
+      \node[book] at (-3.1,-1.8) {Hunger Games};
+      \node[book] at (-1.2,-2.3) {Da Vinci Code};
+      \node[book] at ( 1.4,-0.6) {Eat Pray Love};
+      \node[book] at ( 3.0,-1.1) {Joy of Cooking};
+      \node[book] at ( 1.7,-1.9) {7 Habits};
+      \node[book] at ( 3.1,-2.3) {Switzerland};
+
+      % Alice — prominent reader dot, in the bottom-left quadrant but
+      % deliberately off the book cluster so her label is unobstructed.
+      \node[reader] (alice) at (-3.6, -2.4) {};
+      \node[readerlabel, below=1pt of alice] {Alice $(-1,\,-1)$};
+    \end{tikzpicture}
+  \end{center}
+
+  Readers live in the same plane.  A reader's vector says where her
+  taste sits.  Alice, a light-fiction reader, lives among the
+  light-fiction books.
+\end{frame}
+
+% ---------------------------------------------------------------------
+% Scene 7d --- Alice meets Russell (concrete dot product, ❌)
+% ---------------------------------------------------------------------
+\begin{frame}{How much will Alice like Russell?}
+  \medskip
+  \begin{center}
+    \begin{tabular}{c@{\hspace{4em}}c}
+      \textbf{Alice} & \textbf{Russell} \\[2pt]
+      light fiction & demanding nonfiction \\[2pt]
+      $(-1,\;-1)$ & $(+1,\;+1)$
+    \end{tabular}
+  \end{center}
+
+  \vspace{1.6em}
+
+  \begin{center}
+    \large
+    $\hat r_{\text{Alice},\,\text{Russell}}
+      \;=\; (-1)\!\cdot\!(+1) \;+\; (-1)\!\cdot\!(+1)
+      \;=\; {\color{accentOxblood}-2}$
+  \end{center}
+
+  \vspace{1.4em}
+
+  \begin{center}
+    {\Huge\color{accentOxblood}$\bm{\times}$}
+  \end{center}
+
+  \begin{center}
+    \itshape Alice will not finish Russell.
+  \end{center}
+\end{frame}
+
+% ---------------------------------------------------------------------
+% Scene 7e --- Alice meets Potter (concrete dot product, ✅)
+% ---------------------------------------------------------------------
+\begin{frame}{How much will Alice like Potter?}
+  \medskip
+  \begin{center}
+    \begin{tabular}{c@{\hspace{4em}}c}
+      \textbf{Alice} & \textbf{Potter} \\[2pt]
+      light fiction & light fiction \\[2pt]
+      $(-1,\;-1)$ & $(-1,\;-1)$
+    \end{tabular}
+  \end{center}
+
+  \vspace{1.6em}
+
+  \begin{center}
+    \large
+    $\hat r_{\text{Alice},\,\text{Potter}}
+      \;=\; (-1)\!\cdot\!(-1) \;+\; (-1)\!\cdot\!(-1)
+      \;=\; {\color{accentPrussian}+2}$
+  \end{center}
+
+  \vspace{1.4em}
+
+  \begin{center}
+    {\Huge\color{accentPrussian}$\bm{\checkmark}$}
+  \end{center}
+
+  \begin{center}
+    \itshape Alice will love Potter.  Same formula, opposite sign.
+  \end{center}
+\end{frame}
+
+% ---------------------------------------------------------------------
+% Scene 8 --- Dot product equation (recap, kept)
+% Sits between the two concrete examples and the matrix-product reveal.
 % ---------------------------------------------------------------------
 \equationslide{Preference is a dot product}%
   {\hat r_{ui} = u_i^\top v_j}%
-  {The user's vector and the book's vector live in the same space; their inner product is the predicted preference.}
+  {The reader's vector and the book's vector live in the same space; their inner product is the predicted preference. Two coordinates was the easy case --- the formula keeps its shape in any dimension.}
+
+% ---------------------------------------------------------------------
+% Scene 8b --- Stack and multiply (schematic)
+% Three rectangles in proportion: tall thin U, short wide V^T, big R.
+% Compact dimension labels at the top of each matrix.
+% ---------------------------------------------------------------------
+\begin{frame}{Stack and multiply}
+  \begin{center}
+    \begin{tikzpicture}[
+      mat/.style={draw=mutedWarmGray, line width=0.4pt, fill=bgCream},
+      cellH/.style={draw=mutedWarmGray!60, line width=0.15pt},
+      lab/.style={font=\itshape\footnotesize, color=mutedWarmGray},
+      dim/.style={font=\scriptsize, color=mutedWarmGray},
+      bigsym/.style={font=\Large}
+    ]
+      % U (21 x 2): width 0.5, height 3.0
+      \draw[mat] (0, 0) rectangle (0.5, -3.0);
+      \foreach \r in {1,...,20} {
+        \draw[cellH] (0, -\r*0.142857) -- (0.5, -\r*0.142857);
+      }
+      \draw[cellH] (0.25, 0) -- (0.25, -3.0);
+      \node[lab] at (0.25, 0.32) {$U$};
+      \node[dim] at (0.25, 0.05) {$21\!\times\!2$};
+      % highlight one row (Alice = row 0)
+      \fill[accentPrussian, opacity=0.7] (0, 0) rectangle (0.5, -0.142857);
+
+      % × symbol
+      \node[bigsym] at (1.0, -1.5) {$\times$};
+
+      % V^T (2 x 16): width 4.0, height 0.5
+      \draw[mat] (1.5, -1.25) rectangle (5.5, -1.75);
+      \foreach \c in {1,...,15} {
+        \draw[cellH] (1.5 + \c*0.25, -1.25) -- (1.5 + \c*0.25, -1.75);
+      }
+      \draw[cellH] (1.5, -1.5) -- (5.5, -1.5);
+      \node[lab] at (3.5, -0.93) {$V^{\!\top}$};
+      \node[dim] at (3.5, -1.15) {$2\!\times\!16$};
+      % highlight one column (Russell = col 15)
+      \fill[accentOxblood, opacity=0.7] (5.25, -1.25) rectangle (5.5, -1.75);
+
+      % = symbol
+      \node[bigsym] at (6.0, -1.5) {$=$};
+
+      % R (21 x 16): width 4.0, height 3.0
+      \draw[mat] (6.5, 0) rectangle (10.5, -3.0);
+      \node[lab] at (8.5, 0.32) {$R$};
+      \node[dim] at (8.5, 0.05) {$21\!\times\!16$};
+      % highlight the (Alice, Russell) cell
+      \fill[accentOxblood, opacity=0.55] (10.25, 0) rectangle (10.5, -0.142857);
+
+      % faint guide lines: U row -> V^T col -> R cell
+      \draw[mutedWarmGray, dashed, line width=0.2pt] (0.5, -0.071) -- (5.25, -1.5);
+      \draw[mutedWarmGray, dashed, line width=0.2pt] (5.5, -1.5) -- (10.25, -0.071);
+    \end{tikzpicture}
+  \end{center}
+
+  \begin{center}
+    21 readers in $U$,\quad 16 books in $V$,\quad
+    their product \AINITemph{is} $R$.
+    Each cell is one dot product --- the highlighted one is
+    Alice~$\times$~Russell.
+  \end{center}
+\end{frame}
+
+% ---------------------------------------------------------------------
+% Scene 8c --- Stack and multiply, in numbers
+% A 3x3 worked example — Alice, Eleni, Maya across Potter, Borges, Russell.
+% Wider V^T and R so the book-column labels don't collide.
+% ---------------------------------------------------------------------
+\begin{frame}{The matrix product, in numbers}
+  \begin{center}
+    \begin{tikzpicture}[
+      mat/.style={draw=mutedWarmGray, line width=0.4pt, fill=bgCream},
+      hl/.style={font=\itshape\scriptsize, color=mutedWarmGray},
+      ent/.style={font=\small, inner sep=1pt},
+      pos/.style={font=\bfseries\small, color=accentPrussian, inner sep=1pt},
+      neg/.style={font=\bfseries\small, color=accentOxblood, inner sep=1pt},
+      neu/.style={font=\small, color=mutedWarmGray, inner sep=1pt},
+      bigsym/.style={font=\Large}
+    ]
+      % U (3 x 2)
+      \draw[mat] (0, 0) rectangle (1.4, -2.1);
+      \draw[mutedWarmGray!60, line width=0.15pt] (0, -0.7) -- (1.4, -0.7);
+      \draw[mutedWarmGray!60, line width=0.15pt] (0, -1.4) -- (1.4, -1.4);
+      \draw[mutedWarmGray!60, line width=0.15pt] (0.7, 0) -- (0.7, -2.1);
+      \node[ent] at (0.35, -0.35) {$-1$}; \node[ent] at (1.05, -0.35) {$-1$};
+      \node[ent] at (0.35, -1.05) {$-1$}; \node[ent] at (1.05, -1.05) {$+1$};
+      \node[ent] at (0.35, -1.75) {$+1$}; \node[ent] at (1.05, -1.75) {$+1$};
+      \node[hl, anchor=east] at (-0.1, -0.35) {Alice};
+      \node[hl, anchor=east] at (-0.1, -1.05) {Eleni};
+      \node[hl, anchor=east] at (-0.1, -1.75) {Maya};
+      \node[hl] at (0.7, 0.28) {$U$};
+
+      \node[bigsym] at (2.4, -1.05) {$\times$};
+
+      % V^T (2 x 3) — wider columns so book labels fit
+      \draw[mat] (3.0, -0.35) rectangle (7.2, -1.75);
+      \draw[mutedWarmGray!60, line width=0.15pt] (4.4, -0.35) -- (4.4, -1.75);
+      \draw[mutedWarmGray!60, line width=0.15pt] (5.8, -0.35) -- (5.8, -1.75);
+      \draw[mutedWarmGray!60, line width=0.15pt] (3.0, -1.05) -- (7.2, -1.05);
+      \node[ent] at (3.7, -0.7) {$-1$}; \node[ent] at (5.1, -0.7) {$-1$}; \node[ent] at (6.5, -0.7) {$+1$};
+      \node[ent] at (3.7, -1.4) {$-1$}; \node[ent] at (5.1, -1.4) {$+1$}; \node[ent] at (6.5, -1.4) {$+1$};
+      \node[hl] at (3.7, -0.05) {Potter};
+      \node[hl] at (5.1, -0.05) {Borges};
+      \node[hl] at (6.5, -0.05) {Russell};
+      \node[hl] at (5.1, 0.28) {$V^{\!\top}$};
+
+      \node[bigsym] at (7.9, -1.05) {$=$};
+
+      % R (3 x 3)
+      \draw[mat] (8.5, 0) rectangle (12.7, -2.1);
+      \draw[mutedWarmGray!60, line width=0.15pt] (8.5, -0.7) -- (12.7, -0.7);
+      \draw[mutedWarmGray!60, line width=0.15pt] (8.5, -1.4) -- (12.7, -1.4);
+      \draw[mutedWarmGray!60, line width=0.15pt] (9.9, 0) -- (9.9, -2.1);
+      \draw[mutedWarmGray!60, line width=0.15pt] (11.3, 0) -- (11.3, -2.1);
+      % Alice row
+      \node[pos] at (9.2, -0.35) {$+2$}; \node[neu] at (10.6, -0.35) {$0$};  \node[neg] at (12.0, -0.35) {$-2$};
+      % Eleni row
+      \node[neu] at (9.2, -1.05) {$0$};  \node[pos] at (10.6, -1.05) {$+2$}; \node[neu] at (12.0, -1.05) {$0$};
+      % Maya row
+      \node[neg] at (9.2, -1.75) {$-2$}; \node[neu] at (10.6, -1.75) {$0$};  \node[pos] at (12.0, -1.75) {$+2$};
+      \node[hl] at (9.2, 0.20) {Potter};
+      \node[hl] at (10.6, 0.20) {Borges};
+      \node[hl] at (12.0, 0.20) {Russell};
+      \node[hl] at (10.6, 0.55) {$R$};
+    \end{tikzpicture}
+  \end{center}
+
+  \medskip
+  Each entry of $R$ is one dot product.
+  \AINITemph{Positive} on the diagonal: each reader sits with her favourite
+  book.  \AINITemph{Negative} on the anti-diagonal: each reader far from
+  the wrong book.  \AINITemph{Zero} where the two are perpendicular.
+\end{frame}
+
+% ---------------------------------------------------------------------
+% Scene 8d --- The inverse problem
+% ---------------------------------------------------------------------
+\begin{frame}{But we only had \emph{R}}
+  \medskip
+  We never observed $U$ or $V$ directly.  The library's ledger has only
+  $R$ --- the rating matrix, three hundred and thirty-six cells of
+  symbols.
+
+  \medskip
+  Yet the matrix is the product of two skinny ones.  So the question is:
+
+  \vspace{1.6em}
+
+  \begin{center}
+    \itshape\large
+    Given $R$ alone, can we recover $U$ and $V$?
+  \end{center}
+
+  \vspace{1.6em}
+
+  This is the \AINITemph{matrix factorization} problem.  The next demo
+  gives one way to solve it.
+\end{frame}
 
 % ---------------------------------------------------------------------
 % Scene 9 --- Spectral microscope (interactive)
