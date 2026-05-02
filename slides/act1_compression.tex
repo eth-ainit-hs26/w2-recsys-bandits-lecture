@@ -547,23 +547,25 @@
 \end{frame}
 
 % =====================================================================
-% Three prep slides --- build intuition for the inner product before
-% running the formula on Alice/Russell and Alice/Potter.  The framing
-% is a "matchmaker quiz": each axis casts a +1 (match) or -1 (mismatch)
-% vote; the predicted preference is the sum of votes.
+% Dot-product introduction --- eight slides building intuition before
+% the formula lands.  Match-score framing throughout: each axis casts
+% a vote, the sum is the predicted preference.
+%
+%   Phase 1  three fiction-axis examples  (Russell / Potter / Ulysses)
+%   Phase 2  one light-axis pivot         (Ulysses)
+%   Phase 3  three two-axis sums          (Russell / Potter / Ulysses)
+%   Phase 4  concrete heatmap             (4 readers x 4 books)
 % =====================================================================
 
 % ---------------------------------------------------------------------
-% Scene 7d-pre1 --- One axis at a time: multiplication is sign-matching
+% Phase 1a --- Fiction axis: Alice vs Russell (mismatch -1)
 % ---------------------------------------------------------------------
 \begin{frame}{One axis at a time}
   Forget light vs demanding for a moment.  Just fiction vs nonfiction.
 
   \medskip
   \begin{center}
-    \begin{tikzpicture}[
-      every node/.style={inner sep=1pt}
-    ]
+    \begin{tikzpicture}[every node/.style={inner sep=1pt}]
       \draw[ink, thick, ->] (-3.6, 0) -- (3.6, 0)
         node[right, font=\scshape\scriptsize, color=mutedWarmGray] {nonfiction};
       \node[left, font=\scshape\scriptsize, color=mutedWarmGray] at (-3.6, 0) {fiction};
@@ -578,7 +580,7 @@
       \node[font=\bfseries\footnotesize, color=clusterLF, anchor=south, yshift=4pt] at (-2, 0) {Alice};
 
       \fill[clusterDN] ( 2, 0) circle (3pt);
-      \node[font=\bfseries\footnotesize, color=clusterDN, anchor=south, yshift=4pt] at (2, 0) {Russell};
+      \node[font=\bfseries\footnotesize, color=clusterDN, anchor=south, yshift=4pt] at ( 2, 0) {Russell};
     \end{tikzpicture}
   \end{center}
 
@@ -590,17 +592,149 @@
   \medskip
   \begin{center}
     \itshape\color{mutedWarmGray}
-    Same sign $\to +1$ (a \AINITemph{match}).  Different signs $\to -1$
-    (a \AINITemph{mismatch}).  One multiplication is one match score.
+    Different signs $\to -1$ (a \AINITemph{mismatch}).
+    Multiplication is a one-axis match score.
   \end{center}
 \end{frame}
 
 % ---------------------------------------------------------------------
-% Scene 7d-pre2 --- Two axes, two votes, sum is the match score
+% Phase 1b --- Fiction axis: Alice vs Potter (match +1, both LF)
 % ---------------------------------------------------------------------
-\begin{frame}{Two axes, two votes}
-  Bring back the second axis.  Run the same multiplication on
-  light vs demanding.  Then \AINITemph{add} the two votes.
+\begin{frame}{Same trick: Alice vs Potter}
+  Same axis, different book.
+
+  \medskip
+  \begin{center}
+    \begin{tikzpicture}[every node/.style={inner sep=1pt}]
+      \draw[ink, thick, ->] (-3.6, 0) -- (3.6, 0)
+        node[right, font=\scshape\scriptsize, color=mutedWarmGray] {nonfiction};
+      \node[left, font=\scshape\scriptsize, color=mutedWarmGray] at (-3.6, 0) {fiction};
+      \draw[mutedWarmGray, thin] (-2, -0.08) -- (-2, 0.08);
+      \draw[mutedWarmGray, thin] ( 0, -0.08) -- ( 0, 0.08);
+      \draw[mutedWarmGray, thin] ( 2, -0.08) -- ( 2, 0.08);
+      \node[font=\scriptsize, color=mutedWarmGray, anchor=north] at (-2, -0.10) {$-1$};
+      \node[font=\scriptsize, color=mutedWarmGray, anchor=north] at ( 0, -0.10) {$0$};
+      \node[font=\scriptsize, color=mutedWarmGray, anchor=north] at ( 2, -0.10) {$+1$};
+
+      % Alice and Potter both at fiction-axis -1; stack one above and
+      % one below the line so the labels do not collide.
+      \fill[clusterLF] (-2, 0.10) circle (3pt);
+      \node[font=\bfseries\footnotesize, color=clusterLF, anchor=south, yshift=10pt] at (-2, 0.10) {Alice};
+
+      \fill[clusterLF] (-2, -0.10) circle (3pt);
+      \node[font=\bfseries\footnotesize, color=clusterLF, anchor=north, yshift=-10pt] at (-2, -0.10) {Potter};
+    \end{tikzpicture}
+  \end{center}
+
+  \medskip
+  \begin{center}
+    \large $(-1) \;\times\; (-1) \;=\; {\color{accentPrussian}+1}$
+  \end{center}
+
+  \medskip
+  \begin{center}
+    \itshape\color{mutedWarmGray}
+    Same signs $\to +1$ (a \AINITemph{match}).
+    Both fiction; the axis agrees.
+  \end{center}
+\end{frame}
+
+% ---------------------------------------------------------------------
+% Phase 1c --- Fiction axis: Alice vs Ulysses (match +1)
+% Sets up the partial-overlap that lands on Phase 3c.
+% ---------------------------------------------------------------------
+\begin{frame}{Same trick: Alice vs Ulysses}
+  And again with Ulysses --- a very different book.
+
+  \medskip
+  \begin{center}
+    \begin{tikzpicture}[every node/.style={inner sep=1pt}]
+      \draw[ink, thick, ->] (-3.6, 0) -- (3.6, 0)
+        node[right, font=\scshape\scriptsize, color=mutedWarmGray] {nonfiction};
+      \node[left, font=\scshape\scriptsize, color=mutedWarmGray] at (-3.6, 0) {fiction};
+      \draw[mutedWarmGray, thin] (-2, -0.08) -- (-2, 0.08);
+      \draw[mutedWarmGray, thin] ( 0, -0.08) -- ( 0, 0.08);
+      \draw[mutedWarmGray, thin] ( 2, -0.08) -- ( 2, 0.08);
+      \node[font=\scriptsize, color=mutedWarmGray, anchor=north] at (-2, -0.10) {$-1$};
+      \node[font=\scriptsize, color=mutedWarmGray, anchor=north] at ( 0, -0.10) {$0$};
+      \node[font=\scriptsize, color=mutedWarmGray, anchor=north] at ( 2, -0.10) {$+1$};
+
+      \fill[clusterLF] (-2, 0.10) circle (3pt);
+      \node[font=\bfseries\footnotesize, color=clusterLF, anchor=south, yshift=10pt] at (-2, 0.10) {Alice};
+
+      \fill[clusterDF] (-2, -0.10) circle (3pt);
+      \node[font=\bfseries\footnotesize, color=clusterDF, anchor=north, yshift=-10pt] at (-2, -0.10) {Ulysses};
+    \end{tikzpicture}
+  \end{center}
+
+  \medskip
+  \begin{center}
+    \large $(-1) \;\times\; (-1) \;=\; {\color{accentPrussian}+1}$
+  \end{center}
+
+  \medskip
+  \begin{center}
+    \itshape\color{mutedWarmGray}
+    Both fiction --- another \AINITemph{match} on this axis,
+    even though Ulysses and Potter are nothing alike.
+  \end{center}
+\end{frame}
+
+% ---------------------------------------------------------------------
+% Phase 2 --- Pivot to the light axis: Alice vs Ulysses (mismatch)
+% ---------------------------------------------------------------------
+\begin{frame}{Now the light axis: Alice vs Ulysses}
+  Same multiplication, second axis.  Alice prefers \AINITemph{light}
+  reads ($-1$); Ulysses is \AINITemph{demanding} ($+1$).
+
+  \medskip
+  \begin{center}
+    \begin{tikzpicture}[every node/.style={inner sep=1pt}]
+      \draw[ink, thick, ->] (-3.6, 0) -- (3.6, 0)
+        node[right, font=\scshape\scriptsize, color=mutedWarmGray] {demanding};
+      \node[left, font=\scshape\scriptsize, color=mutedWarmGray] at (-3.6, 0) {light};
+      \draw[mutedWarmGray, thin] (-2, -0.08) -- (-2, 0.08);
+      \draw[mutedWarmGray, thin] ( 0, -0.08) -- ( 0, 0.08);
+      \draw[mutedWarmGray, thin] ( 2, -0.08) -- ( 2, 0.08);
+      \node[font=\scriptsize, color=mutedWarmGray, anchor=north] at (-2, -0.10) {$-1$};
+      \node[font=\scriptsize, color=mutedWarmGray, anchor=north] at ( 0, -0.10) {$0$};
+      \node[font=\scriptsize, color=mutedWarmGray, anchor=north] at ( 2, -0.10) {$+1$};
+
+      \fill[clusterLF] (-2, 0) circle (3pt);
+      \node[font=\bfseries\footnotesize, color=clusterLF, anchor=south, yshift=4pt] at (-2, 0) {Alice};
+
+      \fill[clusterDF] ( 2, 0) circle (3pt);
+      \node[font=\bfseries\footnotesize, color=clusterDF, anchor=south, yshift=4pt] at ( 2, 0) {Ulysses};
+    \end{tikzpicture}
+  \end{center}
+
+  \medskip
+  \begin{center}
+    \large $(-1) \;\times\; (+1) \;=\; {\color{accentOxblood}-1}$
+  \end{center}
+
+  \medskip
+  \begin{center}
+    \itshape\color{mutedWarmGray}
+    On this axis they \AINITemph{disagree} ---
+    Alice and Ulysses agree on fiction but not on demand.
+  \end{center}
+\end{frame}
+
+% ---------------------------------------------------------------------
+% Phase 3a --- Two axes: Alice vs Russell (mismatch on both, sum -2)
+% ---------------------------------------------------------------------
+\begin{frame}{Two axes, two votes: Alice vs Russell}
+  Two votes per pair.  \AINITemph{Add} them.
+
+  \medskip
+  \begin{center}
+    \begin{tabular}{c@{\hspace{4em}}c}
+      \textbf{\color{clusterLF}Alice} & \textbf{\color{clusterDN}Russell} \\[1pt]
+      {\scriptsize\color{mutedWarmGray}light fiction} & {\scriptsize\color{mutedWarmGray}demanding nonfiction} \\[1pt]
+      $(-1,\;-1)$ & $(+1,\;+1)$
+    \end{tabular}
+  \end{center}
 
   \medskip
   \begin{center}
@@ -610,155 +744,180 @@
       eq/.style={anchor=base, font=\itshape},
       val/.style={font=\bfseries, color=accentOxblood, anchor=base west}
     ]
-      \node[lab] at (-0.8, 1.00) {fiction-axis vote:};
-      \node[eq]  at ( 1.7, 1.00) {$(-1)\;\times\;(+1)\;=$};
-      \node[val] at ( 3.5, 1.00) {$-1$};
+      \node[lab] at (-0.8, 0.80) {fiction-axis vote:};
+      \node[eq]  at ( 1.7, 0.80) {$(-1)\;\times\;(+1)\;=$};
+      \node[val] at ( 3.5, 0.80) {$-1$};
 
       \node[lab] at (-0.8, 0.10) {light-axis vote:};
       \node[eq]  at ( 1.7, 0.10) {$(-1)\;\times\;(+1)\;=$};
       \node[val] at ( 3.5, 0.10) {$-1$};
 
-      \draw[mutedWarmGray, line width=0.4pt] (3.0, -0.40) -- (4.1, -0.40);
+      \draw[mutedWarmGray, line width=0.4pt] (3.0, -0.30) -- (4.1, -0.30);
 
-      \node[lab] at (-0.8, -1.00) {match score:};
-      \node[val, font=\bfseries\large] at ( 3.5, -1.00) {$-2$};
+      \node[lab] at (-0.8, -0.80) {match score:};
+      \node[val, font=\bfseries\large] at ( 3.5, -0.80) {$-2$};
     \end{tikzpicture}
   \end{center}
 
   \medskip
   \begin{center}
-    \itshape\color{mutedWarmGray}
-    Each axis casts a vote.  The sum is the predicted match score.
+    {\Large\color{accentOxblood}$\bm{\times}$}\quad
+    \itshape Alice will not finish Russell.
   \end{center}
 \end{frame}
 
 % ---------------------------------------------------------------------
-% Scene 7d-pre3 --- Three outcomes: a 4x4 heatmap of every reader-corner
-% x book-corner combination.  Diagonal = +2, anti-diagonal = -2,
-% off-diagonal = 0.
+% Phase 3b --- Two axes: Alice vs Potter (match on both, sum +2)
+% ---------------------------------------------------------------------
+\begin{frame}{Two axes, two votes: Alice vs Potter}
+  Same recipe.  Different verdict.
+
+  \medskip
+  \begin{center}
+    \begin{tabular}{c@{\hspace{4em}}c}
+      \textbf{\color{clusterLF}Alice} & \textbf{\color{clusterLF}Potter} \\[1pt]
+      {\scriptsize\color{mutedWarmGray}light fiction} & {\scriptsize\color{mutedWarmGray}light fiction} \\[1pt]
+      $(-1,\;-1)$ & $(-1,\;-1)$
+    \end{tabular}
+  \end{center}
+
+  \medskip
+  \begin{center}
+    \begin{tikzpicture}[
+      every node/.style={inner sep=2pt},
+      lab/.style={font=\scshape\scriptsize, color=mutedWarmGray, anchor=east},
+      eq/.style={anchor=base, font=\itshape},
+      val/.style={font=\bfseries, color=accentPrussian, anchor=base west}
+    ]
+      \node[lab] at (-0.8, 0.80) {fiction-axis vote:};
+      \node[eq]  at ( 1.7, 0.80) {$(-1)\;\times\;(-1)\;=$};
+      \node[val] at ( 3.5, 0.80) {$+1$};
+
+      \node[lab] at (-0.8, 0.10) {light-axis vote:};
+      \node[eq]  at ( 1.7, 0.10) {$(-1)\;\times\;(-1)\;=$};
+      \node[val] at ( 3.5, 0.10) {$+1$};
+
+      \draw[mutedWarmGray, line width=0.4pt] (3.0, -0.30) -- (4.1, -0.30);
+
+      \node[lab] at (-0.8, -0.80) {match score:};
+      \node[val, font=\bfseries\large] at ( 3.5, -0.80) {$+2$};
+    \end{tikzpicture}
+  \end{center}
+
+  \medskip
+  \begin{center}
+    {\Large\color{accentPrussian}$\bm{\checkmark}$}\quad
+    \itshape Alice will love Potter.
+  \end{center}
+\end{frame}
+
+% ---------------------------------------------------------------------
+% Phase 3c --- Two axes: Alice vs Ulysses (split, sum 0)
+% ---------------------------------------------------------------------
+\begin{frame}{Two axes, two votes: Alice vs Ulysses}
+  Two votes that disagree.
+
+  \medskip
+  \begin{center}
+    \begin{tabular}{c@{\hspace{4em}}c}
+      \textbf{\color{clusterLF}Alice} & \textbf{\color{clusterDF}Ulysses} \\[1pt]
+      {\scriptsize\color{mutedWarmGray}light fiction} & {\scriptsize\color{mutedWarmGray}demanding fiction} \\[1pt]
+      $(-1,\;-1)$ & $(-1,\;+1)$
+    \end{tabular}
+  \end{center}
+
+  \medskip
+  \begin{center}
+    \begin{tikzpicture}[
+      every node/.style={inner sep=2pt},
+      lab/.style={font=\scshape\scriptsize, color=mutedWarmGray, anchor=east},
+      eq/.style={anchor=base, font=\itshape},
+      psv/.style={font=\bfseries, color=accentPrussian, anchor=base west},
+      neg/.style={font=\bfseries, color=accentOxblood, anchor=base west},
+      neu/.style={font=\bfseries, color=mutedWarmGray, anchor=base west}
+    ]
+      \node[lab] at (-0.8, 0.80) {fiction-axis vote:};
+      \node[eq]  at ( 1.7, 0.80) {$(-1)\;\times\;(-1)\;=$};
+      \node[psv] at ( 3.5, 0.80) {$+1$};
+
+      \node[lab] at (-0.8, 0.10) {light-axis vote:};
+      \node[eq]  at ( 1.7, 0.10) {$(-1)\;\times\;(+1)\;=$};
+      \node[neg] at ( 3.5, 0.10) {$-1$};
+
+      \draw[mutedWarmGray, line width=0.4pt] (3.0, -0.30) -- (4.1, -0.30);
+
+      \node[lab] at (-0.8, -0.80) {match score:};
+      \node[neu, font=\bfseries\large] at ( 3.5, -0.80) {$0$};
+    \end{tikzpicture}
+  \end{center}
+
+  \medskip
+  \begin{center}
+    {\Large\color{mutedWarmGray}\textbf{?}}\quad
+    \itshape A tie.  Fiction matches; demand differs.
+  \end{center}
+\end{frame}
+
+% ---------------------------------------------------------------------
+% Phase 4 --- Concrete heatmap: 4 readers x 4 books, named.
+% Diagonal = +2 (matches), anti-diagonal = -2 (mismatches),
+% off-diagonal = 0 (one axis agrees, the other disagrees).
 % ---------------------------------------------------------------------
 \begin{frame}{Same corner, opposite corner, sideways}
   \begin{center}
     \begin{tikzpicture}[
       every node/.style={inner sep=1pt},
-      hdr/.style={font=\itshape\footnotesize},
+      hdr/.style={font=\itshape\scriptsize},
       val/.style={font=\bfseries\footnotesize}
     ]
       % Outer column-axis label
       \node[font=\scshape\scriptsize, color=mutedWarmGray, anchor=south]
-        at (4.2, 4.4) {book corner};
+        at (5.0, 4.30) {book};
 
-      % Column headers (book corners)
-      \foreach \cn/\col [count=\c from 0] in {LF/clusterLF, DF/clusterDF, LN/clusterLN, DN/clusterDN}{%
-        \node[hdr, color=\col] at (1.8 + \c*1.4, 3.95) {\cn};
+      % Column headers (book names, cluster-coloured)
+      \foreach \cn/\col [count=\c from 0] in {%
+        Potter/clusterLF, Ulysses/clusterDF, {Eat Pray Love}/clusterLN, Russell/clusterDN%
+      }{%
+        \node[hdr, color=\col] at (1.7 + \c*2.2, 3.95) {\cn};
       }
 
       % Outer row-axis label
       \node[rotate=90, font=\scshape\scriptsize, color=mutedWarmGray]
-        at (-0.5, 1.85) {reader corner};
+        at (-0.4, 1.93) {reader};
 
-      % Row headers (reader corners)
-      \foreach \rn/\col [count=\r from 0] in {LF/clusterLF, DF/clusterDF, LN/clusterLN, DN/clusterDN}{%
-        \node[hdr, color=\col, anchor=east] at (1.0, 3.2 - \r*0.8) {\rn};
+      % Row headers (reader names, cluster-coloured by archetype)
+      \foreach \rn/\col [count=\r from 0] in {%
+        Alice/clusterLF, Eleni/clusterDF, Iris/clusterLN, Maya/clusterDN%
+      }{%
+        \node[hdr, color=\col, anchor=east] at (0.45, 3.20 - \r*0.85) {\rn};
       }
 
       % Diagonal cells (matches): +2
       \foreach \i in {0,1,2,3}{%
         \fill[accentPrussian!22, rounded corners=2pt]
-          (1.1+\i*1.4, 2.80-\i*0.8) rectangle (2.5+\i*1.4, 3.60-\i*0.8);
-        \node[val, color=accentPrussian] at (1.8+\i*1.4, 3.2-\i*0.8) {$+2$};
+          (0.6+\i*2.2, 2.78-\i*0.85) rectangle (2.8+\i*2.2, 3.62-\i*0.85);
+        \node[val, color=accentPrussian] at (1.7+\i*2.2, 3.20-\i*0.85) {$+2$};
       }
-
       % Anti-diagonal cells (mismatches): -2
       \foreach \r/\c in {0/3, 1/2, 2/1, 3/0}{%
         \fill[accentOxblood!22, rounded corners=2pt]
-          (1.1+\c*1.4, 2.80-\r*0.8) rectangle (2.5+\c*1.4, 3.60-\r*0.8);
-        \node[val, color=accentOxblood] at (1.8+\c*1.4, 3.2-\r*0.8) {$-2$};
+          (0.6+\c*2.2, 2.78-\r*0.85) rectangle (2.8+\c*2.2, 3.62-\r*0.85);
+        \node[val, color=accentOxblood] at (1.7+\c*2.2, 3.20-\r*0.85) {$-2$};
       }
-
       % Off-diagonal cells (neutral): 0
       \foreach \r/\c in {0/1, 0/2, 1/0, 1/3, 2/0, 2/3, 3/1, 3/2}{%
         \fill[mutedWarmGray!10, rounded corners=2pt]
-          (1.1+\c*1.4, 2.80-\r*0.8) rectangle (2.5+\c*1.4, 3.60-\r*0.8);
-        \node[val, color=mutedWarmGray!90] at (1.8+\c*1.4, 3.2-\r*0.8) {$0$};
+          (0.6+\c*2.2, 2.78-\r*0.85) rectangle (2.8+\c*2.2, 3.62-\r*0.85);
+        \node[val, color=mutedWarmGray!90] at (1.7+\c*2.2, 3.20-\r*0.85) {$0$};
       }
     \end{tikzpicture}
   \end{center}
 
   \begin{center}
     \scriptsize\itshape\color{mutedWarmGray}
-    Same corner $\to +2$.  Opposite corner $\to -2$.  Side-by-side $\to 0$.
-  \end{center}
-\end{frame}
-
-% =====================================================================
-% Worked examples --- now the formula on the prep slides above lands
-% on two concrete reader/book pairs.
-% =====================================================================
-
-% ---------------------------------------------------------------------
-% Scene 7d --- Alice meets Russell (concrete dot product, ❌)
-% ---------------------------------------------------------------------
-\begin{frame}{How much will Alice like Russell?}
-  \medskip
-  \begin{center}
-    \begin{tabular}{c@{\hspace{4em}}c}
-      \textbf{Alice} & \textbf{Russell} \\[2pt]
-      light fiction & demanding nonfiction \\[2pt]
-      $(-1,\;-1)$ & $(+1,\;+1)$
-    \end{tabular}
-  \end{center}
-
-  \vspace{1.6em}
-
-  \begin{center}
-    \large
-    $\hat r_{\text{Alice},\,\text{Russell}}
-      \;=\; (-1)\!\cdot\!(+1) \;+\; (-1)\!\cdot\!(+1)
-      \;=\; {\color{accentOxblood}-2}$
-  \end{center}
-
-  \vspace{1.4em}
-
-  \begin{center}
-    {\Huge\color{accentOxblood}$\bm{\times}$}
-  \end{center}
-
-  \begin{center}
-    \itshape Alice will not finish Russell.
-  \end{center}
-\end{frame}
-
-% ---------------------------------------------------------------------
-% Scene 7e --- Alice meets Potter (concrete dot product, ✅)
-% ---------------------------------------------------------------------
-\begin{frame}{How much will Alice like Potter?}
-  \medskip
-  \begin{center}
-    \begin{tabular}{c@{\hspace{4em}}c}
-      \textbf{Alice} & \textbf{Potter} \\[2pt]
-      light fiction & light fiction \\[2pt]
-      $(-1,\;-1)$ & $(-1,\;-1)$
-    \end{tabular}
-  \end{center}
-
-  \vspace{1.6em}
-
-  \begin{center}
-    \large
-    $\hat r_{\text{Alice},\,\text{Potter}}
-      \;=\; (-1)\!\cdot\!(-1) \;+\; (-1)\!\cdot\!(-1)
-      \;=\; {\color{accentPrussian}+2}$
-  \end{center}
-
-  \vspace{1.4em}
-
-  \begin{center}
-    {\Huge\color{accentPrussian}$\bm{\checkmark}$}
-  \end{center}
-
-  \begin{center}
-    \itshape Alice will love Potter.  Same formula, opposite sign.
+    Same corner $\to +2$ (e.g.\ Alice $\times$ Potter).
+    Opposite corner $\to -2$ (Alice $\times$ Russell).
+    Side-by-side $\to 0$ (Alice $\times$ Ulysses).
   \end{center}
 \end{frame}
 
