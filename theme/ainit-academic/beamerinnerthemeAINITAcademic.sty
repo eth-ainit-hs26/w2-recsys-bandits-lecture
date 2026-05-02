@@ -90,7 +90,7 @@
         \vspace{1.4em}%
         {\rmfamily\scshape\small\color{mutedWarmGray} #2\par}%
         \vspace{3.2em}%
-        {\rmfamily\scshape\normalsize\color{accentOxblood} #3\par}%
+        {\rmfamily\scshape\normalsize\color{\AINITactaccent} #3\par}%
       };
     \end{tikzpicture}%
   \end{frame}%
@@ -122,7 +122,7 @@
         {\rmfamily\scshape\small\color{mutedWarmGray} #3\par}%
         \ifstrempty{#4}{}{%
           \vspace{1.8em}%
-          {\rmfamily\scshape\normalsize\color{accentOxblood} #4\par}%
+          {\rmfamily\scshape\normalsize\color{\AINITactaccent} #4\par}%
         }%
       };
     \end{tikzpicture}%
@@ -138,7 +138,7 @@
     \node[anchor=north east,
           inner sep=0pt] at ($(current page.north east) + (-0.07\paperwidth, -0.16\paperheight)$) {%
       \begin{tikzpicture}
-        \node[draw=accentOxblood, line width=0.4pt,
+        \node[draw=\AINITactaccent, line width=0.4pt,
               inner sep=0pt] {%
           \includegraphics[width=1.8cm,keepaspectratio]{#1}%
         };
@@ -221,6 +221,95 @@
           text=mutedWarmGray,
           inner sep=0pt] at ($(current page.north west) + (0.02\paperwidth, -0.30\paperheight)$) {#1};
   \end{tikzpicture}%
+}
+
+% =====================================================================
+% Lecture-level act macros --- Library / Laboratory dialectic.
+%
+% Each of \AINITactone, \AINITacttwo, \AINITinterlude, \AINITepilogue
+% is invoked once at the top of its section file. Each sets:
+%   (a) the accent register \AINITactaccent
+%       (oxblood for Act I, Prussian for Act II, ink elsewhere)
+%   (b) the section indicator \AINITsection
+%       (printed in the headline by the outer theme)
+%   (c) for \AINITactone and \AINITacttwo only, an opener plate.
+%
+% The Interlude and Epilogue do NOT emit their own opener plates --- the
+% existing portrait dividers (Shannon, Hutter) keep that role. Their
+% macros only flip the chrome accent.
+%
+% The plates are deliberately typographic (Roman numeral + small caps
+% title + epigraph), not pictorial: the urn motif is delegated to the
+% recurring marginal glyph in the headline, so opener plates read as
+% chapter divisions in a Pelican monograph rather than as illustrations.
+% =====================================================================
+
+% Internal: opener plate shared by Library and Laboratory.
+%   #1 roman numeral (e.g. I, II)
+%   #2 title text (e.g. Compression, Prediction)
+%   #3 epigraph
+%   #4 attribution
+\newcommand{\AINITactplate}[4]{%
+  \begin{frame}[plain, noframenumbering]
+    \begin{tikzpicture}[remember picture, overlay]
+      % Large Roman numeral, italic, in current accent. Sits in the
+      % left third, slightly above page centre.
+      \node[anchor=center,
+            inner sep=0pt,
+            text=\AINITactaccent,
+            font=\rmfamily\itshape\fontsize{96pt}{96pt}\selectfont]
+        at ($(current page.west) + (0.20\paperwidth, 0.04\paperheight)$) {#1};
+      % Title in small caps, ink, top of right column
+      \node[anchor=north west,
+            inner sep=0pt,
+            text=ink,
+            font=\rmfamily\scshape\LARGE]
+        at ($(current page.north west) + (0.40\paperwidth, -0.30\paperheight)$) {#2};
+      % Hairline rule beneath the title in current accent
+      \node[anchor=north west,
+            inner sep=0pt] at ($(current page.north west) + (0.40\paperwidth, -0.36\paperheight)$)
+        {\textcolor{\AINITactaccent}{\rule{0.30\paperwidth}{0.4pt}}};
+      % Epigraph in italic; attribution beneath in small caps
+      \node[anchor=north west,
+            text width=0.50\paperwidth,
+            align=left,
+            inner sep=0pt] at ($(current page.north west) + (0.40\paperwidth, -0.46\paperheight)$) {%
+          {\rmfamily\itshape\large #3\par}%
+          \vspace{1.0em}%
+          {\rmfamily\scshape\small\color{mutedWarmGray} #4}%
+        };
+    \end{tikzpicture}%
+  \end{frame}%
+}
+
+% Act I --- Compression (Library, oxblood).
+%   #1 epigraph, #2 attribution.
+\newcommand{\AINITactone}[2]{%
+  \AINITsetaccent{accentOxblood}%
+  \renewcommand{\AINITsection}{Act I \textemdash{} Compression}%
+  \AINITactplate{I}{Compression}{#1}{#2}%
+}
+
+% Act II --- Prediction (Laboratory, Prussian).
+%   #1 epigraph, #2 attribution.
+\newcommand{\AINITacttwo}[2]{%
+  \AINITsetaccent{accentPrussian}%
+  \renewcommand{\AINITsection}{Act II \textemdash{} Prediction}%
+  \AINITactplate{II}{Prediction}{#1}{#2}%
+}
+
+% Interlude --- Shannon (austere, ink). No plate; the existing Shannon
+% portrait divider in interlude_shannon.tex serves as the opener.
+\newcommand{\AINITinterlude}{%
+  \AINITsetaccent{ink}%
+  \renewcommand{\AINITsection}{Interlude \textemdash{} Shannon}%
+}
+
+% Epilogue --- Duality (austere, ink). No plate; the existing Hutter
+% portrait divider in epilogue_duality.tex serves as the opener.
+\newcommand{\AINITepilogue}{%
+  \AINITsetaccent{ink}%
+  \renewcommand{\AINITsection}{Epilogue \textemdash{} Duality}%
 }
 
 \endinput

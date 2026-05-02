@@ -14,6 +14,16 @@
 \RequirePackage{etoolbox}
 \RequirePackage{microtype}
 
+% Per-act accent register. The four lecture-level act macros
+% (\actone, \acttwo, \interlude, \epilogue, defined in the inner theme)
+% flip this to one of accentOxblood / accentPrussian / ink. Chrome
+% elements (frametitle underline, headline section text, section-divider
+% titles, portrait borders) read this register so their colour follows
+% the act. Default ink so slides before the first act marker (e.g. the
+% Prologue) render neutrally.
+\newcommand{\AINITactaccent}{ink}
+\newcommand{\AINITsetaccent}[1]{\renewcommand{\AINITactaccent}{#1}}
+
 % Sub-themes (order matters: colors first so fonts/inner/outer can refer
 % to color names; outer last so margins win over inner).
 \useinnertheme{AINITAcademic}

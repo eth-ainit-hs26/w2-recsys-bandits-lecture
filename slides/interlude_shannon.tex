@@ -3,7 +3,9 @@
 %  Pure section content. No preamble. LuaLaTeX-compatible.
 % =====================================================================
 
-\renewcommand{\AINITsection}{Interlude \textemdash{} Shannon}
+% Interlude is austere: chrome accent goes to ink, both Act accents
+% absent. The existing Shannon portrait divider below is the opener.
+\AINITinterlude
 
 % ---------------------------------------------------------------------
 % Section divider --- opens the interlude
@@ -62,8 +64,12 @@
 % ---------------------------------------------------------------------
 % Scene 16 --- Bridge into Act II
 % ---------------------------------------------------------------------
+% Quiet bridge slide. The "Act II --- Prediction" label is dropped
+% because the Laboratory plate at the top of act2_prediction.tex now
+% serves as the act opener; this slide stays purely as the synthesis
+% sentence.
 \sectiondivider%
   {\AINITemph{Recsys was compression. Bandits will be prediction.\\
   Same urns, different question.}}%
   {}%
-  {Act II \textemdash{} Prediction}
+  {}
