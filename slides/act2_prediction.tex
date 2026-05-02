@@ -684,6 +684,69 @@
   \end{itemize}
 \end{frame}
 
+% =====================================================================
+% Stage 4 --- Act III: Many customers and many items (contextual urns)
+%   Mirrors original deck slide 22, plus a bridge slide tying the
+%   contextual setup back to Act I's matrix factorisation.
+%
+%   1. Act III divider + setup    representation vectors, regression
+%   2. Two acts, one geometry     the recsys callback
+% =====================================================================
+
+% ---------------------------------------------------------------------
+% Stage 4, Slide 1 --- Act III: Many customers and many items
+% (original deck slide 22).  Contextual urns; representation vectors;
+% regression.
+% ---------------------------------------------------------------------
+\begin{frame}{Act III: Many customers and many items}
+  In a real recommender there are many customers and many items
+  --- too many urns to estimate one at a time.
+
+  \medskip
+  \begin{enumerate}
+    \setlength{\itemsep}{0.4em}
+    \item Every item gets a representation vector $z$
+          (e.g.\ from an autoencoder).
+    \item For every customer $u$, an unknown
+          representation vector $z_u$.
+    \item The urn's bias is the inner product:
+          \begin{center}
+            $p(z, z_u) \;=\; \max\big(0,\; z^\top z_u\big).$
+          \end{center}
+    \item Estimate $z_u$ for each customer via regression.
+  \end{enumerate}
+\end{frame}
+
+% ---------------------------------------------------------------------
+% Stage 4, Slide 2 --- Two acts, one geometry.  NEW.  Bridge tying
+% contextual bandits back to Act I's matrix factorisation.  This is
+% the lecture's structural payoff: the same vectors, the same inner
+% product, two different problems.
+% ---------------------------------------------------------------------
+\begin{frame}{Two acts, one geometry}
+  Look back at Act I.  Each reader had a vector $u$.
+  Each book had a vector $v$.  Preference was the inner product:
+  \begin{center}
+    $r \;=\; u \cdot v.$
+  \end{center}
+
+  \medskip
+  In Act III, each customer has a vector $z_u$.
+  Each item has a vector $z$.  The urn's bias is the same inner
+  product:
+  \begin{center}
+    $p \;=\; \max(0,\; z^\top z_u).$
+  \end{center}
+
+  \medskip
+  \begin{center}
+    \itshape\color{mutedWarmGray}
+    Same matrix factorisation, two different settings.
+    \\[1pt]
+    Compression powers prediction.
+  \end{center}
+\end{frame}
+
 % ---------------------------------------------------------------------
 % Scene 23 (a) — Setup slide for the distinguishability dial
 % ---------------------------------------------------------------------
