@@ -644,19 +644,19 @@
 \begin{frame}{Race the algorithms}
   Four strategies, the same urns, the same hidden biases:
 
-  \medskip
+  \smallskip
   \begin{itemize}
-    \setlength{\itemsep}{0.4em}
+    \setlength{\itemsep}{0.3em}
     \item Pure random \textemdash{} no learning at all.
     \item Pure greedy \textemdash{} exploit the leader from round one.
     \item $\varepsilon$-greedy \textemdash{} explore with probability $\varepsilon$.
     \item UCB \textemdash{} pick the urn with the highest upper bound.
   \end{itemize}
 
-  \medskip
-  Watch the cumulative-regret curves.  The slope is the whole story:
-  random and greedy grow regret \AINITemph{linearly};
-  $\varepsilon$-greedy and UCB grow it \AINITemph{sublinearly}.
+  \smallskip
+  Watch the cumulative regret.  Random and greedy grow it
+  \AINITemph{linearly}; $\varepsilon$-greedy and UCB grow it
+  \AINITemph{sublinearly}.
 \end{frame}
 
 % ---------------------------------------------------------------------
@@ -730,7 +730,7 @@
     $r \;=\; u \cdot v.$
   \end{center}
 
-  \medskip
+  \smallskip
   In Act III, each customer has a vector $z_u$.
   Each item has a vector $z$.  The urn's bias is the same inner
   product:
@@ -738,12 +738,10 @@
     $p \;=\; \max(0,\; z^\top z_u).$
   \end{center}
 
-  \medskip
+  \smallskip
   \begin{center}
     \itshape\color{mutedWarmGray}
     Same matrix factorisation, two different settings.
-    \\[1pt]
-    Compression powers prediction.
   \end{center}
 \end{frame}
 
