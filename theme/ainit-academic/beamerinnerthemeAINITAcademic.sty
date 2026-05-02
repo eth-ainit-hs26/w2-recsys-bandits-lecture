@@ -96,34 +96,34 @@
   \end{frame}%
 }
 
-% --- Section divider WITH portrait --------------------------------------
-% Same as \sectiondivider but with a small portrait above the quote.
+% --- Section divider WITH portrait (editorial layout) -------------------
+% Asymmetric two-column: portrait on the left, quote vertically centred
+% on the right. No frame — the photo carries itself.
+% Beamer 16:9 has paperwidth=16cm, paperheight=9cm. Content area sits
+% inside about 1cm of margin on each side.
 % #1 image filename (resolved via \graphicspath), #2 epigraph,
-% #3 attribution, #4 act-title.
+% #3 attribution, #4 act-title (may be empty).
 \newcommand{\sectiondividerwithportrait}[4]{%
   \begin{frame}[plain, noframenumbering]
     \begin{tikzpicture}[remember picture, overlay]
-      % Portrait — small, above the quote, with a thin oxblood frame.
-      \node[anchor=south,
-            inner sep=0pt] at ($(current page.center) + (0, 1.25cm)$) {%
-        \begin{tikzpicture}
-          \node[draw=accentOxblood, line width=0.4pt,
-                inner sep=0pt] {%
-            \includegraphics[width=2.4cm,keepaspectratio]{#1}%
-          };
-        \end{tikzpicture}%
+      % Portrait — left side, 5cm wide, vertically centred. Bare image,
+      % no frame: the photo carries itself at this size.
+      \node[anchor=west,
+            inner sep=0pt] at ($(current page.west) + (1.0cm, 0)$) {%
+        \includegraphics[width=5cm,keepaspectratio]{#1}%
       };
-      % Quote + attribution + act title — same layout as \sectiondivider
-      % but offset down to make room for the portrait.
-      \node[anchor=north,
-            text width=.7\paperwidth,
-            align=center,
-            inner sep=0pt] at ($(current page.center) + (0, 0.6cm)$) {%
+      % Quote + attribution + act-title — right column, vertically centred.
+      \node[anchor=west,
+            text width=9cm,
+            align=left,
+            inner sep=0pt] at ($(current page.west) + (6.4cm, 0)$) {%
         {\rmfamily\itshape\large #2\par}%
-        \vspace{1.0em}%
+        \vspace{1.2em}%
         {\rmfamily\scshape\small\color{mutedWarmGray} #3\par}%
-        \vspace{2.2em}%
-        {\rmfamily\scshape\normalsize\color{accentOxblood} #4\par}%
+        \ifstrempty{#4}{}{%
+          \vspace{1.8em}%
+          {\rmfamily\scshape\normalsize\color{accentOxblood} #4\par}%
+        }%
       };
     \end{tikzpicture}%
   \end{frame}%
