@@ -29,7 +29,7 @@
 
   \vspace{0.5em}
 
-  Three symbols. Three hundred and fifty-seven cells.
+  Three symbols. Three hundred and thirty-six cells.
 
   \vspace{0.5em}
 
@@ -40,30 +40,60 @@
 % Scene 4b --- The matrix as raw data, with a question
 % ---------------------------------------------------------------------
 \begin{frame}{Raw data}
+  % Cell drawing helpers — defined inline. v=1 (liked) → blue dot,
+  % v=-1 (disliked) → vermillion dot, v=0 (?) → small grey dot.
+  % Rows shown in a deterministic shuffle so the block-diagonal
+  % structure stays hidden until Scene 5.
+  \def\rdcell#1#2#3{%
+    \pgfmathparse{int(#3)}%
+    \ifnum\pgfmathresult=1\relax
+      \fill[color=accentPrussian] (#1*0.30,-#2*0.21) circle (1.6pt);%
+    \else
+      \ifnum\pgfmathresult=-1\relax
+        \fill[color=accentOxblood] (#1*0.30,-#2*0.21) circle (1.6pt);%
+      \else
+        \fill[mutedWarmGray!50] (#1*0.30,-#2*0.21) circle (0.5pt);%
+      \fi
+    \fi
+  }
+  \def\rdrow#1#2{%
+    \foreach \v [count=\c from 0] in {#1} {%
+      \rdcell{\c}{#2}{\v}%
+    }%
+  }
   \begin{center}
     \begin{tikzpicture}[every node/.style={inner sep=0.6pt}]
-      % miniature 21x16 grid of dots, three shades, schematic.
-      \foreach \r in {0,...,20} {
-        \foreach \c in {0,...,15} {
-          \pgfmathtruncatemacro{\h}{mod(\r*7+\c*3,11)}
-          \ifnum\h<4
-            \fill[ink!85] (\c*0.26,-\r*0.18) circle (1.3pt);
-          \else
-            \ifnum\h<7
-              \fill[mutedWarmGray] (\c*0.26,-\r*0.18) circle (0.8pt);
-            \else
-              \draw[mutedWarmGray!50] (\c*0.26,-\r*0.18) circle (1.1pt);
-            \fi
-          \fi
-        }
-      }
-      \node[font=\itshape\small,mutedWarmGray] at (2.0,0.5) {16 books $\rightarrow$};
-      \node[font=\itshape\small,mutedWarmGray,rotate=90] at (-0.7,-1.8) {$\leftarrow$ 21 readers};
+      % 21 reader-rows of the actual ratings from BOOKS_MATRIX.md,
+      % deterministically scrambled to obscure the block structure.
+      \rdrow{1,0,0,-1,-1,0,0,1,0,-1,1,1,0,-1,0,0}{0}
+      \rdrow{0,1,1,0,0,1,-1,0,-1,0,0,0,1,0,-1,-1}{1}
+      \rdrow{0,-1,-1,0,0,-1,1,0,1,0,0,0,-1,0,1,1}{2}
+      \rdrow{-1,0,0,1,1,0,0,-1,0,1,-1,-1,0,1,0,0}{3}
+      \rdrow{1,-1,-1,-1,-1,-1,1,1,1,-1,1,1,-1,-1,1,1}{4}
+      \rdrow{0,-1,-1,0,0,-1,1,0,1,0,0,0,-1,0,1,1}{5}
+      \rdrow{0,-1,-1,0,0,-1,1,0,1,0,0,0,-1,0,1,1}{6}
+      \rdrow{1,0,0,-1,-1,0,0,1,0,-1,1,1,0,-1,0,0}{7}
+      \rdrow{-1,0,0,1,1,0,0,-1,0,1,-1,-1,0,1,0,0}{8}
+      \rdrow{0,1,1,0,0,1,-1,0,-1,0,0,0,1,0,-1,-1}{9}
+      \rdrow{0,0,-1,0,0,0,1,0,0,0,0,0,-1,0,1,0}{10}
+      \rdrow{-1,0,0,1,1,0,0,-1,0,1,-1,-1,0,1,0,0}{11}
+      \rdrow{1,0,0,-1,-1,0,0,1,0,-1,1,1,0,-1,0,0}{12}
+      \rdrow{0,1,1,0,0,1,-1,0,-1,0,0,0,1,0,-1,-1}{13}
+      \rdrow{-1,0,0,1,1,0,0,-1,0,1,-1,-1,0,1,0,0}{14}
+      \rdrow{0,-1,-1,0,0,-1,1,0,1,0,0,0,-1,0,1,1}{15}
+      \rdrow{0,-1,-1,0,0,-1,1,0,1,0,0,0,-1,0,1,1}{16}
+      \rdrow{0,-1,-1,0,0,-1,1,0,1,1,0,0,-1,0,1,1}{17}
+      \rdrow{-1,-1,-1,1,1,-1,1,-1,1,1,-1,-1,-1,1,1,1}{18}
+      \rdrow{1,0,0,-1,-1,0,0,1,0,-1,1,1,0,-1,0,0}{19}
+      \rdrow{0,1,1,0,0,1,-1,0,-1,0,0,0,1,0,-1,-1}{20}
+      % Axis annotations
+      \node[font=\itshape\small,mutedWarmGray] at (2.25,0.45) {16 books $\rightarrow$};
+      \node[font=\itshape\small,mutedWarmGray,rotate=90] at (-0.6,-2.1) {$\leftarrow$ 21 readers};
     \end{tikzpicture}
   \end{center}
 
   \begin{center}
-    \itshape Three hundred and fifty-seven cells. Can your brain remember them?
+    \itshape Three hundred and thirty-six cells. Can your brain remember them?
   \end{center}
 \end{frame}
 
