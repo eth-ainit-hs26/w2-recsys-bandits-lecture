@@ -7,6 +7,200 @@
 
 \renewcommand{\AINITsection}{Act II \textemdash{} Prediction}
 
+% =====================================================================
+% Cast macros --- Esther (seller) and Alex (customer) and the three
+% colour-coded product cards.  Defined once so each slide stays clean.
+% =====================================================================
+
+\newcommand{\castSeller}[2]{%
+  % #1 = x, #2 = y.  Esther: filled head in clusterLF orange.
+  \begin{scope}[shift={(#1, #2)}]
+    \fill[clusterLF!85] (0, 0.50) circle (4.5pt);
+    \draw[ink, line width=0.9pt] (0, 0.34) -- (0, -0.20);
+    \draw[ink, line width=0.9pt] (-0.22, 0.10) -- (0.22, 0.10);
+    \draw[ink, line width=0.9pt] (-0.16, -0.55) -- (0, -0.20) -- (0.16, -0.55);
+    \node[font=\bfseries\footnotesize, color=ink, anchor=north]
+      at (0, -0.65) {Esther};
+  \end{scope}
+}
+
+\newcommand{\castCustomer}[2]{%
+  % #1 = x, #2 = y.  Alex: outlined head with light gray fill.
+  \begin{scope}[shift={(#1, #2)}]
+    \fill[mutedWarmGray!30] (0, 0.50) circle (4.5pt);
+    \draw[ink, line width=0.7pt] (0, 0.50) circle (4.5pt);
+    \draw[ink, line width=0.9pt] (0, 0.34) -- (0, -0.20);
+    \draw[ink, line width=0.9pt] (-0.22, 0.10) -- (0.22, 0.10);
+    \draw[ink, line width=0.9pt] (-0.16, -0.55) -- (0, -0.20) -- (0.16, -0.55);
+    \node[font=\bfseries\footnotesize, color=ink, anchor=north]
+      at (0, -0.65) {Alex};
+  \end{scope}
+}
+
+\newcommand{\productCard}[5]{%
+  % #1 = x, #2 = y, #3 = name (text), #4 = probability symbol (math), #5 = colour
+  \begin{scope}[shift={(#1, #2)}]
+    \fill[#5!18, rounded corners=2pt] (-1.0, -0.30) rectangle (1.0, 0.30);
+    \draw[#5, rounded corners=2pt, line width=0.5pt]
+      (-1.0, -0.30) rectangle (1.0, 0.30);
+    \node[font=\itshape\footnotesize, color=#5, anchor=west]
+      at (-0.85, 0) {#3};
+    \node[font=\footnotesize, color=#5, anchor=east]
+      at (+0.85, 0) {$#4$};
+  \end{scope}
+}
+
+% =====================================================================
+% Stage 1 --- Motivation block (5 slides; mirrors original deck 3-7).
+%   1. Three campaigns           cast, products, two questions
+%   2. Applications              clean italic list, closest-first
+%   3. Challenges                information first, cost second
+%   4. The solution: UCB         honest spoiler with a soft note
+%   5. Agenda                    three acts colour-coded by urn count
+% =====================================================================
+
+% ---------------------------------------------------------------------
+% Stage 1, Slide 1 --- Three campaigns (original deck slide 3)
+% ---------------------------------------------------------------------
+\begin{frame}{Three campaigns}
+  \begin{center}
+    {\scriptsize\itshape\color{mutedWarmGray}
+     Esther runs an online shop.  Three ad campaigns to test, one
+     customer profile, a small budget.}
+  \end{center}
+
+  \smallskip
+  \begin{center}
+    \begin{tikzpicture}[every node/.style={inner sep=1pt}]
+      \castSeller{-4}{0}
+      \castCustomer{4}{0}
+      \productCard{0}{+0.85}{Cup}{p^C}{clusterLF}
+      \productCard{0}{ 0.00}{Shirt}{p^S}{clusterDF}
+      \productCard{0}{-0.85}{Movie}{p^M}{clusterLN}
+      \draw[mutedWarmGray, ->, line width=0.4pt, >=Latex]
+        (1.05, +0.85) -- (3.6, +0.20);
+      \draw[mutedWarmGray, ->, line width=0.4pt, >=Latex]
+        (1.05,  0.00) -- (3.6,  0.00);
+      \draw[mutedWarmGray, ->, line width=0.4pt, >=Latex]
+        (1.05, -0.85) -- (3.6, -0.20);
+    \end{tikzpicture}
+  \end{center}
+
+  \smallskip
+  \begin{enumerate}\setlength{\itemsep}{0pt}
+    \item How do we estimate $p^C$, $p^S$, and $p^M$?
+    \item How do we \AINITemph{efficiently} find which is the largest?
+  \end{enumerate}
+\end{frame}
+
+% ---------------------------------------------------------------------
+% Stage 1, Slide 2 --- Applications (original deck slide 4)
+% ---------------------------------------------------------------------
+\begin{frame}{Applications}
+  Bandits show up wherever you must \emph{choose} from a menu of
+  options whose payoffs you do not know.
+
+  \medskip
+  \begin{itemize}
+    \setlength{\itemsep}{0.55em}
+    \item \AINITemph{Ad selection.}\quad
+          Which campaign converts most often?
+    \item \AINITemph{Content recommendation.}\quad
+          Which post earns the next click?
+    \item \AINITemph{Resource allocation.}\quad
+          Where does the next dollar buy the most return?
+    \item \AINITemph{Robotics.}\quad
+          Which motion succeeds most reliably?
+  \end{itemize}
+
+  \medskip
+  \begin{center}
+    \scriptsize\itshape\color{mutedWarmGray}
+    Same recipe, different names: explore, exploit, learn.
+  \end{center}
+\end{frame}
+
+% ---------------------------------------------------------------------
+% Stage 1, Slide 3 --- Challenges (original deck slide 5)
+% Information first ("nobody knows the probabilities"),
+% cost second ("ads are expensive").
+% ---------------------------------------------------------------------
+\begin{frame}{Challenges}
+  \begin{center}
+    \begin{tikzpicture}[every node/.style={inner sep=1pt}]
+      \castSeller{-4}{0}
+      \castCustomer{4}{0}
+      \productCard{0}{+0.85}{Cup}{p^C}{clusterLF}
+      \productCard{0}{ 0.00}{Shirt}{p^S}{clusterDF}
+      \productCard{0}{-0.85}{Movie}{p^M}{clusterLN}
+    \end{tikzpicture}
+  \end{center}
+
+  \smallskip
+  \begin{enumerate}\setlength{\itemsep}{0pt}
+    \item Neither Esther \AINITemph{nor Alex} knows
+          $p^C$, $p^S$, $p^M$ in advance.
+    \item Showing an ad costs Esther money --- she cannot test forever.
+  \end{enumerate}
+\end{frame}
+
+% ---------------------------------------------------------------------
+% Stage 1, Slide 4 --- The solution: UCB (original deck slide 6)
+% Honest spoiler.  Read this, don't decode it.
+% ---------------------------------------------------------------------
+\begin{frame}{The solution: UCB algorithm}
+  \begin{center}
+    \footnotesize
+    \begin{tabular}{r@{\hspace{0.6em}}l}
+      \multicolumn{2}{l}{\bfseries\textsc{Algorithm 1.\;\;Upper Confidence Bound (UCB1)}} \\[3pt]
+      \multicolumn{2}{l}{\textbf{Require:}\;\; $\alpha > 2,\;\; T \in \mathbb{N}$} \\[3pt]
+      1: & $S_{0,i} = 0,\;\; \hat\mu_{0,i} = 0,\;\; i = 1, \ldots, d$ \\
+      2: & \textbf{for}\; $t = 1$ \textbf{ to } $T$ \textbf{ do} \\
+      3: & \quad $A_t = \arg\max\limits_{i = 1, \ldots, d}
+            \Big\{\hat\mu_{t-1,i} + \sqrt{2\alpha\ln t \,/\, S_{t-1,i}}\Big\}$ \\
+      4: & \quad observe reward $g_{t, A_t}$ \\
+      5: & \quad $S_{t,i} \leftarrow S_{t-1,i} + \mathbf{1}[A_t = i]$ \\
+      6: & \quad update $\hat\mu_{t,i}
+            = \dfrac{1}{S_{t,i}} \sum_{j=1}^{t} g_{j, A_j}\,\mathbf{1}[A_j = i]$ \\[3pt]
+      7: & \textbf{end for}
+    \end{tabular}
+  \end{center}
+
+  \bigskip
+  \begin{center}
+    \scriptsize\itshape\color{mutedWarmGray}
+    Read this --- don't decode it.  The rest of Act II builds this
+    algorithm from scratch.
+  \end{center}
+
+  \begin{center}
+    \tiny\color{mutedWarmGray}
+    Auer, Cesa-Bianchi \& Fischer, \emph{Finite-time Analysis of the
+    Multiarmed Bandit Problem}, Machine Learning 47, 2002.
+  \end{center}
+\end{frame}
+
+% ---------------------------------------------------------------------
+% Stage 1, Slide 5 --- Agenda (original deck slide 7)
+% Three acts colour-coded by urn count: orange / green / blue.
+% These colours will recur on each act-divider and agenda-recap slide.
+% ---------------------------------------------------------------------
+\begin{frame}{Agenda}
+  \medskip
+  \begin{itemize}
+    \setlength{\itemsep}{1.0em}
+    \item[\textbf{\textcolor{clusterLF}{1.}}]
+          \AINITemph{Estimating one probability.} \\[1pt]
+          {\scriptsize\color{mutedWarmGray}Customers as urns.}
+    \item[\textbf{\textcolor{clusterDF}{2.}}]
+          \AINITemph{Multiple probabilities and multiple urns.} \\[1pt]
+          {\scriptsize\color{mutedWarmGray}$\varepsilon$-greedy and UCB.}
+    \item[\textbf{\textcolor{clusterDN}{3.}}]
+          \AINITemph{Many customers and items.} \\[1pt]
+          {\scriptsize\color{mutedWarmGray}Contextual urns.}
+  \end{itemize}
+\end{frame}
+
 % ---------------------------------------------------------------------
 % Scene 17 (a) — The bandit problem: three urns / three campaigns
 % ---------------------------------------------------------------------
