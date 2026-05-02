@@ -50,6 +50,29 @@
   \end{scope}
 }
 
+\newcommand{\urnIcon}[3]{%
+  % #1 = x, #2 = y, #3 = label below the urn (text or math; can be empty)
+  \begin{scope}[shift={(#1, #2)}]
+    % Body
+    \fill[mutedWarmGray!18, rounded corners=2pt]
+      (-0.30, -0.40) rectangle (0.30, 0.20);
+    \draw[ink, line width=0.6pt, rounded corners=2pt]
+      (-0.30, -0.40) rectangle (0.30, 0.20);
+    % Rim (slight overhang)
+    \fill[mutedWarmGray!28] (-0.38, 0.20) rectangle (0.38, 0.30);
+    \draw[ink, line width=0.6pt]
+      (-0.38, 0.20) -- (-0.38, 0.30) -- (0.38, 0.30) -- (0.38, 0.20);
+    % Decorative balls inside
+    \fill[clusterLF!85] (-0.13, -0.05) circle (2.5pt);
+    \draw[ink, line width=0.3pt] (0.10, -0.10) circle (2.5pt);
+    \fill[clusterLF!85] (0.05, -0.25) circle (2.5pt);
+    \draw[ink, line width=0.3pt] (-0.10, -0.30) circle (2.5pt);
+    % Label below
+    \node[font=\bfseries\footnotesize, color=ink, anchor=north]
+      at (0, -0.50) {#3};
+  \end{scope}
+}
+
 % =====================================================================
 % Stage 1 --- Motivation block (5 slides; mirrors original deck 3-7).
 %   1. Three campaigns           cast, products, two questions
@@ -201,35 +224,247 @@
   \end{itemize}
 \end{frame}
 
+% =====================================================================
+% Stage 2 --- Act I: Estimating one probability
+%   Mirrors original deck slides 8-14, plus the three-urn-casino viz
+%   moved here as the bridge into Act II.
+%
+%   1. Act I divider                  one product, one probability
+%   2. The customer is an urn         substitution: Alex -> urn
+%   3. The customer is an urn         action: drawing balls; p = w/n
+%   4. The empirical estimator        p_hat_n = (x_1 + ... + x_n)/n
+%   5. The estimator converges        law of large numbers
+%   6. Confidence intervals           shrinking 1/sqrt(n) intervals
+%   7. Three-urn casino viz           audience plays before Act II
+%   8. Agenda                         mile-marker into Act II
+% =====================================================================
+
 % ---------------------------------------------------------------------
-% Scene 17 (a) — The bandit problem: three urns / three campaigns
+% Stage 2, Slide 1 --- Act I divider (original deck slide 8)
 % ---------------------------------------------------------------------
-\begin{frame}{The bandit problem}
-  Three marketing campaigns. Three urns. Each urn hides a conversion
-  rate $\mu_i$ that you do not know.
+\begin{frame}{Act I: Estimating one probability}
+  Just one product.  Just one probability.
 
   \medskip
-
-  \begin{itemize}
-    \item Each round, you pick one urn and draw a single ball.
-    \item A white ball is a conversion; a grey ball is nothing.
-    \item Your goal: \AINITemph{maximise total conversions} over $T$ rounds.
-  \end{itemize}
-
-  \medskip
-
-  \sidenote{A show of hands: who has run an A/B test?}
-
-  Every draw is information \AINITemph{and} payoff at the same time.
-  That double role is what makes the problem interesting.
+  \begin{center}
+    \begin{tikzpicture}[every node/.style={inner sep=1pt}]
+      \castSeller{-3}{0}
+      \productCard{0}{0}{Movie}{p^M}{clusterLN}
+      \castCustomer{3}{0}
+      \draw[mutedWarmGray, ->, line width=0.4pt, >=Latex]
+        (1.05, 0) -- (2.5, 0);
+    \end{tikzpicture}
+  \end{center}
 \end{frame}
 
 % ---------------------------------------------------------------------
-% Scene 17 (b) — The empirical estimator
+% Stage 2, Slide 2 --- The customer is an urn: substitution
+% (original deck slide 9).  Alex is replaced by an urn with bias p^M.
 % ---------------------------------------------------------------------
-\equationslide{The empirical estimator}{%
-  \hat p_n \;=\; \frac{x_1 + x_2 + \ldots + x_n}{n}%
-}{Average and pick the best \textemdash{} the audience's natural instinct.}
+\begin{frame}{The customer is an urn}
+  \begin{center}
+    \begin{tikzpicture}[every node/.style={inner sep=1pt}]
+      \node[font=\scshape\scriptsize, color=mutedWarmGray, anchor=east]
+        at (-3.5, 0.7) {real};
+      \node[font=\scshape\scriptsize, color=mutedWarmGray, anchor=east]
+        at (-3.5, -1.5) {model};
+
+      % Top row: Esther + Alex
+      \castSeller{-1.5}{0.7}
+      \castCustomer{1.5}{0.7}
+      \node[font=\large] at (3.5, 0.7) {$p^M$};
+
+      % Bottom row: Esther + URN (replacing Alex)
+      \castSeller{-1.5}{-1.5}
+      \urnIcon{1.5}{-1.5}{$p^M$}
+
+      % Substitution arrow Alex -> URN
+      \draw[accentOxblood, ->, line width=0.7pt, >=Latex, dashed]
+        (1.5, 0.0) -- (1.5, -1.0);
+      \node[font=\itshape\scriptsize, color=accentOxblood, anchor=west]
+        at (1.8, -0.5) {model};
+    \end{tikzpicture}
+  \end{center}
+
+  \medskip
+  \begin{center}
+    \scriptsize\itshape\color{mutedWarmGray}
+    Alex's response distribution is the bias $p^M$.  We model him as
+    an urn whose balls are clicks and non-clicks.
+  \end{center}
+\end{frame}
+
+% ---------------------------------------------------------------------
+% Stage 2, Slide 3 --- The customer is an urn: action
+% (original deck slide 10).  Esther sends ad / draws ball; outcome is
+% the binary response.  Formula: p^M = w^M / n^M.
+% ---------------------------------------------------------------------
+\begin{frame}{The customer is an urn}
+  \begin{center}
+    \begin{tikzpicture}[every node/.style={inner sep=1pt}]
+      \node[font=\scshape\scriptsize, color=mutedWarmGray, anchor=east]
+        at (-4.5, 1.0) {real};
+      \node[font=\scshape\scriptsize, color=mutedWarmGray, anchor=east]
+        at (-4.5, -1.5) {model};
+
+      % Top row: Esther --ad--> Alex; outcome is check or cross
+      \castSeller{-3}{1.0}
+      \draw[mutedWarmGray, ->, line width=0.5pt, >=Latex]
+        (-2.2, 1.1) -- (2.2, 1.1);
+      \node[font=\itshape\footnotesize, color=mutedWarmGray, anchor=south]
+        at (0, 1.15) {sends ad};
+      \castCustomer{3}{1.0}
+      \node[anchor=west] at (3.8, 1.0)
+        {{\bfseries\color{accentPrussian}yes}\;or\;{\bfseries\color{accentOxblood}no}};
+
+      % Bottom row: Esther --draws--> URN; outcome is white or grey ball
+      \castSeller{-3}{-1.5}
+      \draw[mutedWarmGray, ->, line width=0.5pt, >=Latex]
+        (-2.2, -1.4) -- (2.2, -1.4);
+      \node[font=\itshape\footnotesize, color=mutedWarmGray, anchor=south]
+        at (0, -1.35) {draws ball};
+      \urnIcon{3}{-1.5}{$p^M$}
+      \node[anchor=west] at (3.8, -1.5)
+        {{\color{clusterLF}\large $\bullet$}\;or\;{\color{mutedWarmGray}\large $\circ$}};
+    \end{tikzpicture}
+  \end{center}
+
+  \medskip
+  \begin{center}
+    \large $p^M \;=\; \dfrac{w^M}{n^M}$
+  \end{center}
+\end{frame}
+
+% ---------------------------------------------------------------------
+% Stage 2, Slide 4 --- The empirical estimator (original deck slide 11)
+% Replaces the previous \equationslide version with one that shows the
+% urn, the n draws, and the estimator formula together.
+% ---------------------------------------------------------------------
+\begin{frame}{The empirical estimator}
+  \begin{center}
+    \begin{tikzpicture}[every node/.style={inner sep=1pt}]
+      \urnIcon{-2.5}{0}{$p^M$}
+
+      \draw[mutedWarmGray, ->, line width=0.4pt, >=Latex] (-1.9, 0.4) -- (1.5, 0.7);
+      \node[font=\footnotesize] at (1.85, 0.7) {$x_1$};
+      \draw[mutedWarmGray, ->, line width=0.4pt, >=Latex] (-1.9, 0.1) -- (1.5, 0.2);
+      \node[font=\footnotesize] at (1.85, 0.2) {$x_2$};
+      \node[font=\footnotesize, color=mutedWarmGray] at (-0.2, -0.3) {$\vdots$};
+      \draw[mutedWarmGray, ->, line width=0.4pt, >=Latex] (-1.9, -0.2) -- (1.5, -0.7);
+      \node[font=\footnotesize] at (1.85, -0.7) {$x_n$};
+
+      \castCustomer{3.5}{0}
+    \end{tikzpicture}
+  \end{center}
+
+  \medskip
+  \begin{center}
+    {\scriptsize\itshape\color{mutedWarmGray}
+     ($x_i = 1$ if conversion, $0$ otherwise.)}
+  \end{center}
+
+  \medskip
+  \begin{center}
+    \large $\hat p_n^M \;=\; \bar x_n \;=\; \dfrac{x_1 + x_2 + \cdots + x_n}{n}$
+  \end{center}
+\end{frame}
+
+% ---------------------------------------------------------------------
+% Stage 2, Slide 5 --- The estimator converges (original deck slide 12).
+% Law of large numbers, formal statement.
+% ---------------------------------------------------------------------
+\begin{frame}{The empirical estimator converges}
+  As $n$ grows, $\hat p_n^M$ gets closer and closer to $p^M$
+  with high probability.
+
+  \bigskip
+  \begin{center}
+    \Large $\hat p_n^M \;\xrightarrow[n \to \infty]{\mathbb{P}}\; p^M$
+  \end{center}
+
+  \bigskip
+  Formally, for any $\delta, \epsilon > 0$, there is $N \in \mathbb{N}$
+  such that
+  \begin{center}
+    $\mathbb{P}\big(|\hat p_n^M - p^M| > \delta\big) < \epsilon$
+    \;\;for $n \geq N$.
+  \end{center}
+
+  \medskip
+  \begin{center}
+    \itshape\color{mutedWarmGray}
+    This is an instance of \AINITemph{the law of large numbers}.
+  \end{center}
+\end{frame}
+
+% ---------------------------------------------------------------------
+% Stage 2, Slide 6 --- Confidence intervals (original deck slide 13).
+% Same urn at three sample sizes; intervals shrink like 1/sqrt(n).
+% ---------------------------------------------------------------------
+\begin{frame}{Confidence intervals}
+  \begin{columns}[T,onlytextwidth]
+    \column{0.40\textwidth}
+    Estimating from few balls is risky.
+
+    \medskip
+    Better: an \AINITemph{interval} instead of a point estimate.
+
+    \medskip
+    A simple choice:
+    \begin{center}
+      $\Big(\hat p_n - \tfrac{1}{\sqrt n},\;\hat p_n + \tfrac{1}{\sqrt n}\Big)$
+    \end{center}
+
+    \column{0.58\textwidth}
+    \footnotesize
+    \begin{center}
+      \begin{tabular}{l@{\hspace{0.8em}}l}
+        \itshape sample & \itshape interval \\[2pt]
+        \hline\\[-7pt]
+        $n = 5,\;\;\hat p = \tfrac{2}{5}$
+          & $\big(\tfrac{2}{5} - \tfrac{1}{\sqrt 5},\; \tfrac{2}{5} + \tfrac{1}{\sqrt 5}\big)$ \\[5pt]
+        $n = 50,\;\;\hat p = \tfrac{12}{50}$
+          & $\big(\tfrac{12}{50} - \tfrac{1}{\sqrt{50}},\; \tfrac{12}{50} + \tfrac{1}{\sqrt{50}}\big)$ \\[5pt]
+        $n = 500,\;\;\hat p = \tfrac{124}{500}$
+          & $\big(\tfrac{124}{500} - \tfrac{1}{\sqrt{500}},\; \tfrac{124}{500} + \tfrac{1}{\sqrt{500}}\big)$ \\
+      \end{tabular}
+    \end{center}
+  \end{columns}
+
+  \medskip
+  \begin{center}
+    \scriptsize\itshape\color{mutedWarmGray}
+    Same urn, different sample sizes.  As $n$ grows, the interval
+    shrinks like $1/\sqrt{n}$.
+  \end{center}
+\end{frame}
+
+% ---------------------------------------------------------------------
+% Stage 2, Slide 7 --- Three-urn casino viz handoff (moved up from
+% original Scene 20).  Audience plays with multiple urns just before
+% the formal Act II setup.
+% ---------------------------------------------------------------------
+\vizhandoff{three-urn-casino.html}
+
+% ---------------------------------------------------------------------
+% Stage 2, Slide 8 --- Agenda recap (original deck slide 14).
+% Same colour-coding as Stage 1 slide 5; serves as mile-marker into Act II.
+% ---------------------------------------------------------------------
+\begin{frame}{Agenda}
+  \medskip
+  \begin{itemize}
+    \setlength{\itemsep}{1.0em}
+    \item[\textbf{\textcolor{clusterLF}{1.}}]
+          \AINITemph{Estimating one probability.} \\[1pt]
+          {\scriptsize\color{mutedWarmGray}Customers as urns.}
+    \item[\textbf{\textcolor{clusterDF}{2.}}]
+          \AINITemph{Multiple probabilities and multiple urns.} \\[1pt]
+          {\scriptsize\color{mutedWarmGray}$\varepsilon$-greedy and UCB.}
+    \item[\textbf{\textcolor{clusterDN}{3.}}]
+          \AINITemph{Many customers and items.} \\[1pt]
+          {\scriptsize\color{mutedWarmGray}Contextual urns.}
+  \end{itemize}
+\end{frame}
 
 % ---------------------------------------------------------------------
 % Scene 18 — Explore vs exploit
@@ -278,9 +513,9 @@
 \end{frame}
 
 % ---------------------------------------------------------------------
-% Scene 20 — Three-Urn Casino (viz handoff)
+% Scene 20 — three-urn-casino viz handoff has moved to Stage 2 (Act I)
+% as the bridge before Act II.  Removed from here to avoid duplication.
 % ---------------------------------------------------------------------
-\vizhandoff{three-urn-casino.html}
 
 % ---------------------------------------------------------------------
 % Scene 21 — Epsilon-greedy
