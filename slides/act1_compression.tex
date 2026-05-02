@@ -1075,12 +1075,64 @@
 \end{frame}
 
 % ---------------------------------------------------------------------
-% Scene 8 --- Dot product equation (recap, kept)
-% Sits between the two concrete examples and the matrix-product reveal.
+% Scene 8 --- The match score has a name.
+% Lands as a *renaming* of what the audience has just been doing,
+% not as a new artefact.  Drops the hat and the transpose; keeps
+% one concrete worked line so the abstract formula is anchored.
 % ---------------------------------------------------------------------
-\equationslide{Preference is a dot product}%
-  {\hat r_{ui} = u_i^\top v_j}%
-  {What we have been calling the \emph{match score} has a name: the \emph{dot product}.  Multiply on each axis, add the products.  Two axes today; thousands of axes in a real recommender.  Same recipe.}
+\begin{frame}{Preference is a dot product}
+  The \emph{match score} we have been computing has a name:
+  the \AINITemph{dot product}.
+
+  \bigskip
+  \begin{center}
+    \Large $r \;=\; u \,\cdot\, v$
+  \end{center}
+
+  \medskip
+  \begin{center}
+    \itshape\color{mutedWarmGray}
+    Multiply on each axis.  Add the products.
+  \end{center}
+
+  \bigskip
+  \begin{center}
+    \footnotesize
+    For Alice meeting Russell:\quad
+    $u_{\text{Alice}} \cdot v_{\text{Russell}}
+       \;=\; (-1)(+1) + (-1)(+1) \;=\; -2.$
+  \end{center}
+\end{frame}
+
+% ---------------------------------------------------------------------
+% Scene 8a --- The recipe scales.  The formula keeps its shape in
+% any number of dimensions.  Shows the same formula at 2, 50, 200
+% axes, then in general k.
+% ---------------------------------------------------------------------
+\begin{frame}{Two axes here, thousands in the wild}
+  This lecture lives in 2 axes.  Real recommenders live in tens to
+  thousands.  The formula does not change.
+
+  \bigskip
+  \begin{center}
+    \begin{tabular}{r@{\hspace{1.6em}}l}
+      \itshape\color{mutedWarmGray} 2 axes (today)
+        & $u \cdot v \;=\; u_1 v_1 + u_2 v_2$ \\[8pt]
+      \itshape\color{mutedWarmGray} 50 axes (a movie recommender)
+        & $u \cdot v \;=\; u_1 v_1 + u_2 v_2 + \cdots + u_{50}\, v_{50}$ \\[8pt]
+      \itshape\color{mutedWarmGray} 768 axes (word embeddings)
+        & $u \cdot v \;=\; u_1 v_1 + \cdots + u_{768}\, v_{768}$ \\[8pt]
+      \itshape\color{mutedWarmGray} $k$ axes (general)
+        & $u \cdot v \;=\; u_1 v_1 + u_2 v_2 + \cdots + u_k\, v_k$
+    \end{tabular}
+  \end{center}
+
+  \bigskip
+  \begin{center}
+    \scriptsize\itshape\color{mutedWarmGray}
+    More axes, more terms.  Same recipe: multiply on each axis, add.
+  \end{center}
+\end{frame}
 
 % ---------------------------------------------------------------------
 % Scene 8b --- Stack and multiply (schematic)
