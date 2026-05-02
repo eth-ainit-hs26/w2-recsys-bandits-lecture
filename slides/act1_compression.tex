@@ -37,22 +37,55 @@
 \end{frame}
 
 % ---------------------------------------------------------------------
-% Scene 4b --- The matrix as raw data, with a question
+% Scene 4a-bis --- Introduce the sixteen books with full titles and
+% the short labels we will use throughout the lecture.
+% ---------------------------------------------------------------------
+\begin{frame}{Sixteen books}
+  \begin{center}
+    \scriptsize
+    Throughout the lecture each book is referred to by its
+    \AINITemph{short label} (right column).
+    \vspace{0.6em}
+
+    \renewcommand{\arraystretch}{0.95}%
+    \begin{tabular}{@{}l@{\hspace{0.8em}}l@{\hspace{0.8em}}l@{}}
+      \emph{The Wealth of Nations}                       & \textcolor{mutedWarmGray}{Adam Smith, 1776}        & \AINITemph{Smith}          \\
+      \emph{Critique of Pure Reason}                     & \textcolor{mutedWarmGray}{Immanuel Kant, 1781}     & \AINITemph{Kant}           \\
+      \emph{On the Origin of Species}                    & \textcolor{mutedWarmGray}{Charles Darwin, 1859}    & \AINITemph{Darwin}         \\
+      \emph{War and Peace}                               & \textcolor{mutedWarmGray}{Leo Tolstoy, 1869}       & \AINITemph{War \& Peace}   \\
+      \emph{Ulysses}                                     & \textcolor{mutedWarmGray}{James Joyce, 1922}       & \AINITemph{Ulysses}        \\
+      \emph{To the Lighthouse}                           & \textcolor{mutedWarmGray}{Virginia Woolf, 1927}    & \AINITemph{Lighthouse}     \\
+      \emph{The Joy of Cooking}                          & \textcolor{mutedWarmGray}{Irma Rombauer, 1931}     & \AINITemph{Joy of Cooking} \\
+      \emph{Murder on the Orient Express}                & \textcolor{mutedWarmGray}{Agatha Christie, 1934}   & \AINITemph{Christie}       \\
+      \emph{Ficciones}                                   & \textcolor{mutedWarmGray}{Jorge Luis Borges, 1944} & \AINITemph{Borges}         \\
+      \emph{A History of Western Philosophy}             & \textcolor{mutedWarmGray}{Bertrand Russell, 1945}  & \AINITemph{Russell}        \\
+      \emph{The 7 Habits of Highly Effective People}     & \textcolor{mutedWarmGray}{Stephen Covey, 1989}     & \AINITemph{7 Habits}       \\
+      \emph{Harry Potter and the Philosopher's Stone}    & \textcolor{mutedWarmGray}{J.~K.~Rowling, 1997}     & \AINITemph{Potter}         \\
+      \emph{The Da Vinci Code}                           & \textcolor{mutedWarmGray}{Dan Brown, 2003}         & \AINITemph{Da Vinci Code}  \\
+      \emph{Eat, Pray, Love}                             & \textcolor{mutedWarmGray}{Elizabeth Gilbert, 2006} & \AINITemph{Eat Pray Love}  \\
+      \emph{The Hunger Games}                            & \textcolor{mutedWarmGray}{Suzanne Collins, 2008}   & \AINITemph{Hunger Games}   \\
+      \emph{Lonely Planet: Switzerland}                  & \textcolor{mutedWarmGray}{travel guide, 2024}      & \AINITemph{Switzerland}    \\
+    \end{tabular}
+  \end{center}
+\end{frame}
+
+% ---------------------------------------------------------------------
+% Scene 4b --- The matrix as raw data, now with reader names on the
+% left and book abbreviations on top.  The audience can finally point
+% at a specific cell and ask "what does Alice think of Borges?"
+% Rows are still shuffled so the block-diagonal structure stays
+% hidden until the puzzle viz at Scene 5.
 % ---------------------------------------------------------------------
 \begin{frame}{Raw data}
-  % Cell drawing helpers — defined inline. v=1 (liked) → blue dot,
-  % v=-1 (disliked) → vermillion dot, v=0 (?) → small grey dot.
-  % Rows shown in a deterministic shuffle so the block-diagonal
-  % structure stays hidden until Scene 5.
   \def\rdcell#1#2#3{%
     \pgfmathparse{int(#3)}%
     \ifnum\pgfmathresult=1\relax
-      \fill[color=accentPrussian] (#1*0.30,-#2*0.21) circle (1.6pt);%
+      \fill[color=accentPrussian] (#1*0.36+0.18,-#2*0.18-0.09) circle (1.6pt);%
     \else
       \ifnum\pgfmathresult=-1\relax
-        \fill[color=accentOxblood] (#1*0.30,-#2*0.21) circle (1.6pt);%
+        \fill[color=accentOxblood] (#1*0.36+0.18,-#2*0.18-0.09) circle (1.6pt);%
       \else
-        \fill[mutedWarmGray!50] (#1*0.30,-#2*0.21) circle (0.5pt);%
+        \fill[mutedWarmGray!50] (#1*0.36+0.18,-#2*0.18-0.09) circle (0.5pt);%
       \fi
     \fi
   }
@@ -62,38 +95,58 @@
     }%
   }
   \begin{center}
-    \begin{tikzpicture}[every node/.style={inner sep=0.6pt}]
-      % 21 reader-rows of the actual ratings from BOOKS_MATRIX.md,
-      % deterministically scrambled to obscure the block structure.
-      \rdrow{1,0,0,-1,-1,0,0,1,0,-1,1,1,0,-1,0,0}{0}
-      \rdrow{0,1,1,0,0,1,-1,0,-1,0,0,0,1,0,-1,-1}{1}
-      \rdrow{0,-1,-1,0,0,-1,1,0,1,0,0,0,-1,0,1,1}{2}
-      \rdrow{-1,0,0,1,1,0,0,-1,0,1,-1,-1,0,1,0,0}{3}
-      \rdrow{1,-1,-1,-1,-1,-1,1,1,1,-1,1,1,-1,-1,1,1}{4}
-      \rdrow{0,-1,-1,0,0,-1,1,0,1,0,0,0,-1,0,1,1}{5}
-      \rdrow{0,-1,-1,0,0,-1,1,0,1,0,0,0,-1,0,1,1}{6}
-      \rdrow{1,0,0,-1,-1,0,0,1,0,-1,1,1,0,-1,0,0}{7}
-      \rdrow{-1,0,0,1,1,0,0,-1,0,1,-1,-1,0,1,0,0}{8}
-      \rdrow{0,1,1,0,0,1,-1,0,-1,0,0,0,1,0,-1,-1}{9}
-      \rdrow{0,0,-1,0,0,0,1,0,0,0,0,0,-1,0,1,0}{10}
-      \rdrow{-1,0,0,1,1,0,0,-1,0,1,-1,-1,0,1,0,0}{11}
-      \rdrow{1,0,0,-1,-1,0,0,1,0,-1,1,1,0,-1,0,0}{12}
-      \rdrow{0,1,1,0,0,1,-1,0,-1,0,0,0,1,0,-1,-1}{13}
-      \rdrow{-1,0,0,1,1,0,0,-1,0,1,-1,-1,0,1,0,0}{14}
-      \rdrow{0,-1,-1,0,0,-1,1,0,1,0,0,0,-1,0,1,1}{15}
-      \rdrow{0,-1,-1,0,0,-1,1,0,1,0,0,0,-1,0,1,1}{16}
-      \rdrow{0,-1,-1,0,0,-1,1,0,1,1,0,0,-1,0,1,1}{17}
-      \rdrow{-1,-1,-1,1,1,-1,1,-1,1,1,-1,-1,-1,1,1,1}{18}
-      \rdrow{1,0,0,-1,-1,0,0,1,0,-1,1,1,0,-1,0,0}{19}
-      \rdrow{0,1,1,0,0,1,-1,0,-1,0,0,0,1,0,-1,-1}{20}
-      % Axis annotations
-      \node[font=\itshape\small,mutedWarmGray] at (2.25,0.45) {16 books $\rightarrow$};
-      \node[font=\itshape\small,mutedWarmGray,rotate=90] at (-0.6,-2.1) {$\leftarrow$ 21 readers};
+    \begin{tikzpicture}[every node/.style={inner sep=0.4pt}]
+      % Book abbreviations on top, vertical
+      \foreach \book [count=\c from 0] in {%
+        {Ulysses}, {Smith}, {Kant}, {Joy of Cooking},
+        {Eat Pray Love}, {Darwin}, {Potter}, {War \& Peace},
+        {Christie}, {Switzerland}, {Lighthouse}, {Borges},
+        {Russell}, {7 Habits}, {Hunger Games}, {Da Vinci Code}%
+      }{%
+        \node[rotate=90, anchor=west, font=\tiny\itshape, color=mutedWarmGray]
+          at (\c*0.36+0.18, 0.06) {\book};
+      }
+      % Reader names on the left
+      \foreach \name [count=\r from 0] in {%
+        {Eleni}, {Maya}, {Alice}, {Iris}, {Quinn},
+        {Ben}, {Clara}, {Felix}, {Jonas}, {Nico},
+        {Samir}, {Karin}, {Greta}, {Oksana}, {Liam},
+        {David}, {Tessa}, {Ursula}, {Rosa}, {Hugo}, {Petros}%
+      }{%
+        \node[anchor=east, font=\tiny\itshape, color=mutedWarmGray]
+          at (-0.05, -\r*0.18-0.09) {\name};
+      }
+      % 21 reader-rows of the actual ratings, deterministically
+      % scrambled.  Ursula's anomalous like (row 17) sits on slide
+      % position 11 (= Borges) so the canonical anomaly survives the
+      % shuffle and reappears on Scene 5b.
+      \rdrow{1,0,0,-1,-1,0,0,1,0,-1,1,1,0,-1,0,0}{0}      % Eleni  (A2)
+      \rdrow{0,1,1,0,0,1,-1,0,-1,0,0,0,1,0,-1,-1}{1}      % Maya   (A4)
+      \rdrow{0,-1,-1,0,0,-1,1,0,1,0,0,0,-1,0,1,1}{2}      % Alice  (A1)
+      \rdrow{-1,0,0,1,1,0,0,-1,0,1,-1,-1,0,1,0,0}{3}      % Iris   (A3)
+      \rdrow{1,-1,-1,-1,-1,-1,1,1,1,-1,1,1,-1,-1,1,1}{4}  % Quinn
+      \rdrow{0,-1,-1,0,0,-1,1,0,1,0,0,0,-1,0,1,1}{5}      % Ben    (A1)
+      \rdrow{0,-1,-1,0,0,-1,1,0,1,0,0,0,-1,0,1,1}{6}      % Clara  (A1)
+      \rdrow{1,0,0,-1,-1,0,0,1,0,-1,1,1,0,-1,0,0}{7}      % Felix  (A2)
+      \rdrow{-1,0,0,1,1,0,0,-1,0,1,-1,-1,0,1,0,0}{8}      % Jonas  (A3)
+      \rdrow{0,1,1,0,0,1,-1,0,-1,0,0,0,1,0,-1,-1}{9}      % Nico   (A4)
+      \rdrow{0,0,-1,0,0,0,1,0,0,0,0,0,-1,0,1,0}{10}       % Samir
+      \rdrow{-1,0,0,1,1,0,0,-1,0,1,-1,-1,0,1,0,0}{11}     % Karin  (A3)
+      \rdrow{1,0,0,-1,-1,0,0,1,0,-1,1,1,0,-1,0,0}{12}     % Greta  (A2)
+      \rdrow{0,1,1,0,0,1,-1,0,-1,0,0,0,1,0,-1,-1}{13}     % Oksana (A4)
+      \rdrow{-1,0,0,1,1,0,0,-1,0,1,-1,-1,0,1,0,0}{14}     % Liam   (A3)
+      \rdrow{0,-1,-1,0,0,-1,1,0,1,0,0,0,-1,0,1,1}{15}     % David  (A1)
+      \rdrow{0,-1,-1,0,0,-1,1,0,1,0,0,0,-1,0,1,1}{16}     % Tessa  (A1 clone)
+      \rdrow{0,-1,-1,0,0,-1,1,0,1,0,0,1,-1,0,1,1}{17}     % Ursula (A1 + Borges anomaly)
+      \rdrow{-1,-1,-1,1,1,-1,1,-1,1,1,-1,-1,-1,1,1,1}{18} % Rosa
+      \rdrow{1,0,0,-1,-1,0,0,1,0,-1,1,1,0,-1,0,0}{19}     % Hugo   (A2)
+      \rdrow{0,1,1,0,0,1,-1,0,-1,0,0,0,1,0,-1,-1}{20}     % Petros (A4)
     \end{tikzpicture}
   \end{center}
 
   \begin{center}
-    \itshape Three hundred and thirty-six cells. Can your brain remember them?
+    \scriptsize\itshape\color{mutedWarmGray}
+    Three hundred and thirty-six cells.  Can your brain remember them?
   \end{center}
 \end{frame}
 
@@ -357,57 +410,23 @@
 \end{frame}
 
 % ---------------------------------------------------------------------
-% Scene 5f --- The geometry was always there.  A tiny three-icon
-% sparkline at the top traces the journey: block-diagonal matrix ->
-% four piles -> four corners.  (Was Scene 6a.)
+% Scene 5f --- The geometry was always there.  (Was Scene 6a.)
 % ---------------------------------------------------------------------
 \begin{frame}{The geometry was always there}
   \sidenote{Both axes are old library science: Dewey decimal (1876)
             gives Fiction vs.\ Nonfiction; Flesch (1948) and Lexile (1989)
             give Light vs.\ Demanding.}
-  \begin{center}
-    \begin{tikzpicture}[scale=0.7, every node/.style={inner sep=0pt}]
-      % Icon 1: block-diagonal mini matrix
-      \fill[clusterLF] (0.00, 1.20) rectangle (0.40, 1.60);
-      \fill[clusterDF] (0.40, 0.80) rectangle (0.80, 1.20);
-      \fill[clusterLN] (0.80, 0.40) rectangle (1.20, 0.80);
-      \fill[clusterDN] (1.20, 0.00) rectangle (1.60, 0.40);
-      \draw[mutedWarmGray, line width=0.3pt] (0,0) rectangle (1.6,1.6);
-
-      % Arrow 1
-      \draw[mutedWarmGray, ->, line width=0.4pt, >=Latex]
-        (1.85, 0.8) -- (2.35, 0.8);
-
-      % Icon 2: four piles (vertical bars)
-      \fill[clusterLF] (2.60, 0.00) rectangle (2.90, 1.60);
-      \fill[clusterDF] (3.00, 0.00) rectangle (3.30, 1.60);
-      \fill[clusterLN] (3.40, 0.00) rectangle (3.70, 1.60);
-      \fill[clusterDN] (3.80, 0.00) rectangle (4.10, 1.60);
-
-      % Arrow 2
-      \draw[mutedWarmGray, ->, line width=0.4pt, >=Latex]
-        (4.35, 0.8) -- (4.85, 0.8);
-
-      % Icon 3: four corners (tiny scatter)
-      \draw[mutedWarmGray, line width=0.3pt] (5.10, 0.80) -- (6.70, 0.80);
-      \draw[mutedWarmGray, line width=0.3pt] (5.90, 0.00) -- (5.90, 1.60);
-      \fill[clusterDF] (5.40, 1.30) circle (3pt);
-      \fill[clusterDN] (6.40, 1.30) circle (3pt);
-      \fill[clusterLF] (5.40, 0.30) circle (3pt);
-      \fill[clusterLN] (6.40, 0.30) circle (3pt);
-    \end{tikzpicture}
-  \end{center}
-
-  \vspace{0.4em}
-
   Two binary distinctions, four corners.  This is how librarians and
   educators have sorted books for a century.
 
-  \vspace{0.6em}
+  \vspace{0.8em}
 
   We did not impose these axes.  We \AINITemph{recovered} them ---
-  from a matrix of likes and dislikes alone.  The books told us their
-  geometry, and we listened.
+  from a matrix of likes and dislikes alone.
+
+  \vspace{0.4em}
+
+  The books told us their geometry, and we listened.
 \end{frame}
 
 % ---------------------------------------------------------------------
