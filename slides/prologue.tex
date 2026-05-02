@@ -20,6 +20,85 @@
   {}%
 
 % ---------------------------------------------------------------------------
+% Scene 2b --- Bridge from Week 1: the transformer's two halves
+% Recall the encoder/decoder summary from w1_2_llm.pdf, slide 4 (Ge'ez games).
+% Left column: short prose. Right column: minimal TikZ block diagram.
+% ---------------------------------------------------------------------------
+\begin{frame}{Last week, in language}
+  \begin{columns}[T]
+    \column{0.62\textwidth}
+    \vspace{0.3em}
+    You met the transformer. The summary we landed on:
+
+    \medskip
+
+    \emph{An LLM \(\approx\) encoder (builds meaning) \(+\) decoder
+    (continues the sentence).}
+
+    \medskip
+
+    The \AINITemph{encoder} reads a prefix and produces an
+    \AINITemph{embedding} \textemdash{} a vector summarising what the
+    prefix says. The \AINITemph{decoder} takes that vector and writes a
+    probability distribution over the next token.
+
+    \column{0.34\textwidth}
+    \vspace{0.5em}
+    \centering
+    \begin{tikzpicture}[
+      node distance=0.3cm,
+      data/.style={
+        font=\itshape\footnotesize, color=mutedWarmGray,
+        align=center, inner sep=2pt
+      },
+      block/.style={
+        rectangle, rounded corners=1.5pt,
+        draw=accentOxblood, line width=0.5pt,
+        minimum height=0.7cm, minimum width=1.8cm,
+        fill=bgCream, align=center,
+        font=\itshape\small
+      },
+      ar/.style={->, line width=0.5pt, color=accentOxblood, >=Latex}
+    ]
+      \node[data] (prefix) {prefix};
+      \node[block, below=of prefix] (enc) {encoder};
+      \node[data, below=of enc] (vec) {embedding\\(vector)};
+      \node[block, below=of vec] (dec) {decoder};
+      \node[data, below=of dec] (probs) {probabilities\\over next token};
+      \draw[ar] (prefix) -- (enc);
+      \draw[ar] (enc) -- (vec);
+      \draw[ar] (vec) -- (dec);
+      \draw[ar] (dec) -- (probs);
+    \end{tikzpicture}
+  \end{columns}
+\end{frame}
+
+% ---------------------------------------------------------------------------
+% Scene 2c --- Reframe: encoder = compression, decoder = prediction
+% ---------------------------------------------------------------------------
+\begin{frame}{Two halves of one machine}
+  The encoder and decoder have older names.
+
+  \medskip
+  \begin{itemize}
+    \setlength{\itemsep}{0.5em}
+    \item Encoder \(\approx\) \AINITemph{compression}.
+          A long sequence becomes a short vector.
+    \item Decoder \(\approx\) \AINITemph{prediction}.
+          The vector becomes a bet about what comes next.
+  \end{itemize}
+
+  \medskip
+  For ninety minutes today we will do each half explicitly \textemdash{}
+  but for data that isn't language. \AINITemph{Customers, not words.
+  Campaigns, not tokens.}
+
+  \medskip
+  This framework is older than the transformer. It is from a 1948 paper
+  by Shannon.
+\end{frame}
+
+% ---------------------------------------------------------------------------
 % Scene 3 --- Thesis paragraph
 % Standard content slide, left-aligned, no bullets.
 % ---------------------------------------------------------------------------
