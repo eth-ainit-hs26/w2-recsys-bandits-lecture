@@ -38,9 +38,9 @@
     \medskip
 
     The \AINITemph{encoder} reads a prefix and produces an
-    \AINITemph{embedding} \textemdash{} a vector summarising what the
-    prefix says. The \AINITemph{decoder} takes that vector and writes a
-    probability distribution over the next token.
+    \AINITemph{embedding}: a vector summarising what the prefix says.
+    The \AINITemph{decoder} takes that vector and produces from it
+    the corresponding row in the probability table.
 
     \column{0.34\textwidth}
     \vspace{0.5em}
@@ -89,13 +89,8 @@
   \end{itemize}
 
   \medskip
-  For ninety minutes today we will do each half explicitly \textemdash{}
-  but for data that isn't language. \AINITemph{Customers, not words.
-  Campaigns, not tokens.}
-
-  \medskip
-  This framework is older than the transformer. It is from a 1948 paper
-  by Shannon.
+  This framework is the core of many modern machine learning
+  technologies, and originates from a 1948 paper by Shannon.
 \end{frame}
 
 % ---------------------------------------------------------------------------
@@ -104,9 +99,8 @@
 % ---------------------------------------------------------------------------
 \begin{frame}{The promise}
   Machine learning is the engineering of two old theorems.
-  \AINITemph{Compression} \textemdash{} the shortest faithful description of
-  the past \textemdash{} and \AINITemph{prediction} \textemdash{} the best
-  bet about the future \textemdash{} are two views of the same subject,
-  governed by Shannon's 1948 theorems. We will build them in two halves and
-  collapse them in the third.
+  \AINITemph{Compression}, the shortest faithful description of
+  the past, and \AINITemph{prediction}, the best bet about the future,
+  are two views of the same subject, governed by Shannon's 1948 theorems.
+  We will build them in two halves and collapse them in the third.
 \end{frame}

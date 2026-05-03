@@ -15,21 +15,13 @@
 % Scene 4a --- The data
 % ---------------------------------------------------------------------
 \begin{frame}{The data: 21 readers, 16 books}
-  A small public library has kept a quiet record.
+  A small public library has kept track of 21 readers and 16 books.
+  Each cell records whether the reader liked the book, disliked it,
+  or has not yet read it.
 
   \vspace{0.5em}
 
-  For each of \AINITemph{21 anonymous readers} and each of \AINITemph{16 books},
-  one cell records whether the reader liked the book, disliked it, or
-  has not yet read it.
-
-  \vspace{0.5em}
-
-  Three symbols. Three hundred and thirty-six cells.
-
-  \vspace{0.5em}
-
-  No names, no genres, no author photographs --- only the matrix.
+  We want to extract insights from this matrix.
 \end{frame}
 
 % ---------------------------------------------------------------------
@@ -38,13 +30,15 @@
 % ---------------------------------------------------------------------
 \begin{frame}{Sixteen books}
   \begin{center}
-    \scriptsize
-    Throughout the lecture each book is referred to by its
-    \AINITemph{short label} (right column).
-    \vspace{0.6em}
-
-    \renewcommand{\arraystretch}{0.95}%
-    \begin{tabular}{@{}l@{\hspace{0.8em}}l@{\hspace{0.8em}}l@{}}
+    \tiny
+    Each book is referred to by its \AINITemph{short label}
+    (right column).
+  \end{center}
+  \vspace{-0.2em}
+  \begin{center}
+    \tiny
+    \renewcommand{\arraystretch}{0.85}%
+    \begin{tabular}{@{}l@{\hspace{0.7em}}l@{\hspace{0.7em}}l@{}}
       \emph{The Wealth of Nations}                       & \textcolor{mutedWarmGray}{Adam Smith, 1776}        & \AINITemph{Smith}          \\
       \emph{Critique of Pure Reason}                     & \textcolor{mutedWarmGray}{Immanuel Kant, 1781}     & \AINITemph{Kant}           \\
       \emph{On the Origin of Species}                    & \textcolor{mutedWarmGray}{Charles Darwin, 1859}    & \AINITemph{Darwin}         \\
@@ -149,7 +143,7 @@
 % ---------------------------------------------------------------------
 % Scene 5 --- Block-diagonal puzzle (interactive)
 % ---------------------------------------------------------------------
-\vizhandoff{01\_block-diagonal-puzzle.html}
+\vizhandoff{Block-diagonal puzzle}
 
 % =====================================================================
 % Scenes 5b -- 5f: gradual reveal from the scrambled matrix to the
@@ -271,7 +265,7 @@
 
   \begin{center}
     \scriptsize\itshape\color{mutedWarmGray}
-    Sort the rows, sort the columns --- four piles of books fall out.
+    Sort the rows, sort the columns, and four piles of books fall out.
   \end{center}
 \end{frame}
 
@@ -358,7 +352,7 @@
 
   \medskip
   Sixteen books collapse to \AINITemph{two stacks}.  Yet each stack
-  carries \emph{two colours} --- one axis is not enough.
+  carries \emph{two colours}, so one axis is not enough.
 \end{frame}
 
 % ---------------------------------------------------------------------
@@ -409,26 +403,18 @@
 % Scene 5f --- The geometry was always there.  (Was Scene 6a.)
 % ---------------------------------------------------------------------
 \begin{frame}{The geometry was always there}
-  \sidenote{Both axes are old library science: Dewey decimal (1876)
-            gives Fiction vs.\ Nonfiction; Flesch (1948) and Lexile (1989)
-            give Light vs.\ Demanding.}
-  Two binary distinctions, four corners.  This is how librarians and
-  educators have sorted books for a century.
+  Two binary distinctions, four corners.
 
   \vspace{0.8em}
 
-  We did not impose these axes.  We \AINITemph{recovered} them ---
-  from a matrix of likes and dislikes alone.
-
-  \vspace{0.4em}
-
-  The books told us their geometry, and we listened.
+  We did not impose these axes.  We inferred them from a matrix of
+  likes and dislikes alone.
 \end{frame}
 
 % ---------------------------------------------------------------------
 % Scene 7 --- Latent axes lab (interactive)
 % ---------------------------------------------------------------------
-\vizhandoff{02\_latent-axes-lab.html}
+\vizhandoff{Latent-axes lab}
 
 % =====================================================================
 % Gradual transition from "books in a plane" to "matrix factorization".
@@ -640,7 +626,7 @@
 % Sets up the partial-overlap that lands on Phase 3c.
 % ---------------------------------------------------------------------
 \begin{frame}{Same trick: Alice vs Ulysses}
-  And again with Ulysses --- a very different book.
+  And again with Ulysses, a very different book.
 
   \medskip
   \begin{center}
@@ -671,7 +657,7 @@
   \medskip
   \begin{center}
     \itshape\color{mutedWarmGray}
-    Both fiction --- another \AINITemph{match} on this axis,
+    Both fiction, so another \AINITemph{match} on this axis,
     even though Ulysses and Potter are nothing alike.
   \end{center}
 \end{frame}
@@ -712,16 +698,64 @@
   \medskip
   \begin{center}
     \itshape\color{mutedWarmGray}
-    On this axis they \AINITemph{disagree} ---
+    On this axis they \AINITemph{disagree}.
     Alice and Ulysses agree on fiction but not on demand.
   \end{center}
 \end{frame}
 
 % ---------------------------------------------------------------------
-% Phase 3a --- Two axes: Alice vs Russell (mismatch on both, sum -2)
+% Phase 3a --- Two axes: Alice vs Ulysses (split, sum 0).  Placed first
+% so the audience sees a tie before the clean +2 / -2 verdicts.
+% ---------------------------------------------------------------------
+\begin{frame}{Two axes, two votes: Alice vs Ulysses}
+  Two votes per pair.  \AINITemph{Add} them.
+
+  \medskip
+  \begin{center}
+    \begin{tabular}{c@{\hspace{4em}}c}
+      \textbf{\color{clusterLF}Alice} & \textbf{\color{clusterDF}Ulysses} \\[1pt]
+      {\scriptsize\color{mutedWarmGray}light fiction} & {\scriptsize\color{mutedWarmGray}demanding fiction} \\[1pt]
+      $(-1,\;-1)$ & $(-1,\;+1)$
+    \end{tabular}
+  \end{center}
+
+  \medskip
+  \begin{center}
+    \begin{tikzpicture}[
+      every node/.style={inner sep=2pt},
+      lab/.style={font=\scshape\scriptsize, color=mutedWarmGray, anchor=east},
+      eq/.style={anchor=base, font=\itshape},
+      psv/.style={font=\bfseries, color=accentPrussian, anchor=base west},
+      neg/.style={font=\bfseries, color=accentOxblood, anchor=base west},
+      neu/.style={font=\bfseries, color=mutedWarmGray, anchor=base west}
+    ]
+      \node[lab] at (-0.8, 0.80) {fiction-axis vote:};
+      \node[eq]  at ( 1.7, 0.80) {$(-1)\;\times\;(-1)\;=$};
+      \node[psv] at ( 3.5, 0.80) {$+1$};
+
+      \node[lab] at (-0.8, 0.10) {light-axis vote:};
+      \node[eq]  at ( 1.7, 0.10) {$(-1)\;\times\;(+1)\;=$};
+      \node[neg] at ( 3.5, 0.10) {$-1$};
+
+      \draw[mutedWarmGray, line width=0.4pt] (3.0, -0.30) -- (4.1, -0.30);
+
+      \node[lab] at (-0.8, -0.80) {match score:};
+      \node[neu, font=\bfseries\large] at ( 3.5, -0.80) {$0$};
+    \end{tikzpicture}
+  \end{center}
+
+  \medskip
+  \begin{center}
+    {\Large\color{mutedWarmGray}\textbf{?}}\quad
+    \itshape A tie.  Fiction matches; demand differs.
+  \end{center}
+\end{frame}
+
+% ---------------------------------------------------------------------
+% Phase 3b --- Two axes: Alice vs Russell (mismatch on both, sum -2)
 % ---------------------------------------------------------------------
 \begin{frame}{Two axes, two votes: Alice vs Russell}
-  Two votes per pair.  \AINITemph{Add} them.
+  Same recipe.  Both votes go negative.
 
   \medskip
   \begin{center}
@@ -763,10 +797,10 @@
 \end{frame}
 
 % ---------------------------------------------------------------------
-% Phase 3b --- Two axes: Alice vs Potter (match on both, sum +2)
+% Phase 3c --- Two axes: Alice vs Potter (match on both, sum +2)
 % ---------------------------------------------------------------------
 \begin{frame}{Two axes, two votes: Alice vs Potter}
-  Same recipe.  Different verdict.
+  Same recipe.  Both votes go positive.
 
   \medskip
   \begin{center}
@@ -808,49 +842,93 @@
 \end{frame}
 
 % ---------------------------------------------------------------------
-% Phase 3c --- Two axes: Alice vs Ulysses (split, sum 0)
+% Phase 4a --- The matrix arose from the embeddings.  Flipped layout:
+% the axes scatter sits on the LEFT (the cause), the rating heatmap on
+% the RIGHT (the consequence).  Each cell is one inner product of two
+% points in the plane.
 % ---------------------------------------------------------------------
-\begin{frame}{Two axes, two votes: Alice vs Ulysses}
-  Two votes that disagree.
+\begin{frame}{The matrix arose from the embeddings}
+  Each cell of the matrix is the inner product of two points in the
+  plane: a \AINITemph{reader} times a \AINITemph{book}.
 
-  \medskip
-  \begin{center}
-    \begin{tabular}{c@{\hspace{4em}}c}
-      \textbf{\color{clusterLF}Alice} & \textbf{\color{clusterDF}Ulysses} \\[1pt]
-      {\scriptsize\color{mutedWarmGray}light fiction} & {\scriptsize\color{mutedWarmGray}demanding fiction} \\[1pt]
-      $(-1,\;-1)$ & $(-1,\;+1)$
-    \end{tabular}
-  \end{center}
+  \begin{columns}[T,onlytextwidth]
+    \column{0.50\textwidth}
+    \centering
+    \begin{tikzpicture}[every node/.style={inner sep=1pt}]
+      \draw[ink, thick, ->] (-1.95, 0) -- (1.95, 0)
+        node[right, font=\scshape\tiny, color=mutedWarmGray] {nonfiction};
+      \draw[ink, thick, ->] (0, -1.95) -- (0, 1.95)
+        node[above, font=\scshape\tiny, color=mutedWarmGray] {demanding};
+      \node[left,  font=\scshape\tiny, color=mutedWarmGray] at (-1.95,     0) {fiction};
+      \node[below, font=\scshape\tiny, color=mutedWarmGray] at (    0, -1.95) {light};
 
-  \medskip
-  \begin{center}
-    \begin{tikzpicture}[
-      every node/.style={inner sep=2pt},
-      lab/.style={font=\scshape\scriptsize, color=mutedWarmGray, anchor=east},
-      eq/.style={anchor=base, font=\itshape},
-      psv/.style={font=\bfseries, color=accentPrussian, anchor=base west},
-      neg/.style={font=\bfseries, color=accentOxblood, anchor=base west},
-      neu/.style={font=\bfseries, color=mutedWarmGray, anchor=base west}
-    ]
-      \node[lab] at (-0.8, 0.80) {fiction-axis vote:};
-      \node[eq]  at ( 1.7, 0.80) {$(-1)\;\times\;(-1)\;=$};
-      \node[psv] at ( 3.5, 0.80) {$+1$};
+      % Reader markers (circles)
+      \node[circle, fill=clusterLF, inner sep=2.0pt] at (-1.1, -0.9) {};
+      \node[circle, fill=clusterDF, inner sep=2.0pt] at (-1.1, +1.3) {};
+      \node[circle, fill=clusterLN, inner sep=2.0pt] at (+1.1, -0.9) {};
+      \node[circle, fill=clusterDN, inner sep=2.0pt] at (+1.1, +1.3) {};
 
-      \node[lab] at (-0.8, 0.10) {light-axis vote:};
-      \node[eq]  at ( 1.7, 0.10) {$(-1)\;\times\;(+1)\;=$};
-      \node[neg] at ( 3.5, 0.10) {$-1$};
+      % Book markers (squares)
+      \node[rectangle, fill=clusterLF, inner sep=1.6pt] at (-1.1, -1.3) {};
+      \node[rectangle, fill=clusterDF, inner sep=1.6pt] at (-1.1, +0.9) {};
+      \node[rectangle, fill=clusterLN, inner sep=1.6pt] at (+1.1, -1.3) {};
+      \node[rectangle, fill=clusterDN, inner sep=1.6pt] at (+1.1, +0.9) {};
 
-      \draw[mutedWarmGray, line width=0.4pt] (3.0, -0.30) -- (4.1, -0.30);
+      % Labels
+      \node[font=\itshape\tiny, color=clusterLF, anchor=east] at (-1.22, -0.9) {Alice};
+      \node[font=\itshape\tiny, color=clusterDF, anchor=east] at (-1.22, +1.3) {Eleni};
+      \node[font=\itshape\tiny, color=clusterLN, anchor=west] at (+1.22, -0.9) {Iris};
+      \node[font=\itshape\tiny, color=clusterDN, anchor=west] at (+1.22, +1.3) {Maya};
 
-      \node[lab] at (-0.8, -0.80) {match score:};
-      \node[neu, font=\bfseries\large] at ( 3.5, -0.80) {$0$};
+      \node[font=\itshape\tiny, color=clusterLF, anchor=east] at (-1.22, -1.3) {Potter};
+      \node[font=\itshape\tiny, color=clusterDF, anchor=east] at (-1.22, +0.9) {Ulysses};
+      \node[font=\itshape\tiny, color=clusterLN, anchor=west] at (+1.22, -1.3) {Eat Pray};
+      \node[font=\itshape\tiny, color=clusterDN, anchor=west] at (+1.22, +0.9) {Russell};
     \end{tikzpicture}
-  \end{center}
 
-  \medskip
+    \column{0.50\textwidth}
+    \centering
+    \begin{tikzpicture}[
+      every node/.style={inner sep=1pt},
+      hdr/.style={font=\itshape\scriptsize},
+      val/.style={font=\bfseries\scriptsize}
+    ]
+      % Column headers (book names; abbreviated to fit narrow cells)
+      \foreach \cn/\col [count=\c from 0] in {%
+        Potter/clusterLF, Ulysses/clusterDF, {Eat Pray}/clusterLN, Russell/clusterDN%
+      }{%
+        \node[hdr, color=\col] at (0.7 + \c*1.3, 2.95) {\cn};
+      }
+      % Row headers (reader names)
+      \foreach \rn/\col [count=\r from 0] in {%
+        Alice/clusterLF, Eleni/clusterDF, Iris/clusterLN, Maya/clusterDN%
+      }{%
+        \node[hdr, color=\col, anchor=east] at (0.0, 2.30 - \r*0.65) {\rn};
+      }
+      % Diagonal cells: +2
+      \foreach \i in {0,1,2,3}{%
+        \fill[accentPrussian!22, rounded corners=2pt]
+          (0.05+\i*1.3, 1.97-\i*0.65) rectangle (1.35+\i*1.3, 2.62-\i*0.65);
+        \node[val, color=accentPrussian] at (0.7+\i*1.3, 2.30-\i*0.65) {$+2$};
+      }
+      % Anti-diagonal cells: -2
+      \foreach \r/\c in {0/3, 1/2, 2/1, 3/0}{%
+        \fill[accentOxblood!22, rounded corners=2pt]
+          (0.05+\c*1.3, 1.97-\r*0.65) rectangle (1.35+\c*1.3, 2.62-\r*0.65);
+        \node[val, color=accentOxblood] at (0.7+\c*1.3, 2.30-\r*0.65) {$-2$};
+      }
+      % Off-diagonal cells: 0
+      \foreach \r/\c in {0/1, 0/2, 1/0, 1/3, 2/0, 2/3, 3/1, 3/2}{%
+        \fill[mutedWarmGray!10, rounded corners=2pt]
+          (0.05+\c*1.3, 1.97-\r*0.65) rectangle (1.35+\c*1.3, 2.62-\r*0.65);
+        \node[val, color=mutedWarmGray!90] at (0.7+\c*1.3, 2.30-\r*0.65) {$0$};
+      }
+    \end{tikzpicture}
+  \end{columns}
+
   \begin{center}
-    {\Large\color{mutedWarmGray}\textbf{?}}\quad
-    \itshape A tie.  Fiction matches; demand differs.
+    \scriptsize\itshape\color{mutedWarmGray}
+    Each matrix cell is one inner product of two points.
   \end{center}
 \end{frame}
 
@@ -926,7 +1004,7 @@
 % side by side.
 % ---------------------------------------------------------------------
 \begin{frame}{Readers and books, same plane}
-  Each reader \emph{and} each book has two coordinates ---
+  Each reader \emph{and} each book has two coordinates, and
   the same Cartesian plane carries them both.
 
   \medskip
@@ -980,97 +1058,6 @@
 \end{frame}
 
 % ---------------------------------------------------------------------
-% Phase 6 --- The matrix arose from the embeddings.  Show the heatmap
-% on the left and the embedding scatter on the right so the audience
-% reads each matrix cell as one inner product of two points in the
-% same plane.
-% ---------------------------------------------------------------------
-\begin{frame}{The matrix arose from the embeddings}
-  Each cell of the matrix is the inner product of two points in the
-  plane: a \AINITemph{reader} times a \AINITemph{book}.
-
-  \begin{columns}[T,onlytextwidth]
-    \column{0.50\textwidth}
-    \centering
-    \begin{tikzpicture}[
-      every node/.style={inner sep=1pt},
-      hdr/.style={font=\itshape\scriptsize},
-      val/.style={font=\bfseries\scriptsize}
-    ]
-      % Column headers (book names; abbreviated to fit narrow cells)
-      \foreach \cn/\col [count=\c from 0] in {%
-        Potter/clusterLF, Ulysses/clusterDF, {Eat Pray}/clusterLN, Russell/clusterDN%
-      }{%
-        \node[hdr, color=\col] at (0.7 + \c*1.3, 2.95) {\cn};
-      }
-      % Row headers (reader names)
-      \foreach \rn/\col [count=\r from 0] in {%
-        Alice/clusterLF, Eleni/clusterDF, Iris/clusterLN, Maya/clusterDN%
-      }{%
-        \node[hdr, color=\col, anchor=east] at (0.0, 2.30 - \r*0.65) {\rn};
-      }
-      % Diagonal cells: +2
-      \foreach \i in {0,1,2,3}{%
-        \fill[accentPrussian!22, rounded corners=2pt]
-          (0.05+\i*1.3, 1.97-\i*0.65) rectangle (1.35+\i*1.3, 2.62-\i*0.65);
-        \node[val, color=accentPrussian] at (0.7+\i*1.3, 2.30-\i*0.65) {$+2$};
-      }
-      % Anti-diagonal cells: -2
-      \foreach \r/\c in {0/3, 1/2, 2/1, 3/0}{%
-        \fill[accentOxblood!22, rounded corners=2pt]
-          (0.05+\c*1.3, 1.97-\r*0.65) rectangle (1.35+\c*1.3, 2.62-\r*0.65);
-        \node[val, color=accentOxblood] at (0.7+\c*1.3, 2.30-\r*0.65) {$-2$};
-      }
-      % Off-diagonal cells: 0
-      \foreach \r/\c in {0/1, 0/2, 1/0, 1/3, 2/0, 2/3, 3/1, 3/2}{%
-        \fill[mutedWarmGray!10, rounded corners=2pt]
-          (0.05+\c*1.3, 1.97-\r*0.65) rectangle (1.35+\c*1.3, 2.62-\r*0.65);
-        \node[val, color=mutedWarmGray!90] at (0.7+\c*1.3, 2.30-\r*0.65) {$0$};
-      }
-    \end{tikzpicture}
-
-    \column{0.50\textwidth}
-    \centering
-    \begin{tikzpicture}[every node/.style={inner sep=1pt}]
-      \draw[ink, thick, ->] (-1.95, 0) -- (1.95, 0)
-        node[right, font=\scshape\tiny, color=mutedWarmGray] {nonfiction};
-      \draw[ink, thick, ->] (0, -1.95) -- (0, 1.95)
-        node[above, font=\scshape\tiny, color=mutedWarmGray] {demanding};
-      \node[left,  font=\scshape\tiny, color=mutedWarmGray] at (-1.95,     0) {fiction};
-      \node[below, font=\scshape\tiny, color=mutedWarmGray] at (    0, -1.95) {light};
-
-      % Reader markers (circles)
-      \node[circle, fill=clusterLF, inner sep=2.0pt] at (-1.1, -0.9) {};
-      \node[circle, fill=clusterDF, inner sep=2.0pt] at (-1.1, +1.3) {};
-      \node[circle, fill=clusterLN, inner sep=2.0pt] at (+1.1, -0.9) {};
-      \node[circle, fill=clusterDN, inner sep=2.0pt] at (+1.1, +1.3) {};
-
-      % Book markers (squares)
-      \node[rectangle, fill=clusterLF, inner sep=1.6pt] at (-1.1, -1.3) {};
-      \node[rectangle, fill=clusterDF, inner sep=1.6pt] at (-1.1, +0.9) {};
-      \node[rectangle, fill=clusterLN, inner sep=1.6pt] at (+1.1, -1.3) {};
-      \node[rectangle, fill=clusterDN, inner sep=1.6pt] at (+1.1, +0.9) {};
-
-      % Labels
-      \node[font=\itshape\tiny, color=clusterLF, anchor=east] at (-1.22, -0.9) {Alice};
-      \node[font=\itshape\tiny, color=clusterDF, anchor=east] at (-1.22, +1.3) {Eleni};
-      \node[font=\itshape\tiny, color=clusterLN, anchor=west] at (+1.22, -0.9) {Iris};
-      \node[font=\itshape\tiny, color=clusterDN, anchor=west] at (+1.22, +1.3) {Maya};
-
-      \node[font=\itshape\tiny, color=clusterLF, anchor=east] at (-1.22, -1.3) {Potter};
-      \node[font=\itshape\tiny, color=clusterDF, anchor=east] at (-1.22, +0.9) {Ulysses};
-      \node[font=\itshape\tiny, color=clusterLN, anchor=west] at (+1.22, -1.3) {Eat Pray};
-      \node[font=\itshape\tiny, color=clusterDN, anchor=west] at (+1.22, +0.9) {Russell};
-    \end{tikzpicture}
-  \end{columns}
-
-  \begin{center}
-    \scriptsize\itshape\color{mutedWarmGray}
-    Each matrix cell is one inner product of two points.
-  \end{center}
-\end{frame}
-
-% ---------------------------------------------------------------------
 % Scene 8 --- The match score has a name.
 % Lands as a *renaming* of what the audience has just been doing,
 % not as a new artefact.  Drops the hat and the transpose; keeps
@@ -1083,6 +1070,13 @@
   \bigskip
   \begin{center}
     \Large $r \;=\; u \,\cdot\, v$
+  \end{center}
+
+  \medskip
+  \begin{center}
+    \footnotesize\color{mutedWarmGray}
+    where $u$ is the embedding of a user (a reader) and
+    $v$ is the embedding of an item (a book).
   \end{center}
 
   \medskip
@@ -1131,9 +1125,9 @@
 \end{frame}
 
 % ---------------------------------------------------------------------
-% Scene 8b --- Stack and multiply (schematic)
-% Three rectangles in proportion: tall thin U, short wide V^T, big R.
-% Compact dimension labels at the top of each matrix.
+% Scene 8b --- Stack and multiply (schematic).  Visual factorisation
+% layout: V^T sits ABOVE R (columns align), U sits to the LEFT of R
+% (rows align).  The geometry mirrors R = U V^T directly.
 % ---------------------------------------------------------------------
 \begin{frame}{Stack and multiply}
   \begin{center}
@@ -1142,118 +1136,116 @@
       cellH/.style={draw=mutedWarmGray!60, line width=0.15pt},
       lab/.style={font=\itshape\footnotesize, color=mutedWarmGray},
       dim/.style={font=\scriptsize, color=mutedWarmGray},
-      bigsym/.style={font=\Large}
+      eqsym/.style={font=\Large}
     ]
-      % U (21 x 2): width 0.5, height 3.0
-      \draw[mat] (0, 0) rectangle (0.5, -3.0);
-      \foreach \r in {1,...,20} {
-        \draw[cellH] (0, -\r*0.142857) -- (0.5, -\r*0.142857);
-      }
-      \draw[cellH] (0.25, 0) -- (0.25, -3.0);
-      \node[lab] at (0.25, 0.32) {$U$};
-      \node[dim] at (0.25, 0.05) {$21\!\times\!2$};
-      % highlight one row (Alice = row 0)
-      \fill[accentPrussian, opacity=0.7] (0, 0) rectangle (0.5, -0.142857);
+      % R (21 rows x 16 cols).  Cell width 0.4, cell height 0.2.
+      \draw[mat] (0, 0) rectangle (6.4, -4.2);
+      \node[lab] at (3.2, -4.50) {$R$};
+      \node[dim] at (3.2, -4.78) {$21\!\times\!16$};
+      % Highlight (Alice, Russell): row 0, col 15
+      \fill[accentOxblood, opacity=0.55] (6.0, 0) rectangle (6.4, -0.2);
 
-      % × symbol
-      \node[bigsym] at (1.0, -1.5) {$\times$};
-
-      % V^T (2 x 16): width 4.0, height 0.5
-      \draw[mat] (1.5, -1.25) rectangle (5.5, -1.75);
+      % V^T (2 rows x 16 cols), placed ABOVE R, columns aligned.
+      \draw[mat] (0, 0.40) rectangle (6.4, 0.90);
       \foreach \c in {1,...,15} {
-        \draw[cellH] (1.5 + \c*0.25, -1.25) -- (1.5 + \c*0.25, -1.75);
+        \draw[cellH] (\c*0.4, 0.40) -- (\c*0.4, 0.90);
       }
-      \draw[cellH] (1.5, -1.5) -- (5.5, -1.5);
-      \node[lab] at (3.5, -0.93) {$V^{\!\top}$};
-      \node[dim] at (3.5, -1.15) {$2\!\times\!16$};
-      % highlight one column (Russell = col 15)
-      \fill[accentOxblood, opacity=0.7] (5.25, -1.25) rectangle (5.5, -1.75);
+      \draw[cellH] (0, 0.65) -- (6.4, 0.65);
+      \node[lab] at (3.2, 1.20) {$V^{\!\top}$};
+      \node[dim, anchor=west] at (6.55, 0.65) {$2\!\times\!16$};
+      % Highlight Russell column (col 15)
+      \fill[accentOxblood, opacity=0.7] (6.0, 0.40) rectangle (6.4, 0.90);
 
-      % = symbol
-      \node[bigsym] at (6.0, -1.5) {$=$};
+      % U (21 rows x 2 cols), placed to the LEFT of R, rows aligned.
+      \draw[mat] (-1.0, 0) rectangle (-0.5, -4.2);
+      \foreach \r in {1,...,20} {
+        \draw[cellH] (-1.0, -\r*0.2) -- (-0.5, -\r*0.2);
+      }
+      \draw[cellH] (-0.75, 0) -- (-0.75, -4.2);
+      \node[lab] at (-0.75, 0.30) {$U$};
+      \node[dim] at (-0.75, -4.50) {$21\!\times\!2$};
+      % Highlight Alice row (row 0)
+      \fill[accentPrussian, opacity=0.7] (-1.0, 0) rectangle (-0.5, -0.2);
 
-      % R (21 x 16): width 4.0, height 3.0
-      \draw[mat] (6.5, 0) rectangle (10.5, -3.0);
-      \node[lab] at (8.5, 0.32) {$R$};
-      \node[dim] at (8.5, 0.05) {$21\!\times\!16$};
-      % highlight the (Alice, Russell) cell
-      \fill[accentOxblood, opacity=0.55] (10.25, 0) rectangle (10.5, -0.142857);
+      % Equation, placed inside R area away from highlights
+      \node[eqsym] at (3.0, -2.1) {$R \;=\; U\,V^{\!\top}$};
 
-      % faint guide lines: U row -> V^T col -> R cell
-      \draw[mutedWarmGray, dashed, line width=0.2pt] (0.5, -0.071) -- (5.25, -1.5);
-      \draw[mutedWarmGray, dashed, line width=0.2pt] (5.5, -1.5) -- (10.25, -0.071);
+      % Faint guide lines pointing to (Alice, Russell) cell
+      \draw[mutedWarmGray, dashed, line width=0.2pt]
+        (-0.5, -0.1) -- (6.0, -0.1);
+      \draw[mutedWarmGray, dashed, line width=0.2pt]
+        (6.2, 0.40) -- (6.2, 0.0);
     \end{tikzpicture}
   \end{center}
 
+  \medskip
   \begin{center}
     21 readers in $U$,\quad 16 books in $V$,\quad
     their product \AINITemph{is} $R$.
-    Each cell is one dot product --- the highlighted one is
+    Each cell is one dot product. The highlighted one is
     Alice~$\times$~Russell.
   \end{center}
 \end{frame}
 
 % ---------------------------------------------------------------------
-% Scene 8c --- Stack and multiply, in numbers
-% A 3x3 worked example — Alice, Eleni, Maya across Potter, Borges, Russell.
-% Wider V^T and R so the book-column labels don't collide.
+% Scene 8c --- The matrix product, in numbers (3x3 worked example).
+% Visual factorisation layout: V^T (2x3) sits ABOVE R (3x3) with its
+% columns aligned to R's columns; U (3x2) sits to the LEFT of R with
+% its rows aligned to R's rows.  The layout makes R = U V^T legible.
 % ---------------------------------------------------------------------
 \begin{frame}{The matrix product, in numbers}
   \begin{center}
     \begin{tikzpicture}[
       mat/.style={draw=mutedWarmGray, line width=0.4pt, fill=bgCream},
+      gd/.style={draw=mutedWarmGray!60, line width=0.15pt},
       hl/.style={font=\itshape\scriptsize, color=mutedWarmGray},
       ent/.style={font=\small, inner sep=1pt},
       psv/.style={font=\bfseries\small, color=accentPrussian, inner sep=1pt},
       neg/.style={font=\bfseries\small, color=accentOxblood, inner sep=1pt},
-      neu/.style={font=\small, color=mutedWarmGray, inner sep=1pt},
-      bigsym/.style={font=\Large}
+      neu/.style={font=\small, color=mutedWarmGray, inner sep=1pt}
     ]
-      % U (3 x 2)
-      \draw[mat] (0, 0) rectangle (1.4, -2.1);
-      \draw[mutedWarmGray!60, line width=0.15pt] (0, -0.7) -- (1.4, -0.7);
-      \draw[mutedWarmGray!60, line width=0.15pt] (0, -1.4) -- (1.4, -1.4);
-      \draw[mutedWarmGray!60, line width=0.15pt] (0.7, 0) -- (0.7, -2.1);
-      \node[ent] at (0.35, -0.35) {$-1$}; \node[ent] at (1.05, -0.35) {$-1$};
-      \node[ent] at (0.35, -1.05) {$-1$}; \node[ent] at (1.05, -1.05) {$+1$};
-      \node[ent] at (0.35, -1.75) {$+1$}; \node[ent] at (1.05, -1.75) {$+1$};
-      \node[hl, anchor=east] at (-0.1, -0.35) {Alice};
-      \node[hl, anchor=east] at (-0.1, -1.05) {Eleni};
-      \node[hl, anchor=east] at (-0.1, -1.75) {Maya};
-      \node[hl] at (0.7, 0.28) {$U$};
+      % R (3 rows x 3 cols), at the origin.  Cell 1.4 wide, 0.7 tall.
+      \draw[mat] (0, 0) rectangle (4.2, -2.1);
+      \draw[gd] (0, -0.7) -- (4.2, -0.7);
+      \draw[gd] (0, -1.4) -- (4.2, -1.4);
+      \draw[gd] (1.4, 0) -- (1.4, -2.1);
+      \draw[gd] (2.8, 0) -- (2.8, -2.1);
+      % R entries
+      \node[psv] at (0.7, -0.35) {$+2$}; \node[neu] at (2.1, -0.35) {$0$};  \node[neg] at (3.5, -0.35) {$-2$};
+      \node[neu] at (0.7, -1.05) {$0$};  \node[psv] at (2.1, -1.05) {$+2$}; \node[neu] at (3.5, -1.05) {$0$};
+      \node[neg] at (0.7, -1.75) {$-2$}; \node[neu] at (2.1, -1.75) {$0$};  \node[psv] at (3.5, -1.75) {$+2$};
+      \node[hl] at (2.1, -2.40) {$R$};
 
-      \node[bigsym] at (2.4, -1.05) {$\times$};
+      % V^T (2 rows x 3 cols) ABOVE R, columns aligned.
+      % Vertical extent: y from 0.30 (just above R) to 1.70 (1.4 tall).
+      \draw[mat] (0, 0.30) rectangle (4.2, 1.70);
+      \draw[gd] (0, 1.00) -- (4.2, 1.00);
+      \draw[gd] (1.4, 0.30) -- (1.4, 1.70);
+      \draw[gd] (2.8, 0.30) -- (2.8, 1.70);
+      % V^T entries: row 1 = fiction axis, row 2 = light axis
+      \node[ent] at (0.7, 1.35) {$-1$}; \node[ent] at (2.1, 1.35) {$-1$}; \node[ent] at (3.5, 1.35) {$+1$};
+      \node[ent] at (0.7, 0.65) {$-1$}; \node[ent] at (2.1, 0.65) {$+1$}; \node[ent] at (3.5, 0.65) {$+1$};
+      % Book column labels above V^T
+      \node[hl] at (0.7, 1.95) {Potter};
+      \node[hl] at (2.1, 1.95) {Borges};
+      \node[hl] at (3.5, 1.95) {Russell};
+      \node[hl] at (4.55, 1.00) [anchor=west] {$V^{\!\top}$};
 
-      % V^T (2 x 3) — wider columns so book labels fit
-      \draw[mat] (3.0, -0.35) rectangle (7.2, -1.75);
-      \draw[mutedWarmGray!60, line width=0.15pt] (4.4, -0.35) -- (4.4, -1.75);
-      \draw[mutedWarmGray!60, line width=0.15pt] (5.8, -0.35) -- (5.8, -1.75);
-      \draw[mutedWarmGray!60, line width=0.15pt] (3.0, -1.05) -- (7.2, -1.05);
-      \node[ent] at (3.7, -0.7) {$-1$}; \node[ent] at (5.1, -0.7) {$-1$}; \node[ent] at (6.5, -0.7) {$+1$};
-      \node[ent] at (3.7, -1.4) {$-1$}; \node[ent] at (5.1, -1.4) {$+1$}; \node[ent] at (6.5, -1.4) {$+1$};
-      \node[hl] at (3.7, -0.05) {Potter};
-      \node[hl] at (5.1, -0.05) {Borges};
-      \node[hl] at (6.5, -0.05) {Russell};
-      \node[hl] at (5.1, 0.28) {$V^{\!\top}$};
-
-      \node[bigsym] at (7.9, -1.05) {$=$};
-
-      % R (3 x 3)
-      \draw[mat] (8.5, 0) rectangle (12.7, -2.1);
-      \draw[mutedWarmGray!60, line width=0.15pt] (8.5, -0.7) -- (12.7, -0.7);
-      \draw[mutedWarmGray!60, line width=0.15pt] (8.5, -1.4) -- (12.7, -1.4);
-      \draw[mutedWarmGray!60, line width=0.15pt] (9.9, 0) -- (9.9, -2.1);
-      \draw[mutedWarmGray!60, line width=0.15pt] (11.3, 0) -- (11.3, -2.1);
-      % Alice row
-      \node[psv] at (9.2, -0.35) {$+2$}; \node[neu] at (10.6, -0.35) {$0$};  \node[neg] at (12.0, -0.35) {$-2$};
-      % Eleni row
-      \node[neu] at (9.2, -1.05) {$0$};  \node[psv] at (10.6, -1.05) {$+2$}; \node[neu] at (12.0, -1.05) {$0$};
-      % Maya row
-      \node[neg] at (9.2, -1.75) {$-2$}; \node[neu] at (10.6, -1.75) {$0$};  \node[psv] at (12.0, -1.75) {$+2$};
-      \node[hl] at (9.2, 0.20) {Potter};
-      \node[hl] at (10.6, 0.20) {Borges};
-      \node[hl] at (12.0, 0.20) {Russell};
-      \node[hl] at (10.6, 0.55) {$R$};
+      % U (3 rows x 2 cols) LEFT of R, rows aligned.
+      % Horizontal extent: x from -1.70 to -0.30 (1.4 wide).
+      \draw[mat] (-1.70, 0) rectangle (-0.30, -2.1);
+      \draw[gd] (-1.70, -0.7) -- (-0.30, -0.7);
+      \draw[gd] (-1.70, -1.4) -- (-0.30, -1.4);
+      \draw[gd] (-1.00, 0) -- (-1.00, -2.1);
+      % U entries
+      \node[ent] at (-1.35, -0.35) {$-1$}; \node[ent] at (-0.65, -0.35) {$-1$};
+      \node[ent] at (-1.35, -1.05) {$-1$}; \node[ent] at (-0.65, -1.05) {$+1$};
+      \node[ent] at (-1.35, -1.75) {$+1$}; \node[ent] at (-0.65, -1.75) {$+1$};
+      % Reader row labels to the left of U
+      \node[hl, anchor=east] at (-1.85, -0.35) {Alice};
+      \node[hl, anchor=east] at (-1.85, -1.05) {Eleni};
+      \node[hl, anchor=east] at (-1.85, -1.75) {Maya};
+      \node[hl] at (-1.00, -2.40) {$U$};
     \end{tikzpicture}
   \end{center}
 
@@ -1270,7 +1262,7 @@
 \begin{frame}{But we only had \emph{R}}
   \medskip
   We never observed $U$ or $V$ directly.  The library's ledger has only
-  $R$ --- the rating matrix, three hundred and thirty-six cells of
+  $R$, the rating matrix, three hundred and thirty-six cells of
   symbols.
 
   \medskip
@@ -1292,7 +1284,7 @@
 % ---------------------------------------------------------------------
 % Scene 9 --- Spectral microscope (interactive)
 % ---------------------------------------------------------------------
-\vizhandoff{spectral-microscope.html}
+\vizhandoff{Spectral microscope}
 
 % ---------------------------------------------------------------------
 % Scene 10 --- Eckart & Young (1936)
@@ -1305,24 +1297,19 @@
 
   \vspace{0.8em}
 
-  No algorithm beats it. No clever trick beats it. No future
-  architecture beats it.
-
-  \vspace{0.4em}
-
-  The curve you just saw is not an empirical observation. It is the
-  graph of a theorem ninety years old.
+  No algorithm can beat that.  No future machine learning technology
+  can beat it.
 \end{frame}
 
 % ---------------------------------------------------------------------
 % Scene 11 --- Customer-Urns Carousel (interactive)
 % ---------------------------------------------------------------------
-\vizhandoff{customer-urns-carousel.html}
+\vizhandoff{Customer-urns carousel}
 
 % ---------------------------------------------------------------------
 % Scene 12 --- Embeddings that learn (interactive)
 % ---------------------------------------------------------------------
-\vizhandoff{07\_embeddings-that-learn.html}
+\vizhandoff{Embeddings that learn}
 
 % ---------------------------------------------------------------------
 % Closing slide for Act I
@@ -1332,6 +1319,6 @@
 
   \vspace{0.8em}
 
-  The names --- \AINITemph{entropy}, \AINITemph{rank},
-  \AINITemph{factorization} --- were old words from 1936 and 1948.
+  The names \AINITemph{entropy}, \AINITemph{rank}, and
+  \AINITemph{factorization} were old words from 1936 and 1948.
 \end{frame}

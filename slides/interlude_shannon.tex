@@ -23,7 +23,7 @@
   \begin{columns}[T]
     \column{0.74\textwidth}
     In 1948, Claude Shannon published \AINITemph{A Mathematical Theory of
-    Communication} --- a paper with two theorems at its core. The
+    Communication}, a paper with two theorems at its core. The
     \AINITemph{source coding theorem} fixes a floor on how compactly any
     sequence of symbols can be described; the \AINITemph{channel coding
     theorem} fixes a ceiling on how reliably they can be transmitted
@@ -42,14 +42,14 @@
 % ---------------------------------------------------------------------
 \begin{frame}{How unpredictable is the next ball?}
   An urn with bias $p$ produces a stream of white and yellow draws.
-  When $p = \tfrac{1}{2}$ every draw is a coin flip --- maximal
-  surprise. When $p = 0.99$ almost every draw is white --- the
+  When $p = \tfrac{1}{2}$ every draw is a coin flip, with maximal
+  surprise. When $p = 0.99$ almost every draw is white, and the
   sequence is nearly redundant. \AINITemph{Entropy} is the name we
   give to this gradient between certainty and surprise. Let us feel
   it before we write it down.
 \end{frame}
 
-\vizhandoff{entropy-mountain.html}
+\vizhandoff{Entropy mountain}
 
 % ---------------------------------------------------------------------
 % Scene 15 --- H(p) floor stated
@@ -58,18 +58,17 @@
   {The entropy of an urn}%
   {H(p) = -p\log_2 p - (1-p)\log_2 (1-p)}%
   {No compression scheme can describe an urn's draws in fewer than
-  $H(p)$ bits per ball. Eckart--Young was the floor for compressing a
-  matrix; entropy is the floor for compressing a sequence.}
+  $H(p)$ bits per ball. Eckart and Young gave the floor for compressing
+  a matrix; entropy is the floor for compressing a sequence.}
 
 % ---------------------------------------------------------------------
-% Scene 16 --- Bridge into Act II
+% Scene 16 --- Bridge into the Epilogue
 % ---------------------------------------------------------------------
-% Quiet bridge slide. The "Act II --- Prediction" label is dropped
-% because the Laboratory plate at the top of act2_prediction.tex now
-% serves as the act opener; this slide stays purely as the synthesis
-% sentence.
+% Quiet bridge slide.  The interlude now sits between Act II and the
+% Epilogue, so the synthesis sentence points the audience forward to
+% the duality that closes the lecture.
 \sectiondivider%
-  {\AINITemph{Recsys was compression. Bandits will be prediction.\\
-  Same urns, different question.}}%
+  {\AINITemph{Recsys was compression. Bandits were prediction.\\
+  The Epilogue shows they were the same machine.}}%
   {}%
   {}

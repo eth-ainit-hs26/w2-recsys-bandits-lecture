@@ -167,7 +167,7 @@
   \begin{enumerate}\setlength{\itemsep}{0pt}
     \item Neither Esther \AINITemph{nor Alex} knows
           $p^C$, $p^S$, $p^M$ in advance.
-    \item Showing an ad costs Esther money --- she cannot test forever.
+    \item Showing an ad costs Esther money, so she cannot test forever.
   \end{enumerate}
 \end{frame}
 
@@ -196,7 +196,7 @@
   \bigskip
   \begin{center}
     \scriptsize\itshape\color{mutedWarmGray}
-    Read this --- don't decode it.  The rest of Act II builds this
+    Read this, do not decode it.  The rest of Act II builds this
     algorithm from scratch.
   \end{center}
 
@@ -246,7 +246,7 @@
 % ---------------------------------------------------------------------
 % Stage 2, Slide 1 --- Act I divider (original deck slide 8)
 % ---------------------------------------------------------------------
-\begin{frame}{Act I: Estimating one probability}
+\begin{frame}{Chapter 1: Estimating one probability}
   Just one product.  Just one probability.
 
   \medskip
@@ -448,7 +448,7 @@
 % original Scene 20).  Audience plays with multiple urns just before
 % the formal Act II setup.
 % ---------------------------------------------------------------------
-\vizhandoff{three-urn-casino.html}
+\vizhandoff{Three-urn casino}
 
 % ---------------------------------------------------------------------
 % Stage 2, Slide 8 --- Agenda recap (original deck slide 14).
@@ -490,7 +490,7 @@
 % ---------------------------------------------------------------------
 % Stage 3, Slide 1 --- Act II: Two urns (original deck slide 15)
 % ---------------------------------------------------------------------
-\begin{frame}{Act II: Two urns}
+\begin{frame}{Chapter 2: Two urns}
   Bring back the cup.  Now two products, two probabilities.
 
   \medskip
@@ -651,10 +651,10 @@
   \smallskip
   \begin{itemize}
     \setlength{\itemsep}{0.3em}
-    \item Pure random \textemdash{} no learning at all.
-    \item Pure greedy \textemdash{} exploit the leader from round one.
-    \item $\varepsilon$-greedy \textemdash{} explore with probability $\varepsilon$.
-    \item UCB \textemdash{} pick the urn with the highest upper bound.
+    \item Pure random: no learning at all.
+    \item Pure greedy: exploit the leader from round one.
+    \item $\varepsilon$-greedy: explore with probability $\varepsilon$.
+    \item UCB: pick the urn with the highest upper bound.
   \end{itemize}
 
   \smallskip
@@ -666,7 +666,7 @@
 % ---------------------------------------------------------------------
 % Stage 3, Slide 8 --- Algorithm stadium (viz handoff, kept).
 % ---------------------------------------------------------------------
-\vizhandoff{algorithm\_stadium.html}
+\vizhandoff{Algorithm stadium}
 
 % ---------------------------------------------------------------------
 % Stage 3, Slide 9 --- Agenda recap (original deck slide 21).
@@ -702,23 +702,34 @@
 % (original deck slide 22).  Contextual urns; representation vectors;
 % regression.
 % ---------------------------------------------------------------------
-\begin{frame}{Act III: Many customers and many items}
-  In a real recommender there are many customers and many items
-  --- too many urns to estimate one at a time.
+\begin{frame}{Chapter 3: Many customers and many items}
+  \footnotesize
+  Real recommenders have millions of items and billions of customers.
+  We cannot run a separate UCB per customer.  The fix reuses Act I's
+  matrix factorisation:
 
-  \medskip
+  \smallskip
   \begin{enumerate}
-    \setlength{\itemsep}{0.4em}
-    \item Every item gets a representation vector $z$
-          (e.g.\ from an autoencoder).
-    \item For every customer $u$, an unknown
-          representation vector $z_u$.
-    \item The urn's bias is the inner product:
-          \begin{center}
-            $p(z, z_u) \;=\; \max\big(0,\; z^\top z_u\big).$
-          \end{center}
-    \item Estimate $z_u$ for each customer via regression.
+    \setlength{\itemsep}{0.2em}
+    \item Factorise historical ratings to obtain an embedding vector
+          $z$ for each item (the step that gave us the book vectors
+          $v$ in Act I).
+    \item For a new customer $u$, the preference vector $z_u$ is
+          \emph{unknown}.  Estimate it online from the few interactions
+          observed so far, by regression on observed rewards.
+    \item The urn's bias for offering item $z$ to customer $u$ is the
+          inner product of Act I:
+          $\;p(z, z_u) \;=\; \max\!\big(0,\; z^\top z_u\big).$
+    \item Each round, pick the item whose predicted bias has the
+          highest upper bound (UCB on $z^\top \hat z_u$).
   \end{enumerate}
+
+  \smallskip
+  \begin{center}
+    \scriptsize\itshape\color{mutedWarmGray}
+    Compression (Act I) provides $z$.  Prediction (Act II) provides
+    $\hat z_u$.
+  \end{center}
 \end{frame}
 
 % ---------------------------------------------------------------------
@@ -727,17 +738,16 @@
 % the lecture's structural payoff: the same vectors, the same inner
 % product, two different problems.
 % ---------------------------------------------------------------------
-\begin{frame}{Two acts, one geometry}
-  Look back at Act I.  Each reader had a vector $u$.
-  Each book had a vector $v$.  Preference was the inner product:
+\begin{frame}{One geometry, two settings}
+  In Act I (recsys), each reader had a vector $u$.  Each book had a
+  vector $v$.  Preference was the inner product:
   \begin{center}
     $r \;=\; u \cdot v.$
   \end{center}
 
   \smallskip
-  In Act III, each customer has a vector $z_u$.
-  Each item has a vector $z$.  The urn's bias is the same inner
-  product:
+  In contextual bandits, each customer has a vector $z_u$.  Each item
+  has a vector $z$.  The urn's bias is the same inner product:
   \begin{center}
     $p \;=\; \max(0,\; z^\top z_u).$
   \end{center}
@@ -745,7 +755,7 @@
   \smallskip
   \begin{center}
     \itshape\color{mutedWarmGray}
-    Same matrix factorisation, two different settings.
+    Same matrix factorisation, two different problems.
   \end{center}
 \end{frame}
 
@@ -765,26 +775,44 @@
 
   The required sample size scales roughly as $1 / (p_1 - p_2)^2$.
   Halve the gap, and you need four times the data.
-
-  \medskip
-
-  \sidenote{This is what your statistician means when she says
-  ``we need a million users to A/B-test this.''}
 \end{frame}
 
 % ---------------------------------------------------------------------
 % Scene 23 (b) — Distinguishability Dial (viz handoff)
 % ---------------------------------------------------------------------
-\vizhandoff{distinguishability-dial.html}
+\vizhandoff{Distinguishability dial}
 
 % ---------------------------------------------------------------------
 % Scene 24 — Lai & Robbins (1985)
 % ---------------------------------------------------------------------
-\equationslide{Lai \& Robbins (1985)}{%
-  \liminf_{T \to \infty}\frac{R_T}{\log T}
-  \;\geq\;
-  \sum_{i \neq i^*} \frac{p^* - p_i}{{\color{accentOxblood}\mathrm{KL}(p_i \,\|\, p^*)}}%
-}{No algorithm beats this rate.  The hardest thing is telling apart distributions that look alike --- and the cost is in KL divergence, the same Shannon used in 1948.}
+\begin{frame}{Lai \& Robbins (1985)}
+  No algorithm can do better than:
+  \medskip
+  \begin{center}
+    $\displaystyle
+      \liminf_{T \to \infty}\frac{R_T}{\log T}
+      \;\geq\;
+      \sum_{i \neq i^*} \frac{p^* - p_i}{{\color{accentOxblood}\mathrm{KL}(p_i \,\|\, p^*)}}$
+  \end{center}
+
+  \medskip
+  \footnotesize
+  \begin{tabular}{@{}l@{\hspace{1em}}l@{}}
+    $T$               & total number of rounds played \\
+    $R_T$             & cumulative regret over $T$ rounds (loss vs.\ always playing the best arm) \\
+    $p_i$             & bias of arm $i$ (its true conversion rate) \\
+    $p^*$             & bias of the best arm $i^*$, i.e.\ $\max_i p_i$ \\
+    $\mathrm{KL}(p_i \| p^*)$ & how distinguishable arm $i$ is from the best \\
+  \end{tabular}
+
+  \medskip
+  \begin{center}
+    \scriptsize\itshape\color{mutedWarmGray}
+    The harder it is to tell two arms apart, the more rounds you waste
+    on the loser.  The cost is in KL divergence, the same Shannon used
+    in 1948.
+  \end{center}
+\end{frame}
 
 % ---------------------------------------------------------------------
 % Closing slide for Act II
@@ -798,7 +826,7 @@
 
   \medskip
 
-  The two halves of this lecture share one ceiling \textemdash{} and we
+  The two halves of this lecture share one ceiling, and we
   have not yet named the quantity in which both ceilings are written.
-  That is the Epilogue.
+  That is what the Interlude and the Epilogue are for.
 \end{frame}
