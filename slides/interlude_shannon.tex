@@ -45,21 +45,49 @@
   When $p = \tfrac{1}{2}$ every draw is a coin flip, with maximal
   surprise. When $p = 0.99$ almost every draw is white, and the
   sequence is nearly redundant. \AINITemph{Entropy} is the name we
-  give to this gradient between certainty and surprise. Let us feel
-  it before we write it down.
+  give to this gradient between certainty and surprise.
 \end{frame}
 
-\vizhandoff{9}{Entropy mountain}
+% ---------------------------------------------------------------------
+% Scene 14b --- Two ways to make a draw unpredictable.  Shape AND
+% number of colours both push entropy up on the same scale of bits.
+% ---------------------------------------------------------------------
+\input{_entropy_multicolor_slide}
+
+\vizhandoff{10}{Entropy mountain}
 
 % ---------------------------------------------------------------------
-% Scene 15 --- H(p) floor stated
+% Scene 15 --- The entropy of an urn.  Two cases: binary urn (white /
+% yellow) and a general K-colour urn.
 % ---------------------------------------------------------------------
-\equationslide%
-  {The entropy of an urn}%
-  {H(p) = -p\log_2 p - (1-p)\log_2 (1-p)}%
-  {No compression scheme can describe an urn's draws in fewer than
-  $H(p)$ bits per ball. Eckart and Young gave the floor for compressing
-  a matrix; entropy is the floor for compressing a sequence.}
+\begin{frame}{The entropy of an urn}
+  \footnotesize
+  \emph{Two-colour urn.}  Bias $p$ for white, $1 - p$ for yellow:
+  \medskip
+  \begin{center}
+    $\displaystyle H(p) \;=\; -\,p\,\log_2 p \;-\; (1 - p)\,\log_2 (1 - p).$
+  \end{center}
+
+  \medskip
+  \emph{General urn with $K$ colours.}  Probabilities
+  $p_1, \ldots, p_K$ that sum to $1$:
+  \medskip
+  \begin{center}
+    $\displaystyle H(p_1, \ldots, p_K) \;=\; -\sum_{i = 1}^{K}\, p_i\,\log_2 p_i.$
+  \end{center}
+
+  \medskip
+  No compression scheme can describe an urn's draws in fewer than $H$
+  bits per ball.  Eckart and Young gave the floor for compressing a
+  matrix; entropy is the floor for compressing a sequence.
+
+  \medskip
+  \begin{center}
+    \scriptsize\itshape\color{mutedWarmGray}
+    The two-colour formula is the special case $K = 2$.  Both grow with
+    uniformity; the general formula also grows with the number of colours.
+  \end{center}
+\end{frame}
 
 % ---------------------------------------------------------------------
 % Scene 16 --- Bridge into the Epilogue

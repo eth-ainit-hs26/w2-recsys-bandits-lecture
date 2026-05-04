@@ -1,0 +1,251 @@
+% =====================================================================
+% Two ways to make a draw unpredictable.
+%
+% A 2x3 grid of urns built in pure TikZ, plus a shared horizontal
+% "entropy axis" running from 0 to 3 bits beneath the grid. Each urn
+% drops a coloured marker onto the axis at its entropy value, so the
+% audience sees the two effects (flatter shape AND more colours)
+% accumulating on a single common scale.
+%
+% Top row varies the SHAPE of a 2-colour distribution
+%   (19/1, 14/6, 10/10) -> H = 0.29, 0.88, 1.00 bits.
+% Bottom row keeps the distribution uniform and varies the NUMBER of
+% colours (K = 2, 4, 8) -> H = log2 K = 1, 2, 3 bits.
+%
+% Pure TikZ; no external assets. Assumes the AINIT-academic theme is
+% already loaded by the master deck.
+% =====================================================================
+
+% Wong cluster colors are defined inside act1_compression.tex; if this
+% slide is \input from a deck where that section has not been loaded
+% yet, we still need them. \providecolor avoids redefinition.
+\providecolor{clusterLF}{RGB}{230,159,0}    % orange
+\providecolor{clusterDF}{RGB}{0,158,115}    % bluish green
+\providecolor{clusterLN}{RGB}{204,121,167}  % reddish purple
+\providecolor{clusterDN}{RGB}{86,180,233}   % sky blue
+
+\begin{frame}{Two ways to make a draw unpredictable}
+
+\vspace{-0.6em}
+\begin{center}
+\begin{tikzpicture}[
+    every node/.style={inner sep=0pt},
+    urnoutline/.style={ink, line width=0.45pt, rounded corners=1pt},
+    urnfill/.style={mutedWarmGray!12},
+    rimfill/.style={mutedWarmGray!22},
+    ballstyle/.style={draw=ink, line width=0.20pt},
+    axislabel/.style={font=\scriptsize\itshape, color=mutedWarmGray},
+    rowtag/.style={font=\scshape\scriptsize, anchor=west},
+    valueR1/.style={font=\scriptsize\itshape, color=accentOxblood,
+                    anchor=north, align=center},
+    valueR2/.style={font=\scriptsize\itshape, color=accentPrussian,
+                    anchor=north, align=center},
+    captionUrn/.style={font=\scriptsize, color=mutedWarmGray,
+                       anchor=north},
+  ]
+
+  % -------------------------------------------------------------------
+  % Layout (post-shrink unit = cm).  Three columns at x = 0, 3.4, 6.8
+  % (cell centres). Urn body half-width = 0.78. Total picture width
+  % approximately 8.4 cm (within 12 cm body area).
+  %
+  % Vertical:
+  %   row1 tag         y =  3.20
+  %   row1 urn centre  y =  2.20  (body top 2.86, body bot 1.50)
+  %   H-value row1     y =  2.94  (just above body top, anchor=south)
+  %   row1 caption     y =  1.42  (just below body, anchor=north)
+  %   row2 tag         y =  0.65
+  %   row2 urn centre  y = -0.40  (body top 0.26, body bot -1.10)
+  %   H-value row2     y =  0.34  (just above body top)
+  %   row2 caption     y = -1.18  (just below body)
+  %   axis             y = -2.00
+  % -------------------------------------------------------------------
+
+  % ===================================================================
+  % Row tags above each row.
+  % ===================================================================
+  \node[rowtag, color=accentOxblood] at (-0.95, 3.35)
+    {row 1 \textemdash{} \itshape\normalfont two colours, vary the shape};
+  \node[rowtag, color=accentPrussian] at (-0.95, 0.75)
+    {row 2 \textemdash{} \itshape\normalfont uniform, vary the colour count};
+
+  % ===================================================================
+  % Reusable: urn body + rim, 1.56 cm wide x 1.36 cm tall, centred.
+  % Local coords: rim at y=0.60..0.74; body at y=-0.62..0.60.
+  % ===================================================================
+
+  % ===================================================================
+  % ROW 1.  Two-colour urns at three biases (5x4 grid of 20 balls).
+  % ===================================================================
+
+  % --- Cell 1A: 19 orange, 1 blue --------------------------------------
+  \begin{scope}[shift={(0, 2.20)}]
+    \fill[rimfill] (-0.84, 0.60) rectangle (0.84, 0.74);
+    \draw[urnoutline] (-0.84, 0.60) -- (-0.84, 0.74) -- (0.84, 0.74) -- (0.84, 0.60);
+    \fill[urnfill, rounded corners=2pt] (-0.78, -0.70) rectangle (0.78, 0.60);
+    \draw[urnoutline, rounded corners=2pt] (-0.78, -0.70) rectangle (0.78, 0.60);
+    \foreach \i in {0,1,2,3,4} {
+      \foreach \j in {0,1,2,3} {
+        \fill[clusterLF, ballstyle]
+          ($(-0.54, -0.45) + (\i*0.27, \j*0.27)$) circle (2.4pt);
+      }
+    }
+    \fill[clusterDN, ballstyle] (-0.54 + 2*0.27, -0.45 + 3*0.27) circle (2.4pt);
+  \end{scope}
+  \node[valueR1] at (0, 1.42) {$H = 0.29$ bits};
+
+  % --- Cell 1B: 14 orange, 6 blue --------------------------------------
+  \begin{scope}[shift={(3.4, 2.20)}]
+    \fill[rimfill] (-0.84, 0.60) rectangle (0.84, 0.74);
+    \draw[urnoutline] (-0.84, 0.60) -- (-0.84, 0.74) -- (0.84, 0.74) -- (0.84, 0.60);
+    \fill[urnfill, rounded corners=2pt] (-0.78, -0.70) rectangle (0.78, 0.60);
+    \draw[urnoutline, rounded corners=2pt] (-0.78, -0.70) rectangle (0.78, 0.60);
+    \foreach \i in {0,1,2,3,4} {
+      \foreach \j in {0,1} {
+        \fill[clusterLF, ballstyle]
+          ($(-0.54, -0.45) + (\i*0.27, \j*0.27)$) circle (2.4pt);
+      }
+    }
+    \foreach \i in {0,1,2,3} {
+      \fill[clusterLF, ballstyle]
+        ($(-0.54, -0.45) + (\i*0.27, 2*0.27)$) circle (2.4pt);
+    }
+    \fill[clusterDN, ballstyle]
+      ($(-0.54, -0.45) + (4*0.27, 2*0.27)$) circle (2.4pt);
+    \foreach \i in {0,1,2,3,4} {
+      \fill[clusterDN, ballstyle]
+        ($(-0.54, -0.45) + (\i*0.27, 3*0.27)$) circle (2.4pt);
+    }
+  \end{scope}
+  \node[valueR1] at (3.4, 1.42) {$H = 0.88$ bits};
+
+  % --- Cell 1C: 10 orange, 10 blue -------------------------------------
+  \begin{scope}[shift={(6.8, 2.20)}]
+    \fill[rimfill] (-0.84, 0.60) rectangle (0.84, 0.74);
+    \draw[urnoutline] (-0.84, 0.60) -- (-0.84, 0.74) -- (0.84, 0.74) -- (0.84, 0.60);
+    \fill[urnfill, rounded corners=2pt] (-0.78, -0.70) rectangle (0.78, 0.60);
+    \draw[urnoutline, rounded corners=2pt] (-0.78, -0.70) rectangle (0.78, 0.60);
+    \foreach \i in {0,1,2,3,4} {
+      \foreach \j in {0,1,2,3} {
+        \pgfmathtruncatemacro{\parity}{mod(\i+\j,2)}
+        \ifnum\parity=0
+          \fill[clusterLF, ballstyle]
+            ($(-0.54, -0.45) + (\i*0.27, \j*0.27)$) circle (2.4pt);
+        \else
+          \fill[clusterDN, ballstyle]
+            ($(-0.54, -0.45) + (\i*0.27, \j*0.27)$) circle (2.4pt);
+        \fi
+      }
+    }
+  \end{scope}
+  \node[valueR1] at (6.8, 1.42) {$H = 1.00$ bit};
+
+  % ===================================================================
+  % ROW 2.  Uniform urns of 2, 4, 8 colours (4x4 grid of 16 balls).
+  % ===================================================================
+
+  % --- Cell 2A: K=2 ----------------------------------------------------
+  \begin{scope}[shift={(0, -0.40)}]
+    \fill[rimfill] (-0.84, 0.60) rectangle (0.84, 0.74);
+    \draw[urnoutline] (-0.84, 0.60) -- (-0.84, 0.74) -- (0.84, 0.74) -- (0.84, 0.60);
+    \fill[urnfill, rounded corners=2pt] (-0.78, -0.70) rectangle (0.78, 0.60);
+    \draw[urnoutline, rounded corners=2pt] (-0.78, -0.70) rectangle (0.78, 0.60);
+    \foreach \i in {0,1,2,3} {
+      \foreach \j in {0,1,2,3} {
+        \pgfmathtruncatemacro{\parity}{mod(\i+\j,2)}
+        \ifnum\parity=0
+          \fill[clusterLF, ballstyle]
+            ($(-0.405, -0.405) + (\i*0.27, \j*0.27)$) circle (2.4pt);
+        \else
+          \fill[clusterDN, ballstyle]
+            ($(-0.405, -0.405) + (\i*0.27, \j*0.27)$) circle (2.4pt);
+        \fi
+      }
+    }
+  \end{scope}
+  \node[valueR2] at (0, -1.18) {$K = 2$, $H = 1$ bit};
+
+  % --- Cell 2B: K=4 ----------------------------------------------------
+  \begin{scope}[shift={(3.4, -0.40)}]
+    \fill[rimfill] (-0.84, 0.60) rectangle (0.84, 0.74);
+    \draw[urnoutline] (-0.84, 0.60) -- (-0.84, 0.74) -- (0.84, 0.74) -- (0.84, 0.60);
+    \fill[urnfill, rounded corners=2pt] (-0.78, -0.70) rectangle (0.78, 0.60);
+    \draw[urnoutline, rounded corners=2pt] (-0.78, -0.70) rectangle (0.78, 0.60);
+    \foreach \i/\c in {0/clusterLF, 1/clusterDF, 2/clusterLN, 3/clusterDN} {
+      \fill[\c, ballstyle] ($(-0.405, -0.405) + (\i*0.27, 0)$) circle (2.4pt);
+    }
+    \foreach \i/\c in {0/clusterDF, 1/clusterLN, 2/clusterDN, 3/clusterLF} {
+      \fill[\c, ballstyle] ($(-0.405, -0.405) + (\i*0.27, 0.27)$) circle (2.4pt);
+    }
+    \foreach \i/\c in {0/clusterLN, 1/clusterDN, 2/clusterLF, 3/clusterDF} {
+      \fill[\c, ballstyle] ($(-0.405, -0.405) + (\i*0.27, 0.54)$) circle (2.4pt);
+    }
+    \foreach \i/\c in {0/clusterDN, 1/clusterLF, 2/clusterDF, 3/clusterLN} {
+      \fill[\c, ballstyle] ($(-0.405, -0.405) + (\i*0.27, 0.81)$) circle (2.4pt);
+    }
+  \end{scope}
+  \node[valueR2] at (3.4, -1.18) {$K = 4$, $H = 2$ bits};
+
+  % --- Cell 2C: K=8 ----------------------------------------------------
+  % 8 distinct colours: 4 Wong clusters at full strength + same at 55%.
+  \begin{scope}[shift={(6.8, -0.40)}]
+    \fill[rimfill] (-0.84, 0.60) rectangle (0.84, 0.74);
+    \draw[urnoutline] (-0.84, 0.60) -- (-0.84, 0.74) -- (0.84, 0.74) -- (0.84, 0.60);
+    \fill[urnfill, rounded corners=2pt] (-0.78, -0.70) rectangle (0.78, 0.60);
+    \draw[urnoutline, rounded corners=2pt] (-0.78, -0.70) rectangle (0.78, 0.60);
+    \foreach \i/\c in {0/clusterLF, 1/clusterDF, 2/clusterLN, 3/clusterDN} {
+      \fill[\c, ballstyle] ($(-0.405, -0.405) + (\i*0.27, 0)$) circle (2.4pt);
+    }
+    \foreach \i/\c in {0/{clusterLF!55}, 1/{clusterDF!55}, 2/{clusterLN!55}, 3/{clusterDN!55}} {
+      \fill[\c, ballstyle] ($(-0.405, -0.405) + (\i*0.27, 0.27)$) circle (2.4pt);
+    }
+    \foreach \i/\c in {0/clusterDN, 1/clusterLN, 2/clusterDF, 3/clusterLF} {
+      \fill[\c, ballstyle] ($(-0.405, -0.405) + (\i*0.27, 0.54)$) circle (2.4pt);
+    }
+    \foreach \i/\c in {0/{clusterDN!55}, 1/{clusterLN!55}, 2/{clusterDF!55}, 3/{clusterLF!55}} {
+      \fill[\c, ballstyle] ($(-0.405, -0.405) + (\i*0.27, 0.81)$) circle (2.4pt);
+    }
+  \end{scope}
+  \node[valueR2] at (6.8, -1.18) {$K = 8$, $H = 3$ bits};
+
+  % ===================================================================
+  % SHARED ENTROPY AXIS.  Horizontal number line from 0 to 3 bits,
+  % spanning x = 0 to x = 6.8.  1 bit = 6.8/3 cm = 2.267 cm.
+  % Markers: row 1 = oxblood circles above, row 2 = prussian squares below.
+  % ===================================================================
+  \pgfmathsetmacro{\unit}{2.2667}  % cm per bit
+
+  \draw[ink, line width=0.45pt] (0, -2.00) -- (6.80, -2.00);
+  \foreach \b in {0,1,2,3} {
+    \draw[ink, line width=0.4pt] (\b*\unit, -1.95) -- (\b*\unit, -2.05);
+    \node[axislabel, anchor=north] at (\b*\unit, -2.10) {\b};
+  }
+  \node[axislabel, anchor=east] at (-0.10, -2.00) {entropy};
+  \node[axislabel, anchor=west] at (6.95, -2.00) {bits};
+
+  % Row 1 markers: oxblood circles above the line, slightly left-shifted.
+  \foreach \H in {0.286, 0.881, 1.000} {
+    \fill[accentOxblood] (\H*\unit - 0.07, -1.84) circle (2.3pt);
+    \draw[ink, line width=0.20pt] (\H*\unit - 0.07, -1.84) circle (2.3pt);
+  }
+  % Row 2 markers: prussian squares above the line, slightly right-shifted,
+  % so when row 1 and row 2 share an entropy value (H = 1) they appear
+  % side-by-side rather than overlapping.
+  \foreach \H in {1.000, 2.000, 3.000} {
+    \fill[accentPrussian]
+      (\H*\unit + 0.01, -1.90) rectangle ++(0.12, 0.12);
+    \draw[ink, line width=0.20pt]
+      (\H*\unit + 0.01, -1.90) rectangle ++(0.12, 0.12);
+  }
+
+\end{tikzpicture}
+\end{center}
+
+\vspace{-1.1em}
+\begin{center}
+{\itshape\color{mutedWarmGray}\footnotesize
+Entropy grows when the distribution flattens \emph{and} when more
+colours enter the urn. The two effects accumulate on the same scale of bits.}
+\end{center}
+
+\end{frame}

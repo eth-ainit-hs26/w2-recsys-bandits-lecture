@@ -60,3 +60,8 @@ venv/
 # Polybox / cloud-sync metadata (this folder lives inside polybox)
 .~lock.*
 ~$*
+
+# MovieLens raw data (re-downloaded by data/build_movielens_subset.py).
+# The processed subset lives in visualizations/shared/movielens_subset.json
+# and IS committed; the raw 5MB zip and its extracted files are not.
+data/movielens/

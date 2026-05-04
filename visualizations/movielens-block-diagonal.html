@@ -1,0 +1,431 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>MovieLens block-diagonal puzzle</title>
+  <link rel="stylesheet" href="shared/style.css">
+  <style>
+    .lede { color: var(--color-text-muted); max-width: 70ch; margin-bottom: 18px; }
+    .viz-card {
+      background: var(--color-card);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-card);
+      padding: 22px;
+      box-shadow: var(--shadow-card);
+      margin-bottom: 24px;
+    }
+    .controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 18px;
+      flex-wrap: wrap;
+    }
+    .controls button {
+      font: 500 0.9rem -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      padding: 8px 16px;
+      border: 1px solid var(--color-border);
+      border-radius: 6px;
+      background: white;
+      color: var(--color-text);
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .controls button:hover { border-color: var(--color-header-start); }
+    .controls button.active {
+      background: var(--color-header-start);
+      color: white;
+      border-color: var(--color-header-start);
+    }
+    .controls .hint {
+      color: var(--color-text-muted);
+      font-size: 0.86rem;
+      margin-left: auto;
+    }
+
+    /* Matrix layout */
+    .matrix-wrap {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 6px;
+      overflow-x: auto;
+    }
+    .matrix-canvas { position: relative; }
+    svg.matrix-svg { display: block; max-width: 100%; height: auto; }
+    text.col-label, text.row-label {
+      font: 11px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      fill: var(--color-text-muted);
+      transition: fill 0.2s;
+    }
+    text.col-label.active, text.row-label.active {
+      fill: var(--color-text);
+      font-weight: 600;
+    }
+    rect.cell {
+      stroke: white;
+      stroke-width: 1;
+      transition: opacity 0.4s ease;
+    }
+    rect.user-cluster-bar, rect.movie-cluster-bar {
+      transition: opacity 0.4s ease;
+    }
+
+    .legend {
+      display: flex; gap: 18px; flex-wrap: wrap;
+      font-size: 0.88rem; color: var(--color-text-muted);
+      margin-top: 14px;
+    }
+    .legend .item { display: inline-flex; align-items: center; gap: 6px; }
+    .legend .swatch {
+      display: inline-block;
+      width: 14px; height: 14px;
+      border-radius: 3px;
+      border: 1px solid var(--color-border);
+    }
+    .stat-row {
+      display: flex; gap: 24px; margin-top: 12px;
+      font-size: 0.88rem; color: var(--color-text-muted);
+    }
+    .stat-row strong { color: var(--color-text); font-weight: 600; }
+
+    .meta-card {
+      background: var(--color-neu-bg);
+      border-left: 3px solid var(--color-header-start);
+      border-radius: 6px;
+      padding: 14px 18px;
+      margin-top: 18px;
+      font-size: 0.92rem;
+    }
+    .meta-card h3 {
+      font-size: 0.95rem;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: var(--color-text);
+    }
+    .meta-card ul { list-style: none; padding-left: 0; }
+    .meta-card li { margin: 4px 0; }
+    .meta-card .cluster-name {
+      font-weight: 600;
+      margin-right: 6px;
+    }
+    .citation {
+      font-size: 0.82rem;
+      color: var(--color-text-muted);
+      margin-top: 22px;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body>
+  <header class="eth-header">
+    <div class="eth-logo">ETH<em>zürich</em></div>
+    <nav><a href="../">← Companion site</a></nav>
+  </header>
+
+  <main class="viz-container">
+    <h1>MovieLens block-diagonal puzzle</h1>
+    <p class="lede">
+      Real ratings, real users. The toy puzzle (Demo&nbsp;1) was rank-2 by
+      construction; here every cell is a real movie review from the public
+      <strong>MovieLens 100K</strong> dataset. The same trick (sort users
+      and movies by their latent factors) reveals the same block structure.
+    </p>
+
+    <div class="viz-card">
+      <div class="controls">
+        <button id="btnScrambled" class="active">Scrambled</button>
+        <button id="btnReveal">Reveal clusters</button>
+        <button id="btnLabels">Show cluster bars</button>
+        <span class="hint">Click a button to switch view.</span>
+      </div>
+
+      <div class="matrix-canvas">
+        <svg id="svg" class="matrix-svg" viewBox="0 0 1080 720"
+             preserveAspectRatio="xMidYMin meet" aria-label="rating matrix">
+        </svg>
+      </div>
+
+      <div class="legend">
+        <span class="item"><span class="swatch" style="background:#0072B2"></span>liked&nbsp;(rating &geq; user mean&nbsp;+&nbsp;0.5)</span>
+        <span class="item"><span class="swatch" style="background:#D55E00"></span>disliked&nbsp;(rating &leq; user mean&nbsp;&minus;&nbsp;0.5)</span>
+        <span class="item"><span class="swatch" style="background:#F2EAD3"></span>neutral</span>
+        <span class="item"><span class="swatch" style="background:#FFFFFF;border:1px dashed #CCC"></span>unrated</span>
+      </div>
+
+      <div class="stat-row">
+        <span><strong id="statUsers">&mdash;</strong> users</span>
+        <span><strong id="statMovies">&mdash;</strong> movies</span>
+        <span><strong id="statRatings">&mdash;</strong> observed ratings</span>
+        <span><strong id="statLikes">&mdash;</strong> likes vs <strong id="statDislikes">&mdash;</strong> dislikes</span>
+      </div>
+
+      <div class="meta-card">
+        <h3>Movie clusters in the reveal</h3>
+        <ul id="movieClusterList"></ul>
+      </div>
+    </div>
+
+    <aside style="font-size:0.95rem; color:var(--color-text); max-width:75ch;">
+      <h2 style="font-weight:600; margin-bottom:8px;">What you are seeing</h2>
+      <p>
+        Forty top-rated MovieLens users and twenty-eight movies, hand-curated
+        across four genres (Family, Action, Drama, Comedy). Each cell is a
+        real rating, mean-centred per user: a colour shows whether the user
+        liked the film <em>relative to their own usual</em>, not whether they
+        rated it high in absolute terms. (This strips out the &ldquo;everyone
+        rates high&rdquo; bias of MovieLens.)
+      </p>
+      <p style="margin-top:8px;">
+        In the scrambled view the matrix looks like noise. Click
+        <em>Reveal clusters</em> and the same matrix is now sorted by
+        <strong>k-means on the latent embeddings</strong> from a top-2 SVD.
+        Like-coloured cells cluster on the diagonal: each user cluster's
+        favourite movie cluster lights up.
+      </p>
+    </aside>
+
+    <p class="citation" id="citation">&mdash;</p>
+  </main>
+
+  <script>
+  // ----- load and render -----
+  fetch("shared/movielens_subset.json")
+    .then(r => r.json())
+    .then(render)
+    .catch(err => {
+      document.querySelector("main").innerHTML +=
+        "<p style='color:#c00'>Failed to load data: " + err + "</p>";
+      console.error(err);
+    });
+
+  function render(data) {
+    const N_U = data.n_users, N_M = data.n_movies;
+    document.getElementById("statUsers").textContent  = N_U;
+    document.getElementById("statMovies").textContent = N_M;
+
+    // Counts
+    let nLikes = 0, nDislikes = 0, nNeutral = 0, nNull = 0;
+    for (let i = 0; i < N_U; i++) {
+      for (let j = 0; j < N_M; j++) {
+        const v = data.matrix[i][j];
+        if      (v === 1) nLikes++;
+        else if (v === -1) nDislikes++;
+        else if (v === 0) nNeutral++;
+        else nNull++;
+      }
+    }
+    document.getElementById("statRatings").textContent = nLikes + nDislikes + nNeutral;
+    document.getElementById("statLikes").textContent = nLikes;
+    document.getElementById("statDislikes").textContent = nDislikes;
+
+    // Movie clusters list (in reveal order)
+    const cnames = data.cluster_names;
+    const list = document.getElementById("movieClusterList");
+    data.movie_clusters.forEach((mc, idx) => {
+      const li = document.createElement("li");
+      const movies = data.movies
+        .filter(m => m.cluster === mc.cluster)
+        .map(m => m.title.replace(/\s*\(\d{4}\)$/, ""))
+        .slice(0, 4);
+      li.innerHTML = `<span class="cluster-name" style="color:${clusterColor(idx)}">${mc.name}:</span>` +
+                     movies.join(", ") + (mc.n > 4 ? `, &hellip; (${mc.n} total)` : "");
+      list.appendChild(li);
+    });
+
+    document.getElementById("citation").textContent =
+      data.source.citation + " " + data.source.url;
+
+    // Geometry
+    const PADDING_T  = 130, PADDING_L = 130;
+    const CELL_W = 26, CELL_H = 11;
+    const W = PADDING_L + N_M * CELL_W + 110;
+    const H = PADDING_T + N_U * CELL_H + 30;
+
+    const svg = document.getElementById("svg");
+    svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+
+    // Build cells
+    let scrambled = { user: [...Array(N_U).keys()], movie: [...Array(N_M).keys()] };
+    let reveal = { user: data.reveal.user_order, movie: data.reveal.movie_order };
+
+    // Two state arrays: rowOrder and colOrder, what we render right now.
+    let rowOrder = scrambled.user.slice();
+    let colOrder = scrambled.movie.slice();
+    let labelsOn = false;
+
+    // Static elements (built once)
+    const ns = "http://www.w3.org/2000/svg";
+
+    // Movie column labels
+    const colLabels = [];
+    for (let j = 0; j < N_M; j++) {
+      const t = document.createElementNS(ns, "text");
+      t.setAttribute("x", PADDING_L + j * CELL_W + CELL_W / 2);
+      t.setAttribute("y", PADDING_T - 8);
+      t.setAttribute("text-anchor", "start");
+      t.setAttribute("transform",
+        `rotate(-55, ${PADDING_L + j * CELL_W + CELL_W / 2}, ${PADDING_T - 8})`);
+      t.setAttribute("class", "col-label");
+      svg.appendChild(t);
+      colLabels.push(t);
+    }
+    // Reader row labels
+    const rowLabels = [];
+    for (let i = 0; i < N_U; i++) {
+      const t = document.createElementNS(ns, "text");
+      t.setAttribute("x", PADDING_L - 6);
+      t.setAttribute("y", PADDING_T + i * CELL_H + CELL_H / 2 + 3);
+      t.setAttribute("text-anchor", "end");
+      t.setAttribute("class", "row-label");
+      svg.appendChild(t);
+      rowLabels.push(t);
+    }
+
+    // Cells
+    const cells = [];
+    for (let i = 0; i < N_U; i++) {
+      for (let j = 0; j < N_M; j++) {
+        const r = document.createElementNS(ns, "rect");
+        r.setAttribute("class", "cell");
+        r.setAttribute("width",  CELL_W - 1);
+        r.setAttribute("height", CELL_H - 1);
+        svg.appendChild(r);
+        cells.push({ i, j, el: r });
+      }
+    }
+
+    // Cluster bars (drawn but hidden until "Show cluster bars")
+    const userBarG = document.createElementNS(ns, "g");
+    const movieBarG = document.createElementNS(ns, "g");
+    svg.appendChild(userBarG);
+    svg.appendChild(movieBarG);
+
+    function clusterColor(orderedIdx) {
+      const palette = ["#56B4E9", "#E69F00", "#009E73", "#CC79A7"];
+      return palette[orderedIdx % palette.length];
+    }
+
+    function fillFor(value) {
+      if (value === 1)  return "#0072B2";   // blue
+      if (value === -1) return "#D55E00";   // vermillion
+      if (value === 0)  return "#F2EAD3";   // light cream/neutral
+      return "#FFFFFF";                     // unrated
+    }
+
+    function update() {
+      // Update labels
+      for (let j = 0; j < N_M; j++) {
+        const mid = colOrder[j];
+        colLabels[j].textContent = data.movies[mid].title.replace(/\s*\(\d{4}\)$/, "");
+      }
+      for (let i = 0; i < N_U; i++) {
+        const uid = rowOrder[i];
+        rowLabels[i].textContent = "user " + data.users[uid].id;
+      }
+
+      // Update cell positions and colors
+      for (const c of cells) {
+        const ri = rowOrder.indexOf(c.i);
+        const cj = colOrder.indexOf(c.j);
+        c.el.setAttribute("x", PADDING_L + cj * CELL_W);
+        c.el.setAttribute("y", PADDING_T + ri * CELL_H);
+        const v = data.matrix[c.i][c.j];
+        c.el.setAttribute("fill", fillFor(v));
+        c.el.setAttribute("opacity", v === null ? 0.20 : 1.0);
+      }
+
+      // Update cluster bars: visible only in reveal mode if labelsOn
+      userBarG.innerHTML = "";
+      movieBarG.innerHTML = "";
+      const inReveal = (rowOrder === reveal.user || rowOrder.toString() === reveal.user.toString())
+                  && (colOrder === reveal.movie || colOrder.toString() === reveal.movie.toString());
+      if (labelsOn && inReveal) {
+        // Movie cluster bars (top): coloured strips above the matrix
+        let cursor = 0;
+        data.movie_clusters.forEach((mc, idx) => {
+          const r = document.createElementNS(ns, "rect");
+          r.setAttribute("x", PADDING_L + cursor * CELL_W);
+          r.setAttribute("y", PADDING_T - 16);
+          r.setAttribute("width", mc.n * CELL_W - 2);
+          r.setAttribute("height", 6);
+          r.setAttribute("fill", clusterColor(idx));
+          r.setAttribute("opacity", 0.7);
+          movieBarG.appendChild(r);
+
+          const t = document.createElementNS(ns, "text");
+          t.setAttribute("x", PADDING_L + (cursor + mc.n / 2) * CELL_W);
+          t.setAttribute("y", PADDING_T - 22);
+          t.setAttribute("text-anchor", "middle");
+          t.setAttribute("font-size", "10");
+          t.setAttribute("font-weight", "600");
+          t.setAttribute("fill", clusterColor(idx));
+          t.textContent = mc.name;
+          movieBarG.appendChild(t);
+
+          cursor += mc.n;
+        });
+
+        // User cluster bars (left)
+        cursor = 0;
+        data.user_clusters.forEach((uc, idx) => {
+          const r = document.createElementNS(ns, "rect");
+          r.setAttribute("x", PADDING_L - 16);
+          r.setAttribute("y", PADDING_T + cursor * CELL_H);
+          r.setAttribute("width", 6);
+          r.setAttribute("height", uc.n * CELL_H - 2);
+          r.setAttribute("fill", clusterColor(idx));
+          r.setAttribute("opacity", 0.7);
+          userBarG.appendChild(r);
+          cursor += uc.n;
+        });
+      }
+    }
+
+    update();
+
+    // Auto-trigger via URL hash for screenshots / deep-links
+    if (location.hash === "#reveal" || location.hash === "#reveal-labels") {
+      rowOrder = reveal.user.slice();
+      colOrder = reveal.movie.slice();
+      setActive("btnReveal");
+      if (location.hash === "#reveal-labels") {
+        labelsOn = true;
+        document.getElementById("btnLabels").classList.add("active");
+      }
+      update();
+    }
+
+    document.getElementById("btnScrambled").addEventListener("click", () => {
+      rowOrder = scrambled.user.slice();
+      colOrder = scrambled.movie.slice();
+      setActive("btnScrambled");
+      update();
+    });
+    document.getElementById("btnReveal").addEventListener("click", () => {
+      rowOrder = reveal.user.slice();
+      colOrder = reveal.movie.slice();
+      setActive("btnReveal");
+      update();
+    });
+    document.getElementById("btnLabels").addEventListener("click", () => {
+      labelsOn = !labelsOn;
+      const btn = document.getElementById("btnLabels");
+      btn.classList.toggle("active", labelsOn);
+      update();
+    });
+  }
+
+  function setActive(id) {
+    document.querySelectorAll(".controls button").forEach(b => {
+      if (b.id === "btnLabels") return;       // handled separately
+      b.classList.toggle("active", b.id === id);
+    });
+  }
+
+  function clusterColor(orderedIdx) {
+    return ["#56B4E9", "#E69F00", "#009E73", "#CC79A7"][orderedIdx % 4];
+  }
+  </script>
+</body>
+</html>
