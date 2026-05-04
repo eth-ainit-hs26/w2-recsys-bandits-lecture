@@ -22,7 +22,10 @@ Specifically:
 
 ```
 .
-├── index.html                  Unified landing page (entry point on GitHub Pages)
+├── index.html                  Live lecture-companion page on GitHub Pages
+│                               (10 numbered demos in the order the
+│                                lecturer visits them; secondary section
+│                                for slides PDF, bonus viz, and source).
 ├── README.md                   Short, points here
 ├── CLAUDE.md                   This file
 ├── NARRATIVE_PLAN.md           THE source of truth — 27 scenes, 6 equations, 7 citations
@@ -80,7 +83,7 @@ bash build.sh
 # → produces lecture.pdf via lualatex (two passes)
 ```
 
-Requirements: **LuaLaTeX** (MacTeX or TeX Live 2024+), with the `ebgaramond`, `unicode-math`, `tikz`, `etoolbox`, `appendixnumberbeamer`, `microtype`, `xcolor` packages. The build script sets `TEXINPUTS=../theme/ainit-academic:` so `\usetheme{AINITAcademic}` resolves.
+Requirements: **LuaLaTeX** (MacTeX or TeX Live 2024+), with the `ebgaramond`, `unicode-math`, `tikz`, `etoolbox`, `appendixnumberbeamer`, `microtype`, `xcolor`, and `qrcode` packages. The build script sets `TEXINPUTS=../theme/ainit-academic:` so `\usetheme{AINITAcademic}` resolves. The `qrcode` package powers slide&nbsp;2 (the companion-site QR).
 
 The theme expects `EB Garamond`, `Latin Modern Math`, and falls back to `TeX Gyre Heros` for any sans chrome. If you want the real ETH wordmark instead of the small-caps text fallback on the title slide, drop the asset into `theme/ainit-academic/` and edit one `\node` in `beamerinnerthemeAINITAcademic.sty`.
 
@@ -114,6 +117,7 @@ URL hash deep-linking is supported on the Customer-Urns Carousel: `customer-urns
 6. **Six equations, no more.** They are listed in `NARRATIVE_PLAN.md` § cross-cutting threads.
 7. **Seven citations, no more.** Listed in `slides/references.tex` and the same § of the narrative plan.
 8. **Funes opens and Funes closes.** Borges' epigraph at scene 2 returns inverted at scene 27. Do not break this loop.
+9. **`\vizhandoff{N}{Title}` is two arguments.** The first is the demo number (1–10), the second is the human-readable title. The slide shows "Demo N / 10 — Title" so participants can match it to the same numbered card on `index.html`.
 
 ## How the lecture was built (May 2026, condensed)
 

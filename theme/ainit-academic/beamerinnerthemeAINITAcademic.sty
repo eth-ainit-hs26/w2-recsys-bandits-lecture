@@ -165,24 +165,31 @@
 }
 
 % --- Viz handoff slide ---------------------------------------------------
-% Inverse colors: ink background, cream text. Centered serif italic.
-% The argument is the human-readable demo title shown to the audience,
-% e.g. \vizhandoff{Block-diagonal puzzle}.  The underlying viz HTML file
-% is opened by the lecturer manually; the slide does not display it.
-\newcommand{\vizhandoff}[1]{%
+% Inverse colors: ink background, cream text.  Centered serif italic.
+% Two arguments:
+%   #1 = demo number (1--10) shown as "Demo N / 10"
+%   #2 = human-readable demo title shown to the audience
+% e.g. \vizhandoff{1}{Block-diagonal puzzle}.  The number cross-references
+% the same numbered card on the lecture's companion website.
+\newcommand{\vizhandoff}[2]{%
   {%
     \setbeamercolor{background canvas}{bg=ink}
     \setbeamercolor{normal text}{fg=bgCream, bg=ink}
     \begin{frame}[plain, noframenumbering]
       \begin{tikzpicture}[remember picture, overlay]
         \node[anchor=center,
-              text width=.7\paperwidth,
+              text width=.78\paperwidth,
               align=center,
               text=bgCream,
               inner sep=0pt] at (current page.center) {%
           {\rmfamily\itshape\large Now switching to:\par}%
-          \vspace{1em}%
-          {\rmfamily\large #1\par}%
+          \vspace{1.0em}%
+          {\rmfamily\large\bfseries Demo #1 \,/\, 10\par}%
+          \vspace{0.4em}%
+          {\rmfamily\large #2\par}%
+          \vspace{1.6em}%
+          {\rmfamily\itshape\footnotesize\color{bgCream!55!ink}%
+           open card \emph{Demo #1} on the companion site\par}%
         };
       \end{tikzpicture}%
     \end{frame}%

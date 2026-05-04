@@ -3,11 +3,13 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Two Engines · AI in Industry · W2</title>
+  <title>Recommendation Systems and Bandits · Companion site</title>
+  <meta name="description" content="Live companion to the W2 lecture on recommendation systems and bandits, AI in Industry, ETH Zurich. Ten interactive demos in lecture order.">
   <style>
     :root {
       /* CVD-safe Okabe-Ito palette + AINIT-academic accents */
       --bg:        #FAF7F0;
+      --paper:     #FFFFFF;
       --ink:       #1A1A1A;
       --muted:     #6E665C;
       --rule:      #E5DFD3;
@@ -15,10 +17,12 @@
       --prussian:  #1B365D;
       --pos:       #0072B2;
       --neg:       #D55E00;
-      --fiction:   #CC79A7;
-      --nonfiction:#E69F00;
-      --light:     #56B4E9;
-      --demanding: #009E73;
+      /* act stripes */
+      --act1:      #56B4E9;
+      --act2:      #CC79A7;
+      --interlude: #009E73;
+      --epilogue:  #722F37;
+      --bonus:     #E69F00;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     html, body {
@@ -29,17 +33,21 @@
       line-height: 1.5;
       -webkit-font-smoothing: antialiased;
     }
-    a { color: var(--prussian); text-decoration: none; border-bottom: 1px solid transparent; transition: border-color 0.15s; }
+    a {
+      color: var(--prussian);
+      text-decoration: none;
+      border-bottom: 1px solid transparent;
+      transition: border-color 0.15s;
+    }
     a:hover { border-bottom-color: var(--prussian); }
     em { font-style: italic; }
-
-    .page-frame {
-      max-width: 980px;
-      margin: 0 auto;
-      padding: 64px 36px 96px;
+    code, .mono {
+      font-family: "SF Mono", Menlo, Consolas, monospace;
     }
+
+    /* ---------- frame ---------- */
     header.eth-band {
-      max-width: 980px;
+      max-width: 1080px;
       margin: 0 auto;
       padding: 18px 36px 6px;
       display: flex;
@@ -50,14 +58,25 @@
       letter-spacing: 0.5px;
     }
     header.eth-band .wordmark { font-weight: 700; color: var(--ink); }
-    header.eth-band .wordmark em { font-weight: 400; font-style: italic; margin-left: 1px; }
+    header.eth-band .wordmark em {
+      font-weight: 400; font-style: italic; margin-left: 1px;
+    }
+    main {
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 24px 36px 96px;
+    }
 
+    /* ---------- hero ---------- */
+    .hero {
+      margin-bottom: 56px;
+    }
     h1.title {
       font-size: 3.2rem;
       font-weight: 400;
       letter-spacing: -0.5px;
-      line-height: 1.1;
-      margin-bottom: 6px;
+      line-height: 1.05;
+      margin-bottom: 8px;
     }
     p.subtitle {
       font-size: 1.35rem;
@@ -65,309 +84,416 @@
       color: var(--muted);
       margin-bottom: 28px;
     }
-    p.lede {
-      font-size: 1.1rem;
-      max-width: 65ch;
-      margin-bottom: 20px;
-    }
-    p.lede em.kw { color: var(--oxblood); font-style: italic; }
-
     p.byline {
       font-variant: small-caps;
       letter-spacing: 1.5px;
       color: var(--muted);
       font-size: 0.85rem;
-      margin-bottom: 64px;
+      margin-bottom: 36px;
+    }
+    .lede {
+      background: var(--paper);
+      border: 1px solid var(--rule);
+      border-left: 3px solid var(--oxblood);
+      padding: 18px 22px;
+      max-width: 70ch;
+      margin-bottom: 24px;
+    }
+    .lede p { margin-bottom: 10px; }
+    .lede p:last-child { margin-bottom: 0; }
+    .lede strong {
+      color: var(--oxblood);
+      font-weight: 600;
     }
 
+    /* ---------- section headings ---------- */
     h2.section {
-      font-size: 1.5rem;
+      font-size: 1.6rem;
       font-weight: 500;
-      margin: 56px 0 4px;
+      margin: 64px 0 4px;
       letter-spacing: -0.3px;
     }
     h2.section + .underline {
-      width: 80px;
+      width: 100px;
       height: 1px;
       background: var(--oxblood);
+      margin-bottom: 18px;
+    }
+    p.section-intro {
+      color: var(--muted);
       margin-bottom: 22px;
+      max-width: 70ch;
     }
-    h3.subsection {
-      font-size: 1.05rem;
-      font-weight: 500;
-      font-variant: small-caps;
-      letter-spacing: 1px;
-      color: var(--oxblood);
-      margin: 28px 0 12px;
-    }
-    p.section-intro { color: var(--muted); margin-bottom: 14px; max-width: 65ch; }
 
-    /* Card grid for viz tiles */
-    .grid {
+    /* ---------- demo grid ---------- */
+    .demos {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 14px;
+      grid-template-columns: repeat(auto-fill, minmax(305px, 1fr));
+      gap: 16px;
     }
-    .card {
-      display: block;
-      background: white;
+    a.demo {
+      display: flex;
+      flex-direction: column;
+      background: var(--paper);
       border: 1px solid var(--rule);
+      border-left-width: 4px;
       border-radius: 8px;
-      padding: 14px 16px 16px;
+      padding: 16px 18px 18px;
       color: inherit;
-      border-bottom: 1px solid var(--rule);
       transition: transform 0.15s, border-color 0.15s, box-shadow 0.15s;
+      position: relative;
     }
-    .card:hover {
+    a.demo:hover {
       transform: translateY(-2px);
-      border-color: var(--oxblood);
       box-shadow: 0 6px 14px rgba(114, 47, 55, 0.08);
+      border-color: var(--oxblood);
+      border-left-color: var(--oxblood);
     }
-    .card .scene {
+    a.demo:hover .arrow { color: var(--oxblood); transform: translateX(2px); }
+    .demo-head {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+    .demo-num {
+      font-variant: small-caps;
+      letter-spacing: 1.5px;
+      font-weight: 600;
+      color: var(--ink);
+      font-size: 0.85rem;
+    }
+    .demo-num .of {
+      color: var(--muted);
+      font-weight: 400;
+      letter-spacing: 1px;
+    }
+    .demo-act {
       font-variant: small-caps;
       letter-spacing: 1px;
+      font-size: 0.72rem;
       color: var(--muted);
-      font-size: 0.78rem;
-      margin-bottom: 4px;
     }
-    .card .name {
+    .demo-title {
+      font-size: 1.15rem;
       font-weight: 500;
-      font-size: 1.05rem;
-      margin-bottom: 4px;
+      margin-bottom: 8px;
+      letter-spacing: -0.2px;
     }
-    .card .blurb {
+    .demo-blurb {
       color: var(--muted);
-      font-size: 0.9rem;
-      line-height: 1.4;
+      font-size: 0.92rem;
+      line-height: 1.45;
+      flex-grow: 1;
+      margin-bottom: 10px;
+    }
+    .demo-foot {
+      font-size: 0.82rem;
+      color: var(--muted);
+      font-style: italic;
+      margin-top: auto;
+    }
+    .demo-foot .arrow {
+      color: var(--prussian);
+      font-style: normal;
+      font-weight: 600;
+      transition: color 0.15s, transform 0.15s;
+      display: inline-block;
     }
 
-    /* Tag stripe colors per quadrant / section */
-    .tag-act1 { border-left: 3px solid var(--light); }
-    .tag-interlude { border-left: 3px solid var(--demanding); }
-    .tag-act2 { border-left: 3px solid var(--fiction); }
-    .tag-epilogue { border-left: 3px solid var(--oxblood); }
-    .tag-bonus { border-left: 3px solid var(--nonfiction); }
+    /* act-coloured left stripe */
+    a.demo[data-act="act1"]      { border-left-color: var(--act1); }
+    a.demo[data-act="act2"]      { border-left-color: var(--act2); }
+    a.demo[data-act="interlude"] { border-left-color: var(--interlude); }
+    a.demo[data-act="epilogue"]  { border-left-color: var(--epilogue); }
+    a.demo[data-act="bonus"]     { border-left-color: var(--bonus); }
 
-    .docs ul { list-style: none; }
-    .docs li { padding: 6px 0; border-bottom: 1px dashed var(--rule); }
-    .docs li:last-child { border-bottom: none; }
-    .docs li .file { font-family: "SF Mono", Menlo, Consolas, monospace; font-size: 0.95rem; color: var(--ink); }
-    .docs li .desc { color: var(--muted); margin-left: 8px; font-size: 0.93rem; }
-
+    /* ---------- secondary list (slides + bonus + source) ---------- */
+    .more-cols {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 28px;
+      margin-top: 12px;
+    }
+    .more-card h3 {
+      font-size: 1.0rem;
+      font-weight: 500;
+      font-variant: small-caps;
+      letter-spacing: 1.2px;
+      color: var(--oxblood);
+      margin-bottom: 8px;
+    }
+    .more-card p, .more-card ul {
+      font-size: 0.92rem;
+      color: var(--muted);
+      max-width: 60ch;
+    }
+    .more-card ul { list-style: none; }
+    .more-card li {
+      padding: 5px 0;
+      border-bottom: 1px dashed var(--rule);
+    }
+    .more-card li:last-child { border-bottom: none; }
+    .more-card li a { color: var(--ink); }
+    .more-card li a:hover { color: var(--oxblood); border-bottom-color: var(--oxblood); }
     .pdf-link {
       display: inline-block;
-      padding: 10px 18px;
+      padding: 8px 14px;
       background: var(--ink);
       color: var(--bg);
       border-radius: 6px;
       font-style: italic;
-      margin-right: 10px;
-      margin-bottom: 8px;
+      font-size: 0.9rem;
     }
-    .pdf-link:hover { background: var(--oxblood); border-color: transparent; }
+    .pdf-link:hover { background: var(--oxblood); border-bottom-color: transparent; }
 
+    /* ---------- footer ---------- */
     footer {
       margin-top: 96px;
-      padding-top: 24px;
+      padding-top: 22px;
       border-top: 1px solid var(--rule);
       color: var(--muted);
       font-size: 0.85rem;
-      max-width: 65ch;
+      max-width: 70ch;
     }
-    footer p { margin-bottom: 6px; }
+    footer p { margin-bottom: 8px; }
+
+    @media (max-width: 540px) {
+      h1.title { font-size: 2.4rem; }
+      p.subtitle { font-size: 1.1rem; }
+      main { padding: 20px 22px 64px; }
+      .demos { grid-template-columns: 1fr; }
+    }
   </style>
 </head>
 <body>
   <header class="eth-band">
     <span class="wordmark">ETH<em>zürich</em></span>
-    <span>AI in Industry · W2</span>
+    <span>AI in Industry · Week 2 · Spring 2026</span>
   </header>
 
-  <main class="page-frame">
+  <main>
+    <section class="hero">
+      <h1 class="title">Recommendation Systems<br>and Bandits</h1>
+      <p class="subtitle">Memory, prediction, and the difference between them.</p>
+      <p class="byline">Carlos Cotrini · ETH Zürich</p>
 
-    <h1 class="title">Two Engines</h1>
-    <p class="subtitle">Memory, prediction, and the difference between them.</p>
+      <div class="lede">
+        <p>
+          This is the <strong>live companion</strong> to the lecture.
+          The ten interactive demos below are numbered <strong>in the
+          order the lecturer will visit them.</strong> When the
+          slide says <em>Demo&nbsp;N</em>, click card <em>Demo&nbsp;N</em>.
+        </p>
+        <p>
+          Each card opens in a new tab, so you can return here between
+          demos. No installation, no login. Each demo runs entirely in
+          your browser.
+        </p>
+      </div>
+    </section>
 
-    <p class="lede">
-      A 90-minute lecture on recommendation systems and bandits, told around a single
-      question. <em class="kw">Compression</em> — the shortest faithful description of the
-      past — and <em class="kw">prediction</em> — the best bet about the future — are two
-      views of the same subject, governed by Shannon's 1948 theorems. We build them in
-      two halves and collapse them in the third.
-    </p>
+    <h2 class="section">The ten demos</h2><div class="underline"></div>
 
-    <p class="byline">Carlos Cotrini · ETH Zürich · Spring 2026</p>
+    <div class="demos">
+      <a class="demo" data-act="act1" target="_blank" rel="noopener"
+         href="visualizations/01_block-diagonal-puzzle.html">
+        <div class="demo-head">
+          <span class="demo-num">Demo 1<span class="of"> / 10</span></span>
+          <span class="demo-act">Act I · Compression</span>
+        </div>
+        <div class="demo-title">Block-diagonal puzzle</div>
+        <div class="demo-blurb">
+          Drag rows and columns of a scrambled rating matrix until
+          four clean blocks emerge. Compression by hand.
+        </div>
+        <div class="demo-foot">open in new tab <span class="arrow">→</span></div>
+      </a>
 
-    <!-- ============== SLIDES ============== -->
-    <h2 class="section">Slides</h2><div class="underline"></div>
+      <a class="demo" data-act="act1" target="_blank" rel="noopener"
+         href="visualizations/02_latent-axes-lab.html">
+        <div class="demo-head">
+          <span class="demo-num">Demo 2<span class="of"> / 10</span></span>
+          <span class="demo-act">Act I · Compression</span>
+        </div>
+        <div class="demo-title">Latent-axes lab</div>
+        <div class="demo-blurb">
+          Sixteen books in a 2-D plane. Swap and flip the axes; the
+          geometry survives, the names do not.
+        </div>
+        <div class="demo-foot">open in new tab <span class="arrow">→</span></div>
+      </a>
+
+      <a class="demo" data-act="act1" target="_blank" rel="noopener"
+         href="visualizations/spectral-microscope.html">
+        <div class="demo-head">
+          <span class="demo-num">Demo 3<span class="of"> / 10</span></span>
+          <span class="demo-act">Act I · Compression</span>
+        </div>
+        <div class="demo-title">Spectral microscope</div>
+        <div class="demo-blurb">
+          SVD as a slider. Watch the matrix sharpen as <em>k</em>
+          grows from 1; the elbow at <em>k</em>=2 is Eckart-Young.
+        </div>
+        <div class="demo-foot">open in new tab <span class="arrow">→</span></div>
+      </a>
+
+      <a class="demo" data-act="act1" target="_blank" rel="noopener"
+         href="visualizations/customer-urns-carousel.html">
+        <div class="demo-head">
+          <span class="demo-num">Demo 4<span class="of"> / 10</span></span>
+          <span class="demo-act">Act I · Compression</span>
+        </div>
+        <div class="demo-title">Customer-urns carousel</div>
+        <div class="demo-blurb">
+          Twenty-one urns; click to draw, then collapse to four
+          archetype urns. Stage&nbsp;3 introduces the cold-start
+          reader.
+        </div>
+        <div class="demo-foot">open in new tab <span class="arrow">→</span></div>
+      </a>
+
+      <a class="demo" data-act="act1" target="_blank" rel="noopener"
+         href="visualizations/07_embeddings-that-learn.html">
+        <div class="demo-head">
+          <span class="demo-num">Demo 5<span class="of"> / 10</span></span>
+          <span class="demo-act">Act I · Compression</span>
+        </div>
+        <div class="demo-title">Embeddings that learn</div>
+        <div class="demo-blurb">
+          Random embeddings, gradient descent. Watch the four-corner
+          geometry self-organise. Re-seed and watch it again.
+        </div>
+        <div class="demo-foot">open in new tab <span class="arrow">→</span></div>
+      </a>
+
+      <a class="demo" data-act="act2" target="_blank" rel="noopener"
+         href="visualizations/three-urn-casino.html">
+        <div class="demo-head">
+          <span class="demo-num">Demo 6<span class="of"> / 10</span></span>
+          <span class="demo-act">Act II · Prediction</span>
+        </div>
+        <div class="demo-title">Three-urn casino</div>
+        <div class="demo-blurb">
+          Three campaigns, three hidden conversion rates. Play
+          30&nbsp;rounds, then watch &epsilon;-greedy and naive
+          replay your seed.
+        </div>
+        <div class="demo-foot">open in new tab <span class="arrow">→</span></div>
+      </a>
+
+      <a class="demo" data-act="act2" target="_blank" rel="noopener"
+         href="visualizations/algorithm_stadium.html">
+        <div class="demo-head">
+          <span class="demo-num">Demo 7<span class="of"> / 10</span></span>
+          <span class="demo-act">Act II · Prediction</span>
+        </div>
+        <div class="demo-title">Algorithm stadium</div>
+        <div class="demo-blurb">
+          Same urns, same rounds. Five strategies racing on cumulative
+          regret &mdash; with a slider for the explore parameter.
+        </div>
+        <div class="demo-foot">open in new tab <span class="arrow">→</span></div>
+      </a>
+
+      <a class="demo" data-act="act2" target="_blank" rel="noopener"
+         href="visualizations/distinguishability-dial.html">
+        <div class="demo-head">
+          <span class="demo-num">Demo 8<span class="of"> / 10</span></span>
+          <span class="demo-act">Act II · Prediction</span>
+        </div>
+        <div class="demo-title">Distinguishability dial</div>
+        <div class="demo-blurb">
+          Two urns, slider for the gap. Sample size explodes
+          quadratically as the urns approach each other.
+        </div>
+        <div class="demo-foot">open in new tab <span class="arrow">→</span></div>
+      </a>
+
+      <a class="demo" data-act="interlude" target="_blank" rel="noopener"
+         href="visualizations/entropy-mountain.html">
+        <div class="demo-head">
+          <span class="demo-num">Demo 9<span class="of"> / 10</span></span>
+          <span class="demo-act">Interlude · Shannon</span>
+        </div>
+        <div class="demo-title">Entropy mountain</div>
+        <div class="demo-blurb">
+          Drag an urn's bias from 0 to 1 and trace
+          <em>H(p)</em>. The compression floor, made physical.
+        </div>
+        <div class="demo-foot">open in new tab <span class="arrow">→</span></div>
+      </a>
+
+      <a class="demo" data-act="epilogue" target="_blank" rel="noopener"
+         href="visualizations/compression-prediction-twin.html">
+        <div class="demo-head">
+          <span class="demo-num">Demo 10<span class="of"> / 10</span></span>
+          <span class="demo-act">Epilogue · Duality</span>
+        </div>
+        <div class="demo-title">Compression-prediction twin</div>
+        <div class="demo-blurb">
+          A forecaster on the left, an arithmetic encoder on the
+          right. Three modes: binary urn, English text, character-level
+          Markov LM. Loss = rate, bit-exact.
+        </div>
+        <div class="demo-foot">open in new tab <span class="arrow">→</span></div>
+      </a>
+    </div>
+
+    <h2 class="section">More material</h2><div class="underline"></div>
     <p class="section-intro">
-      Compiled with the custom <em>ainit-academic</em> Beamer theme; LuaLaTeX,
-      EB&nbsp;Garamond. Forty-one slides plus references.
-    </p>
-    <a class="pdf-link" href="slides/lecture.pdf">Lecture PDF (41 pp)</a>
-    <a class="pdf-link" href="theme/ainit-academic/demo.pdf">Theme demo (7 pp)</a>
-
-    <!-- ============== VISUALIZATIONS ============== -->
-    <h2 class="section">Visualizations</h2><div class="underline"></div>
-    <p class="section-intro">
-      Eighteen single-file interactive HTML pieces, each opens directly in a modern browser
-      (no server). The ten anchored to the lecture's twenty-seven scenes are listed first,
-      grouped by act; eight bonus pieces from the earlier draft of the recsys deck sit at
-      the bottom.
+      Slides, bonus visualisations, and the source documents that the
+      lecture is built on.
     </p>
 
-    <h3 class="subsection">Act I — Compression (recsys)</h3>
-    <div class="grid">
-      <a class="card tag-act1" href="visualizations/01_block-diagonal-puzzle.html">
-        <div class="scene">Scene 5</div>
-        <div class="name">Block-diagonal puzzle</div>
-        <div class="blurb">Drag rows and columns until the four-quadrant clustering reveals itself. Compression by hand.</div>
-      </a>
-      <a class="card tag-act1" href="visualizations/02_latent-axes-lab.html">
-        <div class="scene">Scene 7</div>
-        <div class="name">Latent-axes lab</div>
-        <div class="blurb">Sixteen books in a 2-D plane. Swap and flip the axes — the geometry is invariant; the names are not.</div>
-      </a>
-      <a class="card tag-act1" href="visualizations/spectral-microscope.html">
-        <div class="scene">Scene 9</div>
-        <div class="name">Spectral microscope</div>
-        <div class="blurb">SVD as a slider. Watch the matrix sharpen as <em>k</em> grows from 1; the elbow at <em>k</em>&nbsp;=&nbsp;2 is Eckart-Young.</div>
-      </a>
-      <a class="card tag-act1" href="visualizations/customer-urns-carousel.html">
-        <div class="scene">Scene 11 — anchor</div>
-        <div class="name">Customer-urns carousel</div>
-        <div class="blurb">Twenty-one urns; click to draw, then compress to four archetype urns. Stage 3 introduces the cold-start reader Vera.</div>
-      </a>
-      <a class="card tag-act1" href="visualizations/07_embeddings-that-learn.html">
-        <div class="scene">Scene 12</div>
-        <div class="name">Embeddings that learn</div>
-        <div class="blurb">Random embeddings under gradient descent organise themselves into the four-corner geometry. Re-seed and watch it again.</div>
-      </a>
-    </div>
+    <div class="more-cols">
+      <div class="more-card">
+        <h3>Slides</h3>
+        <p>Compiled with the custom <em>ainit-academic</em> Beamer
+           theme. LuaLaTeX, EB&nbsp;Garamond.</p>
+        <p style="margin-top:10px">
+          <a class="pdf-link" href="slides/lecture.pdf">Lecture PDF</a>
+        </p>
+      </div>
 
-    <h3 class="subsection">Interlude — Shannon</h3>
-    <div class="grid">
-      <a class="card tag-interlude" href="visualizations/entropy-mountain.html">
-        <div class="scene">Scene 14</div>
-        <div class="name">Entropy mountain</div>
-        <div class="blurb">Drag the bias of an urn from 0 to 1 and trace the bell curve <em>H(p)</em>. The compression floor, made physical.</div>
-      </a>
-    </div>
+      <div class="more-card">
+        <h3>Bonus demos</h3>
+        <p>Eight further interactive pieces from an earlier draft.
+           Each explores a single idea and is independent of the
+           lecture flow.</p>
+        <ul style="margin-top:10px">
+          <li><a target="_blank" rel="noopener" href="visualizations/03_inner-product-compass.html">Inner-product compass</a></li>
+          <li><a target="_blank" rel="noopener" href="visualizations/04_dot-product-bistro.html">Dot-product bistro</a></li>
+          <li><a target="_blank" rel="noopener" href="visualizations/05_build-a-rating.html">Build a single rating</a></li>
+          <li><a target="_blank" rel="noopener" href="visualizations/06_outer-product-painters.html">Outer-product painters</a></li>
+          <li><a target="_blank" rel="noopener" href="visualizations/08_filling-the-holes.html">Filling the holes</a></li>
+          <li><a target="_blank" rel="noopener" href="visualizations/09_movielens-taste-map.html">MovieLens taste map</a></li>
+          <li><a target="_blank" rel="noopener" href="visualizations/10_embedding-interpolation.html">Embedding interpolation</a></li>
+          <li><a target="_blank" rel="noopener" href="visualizations/11_cold-start-cliff.html">Cold-start cliff</a></li>
+        </ul>
+      </div>
 
-    <h3 class="subsection">Act II — Prediction (bandits)</h3>
-    <div class="grid">
-      <a class="card tag-act2" href="visualizations/three-urn-casino.html">
-        <div class="scene">Scene 20</div>
-        <div class="name">Three-urn casino</div>
-        <div class="blurb">Three campaigns, three hidden conversion rates. Play 30 rounds, then watch ε-greedy and naive replay your seed.</div>
-      </a>
-      <a class="card tag-act2" href="visualizations/algorithm_stadium.html">
-        <div class="scene">Scene 22</div>
-        <div class="name">Algorithm stadium</div>
-        <div class="blurb">Same urns, same rounds. Five strategies racing on cumulative regret — and a slider for the explore parameter.</div>
-      </a>
-      <a class="card tag-act2" href="visualizations/distinguishability-dial.html">
-        <div class="scene">Scene 23</div>
-        <div class="name">Distinguishability dial</div>
-        <div class="blurb">Two urns, slider for the gap. The required sample size explodes quadratically as the urns approach each other.</div>
-      </a>
-    </div>
-
-    <h3 class="subsection">Epilogue — Duality</h3>
-    <div class="grid">
-      <a class="card tag-epilogue" href="visualizations/compression-prediction-twin.html">
-        <div class="scene">Scene 25 — climax</div>
-        <div class="name">Compression-prediction twin</div>
-        <div class="blurb">Forecaster on the left, arithmetic encoder on the right. Three modes: binary urn, English text, character-level Markov LM. Loss <em>≡</em> rate, bit-exact.</div>
-      </a>
-    </div>
-
-    <h3 class="subsection">Bonus pieces (from the earlier recsys draft)</h3>
-    <p class="section-intro">
-      These eight viz predate the v3 narrative plan and are not on the path the lecture
-      walks. They explore single ideas — the inner product, the dot-product computation,
-      a single rating, an outer-product painter, matrix completion, the MovieLens taste
-      map, embedding interpolation, and a cold-start cliff curve — and remain useful
-      for self-study.
-    </p>
-    <div class="grid">
-      <a class="card tag-bonus" href="visualizations/03_inner-product-compass.html">
-        <div class="scene">Bonus</div><div class="name">Inner-product compass</div>
-        <div class="blurb">Drag a taste vector around; half the plane glows green, the other half red. The dot product as a hemisphere.</div>
-      </a>
-      <a class="card tag-bonus" href="visualizations/04_dot-product-bistro.html">
-        <div class="scene">Bonus</div><div class="name">Dot-product bistro</div>
-        <div class="blurb">Bars for the user, bars for the item, products in between, one number at the bottom. The whole formula breathing.</div>
-      </a>
-      <a class="card tag-bonus" href="visualizations/05_build-a-rating.html">
-        <div class="scene">Bonus</div><div class="name">Build a single rating</div>
-        <div class="blurb">Click a cell. Its row and column light up, products fly out, the answer lands. "Compute all" cascades the matrix.</div>
-      </a>
-      <a class="card tag-bonus" href="visualizations/06_outer-product-painters.html">
-        <div class="scene">Bonus</div><div class="name">Outer-product painters</div>
-        <div class="blurb">Add rank-1 layers one at a time. Same trick compresses an image — proof on the second tab.</div>
-      </a>
-      <a class="card tag-bonus" href="visualizations/08_filling-the-holes.html">
-        <div class="scene">Bonus</div><div class="name">Filling the holes</div>
-        <div class="blurb">Predict the unseen cells. Watch validation accuracy climb as the model trains.</div>
-      </a>
-      <a class="card tag-bonus" href="visualizations/09_movielens-taste-map.html">
-        <div class="scene">Bonus</div><div class="name">MovieLens taste map</div>
-        <div class="blurb">Fifty films in a 2-D taste plane. Drop a "you" vector and watch the top-10 recommendations morph as you drag.</div>
-      </a>
-      <a class="card tag-bonus" href="visualizations/10_embedding-interpolation.html">
-        <div class="scene">Bonus</div><div class="name">Embedding interpolation</div>
-        <div class="blurb">Slide between two readers. Their predicted preferences morph cell-by-cell along the way.</div>
-      </a>
-      <a class="card tag-bonus" href="visualizations/11_cold-start-cliff.html">
-        <div class="scene">Bonus</div><div class="name">Cold-start cliff</div>
-        <div class="blurb">Slide N from 0 to 16 ratings for a new reader. Prediction quality climbs sharply — and plateaus.</div>
-      </a>
-    </div>
-
-    <p class="section-intro" style="margin-top:14px;">
-      <a href="visualizations/index.html">← The earlier section-organised viz hub</a> remains available, too.
-    </p>
-
-    <!-- ============== SOURCE MATERIALS ============== -->
-    <h2 class="section">Source materials</h2><div class="underline"></div>
-    <div class="docs">
-      <ul>
-        <li><span class="file"><a href="NARRATIVE_PLAN.md">NARRATIVE_PLAN.md</a></span><span class="desc">— the contract: 27 scenes, 6 equations, 7 citations, 3 lower bounds.</span></li>
-        <li><span class="file"><a href="BOOKS_MATRIX.md">BOOKS_MATRIX.md</a></span><span class="desc">— the matrix the lecture is built on: 16 books × 21 readers + 1 cold-start, rank-2 by construction.</span></li>
-        <li><span class="file"><a href="LOG_BOOKS_MATRIX.md">LOG_BOOKS_MATRIX.md</a></span><span class="desc">— audit log of the matrix design pass.</span></li>
-        <li><span class="file"><a href="visualizations/SPEC.md">visualizations/SPEC.md</a></span><span class="desc">— design system for the viz folder.</span></li>
-        <li><span class="file"><a href="CLAUDE.md">CLAUDE.md</a></span><span class="desc">— build notes for future sessions.</span></li>
-        <li><span class="file"><a href="original-decks/w2_recsys.pdf">original-decks/w2_recsys.pdf</a></span><span class="desc">— the recsys half of the original Nov-2025 deck.</span></li>
-        <li><span class="file"><a href="original-decks/w2_bandits.pdf">original-decks/w2_bandits.pdf</a></span><span class="desc">— the bandits half of the original deck.</span></li>
-      </ul>
-    </div>
-
-    <!-- ============== ARCHIVE ============== -->
-    <h2 class="section">Archive</h2><div class="underline"></div>
-    <p class="section-intro">
-      Eight early-prototype HTML pieces from the design-discovery phase, preserved for
-      posterity. They are not part of the lecture but record the path the design took.
-    </p>
-    <div class="docs">
-      <ul>
-        <li><span class="file"><a href="archive/ab_vs_bandit.html">ab_vs_bandit.html</a></span><span class="desc">— the head-to-head race that became the Three-urn casino.</span></li>
-        <li><span class="file"><a href="archive/beat_the_bandit.html">beat_the_bandit.html</a></span><span class="desc">— player-vs-algorithm sketch.</span></li>
-        <li><span class="file"><a href="archive/beta_bloom.html">beta_bloom.html</a></span><span class="desc">— Beta-posterior visualisation. Dropped with Thompson sampling in v3.</span></li>
-        <li><span class="file"><a href="archive/customer_compass.html">customer_compass.html</a></span><span class="desc">— a customer-segmentation prototype.</span></li>
-        <li><span class="file"><a href="archive/exploit_landscape.html">exploit_landscape.html</a></span><span class="desc">— exploit-vs-explore terrain.</span></li>
-        <li><span class="file"><a href="archive/lln_playground.html">lln_playground.html</a></span><span class="desc">— the law of large numbers, draggable.</span></li>
-        <li><span class="file"><a href="archive/rating_matrix.html">rating_matrix.html</a></span><span class="desc">— the original drag-and-drop ratings matrix that seeded the visualization style.</span></li>
-        <li><span class="file"><a href="archive/urn_games.html">urn_games.html</a></span><span class="desc">— the urn-metaphor reference deck.</span></li>
-      </ul>
+      <div class="more-card">
+        <h3>Source materials</h3>
+        <p>The contracts the lecture is built on.</p>
+        <ul style="margin-top:10px">
+          <li><a href="NARRATIVE_PLAN.md">NARRATIVE_PLAN.md</a> &mdash; 27 scenes, 7 citations, 3 lower bounds.</li>
+          <li><a href="BOOKS_MATRIX.md">BOOKS_MATRIX.md</a> &mdash; the 21&times;16 rating matrix.</li>
+          <li><a href="https://github.com/eth-ainit-fs26/recsys_bandits_lecture">GitHub repository</a></li>
+        </ul>
+      </div>
     </div>
 
     <footer>
-      <p><em>If this lecture has a thesis, it is not in this index.</em> It is in <a href="NARRATIVE_PLAN.md">NARRATIVE_PLAN.md</a>, scene&nbsp;3, slide titled <em>The promise</em>.</p>
-      <p>The lecture opens with Borges' <em>Funes the Memorious</em> and closes inside the same quote, inverted. <a href="slides/lecture.pdf#page=39">Page 39</a> closes; <a href="slides/lecture.pdf#page=2">page 2</a> opens.</p>
-      <p style="margin-top:14px;">Source code &amp; issues: <a href="https://github.com/eth-ainit-fs26/recsys_bandits_lecture">github.com/eth-ainit-fs26/recsys_bandits_lecture</a></p>
+      <p>
+        The lecture opens with Borges' <em>Funes the Memorious</em>
+        and closes inside the same quote, inverted.
+      </p>
+      <p style="margin-top:10px;">
+        Source &amp; issues:
+        <a href="https://github.com/eth-ainit-fs26/recsys_bandits_lecture">github.com/eth-ainit-fs26/recsys_bandits_lecture</a>
+      </p>
     </footer>
-
   </main>
 </body>
 </html>
