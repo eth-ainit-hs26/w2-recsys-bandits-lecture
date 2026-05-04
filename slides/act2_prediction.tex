@@ -177,7 +177,7 @@
 % ---------------------------------------------------------------------
 \begin{frame}{The solution: UCB algorithm}
   \begin{center}
-    \footnotesize
+    \scriptsize
     \begin{tabular}{r@{\hspace{0.6em}}l}
       \multicolumn{2}{l}{\bfseries\textsc{Algorithm 1.\;\;Upper Confidence Bound (UCB1)}} \\[3pt]
       \multicolumn{2}{l}{\textbf{Require:}\;\; $\alpha > 2,\;\; T \in \mathbb{N}$} \\[3pt]
@@ -193,17 +193,12 @@
     \end{tabular}
   \end{center}
 
-  \bigskip
+  \smallskip
   \begin{center}
     \scriptsize\itshape\color{mutedWarmGray}
     Read this, do not decode it.  The rest of Act II builds this
-    algorithm from scratch.
-  \end{center}
-
-  \begin{center}
-    \tiny\color{mutedWarmGray}
-    Auer, Cesa-Bianchi \& Fischer, \emph{Finite-time Analysis of the
-    Multiarmed Bandit Problem}, Machine Learning 47, 2002.
+    algorithm from scratch.\\[0.2em]
+    {\tiny\upshape Auer, Cesa-Bianchi \& Fischer (2002).}
   \end{center}
 \end{frame}
 
@@ -613,7 +608,8 @@
 % ---------------------------------------------------------------------
 \begin{frame}{UCB sampling}
   \begin{center}
-    \begin{tikzpicture}[every node/.style={inner sep=1pt}]
+    \begin{tikzpicture}[scale=0.85, transform shape,
+                        every node/.style={inner sep=1pt}]
       \urnIcon{-2.6}{0}{$p^C$}
       \node[anchor=south, font=\footnotesize, color=mutedWarmGray]
         at (-2.6, 0.45) {$[\,0,\;1\,]$};
@@ -624,14 +620,14 @@
     \end{tikzpicture}
   \end{center}
 
-  \medskip
-  \footnotesize
+  \smallskip
+  \scriptsize
   \begin{enumerate}
-    \setlength{\itemsep}{0.2em}
+    \setlength{\itemsep}{0.05em}
     \item For each urn $u$, start with $c_u = [0, 1]$.
     \item For $t = 1, 2, \ldots$:
       \begin{enumerate}
-        \setlength{\itemsep}{0.1em}
+        \setlength{\itemsep}{0em}
         \item find the urn $\hat u$ with the
               \AINITemph{highest upper bound};
         \item draw a ball $x$ from $\hat u$;
@@ -786,31 +782,33 @@
 % Scene 24 — Lai & Robbins (1985)
 % ---------------------------------------------------------------------
 \begin{frame}{Lai \& Robbins (1985)}
-  No algorithm can do better than:
-  \medskip
+  \footnotesize
+  Each arm $i$ has a true conversion rate $p_i \in [0, 1]$ (a number).
+  The best arm $i^*$ has rate $p^* = \max_i p_i$.  No algorithm beats:
+
+  \smallskip
   \begin{center}
     $\displaystyle
       \liminf_{T \to \infty}\frac{R_T}{\log T}
       \;\geq\;
-      \sum_{i \neq i^*} \frac{p^* - p_i}{{\color{accentOxblood}\mathrm{KL}(p_i \,\|\, p^*)}}$
+      \sum_{i \neq i^*} \frac{p^* - p_i}{{\color{accentOxblood}\mathrm{KL}(p_i \,\|\, p^*)}}.$
   \end{center}
 
-  \medskip
-  \footnotesize
-  \begin{tabular}{@{}l@{\hspace{1em}}l@{}}
-    $T$               & total number of rounds played \\
-    $R_T$             & cumulative regret over $T$ rounds (loss vs.\ always playing the best arm) \\
-    $p_i$             & bias of arm $i$ (its true conversion rate) \\
-    $p^*$             & bias of the best arm $i^*$, i.e.\ $\max_i p_i$ \\
-    $\mathrm{KL}(p_i \| p^*)$ & how distinguishable arm $i$ is from the best \\
-  \end{tabular}
+  Both pieces are \AINITemph{numbers}:
+  \begin{itemize}
+    \setlength{\itemsep}{0.05em}
+    \item $p^* - p_i$ is the \AINITemph{gap}: how much you lose per
+          round by playing arm $i$ instead of the winner.
+    \item $\mathrm{KL}(p_i \,\|\, p^*)$ is the
+          \AINITemph{Bernoulli KL divergence},
+          $p_i \log\!\frac{p_i}{p^*}
+            + (1 - p_i)\log\!\frac{1 - p_i}{1 - p^*}$,
+          measuring how distinguishable arm $i$ is from the best.
+  \end{itemize}
 
-  \medskip
   \begin{center}
     \scriptsize\itshape\color{mutedWarmGray}
-    The harder it is to tell two arms apart, the more rounds you waste
-    on the loser.  The cost is in KL divergence, the same Shannon used
-    in 1948.
+    Near-twins (small gap, small KL) cost you the most.
   \end{center}
 \end{frame}
 

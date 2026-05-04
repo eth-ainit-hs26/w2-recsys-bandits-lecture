@@ -484,7 +484,7 @@
 % ---------------------------------------------------------------------
 \begin{frame}{And readers, too}
   \begin{center}
-    \begin{tikzpicture}[
+    \begin{tikzpicture}[scale=0.7, transform shape,
       every node/.style={font=\footnotesize},
       book/.style={font=\itshape\scriptsize, color=mutedWarmGray, inner sep=1pt},
       coords/.style={font=\bfseries\footnotesize, color=accentOxblood, inner sep=1pt},
@@ -523,9 +523,11 @@
     \end{tikzpicture}
   \end{center}
 
-  Readers live in the same plane.  A reader's vector says where her
-  taste sits.  Alice, a light-fiction reader, lives among the
-  light-fiction books.
+  \begin{center}
+    \footnotesize\itshape\color{mutedWarmGray}
+    Readers live in the same plane: Alice, a light-fiction reader,
+    sits among the light-fiction books.
+  \end{center}
 \end{frame}
 
 % =====================================================================
@@ -1041,11 +1043,6 @@
       \node[font=\itshape\footnotesize, color=clusterLN, anchor=west] at (+1.65, -1.5) {Eat Pray Love};
       \node[font=\itshape\footnotesize, color=clusterDN, anchor=west] at (+1.65, +1.0) {Russell};
 
-      % Legend, top-left, well clear of the markers
-      \node[circle, fill=mutedWarmGray, inner sep=2.0pt] at (-2.7, 2.05) {};
-      \node[font=\scriptsize, color=mutedWarmGray, anchor=west] at (-2.55, 2.05) {reader};
-      \node[rectangle, fill=mutedWarmGray, inner sep=1.7pt] at (-2.7, 1.65) {};
-      \node[font=\scriptsize, color=mutedWarmGray, anchor=west] at (-2.55, 1.65) {book};
     \end{tikzpicture}
   \end{center}
 
@@ -1067,25 +1064,24 @@
   The \emph{match score} we have been computing has a name:
   the \AINITemph{dot product}.
 
-  \bigskip
+  \medskip
   \begin{center}
     \Large $r \;=\; u \,\cdot\, v$
   \end{center}
 
-  \medskip
   \begin{center}
     \footnotesize\color{mutedWarmGray}
     where $u$ is the embedding of a user (a reader) and
     $v$ is the embedding of an item (a book).
   \end{center}
 
-  \medskip
+  \smallskip
   \begin{center}
     \itshape\color{mutedWarmGray}
     Multiply on each axis.  Add the products.
   \end{center}
 
-  \bigskip
+  \medskip
   \begin{center}
     \footnotesize
     For Alice meeting Russell:\quad
@@ -1195,7 +1191,7 @@
 % ---------------------------------------------------------------------
 \begin{frame}{The matrix product, in numbers}
   \begin{center}
-    \begin{tikzpicture}[
+    \begin{tikzpicture}[scale=0.85, transform shape,
       mat/.style={draw=mutedWarmGray, line width=0.4pt, fill=bgCream},
       gd/.style={draw=mutedWarmGray!60, line width=0.15pt},
       hl/.style={font=\itshape\scriptsize, color=mutedWarmGray},
@@ -1249,11 +1245,13 @@
     \end{tikzpicture}
   \end{center}
 
-  \medskip
-  Each entry of $R$ is one dot product.
-  \AINITemph{Positive} on the diagonal: each reader sits with her favourite
-  book.  \AINITemph{Negative} on the anti-diagonal: each reader far from
-  the wrong book.  \AINITemph{Zero} where the two are perpendicular.
+  \smallskip
+  \begin{center}
+    \footnotesize\itshape\color{mutedWarmGray}
+    Each entry of $R$ is one dot product:
+    $+2$ on the diagonal, $-2$ on the anti-diagonal,
+    $0$ where the two are perpendicular.
+  \end{center}
 \end{frame}
 
 % ---------------------------------------------------------------------

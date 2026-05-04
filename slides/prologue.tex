@@ -28,10 +28,6 @@
   \begin{columns}[T]
     \column{0.62\textwidth}
     \vspace{0.3em}
-    You met the transformer. The summary we landed on:
-
-    \medskip
-
     \emph{An LLM \(\approx\) encoder (builds meaning) \(+\) decoder
     (continues the sentence).}
 
@@ -64,7 +60,7 @@
       \node[block, below=of prefix] (enc) {encoder};
       \node[data, below=of enc] (vec) {embedding\\(vector)};
       \node[block, below=of vec] (dec) {decoder};
-      \node[data, below=of dec] (probs) {probabilities\\over next token};
+      \node[data, below=of dec] (probs) {row in the\\probability table};
       \draw[ar] (prefix) -- (enc);
       \draw[ar] (enc) -- (vec);
       \draw[ar] (vec) -- (dec);
