@@ -303,6 +303,7 @@
   .lane-avatar.style-dashdot  { outline-style: dashed; outline-width: 2.5px; outline-offset: 1px; }
   .lane-avatar.style-solid    { outline-style: solid;  outline-width: 1.5px; }
   .lane-avatar.style-double   { outline-style: double; outline-width: 4px; }
+  .lane-avatar.style-ridge    { outline-style: ridge;  outline-width: 3px; }
   .lane-avatar.leader::after {
     content: '';
     position: absolute;
@@ -401,6 +402,7 @@
   .stat-card.style-dashdot  { border-top: 5px dashed currentColor; border-bottom: 2px dotted currentColor; }
   .stat-card.style-solid    { border-top: 4px solid  currentColor; }
   .stat-card.style-double   { border-top: 6px double currentColor; }
+  .stat-card.style-ridge    { border-top: 5px ridge  currentColor; }
   .stat-card-title {
     font-family: Georgia, serif;
     font-size: 12px;
@@ -544,7 +546,7 @@
 
 <div class="page-header">
   <h1 class="page-title">Algorithm Stadium</h1>
-  <p class="page-subtitle">Same urns. Same rounds. Five strategies running side by side. Watch cumulative regret accumulate underneath each one — and see how the choice of &epsilon; alone separates linear regret from sublinear regret.</p>
+  <p class="page-subtitle">Same urns. Same rounds. Six strategies running side by side: naive estimate-then-exploit, three flavours of &epsilon;-greedy, UCB, and pure random. The race tracks <em>cumulative reward</em>; the chart below tracks <em>cumulative regret</em>. They are different metrics — reward goes <em>up</em> as you collect, regret goes <em>up</em> as you waste — and each lives in its own panel.</p>
 </div>
 
 <!-- ══════════════ TRUE BIASES + GLOBAL CONTROLS ══════════════ -->
@@ -597,7 +599,7 @@
 
 <!-- ══════════════ REGRET CHART ══════════════ -->
 <h2 class="section-title">Cumulative regret</h2>
-<p class="prose">Regret is what you couldn't see — the reward you'd have gotten always pulling the best urn, minus what you actually got. A flat slope means the algorithm has stopped paying tuition. A steep slope means it's still bleeding. Pure random and &epsilon; = 0.50 grow linearly. Naive estimate-then-exploit and &epsilon; = 0.05 grow linearly *if* they commit to the wrong urn. &epsilon; = 0.20 typically wins.</p>
+<p class="prose">Different view, different metric. Regret is what you couldn't see in the reward race: the reward you'd have gotten always pulling the best urn, minus what you actually got. A flat slope means the algorithm has stopped paying tuition. A steep slope means it's still bleeding. Pure random and &epsilon; = 0.50 grow linearly. Naive and &epsilon; = 0.05 grow linearly <em>if</em> they commit to the wrong urn. &epsilon; = 0.20 and UCB typically grow sublinearly &mdash; UCB's bound is the tightest of the lot.</p>
 
 <div class="chart-wrap">
   <canvas class="regret-chart" id="regret-canvas" width="1040" height="320"></canvas>
@@ -619,6 +621,10 @@
   <div class="formula-card">
     <div class="label">&epsilon;-greedy</div>
     <div class="body" id="f-eps"></div>
+  </div>
+  <div class="formula-card">
+    <div class="label">UCB</div>
+    <div class="body" id="f-ucb"></div>
   </div>
   <div class="formula-card">
     <div class="label">Cumulative regret</div>
@@ -664,6 +670,7 @@ const ALGOS = [
   { id: 'eps05',  name: 'ε-greedy 0.05',    hex: '#0072B2', short: '.05', dash: [],             styleClass: 'style-solid'   },
   { id: 'eps20',  name: 'ε-greedy 0.20',    hex: '#009E73', short: '.20', dash: [12, 6],        styleClass: 'style-double'  },
   { id: 'eps50',  name: 'ε-greedy 0.50',    hex: '#CC79A7', short: '.50', dash: [10, 3, 2, 3],  styleClass: 'style-dashdot' },
+  { id: 'ucb',    name: 'UCB (c=√2)',       hex: '#785EF0', short: 'U',   dash: [4, 2, 1, 2],   styleClass: 'style-ridge'   },
   { id: 'random', name: 'Pure random',      hex: '#2c2416', short: 'R',   dash: [2, 4],         styleClass: 'style-dotted'  },
 ];
 
@@ -687,7 +694,7 @@ const state = {
   pStar: 0.85,
   // RNG seeds
   banditSeed: 0,
-  algoSeeds: [0, 0, 0, 0, 0],
+  algoSeeds: ALGOS.map(() => 0),
   // RNG instances
   banditRand: null,
   algoRand: [],
@@ -796,6 +803,17 @@ function pickRandom(s, t, rand) {
   return Math.floor(rand() * N_ARMS);
 }
 
+// UCB1: bootstrap by sampling each arm once, then pick the arm that
+// maximises p_hat + c * sqrt(ln t / n_i).  c = sqrt(2) is the textbook
+// value; it gives sublinear regret O(log T) for any seed.
+const UCB_C = Math.sqrt(2);
+function pickUCB(s, t, rand) {
+  for (let i = 0; i < N_ARMS; i++) if (s.n[i] === 0) return i;
+  const lnT = Math.log(Math.max(2, t + 1));
+  const ucb = s.mu.map((mu, i) => mu + UCB_C * Math.sqrt(lnT / s.n[i]));
+  return argmaxTieBreak(ucb, rand);
+}
+
 function argmaxTieBreak(arr, rand) {
   let max = arr[0], bestIdxs = [0];
   for (let i = 1; i < arr.length; i++) {
@@ -810,6 +828,7 @@ const POLICIES = [
   makeEpsGreedy(0.05),
   makeEpsGreedy(0.20),
   makeEpsGreedy(0.50),
+  pickUCB,
   pickRandom,
 ];
 
@@ -953,7 +972,6 @@ function renderLanes() {
         </div>
         <div class="lane-stat">
           <div class="reward" data-r></div>
-          <div class="regret" data-rg></div>
         </div>
       `;
       wrap.appendChild(lane);
@@ -981,7 +999,6 @@ function renderLanes() {
     if (k === leaderIdx && state.t > 0) avatar.classList.add('leader');
     else avatar.classList.remove('leader');
     lane.querySelector('[data-r]').textContent = s.cumReward.toFixed(0);
-    lane.querySelector('[data-rg]').textContent = 'regret ' + s.cumRegret.toFixed(1);
   }
 }
 
@@ -1233,6 +1250,11 @@ document.addEventListener('DOMContentLoaded', () => {
     katex.render(
       'a_t = \\begin{cases} \\text{uniform} & \\text{w.p. } \\varepsilon \\\\ \\arg\\max_i \\hat{\\mu}_i & \\text{otherwise}\\end{cases}',
       document.getElementById('f-eps'),
+      { throwOnError: false, displayMode: false }
+    );
+    katex.render(
+      'a_t = \\arg\\max_i \\Bigl(\\hat{\\mu}_i + c\\,\\sqrt{\\tfrac{\\ln t}{n_i}}\\Bigr)',
+      document.getElementById('f-ucb'),
       { throwOnError: false, displayMode: false }
     );
     katex.render(

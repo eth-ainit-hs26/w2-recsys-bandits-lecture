@@ -336,6 +336,7 @@
           <span><span class="legend-swatch" style="background:var(--color-pos)"></span>Audience<span class="legend-final" id="leg-aud"></span></span>
           <span><span class="legend-swatch" style="background:var(--color-neg)"></span>Naive (5×3 explore, then exploit)<span class="legend-final" id="leg-nai"></span></span>
           <span><span class="legend-swatch" style="background:var(--color-demanding)"></span>ε-greedy (ε = 0.10)<span class="legend-final" id="leg-eps"></span></span>
+          <span><span class="legend-swatch" style="background:var(--color-fiction)"></span>UCB (c = 1)<span class="legend-final" id="leg-ucb"></span></span>
           <span><span class="legend-swatch" style="background:#6C757D"></span>Optimal (always best)<span class="legend-final" id="leg-opt"></span></span>
         </div>
       </div>
@@ -347,9 +348,9 @@
         Each urn has a <em>hidden</em> Bernoulli bias — the chance that a single draw is a "win".
         On every round, the audience votes which urn to sample; that decision uses only the running
         empirical means <em>p̂ = wins / picks</em>. After 30 rounds, click <strong>Reveal &amp; Replay</strong>
-        to expose the biases and re-run two algorithms — naive explore-then-exploit, and ε-greedy —
-        on the <em>same</em> hidden draws. The cumulative-reward curves show how each strategy spent
-        its 30 chances.
+        to expose the biases and re-run three algorithms — naive explore-then-exploit, ε-greedy, and
+        UCB — on the <em>same</em> hidden draws. The cumulative-reward curves show how each strategy
+        spent its 30 chances.
       </p>
     </aside>
   </main>
@@ -732,6 +733,35 @@
       return { picks, wins, cum };
     }
 
+    // UCB1: pick the urn with the highest p_hat + c * sqrt(ln t / n_i).
+    // Bootstrap by sampling each unsampled urn first.  c = 1 gives sensible
+    // exploration for 30 rounds.
+    const UCB_C = 1.0;
+    function runUCB(seed, biases) {
+      const counts = [0, 0, 0], winsBy = [0, 0, 0];
+      const picks = [], wins = [], cum = [];
+      let total = 0;
+      for (let r = 0; r < N_ROUNDS; r++) {
+        let urnIdx;
+        if (counts.some(n => n === 0)) {
+          urnIdx = counts.indexOf(0);
+        } else {
+          const tPlus1 = r + 1; // round number for the bonus term
+          let best = -Infinity, bestI = 0;
+          for (let i = 0; i < 3; i++) {
+            const phat = winsBy[i] / counts[i];
+            const ucb = phat + UCB_C * Math.sqrt(Math.log(tPlus1) / counts[i]);
+            if (ucb > best) { best = ucb; bestI = i; }
+          }
+          urnIdx = bestI;
+        }
+        const w = ballAtRound(urnIdx, r, seed, biases);
+        counts[urnIdx]++; winsBy[urnIdx] += w;
+        picks.push(urnIdx); wins.push(w); total += w; cum.push(total);
+      }
+      return { picks, wins, cum };
+    }
+
     function runOptimal(seed, biases) {
       // "Always pick best" — needs to know the true argmax, used as proxy ceiling.
       let best = 0;
@@ -838,13 +868,15 @@
         drawAnimated(state.cumOpt, '#6C757D', 'curve-opt');
         drawAnimated(state.cumNaive, 'var(--color-neg)', 'curve-naive');
         drawAnimated(state.cumEps,   'var(--color-demanding)', 'curve-eps');
+        drawAnimated(state.cumUCB,   'var(--color-fiction)',   'curve-ucb');
 
         document.getElementById('leg-aud').textContent = ` (${state.cumAud[state.cumAud.length - 1]})`;
         document.getElementById('leg-nai').textContent = ` (${state.cumNaive[state.cumNaive.length - 1]})`;
         document.getElementById('leg-eps').textContent = ` (${state.cumEps[state.cumEps.length - 1]})`;
+        document.getElementById('leg-ucb').textContent = ` (${state.cumUCB[state.cumUCB.length - 1]})`;
         document.getElementById('leg-opt').textContent = ` (${state.cumOpt[state.cumOpt.length - 1]})`;
       } else {
-        ['leg-aud', 'leg-nai', 'leg-eps', 'leg-opt'].forEach(id => {
+        ['leg-aud', 'leg-nai', 'leg-eps', 'leg-ucb', 'leg-opt'].forEach(id => {
           document.getElementById(id).textContent = '';
         });
       }
@@ -870,9 +902,11 @@
       // Run replays.
       const naive = runNaive(state.seed, state.biases);
       const eps   = runEpsilon(state.seed, state.biases);
+      const ucb   = runUCB(state.seed, state.biases);
       const opt   = runOptimal(state.seed, state.biases);
       state.cumNaive = naive.cum;
       state.cumEps   = eps.cum;
+      state.cumUCB   = ucb.cum;
       state.cumOpt   = opt.cum;
 
       setUrnsDisabled(true);
