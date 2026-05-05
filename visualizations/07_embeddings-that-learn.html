@@ -135,6 +135,33 @@
       text-anchor: middle;
       font-style: italic;
     }
+    svg.matrix-svg {
+      width: 100%;
+      max-width: 760px;
+      height: auto;
+      background: #fbfbfd;
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+      display: block;
+      margin: 0 auto 14px auto;
+    }
+    rect.matrix-cell {
+      stroke: rgba(255, 255, 255, 0.55);
+      stroke-width: 0.5;
+      transition: fill 0.18s linear;
+    }
+    text.mat-label {
+      font: 600 11px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      fill: var(--color-text);
+    }
+    text.mat-sublabel {
+      font: italic 10px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      fill: var(--color-text-muted);
+    }
+    text.mat-eq {
+      font: 600 28px Georgia, "Times New Roman", serif;
+      fill: var(--color-text);
+    }
   </style>
 </head>
 <body>
@@ -155,6 +182,16 @@
     <div class="formula-card" id="formula"></div>
 
     <div class="viz-card">
+      <div class="panel-title">Matrix factorisation view</div>
+      <div class="panel-sub">
+        $U$ on the left, $V^{\!\top}$ on top, their product $UV^{\!\top}$
+        in the middle, and the target $R$ on the right.  As gradient
+        descent proceeds, $U$ and $V$ re-paint and the product chases $R$
+        on the visible cells.
+      </div>
+      <svg id="matrix-svg" class="matrix-svg" viewBox="0 0 540 360"
+           preserveAspectRatio="xMidYMid meet" aria-label="matrix factorisation"></svg>
+
       <div class="layout">
         <div>
           <div class="panel-title">Latent space (learned, dim&nbsp;= 2)</div>
@@ -608,6 +645,130 @@
       renderEmbeddings();
       renderLoss();
       renderStats();
+      updateMatrixView();
+    }
+
+    // ---------------- Matrix-factorisation view ----------------
+    // Layout (in svg viewBox 540 x 360):
+    //   V^T (K=2 x N=16) sits ABOVE the product, columns aligned.
+    //   U   (M=21 x K=2) sits to the LEFT of the product, rows aligned.
+    //   Product UV^T (M=21 x N=16) is the centre matrix.
+    //   = sign separates product and R.
+    //   R   (M=21 x N=16) is on the right.
+    const MAT = (function buildMatrixView() {
+      const ms = d3.select('#matrix-svg');
+      ms.selectAll('*').remove();
+
+      const CELL = 12;
+      const X_U  = 24;
+      const X_VT = X_U + K * CELL + 8;
+      const X_P  = X_VT;
+      const X_EQ = X_P + N * CELL + 8;
+      const X_R  = X_EQ + 22;
+      const Y_VT = 24;
+      const Y_U  = Y_VT + K * CELL + 8;
+      const Y_P  = Y_U;
+      const Y_R  = Y_U;
+
+      function makeGrid(rows, cols, x0, y0) {
+        const g = ms.append('g');
+        const cells = [];
+        for (let i = 0; i < rows; i++) {
+          for (let j = 0; j < cols; j++) {
+            cells.push(g.append('rect')
+              .attr('class', 'matrix-cell')
+              .attr('x', x0 + j * CELL)
+              .attr('y', y0 + i * CELL)
+              .attr('width', CELL)
+              .attr('height', CELL)
+              .node());
+          }
+        }
+        return { g, cells, rows, cols };
+      }
+
+      const gridU  = makeGrid(M, K, X_U,  Y_U);
+      const gridVt = makeGrid(K, N, X_VT, Y_VT);
+      const gridP  = makeGrid(M, N, X_P,  Y_P);
+      const gridR  = makeGrid(M, N, X_R,  Y_R);
+
+      // Labels
+      ms.append('text').attr('class', 'mat-label')
+        .attr('x', X_U + (K * CELL) / 2).attr('y', Y_U - 14)
+        .attr('text-anchor', 'middle').text('U');
+      ms.append('text').attr('class', 'mat-sublabel')
+        .attr('x', X_U + (K * CELL) / 2).attr('y', Y_U + M * CELL + 12)
+        .attr('text-anchor', 'middle').text('21 × 2');
+
+      ms.append('text').attr('class', 'mat-label')
+        .attr('x', X_VT + (N * CELL) / 2).attr('y', Y_VT - 6)
+        .attr('text-anchor', 'middle').text('Vᵀ');
+      ms.append('text').attr('class', 'mat-sublabel')
+        .attr('x', X_VT - 6).attr('y', Y_VT + (K * CELL) / 2 + 3)
+        .attr('text-anchor', 'end').text('2 × 16');
+
+      ms.append('text').attr('class', 'mat-label')
+        .attr('x', X_P + (N * CELL) / 2).attr('y', Y_P + M * CELL + 12)
+        .attr('text-anchor', 'middle').text('U Vᵀ  (prediction)');
+
+      ms.append('text').attr('class', 'mat-eq')
+        .attr('x', X_EQ + 11).attr('y', Y_R + (M * CELL) / 2 + 9)
+        .attr('text-anchor', 'middle').text('=');
+
+      ms.append('text').attr('class', 'mat-label')
+        .attr('x', X_R + (N * CELL) / 2).attr('y', Y_R - 14)
+        .attr('text-anchor', 'middle').text('R  (target)');
+      ms.append('text').attr('class', 'mat-sublabel')
+        .attr('x', X_R + (N * CELL) / 2).attr('y', Y_R + M * CELL + 12)
+        .attr('text-anchor', 'middle').text('21 × 16');
+
+      return { gridU, gridVt, gridP, gridR };
+    })();
+
+    function colorFor(v, scale) {
+      if (v == null || isNaN(v)) return '#e9ecef';
+      const a = Math.min(1, Math.abs(v) / scale);
+      if (a < 0.04) return '#f5f1e6';
+      if (v >= 0) return 'rgba(0,114,178,' + a.toFixed(2) + ')';
+      return 'rgba(213,94,0,' + a.toFixed(2) + ')';
+    }
+
+    function updateMatrixView() {
+      // U: M x K
+      let idx = 0;
+      for (let i = 0; i < M; i++) {
+        for (let k = 0; k < K; k++) {
+          MAT.gridU.cells[idx++].setAttribute('fill', colorFor(U[i][k], 1.5));
+        }
+      }
+      // V^T: K x N  (cell at row=k, col=j corresponds to V[j][k])
+      idx = 0;
+      for (let k = 0; k < K; k++) {
+        for (let j = 0; j < N; j++) {
+          MAT.gridVt.cells[idx++].setAttribute('fill', colorFor(V[j][k], 1.5));
+        }
+      }
+      // Product: M x N
+      idx = 0;
+      for (let i = 0; i < M; i++) {
+        for (let j = 0; j < N; j++) {
+          MAT.gridP.cells[idx++].setAttribute('fill', colorFor(predict(i, j), 1.5));
+        }
+      }
+      // R: M x N (visible cells coloured; missing dim grey)
+      idx = 0;
+      for (let i = 0; i < M; i++) {
+        for (let j = 0; j < N; j++) {
+          const cell = MAT.gridR.cells[idx++];
+          if (mask[i][j]) {
+            cell.setAttribute('fill', colorFor(R[i][j], 1.0));
+            cell.setAttribute('stroke-opacity', 0.55);
+          } else {
+            cell.setAttribute('fill', '#eaecef');
+            cell.setAttribute('stroke-opacity', 0.25);
+          }
+        }
+      }
     }
 
     // ---------------- Animation loop ----------------
