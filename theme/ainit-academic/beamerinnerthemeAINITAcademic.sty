@@ -86,11 +86,11 @@
             text width=.7\paperwidth,
             align=center,
             inner sep=0pt] at (current page.center) {%
-        {\rmfamily\itshape\large #1\par}%
+        {\color{ink}\rmfamily\itshape\large #1\par}%
         \vspace{1.4em}%
-        {\rmfamily\scshape\small\color{mutedWarmGray} #2\par}%
+        {\color{mutedWarmGray}\rmfamily\scshape\small #2\par}%
         \vspace{3.2em}%
-        {\rmfamily\scshape\normalsize\color{\AINITactaccent} #3\par}%
+        {\color{\AINITactaccent}\rmfamily\scshape\normalsize #3\par}%
       };
     \end{tikzpicture}%
   \end{frame}%
@@ -117,12 +117,12 @@
             text width=9cm,
             align=left,
             inner sep=0pt] at ($(current page.west) + (6.4cm, 0)$) {%
-        {\rmfamily\itshape\large #2\par}%
+        {\color{ink}\rmfamily\itshape\large #2\par}%
         \vspace{1.2em}%
-        {\rmfamily\scshape\small\color{mutedWarmGray} #3\par}%
+        {\color{mutedWarmGray}\rmfamily\scshape\small #3\par}%
         \ifstrempty{#4}{}{%
           \vspace{1.8em}%
-          {\rmfamily\scshape\normalsize\color{\AINITactaccent} #4\par}%
+          {\color{\AINITactaccent}\rmfamily\scshape\normalsize #4\par}%
         }%
       };
     \end{tikzpicture}%
@@ -182,11 +182,11 @@
               align=center,
               text=bgCream,
               inner sep=0pt] at (current page.center) {%
-          {\rmfamily\itshape\large Now switching to:\par}%
+          {\rmfamily\itshape\large\color{bgCream} Now switching to:\par}%
           \vspace{1.0em}%
-          {\rmfamily\large\bfseries Demo #1 \,/\, 10\par}%
+          {\rmfamily\large\bfseries\color{bgCream} Demo #1 \,/\, 9\par}%
           \vspace{0.4em}%
-          {\rmfamily\large #2\par}%
+          {\rmfamily\large\color{bgCream} #2\par}%
           \vspace{1.6em}%
           {\rmfamily\itshape\footnotesize\color{bgCream!55!ink}%
            open card \emph{Demo #1} on the companion site\par}%
@@ -209,9 +209,9 @@
               align=center,
               text=white,
               inner sep=0pt] at (current page.center) {%
-          {\rmfamily\itshape\large #1\par}%
+          {\rmfamily\itshape\large\color{white} #1\par}%
           \vspace{1.0em}%
-          {\rmfamily\itshape\large #2\par}%
+          {\rmfamily\itshape\large\color{white} #2\par}%
         };
       \end{tikzpicture}%
     \end{frame}%
@@ -268,13 +268,15 @@
             inner sep=0pt,
             text=\AINITactaccent,
             font=\rmfamily\itshape\fontsize{96pt}{96pt}\selectfont]
-        at ($(current page.west) + (0.20\paperwidth, 0.04\paperheight)$) {#1};
+        at ($(current page.west) + (0.20\paperwidth, 0.04\paperheight)$)
+        {{\color{\AINITactaccent}#1}};
       % Title in small caps, ink, top of right column
       \node[anchor=north west,
             inner sep=0pt,
             text=ink,
             font=\rmfamily\scshape\LARGE]
-        at ($(current page.north west) + (0.40\paperwidth, -0.30\paperheight)$) {#2};
+        at ($(current page.north west) + (0.40\paperwidth, -0.30\paperheight)$)
+        {{\color{ink}#2}};
       % Hairline rule beneath the title in current accent
       \node[anchor=north west,
             inner sep=0pt] at ($(current page.north west) + (0.40\paperwidth, -0.36\paperheight)$)
@@ -284,9 +286,9 @@
             text width=0.50\paperwidth,
             align=left,
             inner sep=0pt] at ($(current page.north west) + (0.40\paperwidth, -0.46\paperheight)$) {%
-          {\rmfamily\itshape\large #3\par}%
+          {\color{ink}\rmfamily\itshape\large #3\par}%
           \vspace{1.0em}%
-          {\rmfamily\scshape\small\color{mutedWarmGray} #4}%
+          {\color{mutedWarmGray}\rmfamily\scshape\small #4}%
         };
     \end{tikzpicture}%
   \end{frame}%
