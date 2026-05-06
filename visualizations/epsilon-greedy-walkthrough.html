@@ -1,0 +1,1069 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>ε-greedy walkthrough · W2 Bandits</title>
+  <link rel="stylesheet" href="shared/style.css">
+  <style>
+    /* ------- Layout ------- */
+    .eg-grid {
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      gap: 22px;
+      align-items: start;
+    }
+    @media (max-width: 980px) { .eg-grid { grid-template-columns: 1fr; } }
+
+    .eg-controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      align-items: center;
+      padding: 12px 14px;
+      background: var(--color-neu-bg);
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+      margin-bottom: 14px;
+    }
+    .eg-controls label {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 0.9rem;
+    }
+    .eg-controls input[type="range"] { width: 130px; }
+    .eg-controls .eps-val {
+      font-variant-numeric: tabular-nums;
+      font-weight: 600;
+      color: var(--color-text);
+      min-width: 38px;
+      display: inline-block;
+      text-align: right;
+    }
+    .eg-controls button {
+      padding: 7px 14px;
+      border-radius: 6px;
+      border: 1px solid var(--color-border);
+      background: white;
+      color: var(--color-text);
+      cursor: pointer;
+      font-size: 0.92rem;
+      font-weight: 500;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .eg-controls button:hover:not(:disabled) {
+      border-color: var(--color-header-start);
+    }
+    .eg-controls button.primary {
+      background: var(--color-header-end);
+      color: white;
+      border-color: var(--color-header-end);
+    }
+    .eg-controls button.primary:hover:not(:disabled) {
+      background: var(--color-header-start);
+    }
+    .eg-controls button:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+    .eg-controls .round-counter {
+      margin-left: auto;
+      font-size: 0.95rem;
+      color: var(--color-text-muted);
+    }
+    .eg-controls .round-counter strong {
+      color: var(--color-text);
+      font-variant-numeric: tabular-nums;
+      font-size: 1.05rem;
+    }
+
+    .eg-status {
+      font-size: 0.92rem;
+      padding: 10px 14px;
+      background: white;
+      border: 1px solid var(--color-border);
+      border-left: 3px solid var(--color-header-start);
+      border-radius: 6px;
+      margin-bottom: 14px;
+      min-height: 22px;
+      color: var(--color-text);
+      line-height: 1.45;
+      font-variant-numeric: tabular-nums;
+    }
+    .eg-status .branch-explore { color: #0891B2; font-weight: 700; }
+    .eg-status .branch-exploit { color: #785EF0; font-weight: 700; }
+
+    /* ------- Pseudocode ------- */
+    .eg-pseudo {
+      background: white;
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+      padding: 14px 16px;
+    }
+    .eg-pseudo h3 {
+      font-size: 0.92rem;
+      font-weight: 600;
+      color: var(--color-header-start);
+      margin: 0 0 10px;
+    }
+    .eg-pseudo ol {
+      list-style: none;
+      padding-left: 0;
+      margin: 0;
+      font-size: 0.86rem;
+      line-height: 1.55;
+      color: var(--color-text);
+    }
+    .eg-pseudo li {
+      padding: 5px 8px;
+      border-radius: 4px;
+      transition: background 0.18s;
+      border-left: 3px solid transparent;
+    }
+    .eg-pseudo li.indent { padding-left: 24px; }
+    .eg-pseudo li.indent2 { padding-left: 40px; }
+    .eg-pseudo li.active {
+      background: rgba(204, 121, 167, 0.12);
+      border-left-color: var(--color-fiction);
+      color: var(--color-text);
+    }
+    .eg-pseudo .keyword { color: var(--color-header-start); font-weight: 600; }
+    .eg-pseudo .branch-c { color: #0891B2; font-weight: 600; }
+    .eg-pseudo .branch-p { color: #785EF0; font-weight: 600; }
+    .eg-pseudo code {
+      font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+      font-size: 0.82rem;
+      color: var(--color-text);
+    }
+
+    /* ------- Scene SVG ------- */
+    .eg-scene-wrap {
+      background: #fbfbfb;
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+      padding: 8px;
+    }
+    svg.eg-scene {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    /* roulette */
+    .roulette-explore { fill: #56B4E9; }
+    .roulette-exploit { fill: #785EF0; }
+    .roulette-explore.dim { fill: #56B4E9; opacity: 0.45; }
+    .roulette-exploit.dim { fill: #785EF0; opacity: 0.45; }
+    .roulette-divider { stroke: white; stroke-width: 1.5; }
+    .roulette-rim { fill: none; stroke: #2c3e50; stroke-width: 2.5; }
+    .roulette-pointer {
+      stroke: #2c3e50; stroke-width: 1.4; fill: white;
+    }
+    .roulette-label {
+      font-size: 13px;
+      font-weight: 600;
+      text-anchor: middle;
+      fill: white;
+      paint-order: stroke;
+      stroke: rgba(0,0,0,0.25);
+      stroke-width: 0.6;
+    }
+    .roulette-readout {
+      font-size: 12px;
+      fill: var(--color-text-muted);
+      text-anchor: middle;
+    }
+    .roulette-readout strong, .roulette-readout-strong {
+      fill: var(--color-text);
+      font-weight: 700;
+    }
+
+    /* urns */
+    .urn-body {
+      fill: rgba(245, 240, 220, 0.6);
+      stroke: #2c3e50;
+      stroke-width: 1.6;
+    }
+    .urn-rim {
+      fill: rgba(120, 100, 60, 0.18);
+      stroke: #2c3e50;
+      stroke-width: 1.6;
+    }
+    .urn-label {
+      font-size: 14px;
+      font-weight: 600;
+      fill: var(--color-text);
+      text-anchor: middle;
+    }
+    .urn-bias {
+      font-size: 11px;
+      fill: var(--color-text-muted);
+      text-anchor: middle;
+      font-style: italic;
+    }
+    .urn-glow {
+      fill: none;
+      stroke: var(--color-header-end);
+      stroke-width: 4;
+      opacity: 0;
+      pointer-events: none;
+    }
+    .urn-glow.active {
+      opacity: 0.85;
+      transition: opacity 0.25s;
+    }
+
+    /* balls */
+    circle.ball-orange { fill: #E69F00; stroke: rgba(0,0,0,0.18); stroke-width: 0.5; }
+    circle.ball-white  { fill: #ffffff; stroke: #2c3e50; stroke-width: 0.7; }
+
+    /* observations strip */
+    .obs-label {
+      font-size: 12px;
+      font-weight: 600;
+      fill: var(--color-text);
+      text-anchor: start;
+    }
+    .obs-formula {
+      font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+      font-size: 11px;
+      fill: var(--color-text-muted);
+    }
+    .obs-formula .num {
+      fill: var(--color-text);
+      font-weight: 600;
+    }
+    .obs-formula.is-best .num {
+      fill: var(--color-pos);
+    }
+    .estimate-best-marker {
+      fill: var(--color-pos);
+      font-size: 10px;
+      font-weight: 700;
+    }
+
+    /* path arrows showing the chosen branch */
+    .path-line {
+      stroke-width: 3;
+      fill: none;
+      stroke-dasharray: 6 5;
+      stroke-dashoffset: 0;
+      transition: opacity 0.4s;
+    }
+    .path-line.dim { opacity: 0.18; }
+    .path-line.active { opacity: 1; }
+    .path-line.explore { stroke: #56B4E9; }
+    .path-line.exploit { stroke: #785EF0; }
+
+    .scene-divider { stroke: #d8d8d8; stroke-width: 1; stroke-dasharray: 2 4; }
+  </style>
+</head>
+<body>
+  <header class="eth-header">
+    <div class="eth-logo">ETH<em>zürich</em></div>
+    <nav><a href="../">← Companion site</a></nav>
+  </header>
+
+  <main class="viz-container">
+    <h1>ε-greedy: a step-by-step walkthrough</h1>
+    <p class="lede">
+      One click per micro-step.  Watch the roulette decide whether to
+      <span style="color:#785EF0;font-weight:600;">exploit</span> (probability 1−ε) or
+      <span style="color:#0891B2;font-weight:600;">explore</span> (probability ε), then
+      a ball is pulled from the chosen urn and the corresponding
+      estimate p̂<sub>k</sub> is updated.  The three urns have hidden
+      biases p<sub>1</sub> &gt; p<sub>2</sub> &gt; p<sub>3</sub>; the
+      orange-vs-white mix inside each urn is the truth the algorithm
+      is trying to discover.
+    </p>
+
+    <div class="viz-card">
+      <div class="eg-controls">
+        <label>
+          ε =
+          <input type="range" id="eps-input" min="0.05" max="0.95" step="0.01" value="0.20">
+          <span class="eps-val" id="eps-value">0.20</span>
+        </label>
+        <label>
+          <input type="checkbox" id="decay-input">
+          decaying ε  (ε ← ε · 0.95 each round)
+        </label>
+        <button id="next-btn" class="primary">Next ▶</button>
+        <button id="play-btn">▶ Play</button>
+        <button id="reset-btn">Reset</button>
+        <span class="round-counter">round <strong id="round-num">0</strong> &nbsp;·&nbsp; phase <strong id="phase-name">init</strong></span>
+      </div>
+
+      <div class="eg-status" id="status-line">
+        Set ε with the slider, then press <strong>Next</strong> to spin the roulette.
+      </div>
+
+      <div class="eg-grid">
+        <div class="eg-pseudo">
+          <h3>Algorithm</h3>
+          <ol id="pseudo">
+            <li data-step="init">
+              <span class="keyword">Initialise.</span>  For each urn k = 1, 2, 3, set
+              the observation list to empty.  Choose ε ∈ (0, 1).
+            </li>
+            <li data-step="round">
+              <span class="keyword">For</span> round t = 1, 2, 3, &hellip;
+            </li>
+            <li class="indent" data-step="spin">
+              Sample u ~ Uniform[0, 1].
+            </li>
+            <li class="indent" data-step="branch-explore">
+              <span class="keyword">If</span> u &lt; ε &nbsp;<span class="branch-c">[ explore ]</span>: pick urn k uniformly at random.
+            </li>
+            <li class="indent" data-step="branch-exploit">
+              <span class="keyword">Else</span> &nbsp;<span class="branch-p">[ exploit ]</span>: pick urn k = arg max<sub>i</sub> p̂<sub>i</sub>.
+            </li>
+            <li class="indent" data-step="pull">
+              Pull a ball from urn k.  Observe x ∈ {0, 1}.
+            </li>
+            <li class="indent" data-step="update">
+              Append x to urn k's observation list.  Recompute p̂<sub>k</sub> = mean of that list.
+            </li>
+          </ol>
+        </div>
+
+        <div class="eg-scene-wrap">
+          <svg id="scene" class="eg-scene" viewBox="0 0 1080 700"
+               preserveAspectRatio="xMidYMin meet" aria-label="ε-greedy walkthrough"></svg>
+        </div>
+      </div>
+    </div>
+
+    <aside class="explainer" style="font-size:0.94rem; color:var(--color-text); max-width:75ch;">
+      <h2 style="font-weight:600; margin-bottom:6px;">What you are watching</h2>
+      <p>
+        The cyan slice of the roulette has angular size ε·360°; the
+        violet slice fills the rest.  The pointer on the rim shows
+        where a uniform draw u ∈ [0, 1] falls; that draw decides
+        whether the round is an exploration step (cyan) or an
+        exploitation step (violet).
+      </p>
+      <p style="margin-top:8px;">
+        Under exploitation, the algorithm picks the urn with the
+        highest current empirical mean p̂<sub>i</sub>.  Under
+        exploration, all three urns are equally likely.
+      </p>
+      <p style="margin-top:8px;">
+        Try ε = 0.05 vs ε = 0.50 across many rounds.  Small ε
+        commits to whichever urn looked best early; large ε keeps
+        wasting pulls on losers.  The decaying-ε option (ε ← ε·0.95
+        per round) lowers the explore tax over time, a common fix.
+      </p>
+    </aside>
+  </main>
+
+  <footer class="eth-footer">CAS AINIT FS26 · W2 Bandits</footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+  <script>
+  (function () {
+    // ============================================================
+    // STATE
+    // ============================================================
+    const TRUE_P = [0.80, 0.50, 0.20];   // hidden biases p_1 > p_2 > p_3
+    const N_URN_BALLS = 32;              // visual count inside each urn
+    const PHASES = ['init', 'spin', 'pull', 'update'];
+
+    const state = {
+      epsilon:     0.20,
+      decay:       false,
+      round:       0,
+      phase:       'init',  // 'init' | 'spin' | 'pull' | 'update'
+      draws:       [[], [], []],   // per-urn list of 0/1
+      lastU:       null,            // u in [0,1] from this round's spin
+      lastBranch:  null,            // 'explore' | 'exploit'
+      lastChoice:  null,            // 0 | 1 | 2 (urn idx)
+      lastDraw:    null,            // 0 | 1
+      playing:     false,
+      playTimer:   null,
+    };
+
+    // ============================================================
+    // DOM
+    // ============================================================
+    const epsInput = document.getElementById('eps-input');
+    const epsValue = document.getElementById('eps-value');
+    const decayInput = document.getElementById('decay-input');
+    const nextBtn = document.getElementById('next-btn');
+    const playBtn = document.getElementById('play-btn');
+    const resetBtn = document.getElementById('reset-btn');
+    const roundNumEl = document.getElementById('round-num');
+    const phaseNameEl = document.getElementById('phase-name');
+    const statusEl = document.getElementById('status-line');
+    const pseudoLis = document.querySelectorAll('#pseudo li');
+
+    // ============================================================
+    // RNG (deterministic per session for reproducibility)
+    // ============================================================
+    let rngSeed = 0x9E3779B9;
+    function rand() {
+      // mulberry32
+      rngSeed = (rngSeed + 0x6D2B79F5) >>> 0;
+      let t = rngSeed;
+      t = Math.imul(t ^ (t >>> 15), t | 1);
+      t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    }
+
+    // ============================================================
+    // SCENE — coordinates
+    // ============================================================
+    const W = 1080, H = 700;
+    const ROUL_CX = 200, ROUL_CY = 145, ROUL_R = 92;
+    const URN_Y  = 360;
+    const URN_W  = 90, URN_H = 130, URN_NECK = 28;
+    const URN_X = [220, 480, 740];        // urn left edges (xL of body)
+    const STRIP_Y = 530;                   // observation strips top
+    const STRIP_W = 220;                   // strip width per urn
+    const STRIP_X = URN_X.map(x => x + URN_W/2 - STRIP_W/2);
+
+    // ============================================================
+    // BUILD: roulette
+    // ============================================================
+    const svg = d3.select('#scene');
+    svg.selectAll('*').remove();
+
+    const gRoulette = svg.append('g');
+    const gPaths    = svg.append('g');
+    const gUrns     = svg.append('g');
+    const gObs      = svg.append('g');
+    const gFly      = svg.append('g');         // for ball animations
+    const gOverlay  = svg.append('g');
+
+    // Roulette background sectors (built once, then re-pathed on epsilon change)
+    const exploreSector = gRoulette.append('path').attr('class', 'roulette-explore');
+    const exploitSector = gRoulette.append('path').attr('class', 'roulette-exploit');
+    gRoulette.append('circle')
+      .attr('class', 'roulette-rim')
+      .attr('cx', ROUL_CX).attr('cy', ROUL_CY).attr('r', ROUL_R);
+
+    // Sector labels
+    const exploreLabel = gRoulette.append('text')
+      .attr('class', 'roulette-label')
+      .text('ε');
+    const exploitLabel = gRoulette.append('text')
+      .attr('class', 'roulette-label')
+      .text('1 − ε');
+
+    // Roulette caption
+    gRoulette.append('text')
+      .attr('x', ROUL_CX).attr('y', ROUL_CY - ROUL_R - 18)
+      .attr('class', 'roulette-readout')
+      .style('font-size', '13px')
+      .style('font-weight', 600)
+      .style('fill', 'var(--color-text)')
+      .text('Roulette');
+
+    // Sector legend below roulette
+    const legendY = ROUL_CY + ROUL_R + 22;
+    gRoulette.append('rect')
+      .attr('x', ROUL_CX - 78).attr('y', legendY - 8)
+      .attr('width', 12).attr('height', 12).attr('fill', '#56B4E9');
+    gRoulette.append('text')
+      .attr('x', ROUL_CX - 60).attr('y', legendY + 3)
+      .attr('class', 'roulette-readout')
+      .style('text-anchor', 'start')
+      .text('explore');
+    gRoulette.append('rect')
+      .attr('x', ROUL_CX + 10).attr('y', legendY - 8)
+      .attr('width', 12).attr('height', 12).attr('fill', '#785EF0');
+    gRoulette.append('text')
+      .attr('x', ROUL_CX + 28).attr('y', legendY + 3)
+      .attr('class', 'roulette-readout')
+      .style('text-anchor', 'start')
+      .text('exploit');
+
+    // u readout below
+    const uReadout = gRoulette.append('text')
+      .attr('x', ROUL_CX).attr('y', legendY + 28)
+      .attr('class', 'roulette-readout')
+      .text('u = —');
+
+    // Pointer (the ball that lands at angle u)
+    const pointerLine = gRoulette.append('line')
+      .attr('class', 'roulette-divider')
+      .attr('stroke', '#2c3e50').attr('stroke-width', 2)
+      .attr('x1', ROUL_CX).attr('y1', ROUL_CY)
+      .attr('x2', ROUL_CX).attr('y2', ROUL_CY - ROUL_R + 10)
+      .style('opacity', 0);
+    const pointerBall = gRoulette.append('circle')
+      .attr('class', 'roulette-pointer')
+      .attr('r', 7)
+      .attr('cx', ROUL_CX).attr('cy', ROUL_CY - ROUL_R + 10)
+      .style('opacity', 0);
+
+    function angleForU(u) {
+      // u in [0, 1] mapped onto the wheel.  We start at 12-o'clock (top),
+      // go clockwise.  Sector [0, eps) is cyan (explore), [eps, 1) violet.
+      // Angle in radians from 12 o'clock, clockwise.
+      return u * 2 * Math.PI;
+    }
+    function pointAt(angleRad) {
+      // 12 o'clock = (cx, cy - r); rotation clockwise.
+      const x = ROUL_CX + Math.sin(angleRad) * (ROUL_R - 4);
+      const y = ROUL_CY - Math.cos(angleRad) * (ROUL_R - 4);
+      return { x, y };
+    }
+
+    function rouletteSectorPath(startU, endU) {
+      const a0 = angleForU(startU);
+      const a1 = angleForU(endU);
+      const p0 = pointAt(a0);
+      const p1 = pointAt(a1);
+      const sweep = (endU - startU) > 0.5 ? 1 : 0;
+      // Path from center to p0, arc to p1, back to center
+      return `M ${ROUL_CX} ${ROUL_CY} ` +
+             `L ${p0.x} ${p0.y} ` +
+             `A ${ROUL_R - 4} ${ROUL_R - 4} 0 ${sweep} 1 ${p1.x} ${p1.y} Z`;
+    }
+
+    function updateRouletteWheel() {
+      const eps = state.epsilon;
+      // Cyan sector covers [0, eps), violet covers [eps, 1).
+      exploreSector.attr('d', rouletteSectorPath(0, Math.max(0.001, eps)));
+      exploitSector.attr('d', rouletteSectorPath(Math.max(0.001, eps), 0.999999));
+      // Place sector labels at angular midpoints, pulled radially toward 60% of R.
+      const midExplore = eps / 2;
+      const midExploit = eps + (1 - eps) / 2;
+      const labelR = ROUL_R * 0.55;
+      const angE = angleForU(midExplore);
+      const angX = angleForU(midExploit);
+      exploreLabel
+        .attr('x', ROUL_CX + Math.sin(angE) * labelR)
+        .attr('y', ROUL_CY - Math.cos(angE) * labelR + 4)
+        .style('opacity', eps > 0.04 ? 1 : 0);
+      exploitLabel
+        .attr('x', ROUL_CX + Math.sin(angX) * labelR)
+        .attr('y', ROUL_CY - Math.cos(angX) * labelR + 4)
+        .style('opacity', eps < 0.96 ? 1 : 0);
+    }
+
+    // ============================================================
+    // BUILD: urns
+    // ============================================================
+    function urnFlaskPath(xL, yT) {
+      // U-shape: shoulders, neck, body, rounded bottom.
+      const xR = xL + URN_W;
+      const yB = yT + URN_H;
+      const neckH = 14;
+      const r = 12;
+      // body curves rounded at corners
+      return `M ${xL + URN_NECK} ${yT}
+              L ${xR - URN_NECK} ${yT}
+              L ${xR - URN_NECK} ${yT + neckH}
+              L ${xR} ${yT + neckH + 6}
+              L ${xR} ${yB - r}
+              Q ${xR} ${yB} ${xR - r} ${yB}
+              L ${xL + r} ${yB}
+              Q ${xL} ${yB} ${xL} ${yB - r}
+              L ${xL} ${yT + neckH + 6}
+              L ${xL + URN_NECK} ${yT + neckH}
+              Z`;
+    }
+
+    function urnRimPath(xL, yT) {
+      const xR = xL + URN_W;
+      return `M ${xL + URN_NECK - 4} ${yT - 6}
+              L ${xR - URN_NECK + 4} ${yT - 6}
+              L ${xR - URN_NECK} ${yT}
+              L ${xL + URN_NECK} ${yT}
+              Z`;
+    }
+
+    // Build each urn
+    const urnGroups = [];
+    for (let k = 0; k < 3; k++) {
+      const g = gUrns.append('g');
+      const xL = URN_X[k], yT = URN_Y;
+
+      // Flask body
+      g.append('path').attr('class', 'urn-body').attr('d', urnFlaskPath(xL, yT));
+      // Rim
+      g.append('path').attr('class', 'urn-rim').attr('d', urnRimPath(xL, yT));
+
+      // Inside balls — scattered, fixed proportions reflecting TRUE_P[k]
+      const insideG = g.append('g').attr('class', 'urn-inside');
+      // Use a deterministic but pseudo-random scatter so visuals don't shift
+      const balls = scatterPositions(N_URN_BALLS,
+        xL + 8, yT + 28,        // bbox top-left within urn body
+        URN_W - 16, URN_H - 38, 12345 + k);
+      const orangeCount = Math.round(N_URN_BALLS * TRUE_P[k]);
+      balls.forEach((pos, i) => {
+        insideG.append('circle')
+          .attr('class', i < orangeCount ? 'ball-orange' : 'ball-white')
+          .attr('cx', pos.x).attr('cy', pos.y).attr('r', 4);
+      });
+
+      // Glow outline used to highlight chosen urn
+      g.append('path')
+        .attr('class', 'urn-glow')
+        .attr('d', urnFlaskPath(xL, yT));
+
+      // Labels
+      g.append('text')
+        .attr('class', 'urn-label')
+        .attr('x', xL + URN_W / 2)
+        .attr('y', yT - 18)
+        .text(`urn ${k + 1}`);
+      g.append('text')
+        .attr('class', 'urn-bias')
+        .attr('x', xL + URN_W / 2)
+        .attr('y', yT - 4)
+        .text(`(true bias p${'₁₂₃'.charAt(k)} = ${TRUE_P[k].toFixed(2)})`);
+
+      urnGroups.push(g);
+    }
+
+    // Deterministic scatter inside a bbox, jittered.
+    function scatterPositions(n, x0, y0, w, h, seed) {
+      let s = seed >>> 0;
+      function r() {
+        s = (s + 0x6D2B79F5) >>> 0;
+        let t = s;
+        t = Math.imul(t ^ (t >>> 15), t | 1);
+        t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+        return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+      }
+      const cols = 5, rows = Math.ceil(n / cols);
+      const dx = w / cols, dy = h / rows;
+      const out = [];
+      for (let i = 0; i < n; i++) {
+        const c = i % cols, ro = Math.floor(i / cols);
+        const jx = (r() - 0.5) * dx * 0.4;
+        const jy = (r() - 0.5) * dy * 0.4;
+        out.push({ x: x0 + c * dx + dx / 2 + jx, y: y0 + ro * dy + dy / 2 + jy });
+      }
+      // Shuffle so orange/white are interleaved visually
+      for (let i = out.length - 1; i > 0; i--) {
+        const j = Math.floor(r() * (i + 1));
+        [out[i], out[j]] = [out[j], out[i]];
+      }
+      return out;
+    }
+
+    // ============================================================
+    // BUILD: observation strips and estimate readouts
+    // ============================================================
+    const obsGroups = [];
+    const VAR_NAMES = ['X', 'Y', 'Z'];
+    for (let k = 0; k < 3; k++) {
+      const g = gObs.append('g');
+      const x0 = STRIP_X[k];
+      const y0 = STRIP_Y;
+
+      g.append('text')
+        .attr('class', 'obs-label')
+        .attr('x', x0)
+        .attr('y', y0 - 6)
+        .text(`obs ${VAR_NAMES[k]}`);
+
+      // Frame for the strip
+      g.append('rect')
+        .attr('x', x0).attr('y', y0)
+        .attr('width', STRIP_W).attr('height', 28)
+        .attr('fill', 'white')
+        .attr('stroke', '#d0d4d8')
+        .attr('stroke-width', 1)
+        .attr('rx', 4);
+
+      // Container for ball circles (added as draws happen)
+      const ballsG = g.append('g').attr('class', 'obs-balls');
+
+      // Estimate formula and value
+      const formulaG = g.append('g');
+      formulaG.append('text')
+        .attr('class', 'obs-formula')
+        .attr('x', x0)
+        .attr('y', y0 + 50)
+        .attr('id', `formula-${k}`)
+        .text(`p̂${'₁₂₃'.charAt(k)} = — / —`);
+      formulaG.append('text')
+        .attr('class', 'obs-formula')
+        .attr('x', x0 + STRIP_W)
+        .attr('y', y0 + 50)
+        .attr('text-anchor', 'end')
+        .attr('id', `value-${k}`)
+        .text('p̂ = —');
+      formulaG.append('text')
+        .attr('class', 'estimate-best-marker')
+        .attr('x', x0 + STRIP_W / 2)
+        .attr('y', y0 + 65)
+        .attr('text-anchor', 'middle')
+        .attr('id', `best-${k}`)
+        .text('');
+
+      obsGroups.push({ g, ballsG, x0, y0 });
+    }
+
+    // ============================================================
+    // BUILD: path arrows from roulette to "exploit" / "explore"
+    // ============================================================
+    // Anchors: roulette right edge → urns (exploit) and to a "uniform pick"
+    // marker (explore).
+    const ROUL_RIGHT = { x: ROUL_CX + ROUL_R + 6, y: ROUL_CY };
+
+    const explorePath = gPaths.append('path')
+      .attr('class', 'path-line explore dim')
+      .attr('d', `M ${ROUL_RIGHT.x} ${ROUL_RIGHT.y} C 540 200, 700 220, 880 250`);
+
+    const exploitPath = gPaths.append('path')
+      .attr('class', 'path-line exploit dim')
+      .attr('d', `M ${ROUL_RIGHT.x} ${ROUL_RIGHT.y} C 540 130, 700 110, 880 130`);
+
+    // Branch labels at the path endpoints
+    gPaths.append('text')
+      .attr('x', 894).attr('y', 252)
+      .attr('font-size', 14).attr('font-weight', 600)
+      .attr('fill', '#0891B2')
+      .text('explore');
+    gPaths.append('text')
+      .attr('x', 894).attr('y', 134)
+      .attr('font-size', 14).attr('font-weight', 600)
+      .attr('fill', '#785EF0')
+      .text('exploit');
+    gPaths.append('text')
+      .attr('x', 894).attr('y', 268)
+      .attr('font-size', 11).attr('fill', 'var(--color-text-muted)')
+      .text('pick urn k uniformly');
+    gPaths.append('text')
+      .attr('x', 894).attr('y', 150)
+      .attr('font-size', 11).attr('fill', 'var(--color-text-muted)')
+      .text('argmax p̂');
+
+    // ============================================================
+    // ANIMATIONS
+    // ============================================================
+    // Spinning roulette ball: walk around the rim, finally settling at
+    // angle u·2π.  Returns a Promise.
+    function spinRouletteTo(u) {
+      pointerBall.style('opacity', 1);
+      pointerLine.style('opacity', 1);
+      const finalAngle = angleForU(u);
+      // Pre-spin: 2 full rotations + final angle
+      const totalAngle = 2 * 2 * Math.PI + finalAngle;
+      const ms = 1100;
+      const start = performance.now();
+      return new Promise(resolve => {
+        function frame(now) {
+          const t = Math.min(1, (now - start) / ms);
+          const eased = 1 - Math.pow(1 - t, 3);
+          const ang = eased * totalAngle;
+          const p = pointAt(ang);
+          pointerBall.attr('cx', p.x).attr('cy', p.y);
+          pointerLine.attr('x2', p.x).attr('y2', p.y);
+          if (t < 1) requestAnimationFrame(frame);
+          else resolve();
+        }
+        requestAnimationFrame(frame);
+      });
+    }
+
+    // Animate a ball flying out of urn k and landing in its observation strip.
+    function flyBallToStrip(urnIdx, isOrange, slot) {
+      const xL = URN_X[urnIdx];
+      const startX = xL + URN_W / 2;
+      const startY = URN_Y + URN_H / 2;
+      const ob = obsGroups[urnIdx];
+      const cellW = 16;
+      const endX = ob.x0 + 8 + slot * cellW;
+      const endY = ob.y0 + 14;
+      const ball = gFly.append('circle')
+        .attr('class', isOrange ? 'ball-orange' : 'ball-white')
+        .attr('r', 6)
+        .attr('cx', startX).attr('cy', startY);
+      const ms = 700;
+      const start = performance.now();
+      return new Promise(resolve => {
+        function frame(now) {
+          const t = Math.min(1, (now - start) / ms);
+          const eased = t * t * (3 - 2 * t);  // smoothstep
+          const x = startX + (endX - startX) * eased;
+          // Parabolic arc: dip up
+          const arcY = -40 * 4 * eased * (1 - eased);
+          const y = startY + (endY - startY) * eased + arcY;
+          ball.attr('cx', x).attr('cy', y).attr('r', 6 - 1.5 * eased);
+          if (t < 1) requestAnimationFrame(frame);
+          else { ball.remove(); resolve(); }
+        }
+        requestAnimationFrame(frame);
+      });
+    }
+
+    // ============================================================
+    // RENDER (re-render the static state)
+    // ============================================================
+    function renderUrnGlow() {
+      urnGroups.forEach((g, i) => {
+        g.select('.urn-glow').classed('active', i === state.lastChoice && state.phase !== 'init');
+      });
+    }
+    function renderObservations() {
+      for (let k = 0; k < 3; k++) {
+        const arr = state.draws[k];
+        const ballsG = obsGroups[k].ballsG;
+        ballsG.selectAll('*').remove();
+        const cellW = 16;
+        arr.forEach((x, i) => {
+          ballsG.append('circle')
+            .attr('class', x === 1 ? 'ball-orange' : 'ball-white')
+            .attr('r', 5.5)
+            .attr('cx', obsGroups[k].x0 + 8 + i * cellW)
+            .attr('cy', obsGroups[k].y0 + 14);
+        });
+        const n = arr.length;
+        const w = arr.reduce((a, b) => a + b, 0);
+        const phat = n === 0 ? null : w / n;
+        const fEl = document.querySelector(`#formula-${k}`);
+        const vEl = document.querySelector(`#value-${k}`);
+        fEl.innerHTML = `p̂${'₁₂₃'.charAt(k)} = ${w} / ${n}`;
+        vEl.innerHTML = phat == null ? '= —' : `= ${phat.toFixed(3)}`;
+      }
+      // Recompute argmax marker
+      const phats = state.draws.map(arr => arr.length === 0 ? -1 : arr.reduce((a, b) => a + b, 0) / arr.length);
+      const allEmpty = phats.every(p => p < 0);
+      let best = -1;
+      if (!allEmpty) {
+        best = 0;
+        for (let i = 1; i < 3; i++) if (phats[i] > phats[best]) best = i;
+      }
+      for (let k = 0; k < 3; k++) {
+        const bestEl = document.querySelector(`#best-${k}`);
+        bestEl.textContent = (k === best) ? '★ best estimate so far' : '';
+      }
+    }
+    function renderRound() {
+      roundNumEl.textContent = state.round;
+      phaseNameEl.textContent = state.phase;
+      epsValue.textContent = state.epsilon.toFixed(2);
+    }
+    function renderPaths() {
+      explorePath.classed('active', state.lastBranch === 'explore' && state.phase !== 'init');
+      explorePath.classed('dim',    state.lastBranch !== 'explore' || state.phase === 'init');
+      exploitPath.classed('active', state.lastBranch === 'exploit' && state.phase !== 'init');
+      exploitPath.classed('dim',    state.lastBranch !== 'exploit' || state.phase === 'init');
+    }
+    function renderPseudoHighlight() {
+      pseudoLis.forEach(li => li.classList.remove('active'));
+      const map = {
+        'init':   ['init'],
+        'spin':   ['round', 'spin', state.lastBranch === 'explore' ? 'branch-explore' : 'branch-exploit'],
+        'pull':   ['pull'],
+        'update': ['update'],
+      };
+      (map[state.phase] || []).forEach(s => {
+        const li = document.querySelector(`#pseudo li[data-step="${s}"]`);
+        if (li) li.classList.add('active');
+      });
+    }
+    function renderRoulettePointer() {
+      if (state.lastU == null) {
+        pointerBall.style('opacity', 0);
+        pointerLine.style('opacity', 0);
+        uReadout.text('u = —');
+      } else {
+        pointerBall.style('opacity', 1);
+        pointerLine.style('opacity', 1);
+        const cmp = state.lastU < state.epsilon
+          ? `< ε  →  EXPLORE`
+          : `≥ ε  →  EXPLOIT`;
+        uReadout.html('');
+        uReadout.append('tspan').text(`u = ${state.lastU.toFixed(3)}  `);
+        uReadout.append('tspan').attr('class', 'roulette-readout-strong')
+          .style('font-weight', 700)
+          .style('fill', state.lastU < state.epsilon ? '#0891B2' : '#785EF0')
+          .text(cmp);
+      }
+    }
+    function renderAll() {
+      updateRouletteWheel();
+      renderRound();
+      renderUrnGlow();
+      renderObservations();
+      renderPaths();
+      renderRoulettePointer();
+      renderPseudoHighlight();
+    }
+
+    // ============================================================
+    // STATUS LINE
+    // ============================================================
+    function setStatus(html) { statusEl.innerHTML = html; }
+
+    // ============================================================
+    // ALGORITHM STEP
+    // ============================================================
+    function chooseExploit() {
+      // argmax of p̂; ties broken by lowest index; if any urn is empty,
+      // fall back to picking that urn (the convention is well-defined
+      // only when all urns have at least one draw).
+      const phats = [];
+      for (let k = 0; k < 3; k++) {
+        const arr = state.draws[k];
+        if (arr.length === 0) return k;            // bootstrap untouched arms
+        phats.push(arr.reduce((a, b) => a + b, 0) / arr.length);
+      }
+      let best = 0;
+      for (let i = 1; i < 3; i++) if (phats[i] > phats[best]) best = i;
+      return best;
+    }
+    function chooseExplore() {
+      return Math.floor(rand() * 3);
+    }
+
+    function pullBall(k) {
+      return rand() < TRUE_P[k] ? 1 : 0;
+    }
+
+    // Advance one micro-step.
+    let busy = false;
+    async function nextStep() {
+      if (busy) return;
+      busy = true;
+      try {
+        if (state.phase === 'init') {
+          // First step of round 1: spin the roulette and decide branch.
+          await doSpinPhase();
+        } else if (state.phase === 'spin') {
+          await doPullPhase();
+        } else if (state.phase === 'pull') {
+          await doUpdatePhase();
+        } else if (state.phase === 'update') {
+          // Loop back: start round t+1's spin
+          await doSpinPhase();
+        }
+      } finally {
+        busy = false;
+      }
+    }
+
+    async function doSpinPhase() {
+      state.round += 1;
+      state.lastU = rand();
+      const u = state.lastU;
+      if (u < state.epsilon) {
+        state.lastBranch = 'explore';
+        state.lastChoice = chooseExplore();
+      } else {
+        state.lastBranch = 'exploit';
+        state.lastChoice = chooseExploit();
+      }
+      state.phase = 'spin';
+      // Animate the spin
+      renderRound();
+      renderPseudoHighlight();
+      setStatus(`Round <strong>${state.round}</strong>: spinning roulette&hellip;`);
+      pointerBall.style('opacity', 1);
+      pointerLine.style('opacity', 1);
+      await spinRouletteTo(u);
+      renderPaths();
+      renderUrnGlow();
+      renderRoulettePointer();
+      renderPseudoHighlight();
+      const branchHTML = state.lastBranch === 'explore'
+        ? `<span class="branch-explore">EXPLORE</span>: pick urn <strong>${state.lastChoice + 1}</strong> uniformly at random.`
+        : `<span class="branch-exploit">EXPLOIT</span>: arg max p̂ ⇒ urn <strong>${state.lastChoice + 1}</strong>.`;
+      setStatus(`Round <strong>${state.round}</strong>: u = ${u.toFixed(3)} ${u < state.epsilon ? '<' : '≥'} ε = ${state.epsilon.toFixed(2)} → ${branchHTML}`);
+    }
+
+    async function doPullPhase() {
+      state.lastDraw = pullBall(state.lastChoice);
+      state.phase = 'pull';
+      renderRound();
+      renderPseudoHighlight();
+      const slot = state.draws[state.lastChoice].length;  // index where this draw will sit
+      const colour = state.lastDraw === 1 ? 'orange' : 'white';
+      setStatus(`Round <strong>${state.round}</strong>: pulled a <strong style="color:${state.lastDraw === 1 ? '#E69F00' : '#666'}">${colour}</strong> ball from urn <strong>${state.lastChoice + 1}</strong>.`);
+      await flyBallToStrip(state.lastChoice, state.lastDraw === 1, slot);
+      // Persist the ball in the strip after fly-in (renderObservations will draw it
+      // once we advance to update phase, so for now show it manually).
+      const ballsG = obsGroups[state.lastChoice].ballsG;
+      ballsG.append('circle')
+        .attr('class', state.lastDraw === 1 ? 'ball-orange' : 'ball-white')
+        .attr('r', 5.5)
+        .attr('cx', obsGroups[state.lastChoice].x0 + 8 + slot * 16)
+        .attr('cy', obsGroups[state.lastChoice].y0 + 14);
+    }
+
+    async function doUpdatePhase() {
+      state.draws[state.lastChoice].push(state.lastDraw);
+      state.phase = 'update';
+      if (state.decay) state.epsilon = Math.max(0.01, state.epsilon * 0.95);
+      renderObservations();
+      renderRound();
+      renderRoulettePointer();
+      renderPseudoHighlight();
+      const k = state.lastChoice;
+      const arr = state.draws[k];
+      const w = arr.reduce((a, b) => a + b, 0), n = arr.length;
+      const ph = (w / n).toFixed(3);
+      setStatus(`Round <strong>${state.round}</strong>: appended ${state.lastDraw} to urn ${k + 1}.  p̂${'₁₂₃'.charAt(k)} = ${w}/${n} = <strong>${ph}</strong>${state.decay ? ` &nbsp;·&nbsp; ε ← ${state.epsilon.toFixed(3)}` : ''}.`);
+    }
+
+    // ============================================================
+    // CONTROLS
+    // ============================================================
+    function reset() {
+      stopPlay();
+      state.epsilon = parseFloat(epsInput.value);
+      state.round = 0;
+      state.phase = 'init';
+      state.draws = [[], [], []];
+      state.lastU = null;
+      state.lastBranch = null;
+      state.lastChoice = null;
+      state.lastDraw = null;
+      // Keep RNG seed continuity? Reset to make Reset reproducible
+      rngSeed = 0x9E3779B9;
+      renderAll();
+      setStatus(`ε set to <strong>${state.epsilon.toFixed(2)}</strong>.  Press <strong>Next</strong> to spin the roulette.`);
+    }
+
+    function startPlay() {
+      if (state.playing) return;
+      state.playing = true;
+      playBtn.textContent = '⏸ Pause';
+      const tick = async () => {
+        if (!state.playing) return;
+        await nextStep();
+        if (state.playing) state.playTimer = setTimeout(tick, 800);
+      };
+      tick();
+    }
+    function stopPlay() {
+      state.playing = false;
+      playBtn.textContent = '▶ Play';
+      if (state.playTimer) clearTimeout(state.playTimer);
+    }
+
+    epsInput.addEventListener('input', () => {
+      state.epsilon = parseFloat(epsInput.value);
+      epsValue.textContent = state.epsilon.toFixed(2);
+      updateRouletteWheel();
+      renderRoulettePointer();
+    });
+    decayInput.addEventListener('change', () => { state.decay = decayInput.checked; });
+    nextBtn.addEventListener('click', () => { nextStep(); });
+    playBtn.addEventListener('click', () => state.playing ? stopPlay() : startPlay());
+    resetBtn.addEventListener('click', reset);
+
+    // ============================================================
+    // BOOT
+    // ============================================================
+    reset();
+
+    // URL hash trigger: #step3 advances 3 clicks (for screenshots / deep links)
+    const hashMatch = location.hash.match(/^#step(\d+)$/);
+    if (hashMatch) {
+      const n = parseInt(hashMatch[1], 10);
+      (async () => {
+        for (let i = 0; i < n; i++) await nextStep();
+      })();
+    }
+  })();
+  </script>
+</body>
+</html>
