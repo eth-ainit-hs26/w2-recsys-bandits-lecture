@@ -184,13 +184,26 @@
     <div class="viz-card">
       <div class="panel-title">Matrix factorisation view</div>
       <div class="panel-sub">
-        $U$ on the left, $V^{\!\top}$ on top, their product $UV^{\!\top}$
-        in the middle, and the target $R$ on the right.  As gradient
-        descent proceeds, $U$ and $V$ re-paint and the product chases $R$
+        <em>U</em> on the left, <em>V</em><sup>⊤</sup> on top, their product
+        <em>U</em>&thinsp;<em>V</em><sup>⊤</sup> in the middle, and the
+        target <em>R</em> on the right.  As gradient descent proceeds,
+        <em>U</em> and <em>V</em> re-paint and the product chases <em>R</em>
         on the visible cells.
       </div>
       <svg id="matrix-svg" class="matrix-svg" viewBox="0 0 540 360"
            preserveAspectRatio="xMidYMid meet" aria-label="matrix factorisation"></svg>
+
+      <div class="controls">
+        <button id="btn-step">Step</button>
+        <button id="btn-play">▶ Play</button>
+        <button id="btn-reset" class="secondary">Reset</button>
+        <button id="btn-seed" class="secondary">New seed</button>
+        <div class="speed-wrap">
+          <label for="speed">steps/sec <span id="speed-val" style="color:var(--color-text);font-weight:600">30</span></label>
+          <input type="range" id="speed" min="1" max="120" value="30">
+        </div>
+        <span class="epoch-bar" id="epoch-bar">idle</span>
+      </div>
 
       <div class="layout">
         <div>
@@ -238,17 +251,6 @@
         </div>
       </div>
 
-      <div class="controls">
-        <button id="btn-step">Step</button>
-        <button id="btn-play">▶ Play</button>
-        <button id="btn-reset" class="secondary">Reset</button>
-        <button id="btn-seed" class="secondary">New seed</button>
-        <div class="speed-wrap">
-          <label for="speed">steps/sec <span id="speed-val" style="color:var(--color-text);font-weight:600">30</span></label>
-          <input type="range" id="speed" min="1" max="120" value="30">
-        </div>
-        <span class="epoch-bar" id="epoch-bar">idle</span>
-      </div>
     </div>
 
     <aside class="explainer">
@@ -277,11 +279,21 @@
       </p>
     </aside>
   </main>
-  <footer class="eth-footer">CAS AINIT FS26 · W2 Recsys · 07 / 11</footer>
+  <footer class="eth-footer">CAS AINIT FS26 · W2 Recsys · Demo 4 / 9</footer>
 
   <script src="shared/data.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
+          onload="renderMathInElement(document.body, {
+            delimiters: [
+              {left: '$$', right: '$$', display: true},
+              {left: '$',  right: '$',  display: false},
+              {left: '\\(', right: '\\)', display: false},
+              {left: '\\[', right: '\\]', display: true}
+            ],
+            throwOnError: false
+          });"></script>
   <script>
   (function () {
     const C = RECSYS.COLORS;
@@ -692,20 +704,15 @@
       const gridP  = makeGrid(M, N, X_P,  Y_P);
       const gridR  = makeGrid(M, N, X_R,  Y_R);
 
-      // Labels
+      // Labels.  Dim sublabels live UNDER each grid (well clear of the
+      // V^T strip that hugs the top of the product), so nothing overlaps.
       ms.append('text').attr('class', 'mat-label')
-        .attr('x', X_U + (K * CELL) / 2).attr('y', Y_U - 14)
-        .attr('text-anchor', 'middle').text('U');
-      ms.append('text').attr('class', 'mat-sublabel')
         .attr('x', X_U + (K * CELL) / 2).attr('y', Y_U + M * CELL + 12)
-        .attr('text-anchor', 'middle').text('21 × 2');
+        .attr('text-anchor', 'middle').text('U  (21 × 2)');
 
       ms.append('text').attr('class', 'mat-label')
         .attr('x', X_VT + (N * CELL) / 2).attr('y', Y_VT - 6)
-        .attr('text-anchor', 'middle').text('Vᵀ');
-      ms.append('text').attr('class', 'mat-sublabel')
-        .attr('x', X_VT - 6).attr('y', Y_VT + (K * CELL) / 2 + 3)
-        .attr('text-anchor', 'end').text('2 × 16');
+        .attr('text-anchor', 'middle').text('Vᵀ  (2 × 16)');
 
       ms.append('text').attr('class', 'mat-label')
         .attr('x', X_P + (N * CELL) / 2).attr('y', Y_P + M * CELL + 12)
@@ -851,8 +858,7 @@
     setSeed(currentSeed);
     initParams();
     renderAll();
-    // Auto-play so the user immediately sees the cloud reorganize.
-    play();
+    // Do NOT auto-play.  The user must press Play to start training.
 
     // Expose for console-debugging convenience
     window.__embedDemo = {
