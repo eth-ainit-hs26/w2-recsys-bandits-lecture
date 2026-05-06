@@ -1416,6 +1416,44 @@
 \vizhandoff{4}{Embeddings that learn}
 
 % ---------------------------------------------------------------------
+% Further applications of matrix factorisation.  Two external
+% visualisations from the SML FS26 course that apply PCA / SVD to
+% other domains: faces and U.S. Congress voting records.  Same
+% trick, different matrices.
+% ---------------------------------------------------------------------
+\begin{frame}{Further applications of matrix factorisation}
+  \footnotesize
+  The same trick recurs whenever you have a matrix.  Two examples from
+  ETH's \emph{Statistical Machine Learning} course (FS26):
+
+  \medskip
+  \begin{itemize}
+    \setlength{\itemsep}{0.7em}
+    \item \AINITemph{Eigenfaces.}
+          Each row is a face, each column a pixel.  The first few
+          factors are the dominant axes of facial variation: lighting,
+          pose, identity.\\[0.2em]
+          {\footnotesize\color{accentOxblood}%
+            \href{https://sml-fs26.github.io/pca-kmeans-rf/eigenfaces-pca/index.html}%
+                 {sml-fs26.github.io/pca-kmeans-rf/eigenfaces-pca}}
+    \item \AINITemph{The Congress story.}
+          Each row is a legislator, each column a roll-call vote.  The
+          first two factors recover the well-known left/right and
+          dovish/hawkish axes of U.S.\ politics, without anyone
+          labelling the data.\\[0.2em]
+          {\footnotesize\color{accentOxblood}%
+            \href{https://sml-fs26.github.io/pca-kmeans-rf/congress-story/index.html\#scene-1}%
+                 {sml-fs26.github.io/pca-kmeans-rf/congress-story}}
+  \end{itemize}
+
+  \medskip
+  \begin{center}
+    \scriptsize\itshape\color{mutedWarmGray}
+    Faces, votes, ratings: different matrices, same factorisation.
+  \end{center}
+\end{frame}
+
+% ---------------------------------------------------------------------
 % Closing slide for Act I
 % ---------------------------------------------------------------------
 \begin{frame}{End of Act I}
