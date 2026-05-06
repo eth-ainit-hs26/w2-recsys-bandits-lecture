@@ -297,6 +297,71 @@
     }
     .panel.encoder .metric-line .val { color: var(--color-tech); }
 
+    /* ---------- Huffman codebook (actual binary string per symbol) ---------- */
+    .huffman-block {
+      margin: 8px 0 12px;
+    }
+    .huffman-block .hf-label {
+      font-size: 0.82rem;
+      color: var(--color-text-muted);
+      margin-bottom: 6px;
+    }
+    .huffman-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(112px, 1fr));
+      gap: 4px;
+      max-height: 240px;
+      overflow-y: auto;
+      padding: 6px;
+      background: var(--color-neu-bg);
+      border-radius: 6px;
+      border: 1px solid var(--color-border);
+    }
+    .huffman-grid.binary {
+      grid-template-columns: repeat(2, 1fr);
+      max-height: none;
+    }
+    .huffman-cell {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 8px;
+      background: white;
+      border-radius: 4px;
+      border-left: 3px solid var(--color-pos);
+      font-size: 0.78rem;
+    }
+    .huffman-cell.binary-pos { border-left-color: var(--color-pos); }
+    .huffman-cell.binary-neg { border-left-color: var(--color-neg); }
+    .huffman-sym {
+      font-weight: 700;
+      color: var(--color-text);
+      min-width: 1.6em;
+      text-align: center;
+      font-size: 0.92rem;
+    }
+    .huffman-code {
+      font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+      color: var(--color-tech);
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      flex: 1;
+      text-align: right;
+    }
+    .huffman-cell.binary-pos .huffman-code { color: var(--color-pos); }
+    .huffman-cell.binary-neg .huffman-code { color: var(--color-neg); }
+    .huffman-bits {
+      color: var(--color-text-muted);
+      font-size: 0.72rem;
+      font-variant-numeric: tabular-nums;
+    }
+    .huffman-note {
+      font-size: 0.78rem;
+      color: var(--color-text-muted);
+      font-style: italic;
+      margin-top: 4px;
+    }
+
     /* ---------- Codebook (interval split used by arithmetic coding) ---------- */
     .codebook-block {
       margin-bottom: 12px;
@@ -795,7 +860,7 @@
         <div class="panel encoder">
           <h3>Arithmetic encoder <span class="pill">−log₂ p̂(x)</span></h3>
           <div class="codebook-block">
-            <div class="cb-label">Codebook: forecaster's split of [0, 1) into one sub-interval per symbol. Width = p̂; bit cost per symbol = −log₂(width).</div>
+            <div class="cb-label">Probability split: forecaster's [0, 1) divided into one sub-interval per symbol. Width = p̂; ideal bit cost = −log₂(width).</div>
             <div class="codebook-bar" id="cb-bar-binary">
               <div class="codebook-seg" id="cb-seg-pos" style="background:var(--color-pos);width:50%">
                 <span class="seg-name">white</span>
@@ -807,6 +872,11 @@
               </div>
             </div>
             <div class="codebook-axis"><span>0</span><span>1</span></div>
+          </div>
+          <div class="huffman-block">
+            <div class="hf-label">Huffman codebook: a literal binary string for each symbol.</div>
+            <div class="huffman-grid binary" id="hf-grid-binary"></div>
+            <div class="huffman-note">For two symbols, Huffman uses one bit per draw &mdash; arithmetic coding spends fractional bits and beats this when the bias is uneven.</div>
           </div>
           <div class="bitstream" id="bitstream">
             <span style="color:var(--color-text-muted)">(bits will appear as symbols arrive)</span>
@@ -903,6 +973,15 @@
       cbNeg.classList.toggle('too-narrow', wNeg < 12);
     }
 
+    // Huffman codebook for the two-symbol alphabet (always 0 / 1).
+    renderHuffmanGrid('hf-grid-binary', [
+      { sym: 'W', p: phatW },
+      { sym: 'V', p: phatV }
+    ], {
+      labelOf: s => s === 'W' ? 'white' : 'vermillion',
+      cellClass: s => s === 'W' ? 'binary-pos' : 'binary-neg'
+    });
+
     // History strip (top, last 30)
     const sym = document.getElementById('history-symbols');
     if (sym) {
@@ -977,6 +1056,54 @@
     "speculative minds are such as science cannot answer and the confident " +
     "answers of theologians no longer seem so convincing as they did in former " +
     "centuries";
+
+  // ====================================================================
+  // Huffman codebook helper.  Given an array of {sym, p}, build the
+  // optimal prefix code and return {sym, p, code} sorted by p descending.
+  // Used to display, alongside the probability-split bar, a literal
+  // binary string per symbol.  Note: arithmetic coding spends fractional
+  // bits per symbol; Huffman rounds each up to a whole bit.
+  // ====================================================================
+  function huffmanCodes(items) {
+    const arr = items.filter(d => d.p > 0);
+    if (arr.length === 0) return [];
+    if (arr.length === 1) return [{ ...arr[0], code: '0', bits: 1 }];
+    const nodes = arr.map(d => ({ sym: d.sym, p: d.p, children: null }));
+    while (nodes.length > 1) {
+      nodes.sort((a, b) => a.p - b.p);
+      const a = nodes.shift();
+      const b = nodes.shift();
+      nodes.push({ sym: null, p: a.p + b.p, children: [a, b] });
+    }
+    const codes = {};
+    (function walk(node, prefix) {
+      if (node.sym !== null) { codes[node.sym] = prefix || '0'; return; }
+      walk(node.children[0], prefix + '0');
+      walk(node.children[1], prefix + '1');
+    })(nodes[0], '');
+    return arr
+      .map(d => ({ sym: d.sym, p: d.p, code: codes[d.sym], bits: codes[d.sym].length }))
+      .sort((a, b) => b.p - a.p);
+  }
+
+  function renderHuffmanGrid(containerId, items, opts) {
+    const grid = document.getElementById(containerId);
+    if (!grid) return;
+    const codes = huffmanCodes(items);
+    const labelOf = (opts && opts.labelOf) || (s => s);
+    const cellClass = (opts && opts.cellClass) || (() => '');
+    grid.innerHTML = '';
+    codes.forEach(d => {
+      const cell = document.createElement('div');
+      cell.className = 'huffman-cell ' + cellClass(d.sym);
+      cell.innerHTML = `
+        <span class="huffman-sym">${labelOf(d.sym)}</span>
+        <span class="huffman-bits">${d.bits}b</span>
+        <span class="huffman-code">${d.code}</span>
+      `;
+      grid.appendChild(cell);
+    });
+  }
 
   // 27-symbol alphabet: a..z then space.
   const TEXT_ALPHABET = (() => {
@@ -1127,9 +1254,14 @@
         <div class="panel encoder">
           <h3>Arithmetic encoder <span class="pill">−log₂ p̂(c)</span></h3>
           <div class="codebook-block">
-            <div class="cb-label">Codebook: 27 sub-intervals of [0, 1), one per letter. Width = p̂(c). Wider letter = fewer bits.</div>
+            <div class="cb-label">Probability split: 27 sub-intervals of [0, 1), one per letter. Width = p̂(c). Wider letter = fewer bits.</div>
             <div class="codebook-bar" id="cb-bar-text"></div>
             <div class="codebook-axis"><span>0</span><span>1</span></div>
+          </div>
+          <div class="huffman-block">
+            <div class="hf-label">Huffman codebook: a literal binary string for each letter, sorted by frequency. Common letters get short codes; rare letters get long ones.</div>
+            <div class="huffman-grid" id="hf-grid-text"></div>
+            <div class="huffman-note">Huffman rounds each cost up to a whole bit; arithmetic coding does better by spending fractional bits per letter.</div>
           </div>
           <div class="bitstream" id="text-bitstream">
             <span style="color:var(--color-text-muted)">(bits will appear as characters arrive)</span>
@@ -1258,6 +1390,12 @@
         seg.classList.toggle('too-narrow', p < 0.025);
       });
     }
+
+    // Huffman codebook (27 letters; literal binary string per letter).
+    renderHuffmanGrid('hf-grid-text',
+      TEXT_ALPHABET.map(c => ({ sym: c, p: q[c] })),
+      { labelOf: s => s === ' ' ? '␣' : s }
+    );
 
     // Encoder stats
     const lossPerSym = TXT.n === 0 ? null : TXT.sumLoss / TXT.n;
@@ -1589,9 +1727,14 @@
         <div class="panel encoder">
           <h3>Arithmetic encoder <span class="pill">−log₂ p̂(c | ctx)</span></h3>
           <div class="codebook-block">
-            <div class="cb-label">Codebook: 27 sub-intervals of [0, 1), conditioned on the last two characters. Widths are p̂(c | ctx) and they shift with every new character.</div>
+            <div class="cb-label">Probability split: 27 sub-intervals of [0, 1), conditioned on the last two characters. Widths are p̂(c | ctx) and shift with every new character.</div>
             <div class="codebook-bar" id="cb-bar-llm"></div>
             <div class="codebook-axis"><span>0</span><span>1</span></div>
+          </div>
+          <div class="huffman-block">
+            <div class="hf-label">Huffman codebook: a literal binary string for each letter, recomputed at every step from p̂(c | ctx).</div>
+            <div class="huffman-grid" id="hf-grid-llm"></div>
+            <div class="huffman-note">As the context shifts, the codebook reshuffles: a letter that is &ldquo;cheap&rdquo; after &ldquo;th&rdquo; (next is &ldquo;e&rdquo; very often) becomes expensive after a different prefix.</div>
           </div>
           <div class="bitstream" id="llm-bitstream">
             <span style="color:var(--color-text-muted)">(bits will appear as characters arrive)</span>
@@ -1738,6 +1881,12 @@
         seg.classList.toggle('too-narrow', p < 0.025);
       });
     }
+
+    // Huffman codebook (rebuilt every step from p̂(c | ctx)).
+    renderHuffmanGrid('hf-grid-llm',
+      TEXT_ALPHABET.map(c => ({ sym: c, p: q[c] || 0 })),
+      { labelOf: s => s === ' ' ? '␣' : s }
+    );
 
     // Encoder stats
     const lossPerSym = LLM.n === 0 ? null : LLM.sumLoss / LLM.n;
