@@ -65,6 +65,14 @@
 
   /* ── TYPOGRAPHY ──────────────────────────────────── */
   .page-header { margin-bottom: 28px; }
+  .back-link {
+    display: inline-block;
+    margin-bottom: 14px;
+    font-size: 14px;
+    color: var(--ink-muted);
+    text-decoration: none;
+  }
+  .back-link:hover { color: var(--ink); text-decoration: underline; }
   .page-title {
     font-family: Georgia, 'Times New Roman', serif;
     font-size: 32px;
@@ -545,6 +553,7 @@
 <main class="main">
 
 <div class="page-header">
+  <a class="back-link" href="../">← Companion site</a>
   <h1 class="page-title">Algorithm Stadium</h1>
   <p class="page-subtitle">Same urns. Same rounds. Six strategies running side by side: naive estimate-then-exploit, three flavours of &epsilon;-greedy, UCB, and pure random. The race tracks <em>cumulative reward</em>; the chart below tracks <em>cumulative regret</em>. They are different metrics — reward goes <em>up</em> as you collect, regret goes <em>up</em> as you waste — and each lives in its own panel.</p>
 </div>
