@@ -166,6 +166,120 @@
       margin-right: 6px;
       vertical-align: middle;
     }
+
+    /* ------ Multi-colour panel ------ */
+    .mc-grid {
+      display: grid;
+      grid-template-columns: 1fr 280px;
+      gap: 24px;
+      align-items: start;
+    }
+    @media (max-width: 1024px) { .mc-grid { grid-template-columns: 1fr; } }
+
+    .mc-bar-svg { width: 100%; height: 260px; display: block; }
+    .mc-bar-svg .bar { stroke: white; stroke-width: 1; }
+    .mc-bar-svg .bar-label {
+      font-size: 11px;
+      fill: var(--color-text);
+      text-anchor: middle;
+      font-variant-numeric: tabular-nums;
+    }
+    .mc-bar-svg .axis-line {
+      stroke: var(--color-text-muted);
+      stroke-dasharray: 3 3;
+    }
+    .mc-bar-svg .max-label {
+      fill: var(--color-text-muted);
+      font-size: 11px;
+    }
+
+    .h-readout-block {
+      display: flex; flex-direction: column; gap: 4px;
+    }
+    .h-readout-block .max-line {
+      font-size: 0.85rem; color: var(--color-text-muted);
+      font-variant-numeric: tabular-nums;
+    }
+    .h-readout-block .max-line strong {
+      color: var(--color-text); font-weight: 500;
+    }
+
+    /* ------ Encoding panel ------ */
+    .enc-grid {
+      display: grid;
+      grid-template-columns: 1fr 260px;
+      gap: 24px;
+      align-items: start;
+    }
+    @media (max-width: 1024px) { .enc-grid { grid-template-columns: 1fr; } }
+
+    .enc-strip-svg {
+      width: 100%; max-width: 720px;
+      display: block;
+      background: #fafafa;
+      border: 1px solid var(--color-border);
+      border-radius: 6px;
+    }
+    .enc-strip-svg .draw {
+      stroke: white; stroke-width: 0.6;
+    }
+    .enc-strip-svg .bit {
+      font-family: ui-monospace, "SF Mono", Menlo, monospace;
+      font-size: 9px;
+      fill: var(--color-text-muted);
+      text-anchor: middle;
+    }
+
+    .enc-bitstream {
+      font-family: ui-monospace, "SF Mono", Menlo, monospace;
+      font-size: 0.78rem;
+      letter-spacing: 0.5px;
+      line-height: 1.45;
+      background: var(--color-neu-bg);
+      border-radius: 6px;
+      padding: 10px 12px;
+      margin-top: 10px;
+      word-break: break-all;
+      min-height: 90px;
+      color: var(--color-text);
+      overflow-wrap: break-word;
+      max-height: 180px;
+      overflow-y: auto;
+    }
+    .enc-bitstream .blue-bits { color: var(--color-pos); font-weight: 600; }
+    .enc-bitstream .red-bits  { color: var(--color-neg); font-weight: 600; }
+
+    .enc-stats {
+      display: flex; flex-wrap: wrap; gap: 16px;
+      margin-top: 10px; font-size: 0.88rem; color: var(--color-text-muted);
+    }
+    .enc-stats .stat .num {
+      font-variant-numeric: tabular-nums;
+      font-weight: 600;
+      color: var(--color-text);
+      font-size: 1.0rem;
+      margin-left: 6px;
+    }
+    .enc-stats .stat.target .num { color: var(--color-fiction); }
+
+    .enc-converge-svg {
+      width: 100%; height: 220px; display: block;
+      margin-top: 14px;
+      background: #fafafa;
+      border: 1px solid var(--color-border);
+      border-radius: 6px;
+    }
+    .enc-converge-svg .h-line {
+      stroke: var(--color-fiction);
+      stroke-width: 2;
+      stroke-dasharray: 6 4;
+      fill: none;
+    }
+    .enc-converge-svg .avg-curve {
+      stroke: var(--color-pos);
+      stroke-width: 2;
+      fill: none;
+    }
   </style>
 </head>
 <body>
@@ -222,6 +336,111 @@
               </div>
               <p class="hint" id="h-interp">Maximum uncertainty — a fair coin.</p>
             </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====================================================== -->
+    <!-- Multi-colour urn                                         -->
+    <!-- ====================================================== -->
+    <h2 style="margin:32px 0 6px;font-weight:500;font-size:1.25rem;">More than two colours</h2>
+    <p class="lede">
+      Same idea, larger alphabet.  An urn with K colours has
+      <em>H = − Σ p<sub>k</sub> log<sub>2</sub> p<sub>k</sub></em>; the maximum
+      <em>log<sub>2</sub> K</em> is reached only when the distribution is uniform.
+    </p>
+
+    <div class="viz-card">
+      <div class="mc-grid">
+        <div>
+          <svg id="mc-bars" class="mc-bar-svg" viewBox="0 0 720 260" preserveAspectRatio="xMidYMid meet"></svg>
+        </div>
+        <div>
+          <div class="control-panel">
+            <h3>Number of colours K</h3>
+            <p class="hint">Slide K from 2 up to 8.</p>
+            <div class="ctrl-group">
+              <input type="range" id="mc-K" min="2" max="8" step="1" value="4">
+              <div class="row">
+                <span>K = 2</span>
+                <span>K = <strong id="mc-K-value">4</strong></span>
+                <span>K = 8</span>
+              </div>
+            </div>
+
+            <h3 style="margin-top:6px;">Concentration α</h3>
+            <p class="hint">α = 0 is uniform (max entropy).  α = 1 puts all mass on one colour (no entropy).</p>
+            <div class="ctrl-group">
+              <input type="range" id="mc-alpha" min="0" max="1" step="0.01" value="0">
+              <div class="row">
+                <span>uniform</span>
+                <span>α = <strong id="mc-alpha-value">0.00</strong></span>
+                <span>point mass</span>
+              </div>
+            </div>
+
+            <div class="h-readout-block">
+              <div class="readout">
+                H = <span id="mc-h-value">2.000</span><span class="small">bits</span>
+              </div>
+              <div class="max-line">max possible at K = <strong id="mc-K-show">4</strong>: log<sub>2</sub> K = <strong id="mc-max">2.000</strong> bits</div>
+              <p class="hint" id="mc-interp">All four colours equally likely — every draw is maximally surprising.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====================================================== -->
+    <!-- Encoding a sequence                                      -->
+    <!-- ====================================================== -->
+    <h2 style="margin:32px 0 6px;font-weight:500;font-size:1.25rem;">Encoding a sequence: bits per ball</h2>
+    <p class="lede">
+      H is not a metaphor.  It is the <em>floor</em> on the average number
+      of bits per ball any encoder can use.  Sample N draws from the
+      binary urn above; an ideal arithmetic coder spends
+      <em>−log<sub>2</sub> p̂(x)</em> bits per draw.  Watch the running
+      average converge to H(p) as N grows.
+    </p>
+
+    <div class="viz-card">
+      <div class="enc-grid">
+        <div>
+          <svg id="enc-strip" class="enc-strip-svg" viewBox="0 0 720 110" preserveAspectRatio="xMidYMid meet"></svg>
+          <div class="enc-bitstream" id="enc-bitstream">
+            <span style="color:var(--color-text-muted)">(press Sample to draw a sequence)</span>
+          </div>
+          <div class="enc-stats">
+            <span class="stat">N = <span class="num" id="enc-n">0</span></span>
+            <span class="stat">total bits used <span class="num" id="enc-bits">0.00</span></span>
+            <span class="stat">average bits/ball <span class="num" id="enc-avg">&mdash;</span></span>
+            <span class="stat target">H(p) floor <span class="num" id="enc-target">&mdash;</span></span>
+          </div>
+          <svg id="enc-converge" class="enc-converge-svg" viewBox="0 0 720 220" preserveAspectRatio="xMidYMid meet"></svg>
+        </div>
+        <div>
+          <div class="control-panel">
+            <h3>Sequence length</h3>
+            <p class="hint">Each draw uses the bias <em>p</em> from the slider above.</p>
+            <div class="ctrl-group">
+              <input type="range" id="enc-N" min="10" max="500" step="10" value="60">
+              <div class="row">
+                <span>N = 10</span>
+                <span>N = <strong id="enc-N-value">60</strong></span>
+                <span>N = 500</span>
+              </div>
+            </div>
+            <button id="enc-sample" style="
+                background: var(--color-header-end); color: white;
+                border: none; border-radius: 6px;
+                padding: 8px 12px; font-size: 0.92rem; cursor: pointer;
+                margin-top: 4px;
+              ">Sample N draws</button>
+            <p class="hint" style="margin-top:8px;">
+              Code: blue ball = <em>−log<sub>2</sub> p</em> bits, vermillion = <em>−log<sub>2</sub>(1 − p)</em> bits.
+              When p = ½ both cost 1 bit; otherwise the more likely colour costs less.
+            </p>
           </div>
         </div>
       </div>
@@ -423,8 +642,310 @@
       realDots.attr('fill', i => i < nBlue ? blueColor : redColor);
     }
 
-    slider.addEventListener('input', e => update(parseFloat(e.target.value)));
+    slider.addEventListener('input', e => {
+      update(parseFloat(e.target.value));
+      // Re-render the encoding panel's H-target whenever p changes.
+      if (typeof updateEncTarget === 'function') updateEncTarget();
+    });
     update(parseFloat(slider.value));
+
+    // ==================================================================
+    // PANEL 2: Multi-colour urn.  K colours, concentration alpha.
+    // p_0 = (1 - alpha) / K + alpha;  p_i (i > 0) = (1 - alpha) / K.
+    // ==================================================================
+    const MC_PALETTE = [
+      '#0072B2', // blue
+      '#D55E00', // vermillion
+      '#009E73', // bluish-green
+      '#CC79A7', // reddish-purple
+      '#E69F00', // orange
+      '#56B4E9', // sky blue
+      '#F0E442', // yellow
+      '#785EF0', // violet
+    ];
+
+    function multiColourProbs(K, alpha) {
+      const u = (1 - alpha) / K;
+      const p = new Array(K).fill(u);
+      p[0] += alpha;
+      return p;
+    }
+
+    function entropyK(probs) {
+      let h = 0;
+      for (const p of probs) {
+        if (p > 0) h -= p * Math.log2(p);
+      }
+      return h;
+    }
+
+    (function buildMulticolour() {
+      const svg = d3.select('#mc-bars');
+      const W = 720, H = 260;
+      const M = { top: 24, right: 24, bottom: 64, left: 56 };
+      const innerW = W - M.left - M.right;
+      const innerH = H - M.top - M.bottom;
+      const g = svg.append('g').attr('transform', `translate(${M.left},${M.top})`);
+
+      const yScale = d3.scaleLinear().domain([0, 1]).range([innerH, 0]);
+      const yAxis = d3.axisLeft(yScale).tickValues([0, 0.25, 0.5, 0.75, 1]).tickFormat(d3.format('.2f'));
+      g.append('g').attr('class', 'axis').call(yAxis);
+      g.append('text').attr('class', 'axis-label')
+        .attr('text-anchor', 'middle')
+        .attr('transform', `translate(${-40},${innerH / 2}) rotate(-90)`)
+        .attr('fill', 'currentColor').attr('font-size', 12)
+        .text('p_k');
+
+      // Reference horizontal lines at 1/K levels (drawn each update)
+      const gRef = g.append('g');
+      const gBars = g.append('g');
+      const gLabels = g.append('g');
+
+      const K_input  = document.getElementById('mc-K');
+      const K_value  = document.getElementById('mc-K-value');
+      const K_show   = document.getElementById('mc-K-show');
+      const A_input  = document.getElementById('mc-alpha');
+      const A_value  = document.getElementById('mc-alpha-value');
+      const H_value  = document.getElementById('mc-h-value');
+      const Max_show = document.getElementById('mc-max');
+      const interpEl = document.getElementById('mc-interp');
+
+      function fmt3(x) { return x.toFixed(3); }
+
+      function updateMC() {
+        const K = parseInt(K_input.value, 10);
+        const a = parseFloat(A_input.value);
+        const probs = multiColourProbs(K, a);
+        const h = entropyK(probs);
+        const hMax = Math.log2(K);
+
+        K_value.textContent = K;
+        K_show.textContent = K;
+        A_value.textContent = a.toFixed(2);
+        H_value.textContent = fmt3(h);
+        Max_show.textContent = fmt3(hMax);
+
+        if (a < 0.02) {
+          interpEl.textContent = 'Uniform — H is at its maximum, log₂ K. Every draw is maximally surprising.';
+        } else if (a > 0.98) {
+          interpEl.textContent = 'All mass on one colour. H = 0. Draws are predictable, encoder uses 0 bits.';
+        } else {
+          interpEl.textContent = `One colour dominates; H ≈ ${fmt3(h)} of the maximum ${fmt3(hMax)} bits.`;
+        }
+
+        // Bars
+        const xScale = d3.scaleBand().domain(d3.range(K)).range([0, innerW]).padding(0.2);
+        const bars = gBars.selectAll('rect.bar').data(probs);
+        bars.exit().remove();
+        const barsEnter = bars.enter().append('rect').attr('class', 'bar');
+        barsEnter.merge(bars)
+          .attr('x', (_, i) => xScale(i))
+          .attr('y', d => yScale(d))
+          .attr('width', xScale.bandwidth())
+          .attr('height', d => innerH - yScale(d))
+          .attr('fill', (_, i) => MC_PALETTE[i % MC_PALETTE.length]);
+
+        // Labels (probability values)
+        const labels = gLabels.selectAll('text.bar-label').data(probs);
+        labels.exit().remove();
+        const labelsEnter = labels.enter().append('text').attr('class', 'bar-label');
+        labelsEnter.merge(labels)
+          .attr('x', (_, i) => xScale(i) + xScale.bandwidth() / 2)
+          .attr('y', d => yScale(d) - 6)
+          .text(d => d.toFixed(3));
+
+        // Reference line at 1/K (uniform level)
+        gRef.selectAll('*').remove();
+        gRef.append('line').attr('class', 'axis-line')
+          .attr('x1', 0).attr('x2', innerW)
+          .attr('y1', yScale(1 / K)).attr('y2', yScale(1 / K));
+        gRef.append('text').attr('class', 'max-label')
+          .attr('x', innerW - 4).attr('y', yScale(1 / K) - 4)
+          .attr('text-anchor', 'end')
+          .text(`uniform = 1/${K}`);
+      }
+
+      K_input.addEventListener('input', updateMC);
+      A_input.addEventListener('input', updateMC);
+      updateMC();
+    })();
+
+    // ==================================================================
+    // PANEL 3: Encoding a sequence of binary draws.
+    // Each draw with prob p̂(x) costs −log2 p̂(x) bits.  Show the running
+    // average bits/ball converging to H(p).
+    // ==================================================================
+    let updateEncTarget;
+    (function buildEncoder() {
+      const stripSvg = d3.select('#enc-strip');
+      const STRIP_W = 720, STRIP_H = 110;
+      const STRIP_PAD = { top: 12, right: 14, bottom: 22, left: 14 };
+      const stripG = stripSvg.append('g')
+        .attr('transform', `translate(${STRIP_PAD.left},${STRIP_PAD.top})`);
+
+      const N_input  = document.getElementById('enc-N');
+      const N_value  = document.getElementById('enc-N-value');
+      const sampleBtn = document.getElementById('enc-sample');
+      const bitsOut  = document.getElementById('enc-bitstream');
+      const nOut     = document.getElementById('enc-n');
+      const bitsTotal = document.getElementById('enc-bits');
+      const avgOut    = document.getElementById('enc-avg');
+      const targetOut = document.getElementById('enc-target');
+
+      const blueColor = '#0072B2';
+      const redColor  = '#D55E00';
+
+      function entropyBin(p) {
+        if (p <= 0 || p >= 1) return 0;
+        return -p * Math.log2(p) - (1 - p) * Math.log2(1 - p);
+      }
+      function getP() { return parseFloat(slider.value); }
+
+      // Show H(p) target whenever p changes
+      updateEncTarget = function () {
+        const h = entropyBin(getP());
+        targetOut.textContent = h.toFixed(3) + ' bits';
+        // Re-render any existing convergence chart
+        if (lastSequence) renderConvergence(lastSequence, getP());
+      };
+
+      let lastSequence = null;
+
+      function sampleSequence(N, p) {
+        const seq = [];
+        for (let i = 0; i < N; i++) seq.push(Math.random() < p ? 1 : 0);
+        return seq;
+      }
+
+      function renderStrip(seq, p) {
+        stripG.selectAll('*').remove();
+        const N = seq.length;
+        const innerW = STRIP_W - STRIP_PAD.left - STRIP_PAD.right;
+        const stride = innerW / Math.max(N, 1);
+        const cell = Math.min(stride - 1, 14);
+        const y = (STRIP_H - STRIP_PAD.top - STRIP_PAD.bottom) / 2 - cell / 2;
+
+        seq.forEach((x, i) => {
+          stripG.append('rect')
+            .attr('class', 'draw')
+            .attr('x', i * stride)
+            .attr('y', y)
+            .attr('width', cell)
+            .attr('height', cell)
+            .attr('fill', x === 1 ? blueColor : redColor);
+        });
+        // Axis label
+        stripG.append('text')
+          .attr('x', innerW / 2)
+          .attr('y', STRIP_H - STRIP_PAD.top - STRIP_PAD.bottom + 16)
+          .attr('text-anchor', 'middle')
+          .attr('font-size', 11)
+          .attr('fill', 'currentColor')
+          .attr('opacity', 0.6)
+          .text(`${N} draws (left → right)`);
+      }
+
+      function renderBitstream(seq, p) {
+        const phatBlue = Math.max(p, 1e-12);
+        const phatRed  = Math.max(1 - p, 1e-12);
+        const bBlue = -Math.log2(phatBlue);
+        const bRed  = -Math.log2(phatRed);
+
+        const html = seq.map(x => {
+          if (x === 1) return `<span class="blue-bits">[B,${bBlue.toFixed(2)}]</span>`;
+          return `<span class="red-bits">[V,${bRed.toFixed(2)}]</span>`;
+        }).join(' ');
+        bitsOut.innerHTML = html || '(empty)';
+
+        let total = 0;
+        for (const x of seq) total += (x === 1 ? bBlue : bRed);
+        return total;
+      }
+
+      function renderConvergence(seq, p) {
+        const cs = d3.select('#enc-converge');
+        cs.selectAll('*').remove();
+        const W = 720, H = 220;
+        const M = { top: 18, right: 24, bottom: 36, left: 56 };
+        const innerW = W - M.left - M.right;
+        const innerH = H - M.top - M.bottom;
+        const g = cs.append('g').attr('transform', `translate(${M.left},${M.top})`);
+
+        const N = seq.length;
+        if (N === 0) return;
+
+        const phatBlue = Math.max(p, 1e-12);
+        const phatRed  = Math.max(1 - p, 1e-12);
+        const bBlue = -Math.log2(phatBlue);
+        const bRed  = -Math.log2(phatRed);
+        const Hp = entropyBin(p);
+
+        const runningAvg = [];
+        let total = 0;
+        seq.forEach((x, i) => {
+          total += (x === 1 ? bBlue : bRed);
+          runningAvg.push(total / (i + 1));
+        });
+
+        const xScale = d3.scaleLinear().domain([1, N]).range([0, innerW]);
+        const yMax = Math.max(1.05, Math.max(bBlue, bRed) + 0.1);
+        const yScale = d3.scaleLinear().domain([0, yMax]).range([innerH, 0]);
+
+        // Axes
+        g.append('g').attr('class', 'axis').attr('transform', `translate(0,${innerH})`)
+          .call(d3.axisBottom(xScale).ticks(5));
+        g.append('g').attr('class', 'axis').call(d3.axisLeft(yScale).ticks(4));
+        g.append('text').attr('class', 'axis-label')
+          .attr('text-anchor', 'middle')
+          .attr('x', innerW / 2).attr('y', innerH + 28)
+          .attr('fill', 'currentColor').attr('font-size', 11)
+          .text('number of draws');
+        g.append('text').attr('class', 'axis-label')
+          .attr('text-anchor', 'middle')
+          .attr('transform', `translate(${-40},${innerH / 2}) rotate(-90)`)
+          .attr('fill', 'currentColor').attr('font-size', 11)
+          .text('average bits / ball');
+
+        // H(p) floor line
+        g.append('line').attr('class', 'h-line')
+          .attr('x1', 0).attr('x2', innerW)
+          .attr('y1', yScale(Hp)).attr('y2', yScale(Hp));
+        g.append('text')
+          .attr('x', innerW - 6).attr('y', yScale(Hp) - 6)
+          .attr('text-anchor', 'end')
+          .attr('fill', 'var(--color-fiction)')
+          .attr('font-size', 11).attr('font-weight', 600)
+          .text(`H(p) = ${Hp.toFixed(3)}`);
+
+        // Running average curve
+        const lineGen = d3.line()
+          .x((_, i) => xScale(i + 1))
+          .y(v => yScale(v));
+        g.append('path').attr('class', 'avg-curve').attr('d', lineGen(runningAvg));
+      }
+
+      function doSample() {
+        const N = parseInt(N_input.value, 10);
+        const p = getP();
+        const seq = sampleSequence(N, p);
+        lastSequence = seq;
+        renderStrip(seq, p);
+        const total = renderBitstream(seq, p);
+        nOut.textContent = N;
+        bitsTotal.textContent = total.toFixed(2);
+        avgOut.textContent = (total / N).toFixed(3) + ' bits';
+        targetOut.textContent = entropyBin(p).toFixed(3) + ' bits';
+        renderConvergence(seq, p);
+      }
+
+      N_input.addEventListener('input', () => {
+        N_value.textContent = N_input.value;
+      });
+      sampleBtn.addEventListener('click', doSample);
+
+      // Initial sample so the chart and bitstream are populated on load
+      doSample();
+    })();
   })();
   </script>
 </body>
