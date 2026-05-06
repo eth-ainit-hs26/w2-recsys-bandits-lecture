@@ -179,23 +179,23 @@
 
     /* urns */
     .urn-body {
-      fill: rgba(245, 240, 220, 0.6);
+      fill: rgba(245, 240, 220, 0.85);
       stroke: #2c3e50;
-      stroke-width: 1.6;
+      stroke-width: 1.8;
     }
     .urn-rim {
-      fill: rgba(120, 100, 60, 0.18);
+      fill: rgba(120, 100, 60, 0.25);
       stroke: #2c3e50;
-      stroke-width: 1.6;
+      stroke-width: 1.8;
     }
     .urn-label {
-      font-size: 14px;
-      font-weight: 600;
+      font-size: 17px;
+      font-weight: 700;
       fill: var(--color-text);
       text-anchor: middle;
     }
     .urn-bias {
-      font-size: 11px;
+      font-size: 13px;
       fill: var(--color-text-muted);
       text-anchor: middle;
       font-style: italic;
@@ -203,14 +203,15 @@
     .urn-glow {
       fill: none;
       stroke: var(--color-header-end);
-      stroke-width: 4;
+      stroke-width: 5;
       opacity: 0;
       pointer-events: none;
     }
     .urn-glow.active {
-      opacity: 0.85;
+      opacity: 0.9;
       transition: opacity 0.25s;
     }
+    .urn-faded { opacity: 0.4; transition: opacity 0.25s; }
 
     /* balls */
     circle.ball-orange { fill: #E69F00; stroke: rgba(0,0,0,0.18); stroke-width: 0.5; }
@@ -218,14 +219,14 @@
 
     /* observations strip */
     .obs-label {
-      font-size: 12px;
+      font-size: 14px;
       font-weight: 600;
       fill: var(--color-text);
       text-anchor: start;
     }
     .obs-formula {
       font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
-      font-size: 11px;
+      font-size: 13px;
       fill: var(--color-text-muted);
     }
     .obs-formula .num {
@@ -241,18 +242,77 @@
       font-weight: 700;
     }
 
-    /* path arrows showing the chosen branch */
-    .path-line {
-      stroke-width: 3;
-      fill: none;
-      stroke-dasharray: 6 5;
-      stroke-dashoffset: 0;
-      transition: opacity 0.4s;
+    /* decision banner */
+    .decision-banner-bg {
+      fill: #f0f0f4;
+      stroke: #d8d8d8;
+      stroke-width: 1;
+      transition: fill 0.3s, stroke 0.3s;
     }
-    .path-line.dim { opacity: 0.18; }
-    .path-line.active { opacity: 1; }
-    .path-line.explore { stroke: #56B4E9; }
-    .path-line.exploit { stroke: #785EF0; }
+    .decision-banner-bg.explore {
+      fill: rgba(86, 180, 233, 0.18);
+      stroke: #56B4E9;
+    }
+    .decision-banner-bg.exploit {
+      fill: rgba(120, 94, 240, 0.16);
+      stroke: #785EF0;
+    }
+    .decision-banner-text {
+      font-size: 24px;
+      font-weight: 700;
+      text-anchor: middle;
+      fill: #777;
+      transition: fill 0.3s;
+    }
+    .decision-banner-text.explore { fill: #0891B2; }
+    .decision-banner-text.exploit { fill: #785EF0; }
+    .decision-banner-sub {
+      font-size: 14px;
+      text-anchor: middle;
+      fill: var(--color-text-muted);
+    }
+    .decision-banner-sub.active { fill: var(--color-text); }
+
+    /* arrow from banner to chosen urn */
+    .chosen-arrow {
+      stroke-width: 4;
+      fill: none;
+      transition: opacity 0.25s;
+      opacity: 0;
+    }
+    .chosen-arrow.explore { stroke: #0891B2; }
+    .chosen-arrow.exploit { stroke: #785EF0; }
+    .chosen-arrow.visible  { opacity: 1; }
+    .chosen-arrowhead {
+      transition: opacity 0.25s;
+      opacity: 0;
+    }
+    .chosen-arrowhead.visible { opacity: 1; }
+
+    /* round history timeline */
+    .history-cell-orange { fill: #E69F00; }
+    .history-cell-white  { fill: #ffffff; stroke: #2c3e50; stroke-width: 0.5; }
+    .history-frame {
+      fill: #fafafa;
+      stroke: #d8d8d8;
+      stroke-width: 1;
+    }
+    .history-label {
+      font-size: 11px;
+      fill: var(--color-text-muted);
+      font-weight: 600;
+    }
+    .history-tick {
+      font-size: 9px;
+      fill: var(--color-text-muted);
+      font-variant-numeric: tabular-nums;
+    }
+    .history-urn-label {
+      font-size: 10px;
+      fill: var(--color-text);
+      text-anchor: middle;
+      font-weight: 600;
+    }
 
     .scene-divider { stroke: #d8d8d8; stroke-width: 1; stroke-dasharray: 2 4; }
   </style>
@@ -327,7 +387,7 @@
         </div>
 
         <div class="eg-scene-wrap">
-          <svg id="scene" class="eg-scene" viewBox="0 0 1080 700"
+          <svg id="scene" class="eg-scene" viewBox="0 0 1080 880"
                preserveAspectRatio="xMidYMin meet" aria-label="ε-greedy walkthrough"></svg>
         </div>
       </div>
@@ -378,6 +438,7 @@
       lastBranch:  null,            // 'explore' | 'exploit'
       lastChoice:  null,            // 0 | 1 | 2 (urn idx)
       lastDraw:    null,            // 0 | 1
+      history:     [],              // [{round, urn, draw, branch}]
       playing:     false,
       playTimer:   null,
     };
@@ -410,16 +471,28 @@
     }
 
     // ============================================================
-    // SCENE — coordinates
+    // SCENE — coordinates (viewBox 1080 × 880)
+    // Vertical narrative:
+    //   1. ROULETTE  (top, centered)
+    //   2. BANNER    (declares EXPLORE / EXPLOIT)
+    //   3. URNS      (three side by side; arrow drops from banner to chosen)
+    //   4. STRIPS    (observation history per urn)
+    //   5. ESTIMATES (p̂ formulas under each strip)
+    //   6. HISTORY   (round-by-round timeline at the bottom)
     // ============================================================
-    const W = 1080, H = 700;
-    const ROUL_CX = 200, ROUL_CY = 145, ROUL_R = 92;
-    const URN_Y  = 360;
-    const URN_W  = 90, URN_H = 130, URN_NECK = 28;
-    const URN_X = [220, 480, 740];        // urn left edges (xL of body)
-    const STRIP_Y = 530;                   // observation strips top
-    const STRIP_W = 220;                   // strip width per urn
+    const W = 1080, H = 880;
+    const ROUL_CX = 540, ROUL_CY = 138, ROUL_R = 100;
+    const BANNER_Y = 270, BANNER_H = 70;
+    const URN_Y  = 410;
+    const URN_W  = 130, URN_H = 160, URN_NECK = 36;
+    const URN_X = [165, 475, 785];
+    const STRIP_Y = 605;
+    const STRIP_W = 250;
     const STRIP_X = URN_X.map(x => x + URN_W/2 - STRIP_W/2);
+    const FORMULA_Y = 660;
+    const HISTORY_Y = 760;
+    const HISTORY_H = 70;
+    const HISTORY_X = 80, HISTORY_W = 920;
 
     // ============================================================
     // BUILD: roulette
@@ -427,10 +500,27 @@
     const svg = d3.select('#scene');
     svg.selectAll('*').remove();
 
+    // arrowhead marker (used for the chosen-urn arrow)
+    const defs = svg.append('defs');
+    defs.append('marker').attr('id', 'arrow-explore')
+      .attr('viewBox', '0 0 10 10').attr('refX', 9).attr('refY', 5)
+      .attr('markerWidth', 6).attr('markerHeight', 6)
+      .attr('orient', 'auto')
+      .append('path').attr('d', 'M0,0 L10,5 L0,10 Z')
+      .attr('fill', '#0891B2');
+    defs.append('marker').attr('id', 'arrow-exploit')
+      .attr('viewBox', '0 0 10 10').attr('refX', 9).attr('refY', 5)
+      .attr('markerWidth', 6).attr('markerHeight', 6)
+      .attr('orient', 'auto')
+      .append('path').attr('d', 'M0,0 L10,5 L0,10 Z')
+      .attr('fill', '#785EF0');
+
     const gRoulette = svg.append('g');
+    const gBanner   = svg.append('g');
     const gPaths    = svg.append('g');
     const gUrns     = svg.append('g');
     const gObs      = svg.append('g');
+    const gHistory  = svg.append('g');
     const gFly      = svg.append('g');         // for ball animations
     const gOverlay  = svg.append('g');
 
@@ -451,36 +541,18 @@
 
     // Roulette caption
     gRoulette.append('text')
-      .attr('x', ROUL_CX).attr('y', ROUL_CY - ROUL_R - 18)
+      .attr('x', ROUL_CX).attr('y', ROUL_CY - ROUL_R - 14)
       .attr('class', 'roulette-readout')
-      .style('font-size', '13px')
+      .style('font-size', '15px')
       .style('font-weight', 600)
       .style('fill', 'var(--color-text)')
       .text('Roulette');
 
-    // Sector legend below roulette
-    const legendY = ROUL_CY + ROUL_R + 22;
-    gRoulette.append('rect')
-      .attr('x', ROUL_CX - 78).attr('y', legendY - 8)
-      .attr('width', 12).attr('height', 12).attr('fill', '#56B4E9');
-    gRoulette.append('text')
-      .attr('x', ROUL_CX - 60).attr('y', legendY + 3)
-      .attr('class', 'roulette-readout')
-      .style('text-anchor', 'start')
-      .text('explore');
-    gRoulette.append('rect')
-      .attr('x', ROUL_CX + 10).attr('y', legendY - 8)
-      .attr('width', 12).attr('height', 12).attr('fill', '#785EF0');
-    gRoulette.append('text')
-      .attr('x', ROUL_CX + 28).attr('y', legendY + 3)
-      .attr('class', 'roulette-readout')
-      .style('text-anchor', 'start')
-      .text('exploit');
-
-    // u readout below
+    // u readout below the roulette
     const uReadout = gRoulette.append('text')
-      .attr('x', ROUL_CX).attr('y', legendY + 28)
+      .attr('x', ROUL_CX).attr('y', ROUL_CY + ROUL_R + 22)
       .attr('class', 'roulette-readout')
+      .style('font-size', '14px')
       .text('u = —');
 
     // Pointer (the ball that lands at angle u)
@@ -700,39 +772,127 @@
     }
 
     // ============================================================
-    // BUILD: path arrows from roulette to "exploit" / "explore"
+    // BUILD: round history timeline
     // ============================================================
-    // Anchors: roulette right edge → urns (exploit) and to a "uniform pick"
-    // marker (explore).
-    const ROUL_RIGHT = { x: ROUL_CX + ROUL_R + 6, y: ROUL_CY };
+    gHistory.append('rect')
+      .attr('class', 'history-frame')
+      .attr('x', HISTORY_X).attr('y', HISTORY_Y)
+      .attr('width', HISTORY_W).attr('height', HISTORY_H)
+      .attr('rx', 6);
+    gHistory.append('text')
+      .attr('class', 'history-label')
+      .attr('x', HISTORY_X + 8).attr('y', HISTORY_Y - 6)
+      .text('Round history (each column = one round, top→bottom = urn 1, 2, 3)');
+    // Three lane labels on the left of the strip
+    const HIST_LANE_H = (HISTORY_H - 14) / 3;
+    for (let k = 0; k < 3; k++) {
+      gHistory.append('text')
+        .attr('class', 'history-urn-label')
+        .attr('x', HISTORY_X - 18)
+        .attr('y', HISTORY_Y + 12 + (k + 0.5) * HIST_LANE_H)
+        .attr('text-anchor', 'end')
+        .text(`urn ${k + 1}`);
+    }
+    const histCellsG = gHistory.append('g');
 
-    const explorePath = gPaths.append('path')
-      .attr('class', 'path-line explore dim')
-      .attr('d', `M ${ROUL_RIGHT.x} ${ROUL_RIGHT.y} C 540 200, 700 220, 880 250`);
+    function renderHistory() {
+      // Collect chronological list of (urn, draw) pairs from state.draws.
+      // Since we don't track round → which urn here directly, we'll use a
+      // separate trace.  For simplicity, recreate from scratch each render
+      // by reading from a stored history list maintained alongside draws.
+      histCellsG.selectAll('*').remove();
+      const trace = state.history;          // [{urn, draw, round}]
+      if (!trace.length) {
+        histCellsG.append('text')
+          .attr('class', 'history-tick')
+          .attr('x', HISTORY_X + HISTORY_W / 2)
+          .attr('y', HISTORY_Y + HISTORY_H / 2 + 4)
+          .attr('text-anchor', 'middle')
+          .text('(no rounds yet)');
+        return;
+      }
+      const colW = Math.max(4, Math.min(20, HISTORY_W / Math.max(40, trace.length + 2)));
+      trace.forEach((ev, i) => {
+        const x = HISTORY_X + 4 + i * colW;
+        if (x + colW > HISTORY_X + HISTORY_W) return;  // clip
+        const y = HISTORY_Y + 8 + ev.urn * HIST_LANE_H;
+        histCellsG.append('rect')
+          .attr('class', ev.draw === 1 ? 'history-cell-orange' : 'history-cell-white')
+          .attr('x', x).attr('y', y + 2)
+          .attr('width', colW - 1).attr('height', HIST_LANE_H - 4)
+          .attr('rx', 1);
+      });
+      // Round number ticks (every 5)
+      const stride = trace.length > 50 ? 10 : 5;
+      for (let i = stride; i <= trace.length; i += stride) {
+        const x = HISTORY_X + 4 + (i - 1) * colW + colW / 2;
+        if (x > HISTORY_X + HISTORY_W) break;
+        histCellsG.append('text')
+          .attr('class', 'history-tick')
+          .attr('x', x).attr('y', HISTORY_Y + HISTORY_H - 2)
+          .attr('text-anchor', 'middle')
+          .text(i);
+      }
+    }
 
-    const exploitPath = gPaths.append('path')
-      .attr('class', 'path-line exploit dim')
-      .attr('d', `M ${ROUL_RIGHT.x} ${ROUL_RIGHT.y} C 540 130, 700 110, 880 130`);
+    // ============================================================
+    // BUILD: decision banner + chosen-urn arrow
+    // ============================================================
+    const BANNER_X = 200, BANNER_W = 680;
+    const bannerBg = gBanner.append('rect')
+      .attr('class', 'decision-banner-bg')
+      .attr('x', BANNER_X).attr('y', BANNER_Y)
+      .attr('width', BANNER_W).attr('height', BANNER_H)
+      .attr('rx', 12);
+    const bannerText = gBanner.append('text')
+      .attr('class', 'decision-banner-text')
+      .attr('x', 540).attr('y', BANNER_Y + 32)
+      .text('—');
+    const bannerSub = gBanner.append('text')
+      .attr('class', 'decision-banner-sub')
+      .attr('x', 540).attr('y', BANNER_Y + 56)
+      .text('Press Next to spin the roulette.');
 
-    // Branch labels at the path endpoints
-    gPaths.append('text')
-      .attr('x', 894).attr('y', 252)
-      .attr('font-size', 14).attr('font-weight', 600)
-      .attr('fill', '#0891B2')
-      .text('explore');
-    gPaths.append('text')
-      .attr('x', 894).attr('y', 134)
-      .attr('font-size', 14).attr('font-weight', 600)
-      .attr('fill', '#785EF0')
-      .text('exploit');
-    gPaths.append('text')
-      .attr('x', 894).attr('y', 268)
-      .attr('font-size', 11).attr('fill', 'var(--color-text-muted)')
-      .text('pick urn k uniformly');
-    gPaths.append('text')
-      .attr('x', 894).attr('y', 150)
-      .attr('font-size', 11).attr('fill', 'var(--color-text-muted)')
-      .text('argmax p̂');
+    // Single arrow from banner to the chosen urn
+    const chosenArrow = gPaths.append('line')
+      .attr('class', 'chosen-arrow')
+      .attr('x1', 540).attr('y1', BANNER_Y + BANNER_H)
+      .attr('x2', 540).attr('y2', URN_Y - 4);
+
+    function updateBanner() {
+      const phase = state.phase;
+      const branch = state.lastBranch;
+      const k = state.lastChoice;
+      // Reset classes
+      bannerBg.attr('class', 'decision-banner-bg');
+      bannerText.attr('class', 'decision-banner-text');
+      bannerSub.attr('class', 'decision-banner-sub');
+      chosenArrow.attr('class', 'chosen-arrow');
+
+      if (phase === 'init' || branch == null) {
+        bannerText.text('—');
+        bannerSub.text('Press Next to spin the roulette.');
+        return;
+      }
+      if (branch === 'explore') {
+        bannerBg.attr('class', 'decision-banner-bg explore');
+        bannerText.attr('class', 'decision-banner-text explore').text('EXPLORE');
+        bannerSub.attr('class', 'decision-banner-sub active')
+          .text(`u = ${state.lastU.toFixed(3)} < ε = ${state.epsilon.toFixed(2)}.   Pick urn ${k+1} uniformly at random.`);
+        chosenArrow.attr('class', 'chosen-arrow explore visible')
+          .attr('marker-end', 'url(#arrow-explore)');
+      } else {
+        bannerBg.attr('class', 'decision-banner-bg exploit');
+        bannerText.attr('class', 'decision-banner-text exploit').text('EXPLOIT');
+        bannerSub.attr('class', 'decision-banner-sub active')
+          .text(`u = ${state.lastU.toFixed(3)} ≥ ε = ${state.epsilon.toFixed(2)}.   Pick urn ${k+1} = arg max p̂.`);
+        chosenArrow.attr('class', 'chosen-arrow exploit visible')
+          .attr('marker-end', 'url(#arrow-exploit)');
+      }
+      // Aim arrow at chosen urn
+      const targetX = URN_X[k] + URN_W / 2;
+      chosenArrow.attr('x2', targetX).attr('y2', URN_Y - 4);
+    }
 
     // ============================================================
     // ANIMATIONS
@@ -768,8 +928,12 @@
       const startX = xL + URN_W / 2;
       const startY = URN_Y + URN_H / 2;
       const ob = obsGroups[urnIdx];
-      const cellW = 16;
-      const endX = ob.x0 + 8 + slot * cellW;
+      // Use dynamic cellW matching renderObservations(slot+1)
+      const desiredCell = 18;
+      const avail = STRIP_W - 16;
+      const newN = slot + 1;
+      const cellW = newN === 0 ? desiredCell : Math.max(5, Math.min(desiredCell, avail / newN));
+      const endX = ob.x0 + 8 + slot * cellW + cellW / 2;
       const endY = ob.y0 + 14;
       const ball = gFly.append('circle')
         .attr('class', isOrange ? 'ball-orange' : 'ball-white')
@@ -806,15 +970,19 @@
         const arr = state.draws[k];
         const ballsG = obsGroups[k].ballsG;
         ballsG.selectAll('*').remove();
-        const cellW = 16;
+        // Dynamic cell width: fit all balls within the strip; clamp to a sensible max.
+        const n = arr.length;
+        const desiredCell = 18;
+        const avail = STRIP_W - 16;
+        const cellW = n === 0 ? desiredCell : Math.max(5, Math.min(desiredCell, avail / n));
+        const ballR = Math.max(3, Math.min(7, cellW * 0.42));
         arr.forEach((x, i) => {
           ballsG.append('circle')
             .attr('class', x === 1 ? 'ball-orange' : 'ball-white')
-            .attr('r', 5.5)
-            .attr('cx', obsGroups[k].x0 + 8 + i * cellW)
+            .attr('r', ballR)
+            .attr('cx', obsGroups[k].x0 + 8 + i * cellW + cellW / 2)
             .attr('cy', obsGroups[k].y0 + 14);
         });
-        const n = arr.length;
         const w = arr.reduce((a, b) => a + b, 0);
         const phat = n === 0 ? null : w / n;
         const fEl = document.querySelector(`#formula-${k}`);
@@ -841,10 +1009,7 @@
       epsValue.textContent = state.epsilon.toFixed(2);
     }
     function renderPaths() {
-      explorePath.classed('active', state.lastBranch === 'explore' && state.phase !== 'init');
-      explorePath.classed('dim',    state.lastBranch !== 'explore' || state.phase === 'init');
-      exploitPath.classed('active', state.lastBranch === 'exploit' && state.phase !== 'init');
-      exploitPath.classed('dim',    state.lastBranch !== 'exploit' || state.phase === 'init');
+      updateBanner();
     }
     function renderPseudoHighlight() {
       pseudoLis.forEach(li => li.classList.remove('active'));
@@ -883,6 +1048,7 @@
       renderRound();
       renderUrnGlow();
       renderObservations();
+      renderHistory();
       renderPaths();
       renderRoulettePointer();
       renderPseudoHighlight();
@@ -981,18 +1147,32 @@
       // Persist the ball in the strip after fly-in (renderObservations will draw it
       // once we advance to update phase, so for now show it manually).
       const ballsG = obsGroups[state.lastChoice].ballsG;
+      // Place a temporary ball where flyBallToStrip landed; doUpdatePhase
+      // will call renderObservations and repaint the strip cleanly.
+      const desiredCell = 18;
+      const avail = STRIP_W - 16;
+      const newN = slot + 1;
+      const cellW = newN === 0 ? desiredCell : Math.max(5, Math.min(desiredCell, avail / newN));
+      const ballR = Math.max(3, Math.min(7, cellW * 0.42));
       ballsG.append('circle')
         .attr('class', state.lastDraw === 1 ? 'ball-orange' : 'ball-white')
-        .attr('r', 5.5)
-        .attr('cx', obsGroups[state.lastChoice].x0 + 8 + slot * 16)
+        .attr('r', ballR)
+        .attr('cx', obsGroups[state.lastChoice].x0 + 8 + slot * cellW + cellW / 2)
         .attr('cy', obsGroups[state.lastChoice].y0 + 14);
     }
 
     async function doUpdatePhase() {
       state.draws[state.lastChoice].push(state.lastDraw);
+      state.history.push({
+        round:  state.round,
+        urn:    state.lastChoice,
+        draw:   state.lastDraw,
+        branch: state.lastBranch,
+      });
       state.phase = 'update';
       if (state.decay) state.epsilon = Math.max(0.01, state.epsilon * 0.95);
       renderObservations();
+      renderHistory();
       renderRound();
       renderRoulettePointer();
       renderPseudoHighlight();
@@ -1012,6 +1192,7 @@
       state.round = 0;
       state.phase = 'init';
       state.draws = [[], [], []];
+      state.history = [];
       state.lastU = null;
       state.lastBranch = null;
       state.lastChoice = null;
@@ -1056,12 +1237,48 @@
     reset();
 
     // URL hash trigger: #step3 advances 3 clicks (for screenshots / deep links)
+    // Uses sync no-animation path so headless screenshots capture the result.
     const hashMatch = location.hash.match(/^#step(\d+)$/);
     if (hashMatch) {
       const n = parseInt(hashMatch[1], 10);
-      (async () => {
-        for (let i = 0; i < n; i++) await nextStep();
-      })();
+      for (let i = 0; i < n; i++) {
+        if (state.phase === 'init' || state.phase === 'update') {
+          state.round += 1;
+          state.lastU = rand();
+          if (state.lastU < state.epsilon) {
+            state.lastBranch = 'explore';
+            state.lastChoice = chooseExplore();
+          } else {
+            state.lastBranch = 'exploit';
+            state.lastChoice = chooseExploit();
+          }
+          state.phase = 'spin';
+        } else if (state.phase === 'spin') {
+          state.lastDraw = pullBall(state.lastChoice);
+          state.phase = 'pull';
+        } else if (state.phase === 'pull') {
+          state.draws[state.lastChoice].push(state.lastDraw);
+          state.history.push({
+            round: state.round,
+            urn: state.lastChoice,
+            draw: state.lastDraw,
+            branch: state.lastBranch,
+          });
+          if (state.decay) state.epsilon = Math.max(0.01, state.epsilon * 0.95);
+          state.phase = 'update';
+        }
+      }
+      renderAll();
+      if (state.lastU != null) {
+        const ang = angleForU(state.lastU);
+        const p = pointAt(ang);
+        pointerBall.attr('cx', p.x).attr('cy', p.y).style('opacity', 1);
+        pointerLine.attr('x2', p.x).attr('y2', p.y).style('opacity', 1);
+      }
+      const k = state.lastChoice;
+      const arr = state.draws[k] || [];
+      const w = arr.reduce((a, b) => a + b, 0), nn = arr.length;
+      setStatus(`After <strong>${state.round}</strong> rounds.  Last: round ${state.round}, ${state.lastBranch === 'explore' ? '<span class="branch-explore">EXPLORE</span>' : '<span class="branch-exploit">EXPLOIT</span>'} → urn ${k+1} → drew ${state.lastDraw} → p̂${'₁₂₃'.charAt(k)} = ${w}/${nn}.`);
     }
   })();
   </script>
