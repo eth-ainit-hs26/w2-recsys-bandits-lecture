@@ -43,14 +43,16 @@
 
 \newcommand{\productCard}[5]{%
   % #1 = x, #2 = y, #3 = name (text), #4 = probability symbol (math), #5 = colour
+  % Card is 2.8 units wide (was 2) so longer book titles like
+  % "Eat Pray Love" fit alongside the probability symbol without overlap.
   \begin{scope}[shift={(#1, #2)}]
-    \fill[#5!18, rounded corners=2pt] (-1.0, -0.30) rectangle (1.0, 0.30);
+    \fill[#5!18, rounded corners=2pt] (-1.4, -0.30) rectangle (1.4, 0.30);
     \draw[#5, rounded corners=2pt, line width=0.5pt]
-      (-1.0, -0.30) rectangle (1.0, 0.30);
-    \node[font=\itshape\footnotesize, color=#5, anchor=west]
-      at (-0.85, 0) {#3};
+      (-1.4, -0.30) rectangle (1.4, 0.30);
+    \node[font=\itshape\scriptsize, color=#5, anchor=west]
+      at (-1.25, 0) {#3};
     \node[font=\footnotesize, color=#5, anchor=east]
-      at (+0.85, 0) {$#4$};
+      at (+1.25, 0) {$#4$};
   \end{scope}
 }
 
@@ -89,11 +91,11 @@
 % ---------------------------------------------------------------------
 % Stage 1, Slide 1 --- Three campaigns (original deck slide 3)
 % ---------------------------------------------------------------------
-\begin{frame}{Three campaigns}
+\begin{frame}{Three books}
   \begin{center}
     {\scriptsize\itshape\color{mutedWarmGray}
-     Esther runs an online shop.  Three ad campaigns to test, one
-     customer profile, a small budget.}
+     Esther runs an online bookshop.  Three books to recommend,
+     one customer profile, a small budget.}
   \end{center}
 
   \smallskip
@@ -101,21 +103,21 @@
     \begin{tikzpicture}[every node/.style={inner sep=1pt}]
       \castSeller{-4}{0}
       \castCustomer{4}{0}
-      \productCard{0}{+0.85}{Cup}{p^C}{clusterLF}
-      \productCard{0}{ 0.00}{Shirt}{p^S}{clusterDF}
-      \productCard{0}{-0.85}{Movie}{p^M}{clusterLN}
+      \productCard{0}{+0.85}{Potter}{p^P}{clusterLF}
+      \productCard{0}{ 0.00}{Ulysses}{p^U}{clusterDF}
+      \productCard{0}{-0.85}{Eat Pray Love}{p^E}{clusterLN}
       \draw[mutedWarmGray, ->, line width=0.4pt, >=Latex]
-        (1.05, +0.85) -- (3.6, +0.20);
+        (1.45, +0.85) -- (3.6, +0.20);
       \draw[mutedWarmGray, ->, line width=0.4pt, >=Latex]
-        (1.05,  0.00) -- (3.6,  0.00);
+        (1.45,  0.00) -- (3.6,  0.00);
       \draw[mutedWarmGray, ->, line width=0.4pt, >=Latex]
-        (1.05, -0.85) -- (3.6, -0.20);
+        (1.45, -0.85) -- (3.6, -0.20);
     \end{tikzpicture}
   \end{center}
 
   \smallskip
   \begin{enumerate}\setlength{\itemsep}{0pt}
-    \item How do we estimate $p^C$, $p^S$, and $p^M$?
+    \item How do we estimate $p^P$, $p^U$, and $p^E$?
     \item How do we \AINITemph{efficiently} find which is the largest?
   \end{enumerate}
 \end{frame}
@@ -157,17 +159,17 @@
     \begin{tikzpicture}[every node/.style={inner sep=1pt}]
       \castSeller{-4}{0}
       \castCustomer{4}{0}
-      \productCard{0}{+0.85}{Cup}{p^C}{clusterLF}
-      \productCard{0}{ 0.00}{Shirt}{p^S}{clusterDF}
-      \productCard{0}{-0.85}{Movie}{p^M}{clusterLN}
+      \productCard{0}{+0.85}{Potter}{p^P}{clusterLF}
+      \productCard{0}{ 0.00}{Ulysses}{p^U}{clusterDF}
+      \productCard{0}{-0.85}{Eat Pray Love}{p^E}{clusterLN}
     \end{tikzpicture}
   \end{center}
 
   \smallskip
   \begin{enumerate}\setlength{\itemsep}{0pt}
     \item Neither Esther \AINITemph{nor Alex} knows
-          $p^C$, $p^S$, $p^M$ in advance.
-    \item Showing an ad costs Esther money, so she cannot test forever.
+          $p^P$, $p^U$, $p^E$ in advance.
+    \item Each customer arrives only once, so Esther cannot test forever.
   \end{enumerate}
 \end{frame}
 
@@ -242,23 +244,23 @@
 % Stage 2, Slide 1 --- Act I divider (original deck slide 8)
 % ---------------------------------------------------------------------
 \begin{frame}{Chapter 1: Estimating one probability}
-  Just one product.  Just one probability.
+  Just one book.  Just one probability.
 
   \medskip
   \begin{center}
     \begin{tikzpicture}[every node/.style={inner sep=1pt}]
       \castSeller{-3}{0}
-      \productCard{0}{0}{Movie}{p^M}{clusterLN}
+      \productCard{0}{0}{Eat Pray Love}{p^E}{clusterLN}
       \castCustomer{3}{0}
       \draw[mutedWarmGray, ->, line width=0.4pt, >=Latex]
-        (1.05, 0) -- (2.5, 0);
+        (1.45, 0) -- (2.5, 0);
     \end{tikzpicture}
   \end{center}
 \end{frame}
 
 % ---------------------------------------------------------------------
 % Stage 2, Slide 2 --- The customer is an urn: substitution
-% (original deck slide 9).  Alex is replaced by an urn with bias p^M.
+% (original deck slide 9).  Alex is replaced by an urn with bias p^E.
 % ---------------------------------------------------------------------
 \begin{frame}{The customer is an urn}
   \begin{center}
@@ -271,11 +273,11 @@
       % Top row: Esther + Alex
       \castSeller{-1.5}{0.7}
       \castCustomer{1.5}{0.7}
-      \node[font=\large] at (3.5, 0.7) {$p^M$};
+      \node[font=\large] at (3.5, 0.7) {$p^E$};
 
       % Bottom row: Esther + URN (replacing Alex)
       \castSeller{-1.5}{-1.5}
-      \urnIcon{1.5}{-1.5}{$p^M$}
+      \urnIcon{1.5}{-1.5}{$p^E$}
 
       % Substitution arrow Alex -> URN
       \draw[accentOxblood, ->, line width=0.7pt, >=Latex, dashed]
@@ -288,15 +290,15 @@
   \medskip
   \begin{center}
     \scriptsize\itshape\color{mutedWarmGray}
-    Alex's response distribution is the bias $p^M$.  We model him as
-    an urn whose balls are clicks and non-clicks.
+    Alex's response distribution is the bias $p^E$.  We model him as
+    an urn whose balls are buys and no-buys.
   \end{center}
 \end{frame}
 
 % ---------------------------------------------------------------------
 % Stage 2, Slide 3 --- The customer is an urn: action
 % (original deck slide 10).  Esther sends ad / draws ball; outcome is
-% the binary response.  Formula: p^M = w^M / n^M.
+% the binary response.  Formula: p^E = w^E / n^E.
 % ---------------------------------------------------------------------
 \begin{frame}{The customer is an urn}
   \begin{center}
@@ -306,12 +308,12 @@
       \node[font=\scshape\scriptsize, color=mutedWarmGray, anchor=east]
         at (-4.5, -1.5) {model};
 
-      % Top row: Esther --ad--> Alex; outcome is check or cross
+      % Top row: Esther --book--> Alex; outcome is yes or no
       \castSeller{-3}{1.0}
       \draw[mutedWarmGray, ->, line width=0.5pt, >=Latex]
         (-2.2, 1.1) -- (2.2, 1.1);
       \node[font=\itshape\footnotesize, color=mutedWarmGray, anchor=south]
-        at (0, 1.15) {sends ad};
+        at (0, 1.15) {recommends a book};
       \castCustomer{3}{1.0}
       \node[anchor=west] at (3.8, 1.0)
         {{\bfseries\color{accentPrussian}yes}\;or\;{\bfseries\color{accentOxblood}no}};
@@ -322,7 +324,7 @@
         (-2.2, -1.4) -- (2.2, -1.4);
       \node[font=\itshape\footnotesize, color=mutedWarmGray, anchor=south]
         at (0, -1.35) {draws ball};
-      \urnIcon{3}{-1.5}{$p^M$}
+      \urnIcon{3}{-1.5}{$p^E$}
       \node[anchor=west] at (3.8, -1.5)
         {{\color{clusterLF}\large $\bullet$}\;or\;{\color{mutedWarmGray}\large $\circ$}};
     \end{tikzpicture}
@@ -330,7 +332,7 @@
 
   \medskip
   \begin{center}
-    \large $p^M \;=\; \dfrac{w^M}{n^M}$
+    \large $p^E \;=\; \dfrac{w^E}{n^E}$
   \end{center}
 \end{frame}
 
@@ -342,7 +344,7 @@
 \begin{frame}{The empirical estimator}
   \begin{center}
     \begin{tikzpicture}[every node/.style={inner sep=1pt}]
-      \urnIcon{-2.5}{0}{$p^M$}
+      \urnIcon{-2.5}{0}{$p^E$}
 
       \draw[mutedWarmGray, ->, line width=0.4pt, >=Latex] (-1.9, 0.4) -- (1.5, 0.7);
       \node[font=\footnotesize] at (1.85, 0.7) {$x_1$};
@@ -359,12 +361,12 @@
   \medskip
   \begin{center}
     {\scriptsize\itshape\color{mutedWarmGray}
-     ($x_i = 1$ if conversion, $0$ otherwise.)}
+     ($x_i = 1$ if buy, $0$ otherwise.)}
   \end{center}
 
   \medskip
   \begin{center}
-    \large $\hat p_n^M \;=\; \bar x_n \;=\; \dfrac{x_1 + x_2 + \cdots + x_n}{n}$
+    \large $\hat p_n^E \;=\; \bar x_n \;=\; \dfrac{x_1 + x_2 + \cdots + x_n}{n}$
   \end{center}
 \end{frame}
 
@@ -373,19 +375,19 @@
 % Law of large numbers, formal statement.
 % ---------------------------------------------------------------------
 \begin{frame}{The empirical estimator converges}
-  As $n$ grows, $\hat p_n^M$ gets closer and closer to $p^M$
+  As $n$ grows, $\hat p_n^E$ gets closer and closer to $p^E$
   with high probability.
 
   \bigskip
   \begin{center}
-    \Large $\hat p_n^M \;\xrightarrow[n \to \infty]{\mathbb{P}}\; p^M$
+    \Large $\hat p_n^E \;\xrightarrow[n \to \infty]{\mathbb{P}}\; p^E$
   \end{center}
 
   \bigskip
   Formally, for any $\delta, \epsilon > 0$, there is $N \in \mathbb{N}$
   such that
   \begin{center}
-    $\mathbb{P}\big(|\hat p_n^M - p^M| > \delta\big) < \epsilon$
+    $\mathbb{P}\big(|\hat p_n^E - p^E| > \delta\big) < \epsilon$
     \;\;for $n \geq N$.
   \end{center}
 
@@ -471,7 +473,7 @@
 %   prefix removed from UCB, epsilon-greedy added between drawbacks
 %   and UCB.
 %
-%   1. Act II: Two urns               bring the cup back; p^C and p^M
+%   1. Act II: Two urns               bring Potter back; p^P and p^E
 %   2. Naive (visual)                 two urns + customer; the setup
 %   3. Naive (algorithm)              three steps of estimate-then-exploit
 %   4. Drawbacks                      n too small / n too large
@@ -486,19 +488,19 @@
 % Stage 3, Slide 1 --- Act II: Two urns (original deck slide 15)
 % ---------------------------------------------------------------------
 \begin{frame}{Chapter 2: Two urns}
-  Bring back the cup.  Now two products, two probabilities.
+  Bring back Potter.  Now two books, two probabilities.
 
   \medskip
   \begin{center}
     \begin{tikzpicture}[every node/.style={inner sep=1pt}]
       \castSeller{-3.5}{0}
-      \productCard{0}{+0.7}{Cup}{p^C}{clusterLF}
-      \productCard{0}{-0.7}{Movie}{p^M}{clusterLN}
+      \productCard{0}{+0.7}{Potter}{p^P}{clusterLF}
+      \productCard{0}{-0.7}{Eat Pray Love}{p^E}{clusterLN}
       \castCustomer{3.5}{0}
       \draw[mutedWarmGray, ->, line width=0.4pt, >=Latex]
-        (1.05, +0.7) -- (3.0, +0.2);
+        (1.45, +0.7) -- (3.0, +0.2);
       \draw[mutedWarmGray, ->, line width=0.4pt, >=Latex]
-        (1.05, -0.7) -- (3.0, -0.2);
+        (1.45, -0.7) -- (3.0, -0.2);
     \end{tikzpicture}
   \end{center}
 \end{frame}
@@ -513,8 +515,8 @@
   \medskip
   \begin{center}
     \begin{tikzpicture}[every node/.style={inner sep=1pt}]
-      \urnIcon{-1.5}{+0.6}{$p^C$}
-      \urnIcon{-1.5}{-1.0}{$p^M$}
+      \urnIcon{-1.5}{+0.6}{$p^P$}
+      \urnIcon{-1.5}{-1.0}{$p^E$}
       \castCustomer{2}{-0.2}
     \end{tikzpicture}
   \end{center}
@@ -533,13 +535,13 @@
 \begin{frame}{Na\"\i ve: estimate then exploit}
   \begin{center}
     \begin{tikzpicture}[every node/.style={inner sep=1pt}]
-      \urnIcon{-3.5}{+0.5}{$p^C$}
-      \urnIcon{-3.5}{-1.0}{$p^M$}
+      \urnIcon{-3.5}{+0.5}{$p^P$}
+      \urnIcon{-3.5}{-1.0}{$p^E$}
       \castCustomer{-0.5}{-0.25}
       \node[anchor=west, align=left, font=\footnotesize]
         at (1.2, -0.2)
         {1.~Choose a number $n$. \\[6pt]
-         2.~Compute estimators $\hat p_n^C, \hat p_n^M$. \\[6pt]
+         2.~Compute estimators $\hat p_n^P, \hat p_n^E$. \\[6pt]
          3.~Exploit the urn with the largest estimate.};
     \end{tikzpicture}
   \end{center}
@@ -553,13 +555,13 @@
 \begin{frame}{Drawbacks!}
   \begin{center}
     \begin{tikzpicture}[every node/.style={inner sep=1pt}]
-      \urnIcon{-3.5}{+0.5}{$p^C$}
-      \urnIcon{-3.5}{-1.0}{$p^M$}
+      \urnIcon{-3.5}{+0.5}{$p^P$}
+      \urnIcon{-3.5}{-1.0}{$p^E$}
       \castCustomer{-0.5}{-0.25}
       \node[anchor=west, align=left, font=\footnotesize]
         at (1.2, -0.2)
         {1.~Choose a number $n$. \\[4pt]
-         2.~Compute $\hat p_n^C, \hat p_n^M$. \\[4pt]
+         2.~Compute $\hat p_n^P, \hat p_n^E$. \\[4pt]
          3.~Exploit the largest.};
     \end{tikzpicture}
   \end{center}
@@ -567,9 +569,9 @@
   \medskip
   \begin{itemize}
     \setlength{\itemsep}{0.3em}
-    \item If $p^C$ and $p^M$ are close and $n$ is too small,
+    \item If $p^P$ and $p^E$ are close and $n$ is too small,
           you exploit the \AINITemph{wrong urn}.
-    \item If $p^C$ and $p^M$ are far apart and $n$ is too large,
+    \item If $p^P$ and $p^E$ are far apart and $n$ is too large,
           you \AINITemph{waste rounds} estimating the loser.
   \end{itemize}
 \end{frame}
@@ -617,10 +619,10 @@
   \begin{center}
     \begin{tikzpicture}[scale=0.85, transform shape,
                         every node/.style={inner sep=1pt}]
-      \urnIcon{-2.6}{0}{$p^C$}
+      \urnIcon{-2.6}{0}{$p^P$}
       \node[anchor=south, font=\footnotesize, color=mutedWarmGray]
         at (-2.6, 0.45) {$[\,0,\;1\,]$};
-      \urnIcon{0}{0}{$p^M$}
+      \urnIcon{0}{0}{$p^E$}
       \node[anchor=south, font=\footnotesize, color=mutedWarmGray]
         at (0, 0.45) {$[\,0,\;1\,]$};
       \castCustomer{2.6}{0}
