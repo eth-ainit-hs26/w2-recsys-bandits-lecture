@@ -1,6 +1,6 @@
 # Recommendation Systems and Bandits · AI in Industry · Week 2
 
-### → **[https://eth-ainit-fs26.github.io/recsys_bandits_lecture/](https://eth-ainit-fs26.github.io/recsys_bandits_lecture/)** ←
+### → **[https://eth-ainit-hs26.github.io/w2-recsys-bandits-lecture/](https://eth-ainit-hs26.github.io/w2-recsys-bandits-lecture/)** ←
 
 The live site is the **lecture's companion page.** Participants visit
 it on their laptop or phone at the start of the lecture; the ten
@@ -17,8 +17,8 @@ managers, framed as a single question: *what is the difference between
 **memory** and **prediction**?*
 
 - **Lecturer:** Carlos Cotrini, ETH Zürich
-- **Course:** AI in Industry, Week 2, Spring 2026
-- **Source:** [github.com/eth-ainit-fs26/recsys_bandits_lecture](https://github.com/eth-ainit-fs26/recsys_bandits_lecture)
+- **Course:** AI in Industry, Week 2, Autumn 2026
+- **Source:** [github.com/eth-ainit-hs26/w2-recsys-bandits-lecture](https://github.com/eth-ainit-fs26/recsys_bandits_lecture)
 - **Deploy:** every push to `main` runs `.github/workflows/pages.yml`,
   which deploys the whole repo to GitHub Pages
   (enable once at *Settings → Pages → Source: GitHub Actions*).
