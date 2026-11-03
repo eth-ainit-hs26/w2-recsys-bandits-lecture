@@ -98,8 +98,9 @@ placed without overlaps), 7.4 minutes in all, no errors or warnings:
 | Portrait 2, two-tower | 7.7 | 17.2 | 2.9 |
 | Portrait 3, code writer | 7.4 | 18.1 | 1.9 |
 
-After that run only four markdown cells changed (the "What to notice" notes and the industry
-section), so the committed code cells are byte for byte the ones that ran. The executed copy, with
+After that run only markdown cells changed: the "What to notice" notes and the industry section, and,
+after the first push on 2026-11-03, the four cells that explain portrait 1 (see Gotchas). So the
+committed code cells are byte for byte the ones that ran. The executed copy, with
 all outputs, is `three-portraits.ipynb` in the Drive of ccarlos@ethz.ch (Colab file id
 `1dXrhsPOilW_ARyML8Gr7Mc7oVxNpeKx8`). The first test copy, code only, is in the Drive folder "AINIT HS26
 weekend 2 notebook drafts" of c.m.cotrini@gmail.com, shared with the ETH account.
@@ -110,6 +111,14 @@ three times as often"), and they must be checked again after any change to a mod
 
 ## Gotchas
 
+- **Portrait 1 was misread at first.** On a first reading Carlos asked whether the language model
+  writes the product descriptions and whether the notebook trains it. The four cells about portrait 1
+  (the title cell, the start of section 2, the cell before the look-alikes table and the scoreboard
+  list) now say that code joins name, shelf and brand into the line the model reads, that the model
+  is used as downloaded, that closeness is the inner product, and that the scoreboard averages the
+  customer's last 20 products at most. Keep those points when editing them. The training facts come
+  from the model card of `sentence-transformers/all-MiniLM-L6-v2` on Hugging Face: fine-tuned from
+  `nreimers/MiniLM-L6-H384-uncased` with a contrastive objective on 1,170,060,424 sentence pairs.
 - **Portrait 2's neighbours are complements.** For the DualShock 4 controller they are headsets
   and PC games (PC players use that controller), for a Switch game a screen protector and a gift
   card. That is behaviour, and the notebook now teaches it ("similar items" against "customers also
