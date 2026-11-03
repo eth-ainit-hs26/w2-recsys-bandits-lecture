@@ -1,0 +1,69 @@
+% Copied on 2026-11-03 from eth-ainit-hs26/w1-lecture-material, commit 9792819, file style/deck-skeleton.tex. To pull a fix, diff against the source and recopy.
+% ===== deck-skeleton.tex: the starting point of an AINIT deck in the Codex plates style =====
+% Copy it into the deck's own directory (a sibling of style/), rename it, and:
+%   1. check the two \input paths (they assume the deck sits next to style/)
+%   2. set the title page fields, \deckslug and \currentweekend below
+%   3. build:   ../style/tools/build.sh my-deck.tex
+%   4. check:   ../style/tools/check.sh my-deck.pdf
+%               python3 ../style/tools/check_overlays.py my-deck.pdf
+%               python3 ../style/tools/render_board.py my-deck.pdf out    (then READ out/s*.png)
+% sample.tex shows every part of the style once. CLAUDE.md in style/ has the rules.
+\documentclass[aspectratio=169]{beamer}
+\input{../style/ainit-preamble}
+\input{../style/ainit-course}
+\renewcommand{\deckslug}{AI in Industry, weekend 2}
+\renewcommand{\currentweekend}{b}   % a, b or c: the weekend this deck belongs to
+
+\title{Title of the lecture}
+\subtitle{Weekend 1: Large language models}
+\author{Carlos Cotrini}
+\institute{AI in Industry, ETH Zurich}
+\date{Friday 16 October 2026}
+% \def\titlegeez{...}   % optional: a Ge'ez line over the title, copied from a course deck
+
+% The cold open, if the lecture has one: set these four, then show \coldopenframe in a [plain] frame.
+% \newcommand{\plateImage}{img/plate.jpg}
+% \newcommand{\plateCredit}{Artist, \emph{Title} (medium, year)}
+% \newcommand{\quoteText}{First line.\\ Second line with a \hl{key word}.}
+% \newcommand{\quoteCitation}{Author, \emph{Work} (year), trans.\ Translator}
+
+\begin{document}
+
+\begin{frame}[plain,noframenumbering]
+  \titlepage
+\end{frame}
+
+% \begin{frame}[plain,noframenumbering]
+%   \coldopenframe
+% \end{frame}
+
+% The course roadmap, for an introduction deck or the opening of a weekend:
+% \begin{frame}{The course in three weekends}
+%   \threeweekends
+% \end{frame}
+
+\section{First section}
+
+\begin{frame}{A frame with a list}
+  \begin{itemize}[<+->]
+    \item First point, in a few words
+    \item Second point
+    \item Third point
+  \end{itemize}
+\end{frame}
+
+% A figure: reveal pieces with visible on, never by wrapping a node in \only. Declare the chosen
+% branch of a tree before the branches not taken. The only text under a figure is a gloss node
+% placed inside it. A frame never ends on a closing sentence.
+\begin{frame}{A frame with a diagram}
+  \centering
+  \begin{tikzpicture}[x=1cm,y=1cm]
+    \node[chip strong] (a) at (0,0) {Chosen};
+    \node[chip strong, visible on=<2->] (b) at (4.2,0.9) {Next};
+    \node[chip dim, visible on=<2->] (c) at (4.2,-0.9) {Other};
+    \treelink{edge strong, visible on=<2->}{elab}{a}{b}{0.7}
+    \treelink{edge dim, visible on=<2->}{elab dim}{a}{c}{0.3}
+  \end{tikzpicture}
+\end{frame}
+
+\end{document}

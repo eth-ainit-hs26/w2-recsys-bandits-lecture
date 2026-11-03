@@ -1,0 +1,237 @@
+% ===== opener.tex: the opener of weekend 2 (13 and 14 November 2026), six frames =====
+% Why recommendation, advertising and customer profiles matter, for an audience of managers.
+% Asked for by Carlos on 2026-11-03 ("build it in 6 slides"), from the opener ideas in his notes.
+% Order: the money, how much a machine chooses, compared to what, a toy of six customers, the field
+% studies behind the toy, and the hand-over to the weekend's games.
+%
+% No number is typed here: numbers.tex is written by tools/opener_numbers.py, which cites each
+% source and asserts the arithmetic. Frame 4 is invented and says so. A "Say" comment above each
+% frame is the talk track. README.md has the sources, the choices made without asking, and the
+% checks. Build from this folder:
+%   python3 tools/opener_numbers.py
+%   ../style/tools/build.sh opener.tex
+\documentclass[aspectratio=169]{beamer}
+\input{../style/ainit-preamble}
+\input{../style/ainit-course}
+\input{opener-kit}
+\input{numbers}
+\renewcommand{\deckslug}{AI in Industry, weekend 2}
+\renewcommand{\currentweekend}{b}
+\title{Why understanding customers pays}
+\author{Carlos Cotrini}
+\hypersetup{pdftitle={Why understanding customers pays}, pdfauthor={Carlos Cotrini}}
+
+\begin{document}
+
+% ===== Frame 1. The money =====
+% Say: Three companies. In 2025 Google sold 294.7 billion dollars of advertising, Meta 196.2 and
+% Amazon 68.6: together 559.5 billion, about 1.5 billion dollars a day. Each ad they show is a guess
+% about one person: will this person respond, now? Many of those guesses draw on a profile of that
+% person, built from what the person did before.
+\begin{frame}{Three companies, \adPerDay{} billion dollars of ads a day}
+  \begin{tikzpicture}[x=1mm, y=1mm]
+    \path[use as bounding box] (0,1) rectangle (130,-54);
+    \node[measure, font=\normalsize\itshape, anchor=north west] at (0,0)
+      {Advertising revenue in 2025, in billions of US dollars};
+    \adbar{2-}{-11}{\barGoogle}{Google}{\adGoogle}
+    \adbar{2-}{-20.5}{\barMeta}{Meta}{\adMeta}
+    \adbar{2-}{-30}{\barAmazon}{Amazon}{\adAmazon}
+    \node[gloss, anchor=north west, visible on=<3->] at (66,-24.5)
+      {Each ad shown is a guess about one person.};
+    \draw[ruledark, line width=0.6pt, visible on=<3->] (0,-37) to (130,-37);
+    \node[anchor=east, inner sep=0, font=\large, visible on=<3->] at (24,-42.5) {Together};
+    \node[anchor=west, inner sep=0, font=\large, visible on=<3->] at (27,-42.5)
+      {\textcolor{brand}{\Large\bfseries\adTotal} billion, about
+       \textcolor{brand}{\Large\bfseries\adPerDay} billion a day};
+    \node[src, anchor=north west, text width=130mm] at (0,-48.5)
+      {Alphabet and Meta: annual reports (Form 10-K) for 2025. Amazon: its results for the four
+       quarters of 2025, added up.};
+  \end{tikzpicture}
+\end{frame}
+
+% ===== Frame 2. How much a machine chooses =====
+% Say: Before the numbers, a question: what share of your hours on YouTube did you go looking for
+% yourself? Take two or three guesses from the room. Then: YouTube's chief product officer said at
+% CES 2018 that more than 70 percent of watch time comes from its recommendations. Netflix wrote in
+% 2012 that 75 percent of what its members watch comes from some sort of recommendation. McKinsey
+% wrote in 2013 that 35 percent of what customers buy on Amazon does. Two are the companies' own
+% figures, and the third comes from McKinsey, which names no source; none comes with a method. The
+% shop window is now different for every customer.
+\begin{frame}{A machine suggested much of what we watch and buy}
+  \begin{tikzpicture}[x=1mm, y=1mm]
+    \path[use as bounding box] (0,1) rectangle (130,-54);
+    \node[anchor=north west, inner sep=0, font=\large\itshape] at (0,0)
+      {What share of your hours on YouTube did you go looking for?};
+    \node[measure, anchor=south west, visible on=<2->] at (55,-14.5)
+      {Share that came from a recommendation};
+    \node[anchor=west, inner sep=0, align=flush left, visible on=<2->] at (0,-20.5)
+      {{\large YouTube, watch time}\\[0.8mm]{\scriptsize\itshape\color{muted}Neal Mohan at CES 2018, in CNET}};
+    \sharebox{2-}{55}{-20.5}{49}{6.5}{\shYouTube}
+    \node[big, anchor=west, visible on=<2->] at (107,-20.5) {over \shYouTube\%};
+    \node[anchor=west, inner sep=0, align=flush left, visible on=<3->] at (0,-32.5)
+      {{\large Netflix, viewing}\\[0.8mm]{\scriptsize\itshape\color{muted}Netflix Tech Blog, 2012}};
+    \sharebox{3-}{55}{-32.5}{49}{6.5}{\shNetflix}
+    \node[big, anchor=west, visible on=<3->] at (107,-32.5) {\shNetflix\%};
+    \node[anchor=west, inner sep=0, align=flush left, visible on=<4->] at (0,-44.5)
+      {{\large Amazon, purchases}\\[0.8mm]{\scriptsize\itshape\color{muted}McKinsey, 2013}};
+    \sharebox{4-}{55}{-44.5}{49}{6.5}{\shAmazon}
+    \node[big, anchor=west, visible on=<4->] at (107,-44.5) {\shAmazon\%};
+  \end{tikzpicture}
+\end{frame}
+
+% ===== Frame 3. Compared to what =====
+% Say: Now think as a manager. 35 percent of Amazon's purchases came through a recommendation. How
+% many of those would have happened anyway? Kumar and Hosanagar ran a randomized experiment on the
+% website of an apparel retailer: with recommendation links, the sales of a product and of its
+% recommended substitutes were 11 percent higher than without them. Jannach and Jugovac reviewed the
+% published field tests: 1 to 5 percent more revenue is the more usual report, and for companies of
+% that size even 1 percent is a great deal of money. Ask every vendor: compared to what? That
+% question runs through the experiments and the bandits of this weekend.
+\begin{frame}{The question to ask: compared to what?}
+  \begin{tikzpicture}[x=1mm, y=1mm]
+    \path[use as bounding box] (0,1) rectangle (130,-54);
+    \node[head, anchor=north west] at (0,0) {Through a recommendation};
+    \node[measure, anchor=north west, text width=55mm] at (0,-7)
+      {Share of Amazon purchases that came from a recommendation};
+    \sharebox{1-}{0}{-20.5}{40}{6.5}{\shAmazon}
+    \node[big, anchor=west] at (43,-20.5) {\shAmazon\%};
+    \node[gloss, anchor=north west, visible on=<3->] at (0,-27)
+      {A share also counts purchases that would have happened anyway.};
+    \node[src, anchor=north west, text width=55mm] at (0,-48.5) {McKinsey, 2013.};
+    \draw[ruling, line width=0.4pt, visible on=<2->] (59,1) to (59,-53);
+    \node[head, anchor=north west, visible on=<2->] at (63,0) {Caused by a recommendation};
+    \node[measure, anchor=north west, text width=67mm, visible on=<2->] at (63,-7)
+      {Randomized experiment: sales of a product and its recommended substitutes, on average};
+    \node[anchor=east, inner sep=0, visible on=<2->] at (79,-19.5) {Without};
+    \draw[bar plain, visible on=<2->] (81,-22) rectangle ({81+34*\liftWithout/100},-17);
+    \node[anchor=west, inner sep=0, font=\large, visible on=<2->]
+      at ({83.5+34*\liftWithout/100},-19.5) {\liftWithout};
+    \node[anchor=east, inner sep=0, visible on=<2->] at (79,-26.5) {With};
+    \fill[hatch, visible on=<2->] (81,-29) rectangle ({81+34*\liftWith/100},-24);
+    \draw[brand, line width=0.7pt, line join=miter, visible on=<2->]
+      (81,-29) rectangle ({81+34*\liftWith/100},-24);
+    \node[anchor=west, inner sep=0, font=\large, visible on=<2->]
+      at ({83.5+34*\liftWith/100},-26.5) {\liftWith};
+    \node[anchor=west, inner sep=0, visible on=<2->] at (81,-33.5)
+      {\textcolor{brand}{\Large\bfseries +\liftPct\%} \large more sales};
+    \node[gloss, anchor=north west, text width=5.2cm, visible on=<3->] at (63,-37.5)
+      {Published field tests more often report \typLow\% to \typHigh\% more revenue.};
+    \node[src, anchor=north west, text width=67mm, visible on=<2->] at (63,-48.5)
+      {Kumar and Hosanagar, Information Systems Research, 2019. Jannach and Jugovac, ACM TMIS, 2019.};
+  \end{tikzpicture}
+\end{frame}
+
+% ===== Frame 4. Six invented customers =====
+% Say: An invented example. You have one retention offer and time for two calls. A churn model lists
+% your customers by their chance of leaving, and you would call the first two, Lea and Marco. Now
+% suppose you knew what the call does to each of them. The call changes nothing for Lea, raises
+% Marco's chance of leaving from 70 to 75 percent, and lowers Nina's and Jonas's by 20 and 15 points.
+% Whom should you have called?
+\begin{frame}{Six customers, two calls: whom do you call?}
+  \begin{tikzpicture}[x=1cm, y=1cm]
+    \path[use as bounding box] (0,0.1) rectangle (13,-5.4);
+    \node[src, anchor=south west] at (0,-0.3) {Invented customers};
+    \sheetband{0}{11.3}{-0.9}{hatch}{brand}
+    \sheetgrid{0}{-0.9}{2.3}{3.0}{3}{6}{0.55}
+    \node[phead, anchor=base] at (1.15,-0.9) {Customer};
+    \node[phead, anchor=base] at (3.8,-0.9) {Chance of leaving};
+    \node[phead, anchor=base] at (6.8,-0.9) {If we call};
+    \node[phead, anchor=base] at (9.8,-0.9) {Change};
+    \foreach \i in {1,...,6} {
+      \pgfmathsetmacro{\yy}{-1.05-0.55*(\i-0.5)}
+      \node[pcell, font=\normalsize] at (1.15,\yy) {\cuName{\i}};
+      \node[pcell, font=\normalsize] at (3.8,\yy) {\cuRisk{\i}\%};
+      \node[pcell, font=\normalsize, visible on=<3->] at (6.8,\yy) {\cuCall{\i}\%};
+      \node[pcell, font=\normalsize, visible on=<3->] at (9.8,\yy) {\cuChange{\i}};
+    }
+    \draw[muted, line width=0.9pt, dash pattern=on 3pt off 2.2pt, visible on=<2->]
+      (-0.1,-1.09) rectangle (11.4,-2.11);
+    \node[anchor=west, inner sep=0, font=\small, text=muted, text width=1.45cm, align=flush left,
+      visible on=<2->] at (11.55,-1.6) {Called by risk};
+    \draw[brand, line width=1.3pt, line join=miter, visible on=<4->]
+      (-0.1,-2.19) rectangle (11.4,-3.21);
+    \node[anchor=west, inner sep=0, font=\small, text=brand, text width=1.45cm, align=flush left,
+      visible on=<4->] at (11.55,-2.7) {Called by response};
+    \node[gloss, anchor=north west, text width=11.2cm, visible on=<4->] at (0,-4.55)
+      {By risk, nothing changes for Lea and Marco becomes more likely to cancel.};
+  \end{tikzpicture}
+\end{frame}
+
+% ===== Frame 5. The field studies behind the toy =====
+% Say: The toy has a real counterpart. Eva Ascarza analysed two field experiments: at a membership
+% organization in North America, which added a gift to its renewal communication in an A/B test,
+% and at a wireless telecom firm in the Middle East, which texted an offer of extra credit for
+% recharging. In simulations on both sets of data, aiming the offer at the customers it moves
+% lowered churn by 4.1 to 8.7 percentage points more than aiming it at the customers most likely to
+% leave. In some cases, aiming at the customers most likely to leave raised churn. A customer profile
+% has to say what moves a customer, as well as what the customer is likely to do.
+% Note for the lecturer: the 4.1 to 8.7 points are the American Marketing Association's summary,
+% from the award it gave the paper in 2023. The paper's abstract gives no number, and an earlier
+% talk abstract of hers said "up to seven percentage points". The paper body was not read.
+\begin{frame}{Call the customers the offer can move}
+  \begin{tikzpicture}[x=1cm, y=1cm]
+    \path[use as bounding box] (0,0.1) rectangle (13,-5.4);
+    \node[chip, align=flush center, text width=2.5cm, font=\normalsize] (offer) at (1.35,-2.2)
+      {One retention offer};
+    \node[chip strong, align=flush center, text width=3.2cm, font=\normalsize, inner xsep=2.6mm,
+      inner ysep=2.4mm] (move) at (5.6,-1.0) {Aim at the customers it moves};
+    \node[chip dim, align=flush center, text width=3.2cm, font=\normalsize, inner xsep=2.6mm,
+      inner ysep=2.4mm] (risk) at (5.6,-3.4) {Aim at the customers most likely to leave};
+    \treelink{edge strong}{elab}{offer}{move}{}
+    \treelink{edge dim}{elab dim}{offer}{risk}{}
+    \node[anchor=west, text width=4.6cm, align=flush left, inner sep=0, text=muted,
+      visible on=<3->] at (8.1,-3.4) {In some cases, aiming at them raised churn};
+    \node[anchor=west, text width=4.6cm, align=flush left, inner sep=0, visible on=<2->]
+      at (8.1,-1.0) {\textcolor{brand}{\Large\bfseries \ascLow{} to \ascHigh{}} percentage
+      points less churn than aiming by risk};
+    \node[src, anchor=north west, text width=13cm] at (0,-4.65)
+      {Eva Ascarza, Journal of Marketing Research, 2018: two field experiments, at a membership
+       organization in North America and a telecom firm in the Middle East. The numbers as summarized
+       by the American Marketing Association, 2023; the comparison was simulated on the field data.};
+  \end{tikzpicture}
+\end{frame}
+
+% ===== Frame 6. The hand-over =====
+% Say: A village shopkeeper knew her regulars: what each one buys and what each one would like next.
+% Migros and Coop have millions of cardholders, and nobody can know them by heart. A machine has to
+% learn it. It places every customer as a point, and customers who buy alike end up close together.
+% A new customer is read from the neighbours. How the machine finds those places is this weekend's
+% subject, and we start with a video store.
+\begin{frame}{What the shopkeeper knew, a machine must learn}
+  \begin{tikzpicture}[x=1cm, y=1cm]
+    \path[use as bounding box] (0,0.1) rectangle (13,-5.4);
+    \node[head, anchor=north west] at (0,0) {The village shop};
+    \node[measure, anchor=north west] at (0,-0.6) {She knows every regular};
+    \node[chip strong, font=\normalsize, inner xsep=2.6mm, inner ysep=2.2mm] (keeper)
+      at (1.16,-2.75) {Shopkeeper};
+    \foreach \i/\yy in {1/-1.55, 2/-2.35, 3/-3.15, 4/-3.95} {
+      \node[chip, font=\small, minimum width=1.3cm, minimum height=0.6cm] (r\i) at (3.9,\yy)
+        {\cuName{\i}};
+    }
+    \treelink{edge strong}{elab}{keeper}{r1}{}
+    \treelink{edge strong}{elab}{keeper}{r2}{}
+    \treelink{edge strong}{elab}{keeper}{r3}{}
+    \treelink{edge strong}{elab}{keeper}{r4}{}
+    \node[head, anchor=north west, visible on=<2->] at (5.1,0) {Millions of regulars};
+    \node[src, anchor=north west, visible on=<2->] at (5.1,-0.6)
+      {Loyalty cards such as Migros Cumulus and Coop Supercard};
+    \draw[axis, visible on=<2->] (5.1,-4.75) to (8.2,-4.75);
+    \draw[axis, visible on=<2->] (5.1,-4.75) to (5.1,-1.15);
+    \foreach \x/\y in {5.65/-1.7, 5.9/-1.55, 6.15/-1.75, 5.8/-1.95, 6.05/-2.05, 5.55/-2.0, 6.3/-1.95,
+                       7.15/-2.2, 7.45/-2.05, 7.7/-2.3, 7.3/-2.45, 7.55/-2.6, 7.05/-2.5, 7.8/-2.55,
+                       6.2/-3.9, 6.5/-3.8, 6.8/-4.0, 6.35/-4.15, 6.65/-4.3, 6.1/-4.2, 6.9/-4.25} {
+      \fill[dot, visible on=<2->] (\x,\y) circle (0.055);
+    }
+    \node[src, anchor=north west, visible on=<2->] at (5.1,-4.85) {Invented points};
+    \draw[brand, line width=0.5pt, visible on=<3->] (7.43,-2.55) circle (0.68);
+    \draw[brand, line width=1.1pt, fill=paper, visible on=<3->] (7.45,-3.0) circle (0.1);
+    \node[anchor=north, inner sep=0, font=\scriptsize\itshape, text=brand, visible on=<3->]
+      at (7.35,-3.38) {a new customer};
+    \node[gloss, anchor=north west, text width=3.45cm, visible on=<3->] at (8.3,-1.0)
+      {Customers who buy alike sit close together.};
+    \node[gloss, anchor=north west, text width=3.45cm, visible on=<4->] at (8.3,-2.6)
+      {This weekend: how a machine learns where each customer sits.};
+  \end{tikzpicture}
+\end{frame}
+
+\end{document}

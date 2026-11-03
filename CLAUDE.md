@@ -54,6 +54,12 @@ Specifically:
 ├── colab/three-portraits/      Weekend 2 Colab notebook "Three portraits of a product"
 │                               (Amazon Reviews 2023, three embeddings, a scoreboard);
 │                               generator build_notebook.py, own CLAUDE.md
+├── style/                      The HS26 deck style, Codex plates, copied on 2026-11-03 from
+│                               w1-lecture-material (preamble, course facts, skeleton, build
+│                               and check tools); own CLAUDE.md
+├── opener-deck/                The weekend 2 opener (2026-11-03): six frames on why
+│                               recommendation, advertising and customer profiles matter,
+│                               opener.pdf and a handout; own CLAUDE.md and README.md
 ├── original-decks/             Original PDFs from before the rebuild
 │   ├── w2_bandits.pdf
 │   └── w2_recsys.pdf
@@ -151,6 +157,19 @@ Three items remain to make the lecture fully production-ready:
 behaviour, and as semantic IDs) and a scoreboard of four recommenders. Its own CLAUDE.md has the
 build, the test route on Carlos's Colab Pro account and the measured results. The Pages workflow
 publishes it with the rest of the repository, so a push makes it public.
+
+## The opener deck and the HS26 style (added 2026-11-03)
+
+`opener-deck/` holds the opener of weekend 2: six frames, for managers, on why recommendation,
+advertising and customer profiles matter (the advertising money of 2025, how much of what people watch
+and buy a machine suggested, "compared to what?", an invented table of six customers, Ascarza's
+retention study, and the hand-over to the weekend's video store game). It is a LaTeX deck in Codex
+plates, the official HS26 style, so it does NOT use the FS26 theme of `slides/` and `theme/`; its style
+is the copy in `style/`, whose CLAUDE.md says where the canonical copy lives. Every number comes from
+`opener-deck/tools/opener_numbers.py`. Build with `../style/tools/build.sh opener.tex` from inside
+`opener-deck/` (lualatex, three passes). The design conventions of this file (Okabe-Ito colours, no
+bold, six equations) belong to the FS26 lecture and do not bind the HS26 decks. Nothing links to the
+opener yet; a push makes the PDF public on Pages.
 
 ## When in doubt
 

@@ -1,0 +1,107 @@
+% Copied on 2026-11-03 from eth-ainit-hs26/w1-lecture-material, commit 9792819, file style/ainit-course.tex. To pull a fix, diff against the source and recopy.
+% ===== ainit-course.tex: the facts of AINIT HS26 and the three weekends frame =====
+% Load this after ainit-preamble.tex in any deck that shows the course roadmap or the title page's
+% Ge'ez year. The facts live here once, so a change of date or title is one edit.
+%
+% Where the facts come from. Dates, themes and titles are the master spreadsheet's Syllabus tab and
+% agree with the course website. The three project names differ between the website, the sheet and
+% the introduction deck. This file follows the introduction deck (admin-deck/), because that is the
+% deck the participants see first. The topics line of each weekend is a short reading of the
+% weekend's slots. Re-read the sheet before the semester starts and after any change of schedule.
+%
+% For the next academic year change \geezYear, the dates, and whatever else moved.
+
+% 2026 in Ge'ez numerals: 20 x 100 + 20 + 6. The title page prints it after the date.
+\newcommand{\geezYear}{፳፻፳፮}
+
+% ---- the three weekends (a, b, c): number, title, dates, topics, project, Faust epithet ----
+% The epithets come from the course's cold open: Goethe's Faust renders the Greek word logos as
+% the Word, the Thought and the Act, and refuses the Power. They map to the three weekends.
+\newcommand{\wkaNum}{1}\newcommand{\wkaTitle}{Large language models}
+\newcommand{\wkaDates}{16 and 17 October}
+\newcommand{\wkaTopics}{Ge'ez games, prompting, OPRO, MLOps}
+\newcommand{\wkaProject}{LLM-based marketing agent}\newcommand{\wkaMuse}{the Word}
+\newcommand{\wkbNum}{2}\newcommand{\wkbTitle}{Representation learning}
+\newcommand{\wkbDates}{13 and 14 November}
+\newcommand{\wkbTopics}{Recommendation systems, matrix factorization, bandits}
+\newcommand{\wkbProject}{Recommendation systems}\newcommand{\wkbMuse}{the Thought}
+\newcommand{\wkcNum}{3}\newcommand{\wkcTitle}{Reinforcement learning}
+\newcommand{\wkcDates}{11 and 12 December}
+\newcommand{\wkcTopics}{MDPs, Bellman equations, SARSA, REINFORCE}
+\newcommand{\wkcProject}{Reinforcement learning for delivery optimization}
+\newcommand{\wkcMuse}{the Act}
+
+% ===== frame: the three weekends, three plates side by side =====
+% The current weekend has a hatched header band and an ochre flag. Set it with
+% \renewcommand{\currentweekend}{b} in a weekend 2 deck. The refused Power hangs as a struck label
+% above the gap between the second and the third plate, with a dashed phantom line running down that
+% gap. Switch it off with \cxpowerfalse after loading this file.
+\newif\ifcxpower
+\cxpowertrue
+\newcommand{\cxW}{4.08}   % plate width in cm
+\newcommand{\cxG}{0.38}   % gap between plates in cm
+\newcommand{\cxH}{5.0}    % plate height in cm
+\newcommand{\cxtop}{0.56} % height of the row of flags above the plates, in cm
+\newcommand{\cxband}{0.44}% height of the header band of a plate, in cm
+
+% the capital form of a Muse: "the Word" becomes "The Word"
+\def\cxcaptheA the #1\relax{The #1}
+\newcommand{\cxMuse}[1]{{\edef\cxtmp{\csname wk#1Muse\endcsname}\expandafter\cxcaptheA\cxtmp\relax}}
+
+% one plate: weekend letter, left edge in cm, 1 when it is the current weekend.
+% The header band carries the weekend label on vellum; on the current plate the rest of the
+% band is hatched.
+\newcommand{\cxplate}[3]{%
+  \begin{scope}[shift={(#2,\cxtop)}]
+    \ifnum#3=1
+      \fill[hatch] (0,0) rectangle (\cxW,\cxband);
+      \def\cxlab{brand}\def\cxout{brand}\def\cxoutw{1.1pt}
+    \else
+      \def\cxlab{muted}\def\cxout{ruledark}\def\cxoutw{0.65pt}
+    \fi
+    \node[anchor=west, inner xsep=0.28cm, inner ysep=0, minimum height=\cxband cm, fill=paper,
+      text=muted, font=\small\itshape] (lab#1) at (0,{\cxband/2}) {Weekend \csname wk#1Num\endcsname};
+    \ifnum#3=1
+      \draw[brand, line width=0.5pt] (lab#1.north east) -- (lab#1.south east);
+    \fi
+    \draw[\cxout, line width=\cxoutw, line join=miter] (0,0) rectangle (\cxW,\cxH);
+    \draw[\cxout, line width=0.45pt] (0,\cxband) -- (\cxW,\cxband);
+    \ifnum#3=1
+      \node[anchor=south west, inner sep=0, fill=accent2, text=paper, font=\small\itshape,
+        minimum height=0.46cm, inner xsep=2.6mm] at (0,0) {You are here};
+    \fi
+    \node[anchor=base west, inner sep=0, text=\cxlab, font=\fontsize{14}{16}\selectfont\itshape]
+      at (0.28,{\cxband+0.54}) {\cxMuse{#1}};
+    \node[anchor=north west, inner sep=0, text width=3.6cm, align=flush left,
+      font=\fontsize{13}{14.4}\selectfont\bfseries] at (0.28,{\cxband+0.82}) {\csname wk#1Title\endcsname};
+    \node[anchor=base west, inner sep=0, font=\itshape] at (0.28,{\cxband+2.19})
+      {\csname wk#1Dates\endcsname};
+    \draw[ruling, line width=0.4pt] (0.28,{\cxband+2.4}) -- (1.1,{\cxband+2.4});
+    \node[anchor=north west, inner sep=0, text width=3.6cm, align=flush left,
+      font=\fontsize{9}{10.4}\selectfont] at (0.28,{\cxband+2.52})
+      {{\color{muted}\csname wk#1Topics\endcsname}\par\vskip 1.2mm
+       {\itshape\color{muted}Project:} \csname wk#1Project\endcsname};
+  \end{scope}}
+
+\newcommand{\currentweekend}{a}   % the weekend that carries the hatched band and the flag
+\newcommand{\threeweekends}{%
+  \centering
+  \def\cxcura{0}\def\cxcurb{0}\def\cxcurc{0}%
+  \expandafter\def\csname cxcur\currentweekend\endcsname{1}%
+  \pgfmathsetmacro{\cxxb}{\cxW+\cxG}
+  \pgfmathsetmacro{\cxxc}{2*(\cxW+\cxG)}
+  \pgfmathsetmacro{\cxxg}{2*\cxW+1.5*\cxG}
+  \begin{tikzpicture}[x=1cm, y=-1cm]
+    \path[use as bounding box] (0,0) rectangle (13,{\cxtop+\cxH});
+    \cxplate{a}{0}{\cxcura}
+    \cxplate{b}{\cxxb}{\cxcurb}
+    \cxplate{c}{\cxxc}{\cxcurc}
+    \ifcxpower
+      \node[anchor=base, inner sep=0, text=muted, font=\itshape] (pow)
+        at (\cxxg,{\cxtop-0.2}) {The Power};
+      \draw[brand, line width=0.8pt] ([shift={(-0.8mm,0.19em)}]pow.base west) --
+        ([shift={(0.8mm,0.19em)}]pow.base east);
+      \draw[muted, line width=0.5pt, dash pattern=on 2.2pt off 1.8pt]
+        (\cxxg,{\cxtop-0.1}) -- (\cxxg,{\cxtop+\cxH-0.1});
+    \fi
+  \end{tikzpicture}}

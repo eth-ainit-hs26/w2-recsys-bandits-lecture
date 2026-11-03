@@ -1,0 +1,384 @@
+% Copied on 2026-11-03 from eth-ainit-hs26/w1-lecture-material, commit 9792819, file style/ainit-preamble.tex. To pull a fix, diff against the source and recopy.
+% ===== ainit-preamble.tex: the official deck style of AI in Industry (AINIT), HS26 =====
+% "Codex plates". Chosen by Carlos on 9 October 2026 from a two round style board. Round one
+% had Codex, Atlas, Spec sheet, Sheet and Cartridge; round two had Codex violet, Codex plates,
+% Vellum atlas and Cool atlas. CLAUDE.md in this folder records the decision, the rules and the
+% traps. Read it before changing anything here.
+%
+% What it is. Every slide is a leaf of a codex: warm vellum inside a fine double ruled block,
+% pricking dots in the outer margin, the title above a double rule, a violet folio and an italic
+% slug in the lower margin. The figures speak a technical grammar in fine ink: sharp rectangles,
+% 45 degree hatching in violet lines with no solid fill, dashed outlines for whatever is refused
+% or not taken, right angled connectors, numbered balloons on hairline leaders, and a large
+% numeral in a heavy square. Violet is the rubric: the folio, key words, the chosen path, the
+% current weekend. Ochre is the second accent. Ge'ez numerals number the games, the balloons and
+% the sections, from one to five. Arabic digits take over beyond five, because five is how many
+% numerals the room learns in the Ge'ez games.
+%
+% Each deck does:
+%   \documentclass[aspectratio=169]{beamer}
+%   \input{../style/ainit-preamble}      % this file
+%   \input{../style/ainit-course}        % the facts of the course and the three weekends frame
+%   \renewcommand{\deckslug}{AI in Industry, weekend 1}
+% and is compiled with lualatex FROM the deck's own directory, three times: the leaf, the dots
+% and the balloons are placed with remember picture and settle on the third pass. Fonts are
+% EB Garamond, Garamond Math and Libertinus Mono (all in TeX Live) and Kefa III for Ethiopic
+% (a macOS system font; set \geezfontpath before this file to use another folder).
+%
+% What a deck sets:
+%   \title \subtitle \author \institute \date       the title page
+%   \renewcommand{\deckslug}{...}                   the italic slug in the footer
+%   \def\titlegeez{...}                             optional: a Ge'ez line above the cover title
+%   \plateImage \plateCredit \quoteText \quoteCitation   the cold open, shown by \coldopenframe
+% Frames 'title' and 'cold open' are [plain,noframenumbering]; a \section makes its own divider.
+%
+% The kit a deck may use:
+%   macros   \hl{key words}  \geez{...}  \geezNumeral{n}  \cxballoon  \treelink  \weblink  \qrlink
+%            \framedimgh{height}{file}  \coldopenframe  \begin{codeplate}...\end{codeplate}
+%            \begin{cxlist}[\small]...\end{cxlist}  a denser list for reference slides
+%   styles   chip, chip strong, chip dim, edge strong, edge dim, elab, elab dim, axis, vec a,
+%            vec b, vlab a, vlab b, anglearc, anglelab, gloss, hatch, hatch fine
+%   colours  paper ink muted brand accent2 good bad ruling ruledark nib
+%
+% House rules that bind every deck (the lecture-slides skill has the long form):
+%   light and projection first; no red against green (good is blue, bad is vermillion); no ALL
+%   CAPS; no dash or double hyphen in prose; nothing under a diagram; a section divider carries a
+%   numeral, "Section N", the title and a band, nothing else; only the title page names the
+%   lecturer; the only number in the chrome is the folio; no cell grids, column letters, tabs,
+%   title blocks or arcade chrome. Never name a colour fg or bg: beamer rebinds both.
+
+\usepackage{fontspec}
+\usepackage{amsmath}
+\usepackage{booktabs}
+\usepackage{unicode-math}
+\usefonttheme{professionalfonts}
+\usefonttheme{serif}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta, positioning, calc, backgrounds, fit, overlay-beamer-styles,
+                decorations.pathreplacing, patterns.meta}
+\setbeamertemplate{navigation symbols}{}
+
+% === type: EB Garamond (TeX Live), Garamond-Math for the maths, Kefa III for Ethiopic ===
+\setmainfont{EBGaramond}[
+  Extension      = .otf,
+  UprightFont    = *-Medium,
+  ItalicFont     = *-MediumItalic,
+  BoldFont       = *-SemiBold,
+  BoldItalicFont = *-SemiBoldItalic,
+  Ligatures      = TeX,
+  Numbers        = Lining,
+  Scale          = 1.08]
+\setmathfont{Garamond-Math.otf}[Scale=1.08]
+% a monospaced face for code and addresses, sized to the lowercase of the main face
+\setmonofont{LibertinusMono-Regular.otf}[Scale=MatchLowercase]
+
+% Kefa III is a macOS system font. Its light and bold instances are variable font instances.
+% Without the file, the deck still compiles: Ge'ez text then lacks glyphs and a warning says so.
+\providecommand{\geezfontpath}{/System/Library/Fonts/Supplemental/}
+\IfFileExists{\geezfontpath KefaIII.ttf}{%
+  \newfontfamily\geezfont[Path=\geezfontpath]{KefaIII.ttf}
+  % the light instance, for large numerals
+  \newfontfamily\geezlightfont[Path=\geezfontpath, RawFeature={instance=Light}]{KefaIII.ttf}
+  % the bold instance, for the numerals in balloons (the regular weight is too thin there)
+  \newfontfamily\geezboldfont[Path=\geezfontpath, RawFeature={instance=Bold}]{KefaIII.ttf}
+}{%
+  \PackageWarningNoLine{ainit-preamble}{Kefa III was not found in \geezfontpath. Ge'ez text
+    will lack glyphs. Set \string\geezfontpath\space before this file.}%
+  \newcommand{\geezfont}{}\newcommand{\geezlightfont}{}\newcommand{\geezboldfont}{}}
+\newcommand{\geez}[1]{{\geezfont #1}}
+\newcommand{\geezlight}[1]{{\geezlightfont #1}}
+
+% === colours. Never name one fg or bg (beamer rebinds both). ===
+\definecolor{paper}{HTML}{F9F4E3}     % vellum, lightness above 93 percent
+\definecolor{ink}{HTML}{241F1A}       % warm black, iron gall
+\definecolor{muted}{HTML}{5E5448}     % secondary text, darker than black!55
+\definecolor{brand}{HTML}{58409A}     % violet in the rubric role
+\definecolor{accent2}{HTML}{8F5A06}   % ochre, the second accent
+\definecolor{good}{HTML}{0072B2}      % Okabe-Ito blue: a win
+\definecolor{bad}{HTML}{D55E00}       % Okabe-Ito vermillion: a loss. No red against green, ever.
+\colorlet{ruling}{ink!40!paper}       % the ruled lines of the leaf
+\colorlet{ruledark}{ink!62!paper}     % the heavier ruled lines
+\colorlet{nib}{ink!88!paper}          % the outline ink of the figures
+
+\setbeamercolor{normal text}{fg=ink, bg=paper}
+\setbeamercolor{structure}{fg=brand}
+\setbeamercolor{alerted text}{fg=brand}
+\setbeamersize{text margin left=15mm, text margin right=15mm}
+
+% === links: violet, and a raw address keeps the mono face, so a link is marked twice ===
+% Beamer loads hyperref. The border is cleared; colorlinks stays off because it would also tint
+% the section title on the divider.
+\hypersetup{pdfborder={0 0 0}, breaklinks=true}
+\urlstyle{tt}
+\renewcommand{\UrlFont}{\ttfamily\color{brand}}
+% \weblink{https://...}{the words the room reads}: an inline link whose visible text is prose.
+\newcommand{\weblink}[2]{\href{#1}{\color{brand}#2}}
+
+% \qrlink{2.6cm}{https://...}: a vector QR on a plain white plate in a hairline mount. The code is
+% generated from the address at compile time, so it cannot disagree with the address printed
+% beside it. Always print the address next to it.
+% Two guards, both invisible in the source. nolink: qrcode makes the whole code a link by default,
+% and a link is painted in the link colour. \color{black}: qrcode draws in the current colour, so
+% on a full bleed frame where \color{white} is active the modules would vanish.
+\usepackage{qrcode}
+\newcommand{\qrlink}[2]{%
+  \tikz{\node[inner sep=4pt, fill=white, draw=ruledark, line width=0.6pt, line join=miter]
+    {\color{black}\qrcode[nolink, height=#1]{#2}};}}
+
+% \framedimgh{2.5cm}{img/photo.jpg}: a photograph or figure of the given height in a hairline mount,
+% standing 1.4 mm off the picture as the plate of the cold open does.
+\newcommand{\framedimgh}[2]{%
+  \tikz{\node[inner sep=1.4mm, draw=ruling, line width=0.4pt, line join=miter]
+    {\includegraphics[height=#1]{#2}};}}
+
+% === the overlay style used by every piece of page furniture ===
+\tikzset{cx page/.style={remember picture, overlay, shift={(current page.north west)},
+  x=1mm, y=-1mm}}
+
+% === hatching: the one fill of the figures. Violet lines at 45 degrees, no solid colour under them ===
+\tikzset{
+  hatch/.style={pattern={Lines[angle=45, distance=0.95mm, line width=0.42pt]}, pattern color=brand},
+  hatch fine/.style={pattern={Lines[angle=45, distance=0.62mm, line width=0.36pt]}, pattern color=brand},
+}
+
+% === Ge'ez numerals up to five, digits beyond ===
+% The room learns ፩ to ፭ in the Ge'ez games (the course numbers the games with them).
+\newcommand{\geezNumeral}[1]{\ifcase#1 0\or ፩\or ፪\or ፫\or ፬\or ፭\else\number#1\fi}
+\newcommand{\cxnum}[1]{\ifnum#1<6\relax{\geezboldfont\geezNumeral{#1}}\else\number#1\fi}
+\newcounter{glossn}
+
+% a box that is scaled down to fit when its natural width exceeds #1, and left alone otherwise
+\newsavebox{\cxfitbox}
+\newcommand{\cxfit}[2]{%
+  \sbox{\cxfitbox}{#2}%
+  \ifdim\wd\cxfitbox>#1\relax\resizebox{#1}{!}{\usebox{\cxfitbox}}\else\usebox{\cxfitbox}\fi}
+
+% === the footer slug: each deck renews it ===
+\providecommand{\deckslug}{AI in Industry}
+
+% === the leaf: ruled block with a fine double rule, pricking marks in the outer margin ===
+\setbeamertemplate{background}{%
+  \setcounter{glossn}{0}%
+  \begin{tikzpicture}[cx page]
+    \draw[ruling, line width=0.55pt] (8,5) rectangle (152,82);
+    \draw[ruling, line width=0.25pt] (8.9,5.9) rectangle (151.1,81.1);
+    \foreach \i in {0,...,12} {\fill[ruling] (3.2,{5+6.4167*\i}) circle (0.3);}
+  \end{tikzpicture}}
+
+% === the title sits above the first ruled line of the block; an over long title is scaled to fit ===
+\setbeamertemplate{frametitle}{%
+  \vbox to 17.5mm{\offinterlineskip
+    \vskip 8.3mm
+    \hbox to\textwidth{\vrule height 5.3mm depth 1.9mm width 0pt
+      \cxfit{\textwidth}{\color{ink}\fontsize{19}{22}\selectfont\bfseries\insertframetitle}\hfil}%
+    \vskip 0.8mm
+    \hbox to\textwidth{\color{ruledark}\vrule height 0.7pt depth 0pt width\textwidth}%
+    \vskip 0.6mm
+    \hbox to\textwidth{\color{ruling}\vrule height 0.3pt depth 0pt width\textwidth}%
+    \vss}}
+
+% === the folio in the lower margin, the italic slug beside it ===
+\setbeamertemplate{footline}{%
+  \vbox to 8.2mm{\offinterlineskip\vss
+    \hbox to\paperwidth{\hskip 15mm
+      {\color{brand}\fontsize{12}{14}\selectfont\insertframenumber}\hskip 3.4mm
+      {\color{muted}\footnotesize\itshape\deckslug}\hfil}%
+    \vskip 2.2mm}}
+
+% === the title page ===
+% \titlegeez (a Ge'ez line over the title) and \geezYear (the year, in Ge'ez numerals, after the
+% date) are optional. \geezYear comes from ainit-course.tex.
+\setbeamertemplate{title page}{%
+  \begin{tikzpicture}[cx page]
+    \node[text=brand, font=\fontsize{17}{20}\selectfont, anchor=base] at (80,20.5)
+      {\ifdefined\titlegeez\geez{\titlegeez}\fi};
+    \node[text=ink, font=\fontsize{27}{30}\selectfont\bfseries, text width=104mm, align=center,
+      anchor=north, inner sep=0] at (80,25) {\inserttitle};
+    \draw[ruledark, line width=0.8pt] (62,50.5) -- (98,50.5);
+    \draw[ruling, line width=0.3pt] (62,51.5) -- (98,51.5);
+    \node[text=muted, font=\large\itshape, anchor=north, inner sep=0] at (80,55)
+      {\insertsubtitle};
+    \node[text=ink, font=\large, anchor=base, inner sep=0] at (80,67) {\insertauthor};
+    \node[text=muted, font=\normalsize\itshape, anchor=base, inner sep=0] at (80,72.2)
+      {\insertinstitute};
+    \node[text=muted, font=\normalsize\itshape, anchor=base, inner sep=0] at (80,77.2)
+      {\insertdate\ifdefined\geezYear\hspace{3.2mm}{\upshape\color{brand}\geez{\geezYear}}\fi};
+  \end{tikzpicture}}
+
+% === the section page: a numeral in a heavy square, Section N, the title, a hatched band ===
+% The numeral is Ge'ez up to five and a digit beyond. A title that is wider than 92 mm at the
+% display size wraps over several lines at a smaller size, and the band moves down under it.
+\newif\ifcxwrap
+\setbeamertemplate{section page}{%
+  \sbox{\cxfitbox}{\fontsize{36}{40}\selectfont\bfseries\insertsectionhead}%
+  \ifdim\wd\cxfitbox>92mm\relax\cxwraptrue\else\cxwrapfalse\fi
+  \begin{tikzpicture}[cx page]
+    \draw[brand, line width=1.8pt, line join=miter] (17,30.2) rectangle (44,57.2);
+    \draw[brand, line width=0.4pt] (18.9,32.1) rectangle (42.1,55.3);
+    \ifnum\insertsectionnumber<6\relax
+      \node[text=brand, font=\fontsize{54}{54}\selectfont, anchor=center] at (30.56,43.7)
+        {\geezlight{\geezNumeral{\insertsectionnumber}}};
+    \else
+      \node[text=brand, font=\fontsize{54}{54}\selectfont, anchor=center] at (30.56,43.7)
+        {\number\insertsectionnumber};
+    \fi
+    \node[text=muted, font=\fontsize{14}{16}\selectfont\itshape, anchor=base west, inner sep=0]
+      at (53,33.2) {Section \insertsectionnumber};
+    \ifcxwrap
+      \node[text=ink, font=\fontsize{26}{29}\selectfont\bfseries, anchor=north west, inner sep=0,
+        text width=92mm, align=flush left] (cxst) at (53,36.5) {\insertsectionhead};
+      \fill[hatch] ([shift={(0,3.4)}]cxst.south west) rectangle ([shift={(92,7)}]cxst.south west);
+      \draw[brand, line width=0.5pt] ([shift={(0,3.4)}]cxst.south west) -- ++(92,0)
+        ([shift={(0,7)}]cxst.south west) -- ++(92,0);
+    \else
+      \node[text=ink, font=\fontsize{36}{40}\selectfont\bfseries, anchor=base west, inner sep=0]
+        at (53,47.5) {\insertsectionhead};
+      \fill[hatch] (53,53.6) rectangle (145,57.2);
+      \draw[brand, line width=0.5pt] (53,53.6) -- (145,53.6) (53,57.2) -- (145,57.2);
+    \fi
+  \end{tikzpicture}}
+\AtBeginSection[]{\begin{frame}[plain,noframenumbering]\usebeamertemplate{section page}\end{frame}}
+
+% === rubrication: key words in semibold violet ===
+\newcommand{\hl}[1]{\textcolor{brand}{\bfseries #1}}
+
+% === the cold open: the plate in a hairline mount, the verse, the citation ===
+% The deck sets \plateImage (a file name), \plateCredit, \quoteText (lines separated by \\, key
+% words in \hl{}) and \quoteCitation, and calls \coldopenframe inside a [plain] frame.
+\newcommand{\coldopenframe}{%
+  \begin{tikzpicture}[cx page]
+    \node[anchor=north west, inner sep=0] (plate) at (16,15)
+      {\includegraphics[height=52mm]{\plateImage}};
+    \draw[ruling, line width=0.4pt] ([shift={(-1.6,-1.6)}]plate.north west) rectangle
+      ([shift={(1.6,1.6)}]plate.south east);
+    \node[anchor=north, inner sep=0, text=muted, font=\scriptsize\itshape]
+      at ($(plate.south)+(0,3.2)$) {\plateCredit};
+    \node[anchor=west, inner sep=0, text width=86mm, align=flush left,
+      font=\fontsize{11.5}{17}\selectfont] at (62,43.5) {%
+      \quoteText\par\vskip 4mm
+      {\color{ruling}\vrule height 0.4pt depth 0pt width 22mm}\par\vskip 2mm
+      {\small\itshape\color{muted}\quoteCitation}};
+  \end{tikzpicture}}
+
+% === a numbered balloon: a hairline circle with a numeral, centre (#1,#2) in the picture's units ===
+\newcommand{\cxballoon}[4]{% x, y, radius in mm, numeral
+  \draw[brand, line width=0.7pt, fill=paper] (#1,#2) circle [radius=#3mm];
+  \node[text=brand, inner sep=0, font=\fontsize{14}{14}\selectfont] at (#1,#2) {\cxnum{#4}};}
+
+% \treelink{edge style}{label style}{from}{to}{label}: one right angled branch of a tree.
+% It leaves the east anchor of the parent, runs level to a junction at two fifths of the gap,
+% turns once to the height of the child and arrives level at its west anchor. The first branch
+% drawn from a parent carries the shared stretch, so declare the chosen branch first: later
+% branches from the same parent begin at the junction, and a dashed branch never overprints the
+% heavier path.
+\newcommand{\treelink}[5]{%
+  \ifcsname cx@trunk@#3\endcsname
+    \draw[#1] let \p1=(#3.east), \p2=(#4.west), \p3=($(\p1)!0.4!(\p2)$),
+                  \p4=($(\x3,\y2)!0.5!(\p2)$) in
+      (\p4) node[#2, above=0.4mm] {#5}
+      (\x3,\y1) -- (\x3,\y2) -- (\p2);
+  \else
+    \expandafter\def\csname cx@trunk@#3\endcsname{}%
+    \draw[#1] let \p1=(#3.east), \p2=(#4.west), \p3=($(\p1)!0.4!(\p2)$),
+                  \p4=($(\x3,\y2)!0.5!(\p2)$) in
+      (\p4) node[#2, above=0.4mm] {#5}
+      (\p1) -- (\x3,\y1) -- (\x3,\y2) -- (\p2);
+  \fi}
+
+% === list markers: a small square hatched in violet ===
+\newcommand{\cxhatchsq}[1]{%
+  \raisebox{0.12ex}{\tikz[baseline=0pt]{%
+    \fill[hatch fine] (0,0) rectangle (#1,#1);
+    \draw[brand, line width=0.55pt, line join=miter] (0,0) rectangle (#1,#1);}}}
+\setbeamertemplate{itemize item}{\cxhatchsq{3mm}}
+\setbeamertemplate{itemize subitem}{\cxhatchsq{2.1mm}}
+\setbeamertemplate{enumerate item}{%
+  \tikz[baseline=(enumn.base)]\node[draw=brand, line width=0.7pt, circle, inner sep=0.5pt,
+    minimum size=5.4mm, font=\small, text=brand, fill=paper] (enumn) {\cxnum{\insertenumlabel}};}
+\setbeamertemplate{enumerate subitem}{\insertenumlabel.}
+\setbeamerfont{itemize/enumerate body}{size=\Large}
+\setbeamerfont{itemize/enumerate subbody}{size=\large}
+\setbeamertemplate{itemize/enumerate body begin}{\vspace*{0mm}}
+% beamer resets the list parameters inside \list, so the spacing is set in the list defaults
+\makeatletter
+\def\@listi{\leftmargin\leftmargini
+            \topsep 0\p@ \parsep 0\p@
+            \itemsep 6mm \@plus1mm \@minus1mm}
+\let\@listI\@listi
+\def\@listii{\leftmargin\leftmarginii
+             \topsep 0\p@ \parsep 0\p@
+             \itemsep 2mm \@plus0.5mm \@minus0.5mm}
+\makeatother
+% a denser list for reference slides (administration, rosters, small print): a smaller marker and
+% the text size #1, \small by default. Set \itemsep right after \begin{cxlist} as with itemize.
+\newenvironment{cxlist}[1][\small]{%
+  \begingroup
+  \setbeamertemplate{itemize item}{\cxhatchsq{2.2mm}}%
+  \setbeamerfont{itemize/enumerate body}{size=#1}%
+  \begin{itemize}}{\end{itemize}\endgroup}
+
+% === the code plate: mono text in a hairline box under a hatched band ===
+% Use it in a [fragile] frame. It is built for lines up to about 60 characters: a longer line
+% runs past the box, so shorten the code or the prompt instead of shrinking the type.
+\usepackage{listings}
+\usepackage[skins,listings]{tcolorbox}
+\lstdefinestyle{ainit}{
+  basicstyle=\ttfamily\normalsize, keywordstyle=\color{brand}\bfseries,
+  commentstyle=\color{muted}\itshape, stringstyle=\color{accent2},
+  showstringspaces=false, columns=fullflexible, keepspaces=true, breaklines=false,
+  aboveskip=0pt, belowskip=0pt, language=Python}
+\newtcblisting{codeplate}[1][]{%
+  enhanced, listing only, listing options={style=ainit},
+  colback=paper, colframe=ruledark, boxrule=0.6pt, sharp corners,
+  left=4mm, right=4mm, top=5.6mm, bottom=2.2mm, before skip=1mm, after skip=1mm,
+  overlay unbroken={%
+    \fill[hatch] ([yshift=-2.9mm]frame.north west) rectangle (frame.north east);
+    \draw[brand, line width=0.5pt]
+      ([yshift=-2.9mm]frame.north west) -- ([yshift=-2.9mm]frame.north east);},
+  #1}
+
+% === the TikZ styles of the figures ===
+\tikzset{
+  >={Triangle[length=2.5mm, width=1.9mm]},
+  chip/.style={draw=nib, line width=0.7pt, line join=miter, minimum width=1.85cm,
+    minimum height=0.82cm, inner sep=3pt, text=ink, fill=paper, font=\large},
+  chip strong/.style={chip, draw=brand, line width=1.0pt,
+    path picture={%
+      \fill[hatch, even odd rule]
+        (path picture bounding box.south west) rectangle (path picture bounding box.north east)
+        ([shift={(1.25mm,1.25mm)}]path picture bounding box.south west) rectangle
+        ([shift={(-1.25mm,-1.25mm)}]path picture bounding box.north east);
+      \draw[brand, line width=0.35pt]
+        ([shift={(1.25mm,1.25mm)}]path picture bounding box.south west) rectangle
+        ([shift={(-1.25mm,-1.25mm)}]path picture bounding box.north east);}},
+  chip dim/.style={chip, draw=muted, line width=0.6pt, dash pattern=on 2.4pt off 1.8pt,
+    text=muted},
+  edge strong/.style={draw=brand, line width=1.3pt, line join=miter,
+    -{Triangle[length=2.9mm, width=2.2mm]}},
+  edge dim/.style={draw=muted, line width=0.6pt, line join=miter, dash pattern=on 3pt off 2.2pt,
+    -{Triangle[length=2.5mm, width=1.8mm]}},
+  elab/.style={font=\small\itshape, text=brand, fill=paper, inner sep=1.5pt},
+  elab dim/.style={font=\small\itshape, text=muted, fill=paper, inner sep=1.5pt},
+  axis/.style={draw=muted, line width=0.6pt, -{Triangle[length=2.3mm, width=1.6mm]}},
+  vec a/.style={draw=brand, line width=1.4pt, -{Triangle[length=3.1mm, width=2.3mm]}},
+  vec b/.style={draw=accent2, line width=1.4pt, -{Triangle[length=3.1mm, width=2.3mm]}},
+  vlab a/.style={text=brand, font=\normalsize},
+  vlab b/.style={text=accent2, font=\normalsize},
+  anglearc/.style={draw=ink, line width=0.6pt,
+    {Triangle[length=2mm, width=1.4mm]}-{Triangle[length=2mm, width=1.4mm]}},
+  anglelab/.style={text=ink, font=\normalsize},
+  % a note: a numbered balloon on a hairline leader, with its text. The balloons number
+  % themselves 1, 2, 3 on each page.
+  gloss/.style={font=\small\itshape, text=muted, text width=3.9cm, align=flush left,
+    inner xsep=6.9mm, inner ysep=0.6mm,
+    execute at begin node={\stepcounter{glossn}},
+    path picture={%
+      \draw[brand, line width=0.5pt]
+        ($(path picture bounding box.north west)+(2.9mm,-5.4mm)$) --
+        ($(path picture bounding box.south west)+(2.9mm,0.3mm)$);
+      \draw[brand, line width=0.7pt, fill=paper]
+        ($(path picture bounding box.north west)+(2.9mm,-2.9mm)$) circle (2.5mm);
+      \pgftext[at={\pgfpointadd{\pgfpointanchor{path picture bounding box}{north west}}%
+        {\pgfpoint{2.9mm}{-2.9mm}}}]
+        {\color{brand}\fontsize{10.5}{10.5}\selectfont\upshape\cxnum{\value{glossn}}}}},
+}

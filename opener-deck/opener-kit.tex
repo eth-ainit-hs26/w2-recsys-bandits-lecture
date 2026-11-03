@@ -1,0 +1,71 @@
+% ===== opener-kit.tex: the drawings of the weekend 2 opener, Codex plates style =====
+% Load after ../style/ainit-preamble. What it adds:
+%   \sheetgrid \sheetband   a table drawn as a grid of cells under a hatched header band.
+%                           Copied on 2026-11-03 from eth-ainit-hs26/w1-lecture-material,
+%                           llm-deck/llm-kit.tex (commit 9792819), with the lines drawn by "to".
+%                           Its offsets (0.15, 0.28, 0.41) are in the units of a picture in cm.
+%   \adbar     a hatched horizontal bar with its label and its value (a picture in mm)
+%   \sharebox  a share: a hairline box that stands for 100 percent, hatched up to the share
+%   styles     src (a source line), measure (what a figure counts), big (a number in the rubric)
+
+\tikzset{
+  sheet box/.style={draw=nib, line width=0.7pt, line join=miter},
+  sheet rule/.style={draw=ruling, line width=0.4pt},
+  sheet head/.style={draw=ruledark, line width=0.8pt},
+  pcell/.style={inner sep=0, font=\small, text=ink},
+  phead/.style={inner sep=0, font=\small\bfseries, text=ink},
+  bar plain/.style={draw=nib, line width=0.7pt, line join=miter, fill=paper},
+  src/.style={font=\scriptsize\itshape, text=muted, inner sep=0, align=flush left},
+  measure/.style={font=\small\itshape, text=muted, inner sep=0, align=flush left},
+  big/.style={font=\Large\bfseries, text=brand, inner sep=0},
+  head/.style={font=\large\bfseries, text=ink, inner sep=0},
+  dot/.style={fill=muted, draw=none},
+}
+
+% \sheetgrid[overlay]{left}{top}{first column}{column}{columns}{rows}{row height}
+% top is the baseline of the header words. The header row stands from 0.15 below it to 0.28 above
+% it, and row i is centred at top-0.15-rowheight*(i+0.5).
+\newcommand{\sheetgrid}[8][1-]{%
+  \pgfmathsetmacro{\shRight}{#2+#4+#6*#5}%
+  \pgfmathsetmacro{\shTop}{#3+0.28}%
+  \pgfmathsetmacro{\shHead}{#3-0.15}%
+  \pgfmathsetmacro{\shBottom}{#3-0.15-#8*#7}%
+  \pgfmathsetmacro{\shDiv}{#2+#4}%
+  \ifnum#6>1\relax
+    \pgfmathtruncatemacro{\shNc}{#6-1}%
+    \foreach \shk in {1,...,\shNc} {
+      \draw[sheet rule, visible on=<#1>] ({\shDiv+\shk*#5},\shTop) to ({\shDiv+\shk*#5},\shBottom);
+    }
+  \fi
+  \ifnum#7>1\relax
+    \pgfmathtruncatemacro{\shNr}{#7-1}%
+    \foreach \shi in {1,...,\shNr} {
+      \draw[sheet rule, visible on=<#1>] (#2,{\shHead-#8*\shi}) to (\shRight,{\shHead-#8*\shi});
+    }
+  \fi
+  \draw[sheet head, visible on=<#1>] (#2,\shHead) to (\shRight,\shHead);
+  \draw[sheet head, visible on=<#1>] (\shDiv,\shTop) to (\shDiv,\shBottom);
+  \draw[sheet box, visible on=<#1>] (#2,\shTop) rectangle (\shRight,\shBottom);
+}
+% \sheetband[overlay]{x0}{x1}{top}{hatch style}{colour}: the hatched band over the header
+\newcommand{\sheetband}[6][1-]{%
+  \fill[#5, visible on=<#1>] (#2,{#4+0.28}) rectangle (#3,{#4+0.41});
+  \draw[#6, line width=0.4pt, visible on=<#1>] (#2,{#4+0.28}) rectangle (#3,{#4+0.41});}
+
+% \adbar{overlay}{y}{length}{label}{value}: in a picture whose unit is 1 mm. The label stands
+% right aligned before x = 24, the bar starts at x = 27 and is 6.5 mm tall, the value follows it.
+\newcommand{\adbar}[5]{%
+  \node[anchor=east, inner sep=0, font=\large, visible on=<#1>] at (24,#2) {#4};
+  \fill[hatch, visible on=<#1>] (27,{#2-3.25}) rectangle ({27+#3},{#2+3.25});
+  \draw[brand, line width=0.7pt, line join=miter, visible on=<#1>]
+    (27,{#2-3.25}) rectangle ({27+#3},{#2+3.25});
+  \node[big, anchor=west, visible on=<#1>] at ({29.5+#3},#2) {#5};}
+
+% \sharebox{overlay}{x}{y}{width}{height}{percent}: x is the left edge, y the centre line. The
+% hairline box is the whole (100 percent); the violet hatched part is the share.
+\newcommand{\sharebox}[6]{%
+  \fill[hatch, visible on=<#1>] (#2,{#3-#5/2}) rectangle ({#2+#4*#6/100},{#3+#5/2});
+  \draw[nib, line width=0.6pt, line join=miter, visible on=<#1>]
+    (#2,{#3-#5/2}) rectangle ({#2+#4},{#3+#5/2});
+  \draw[brand, line width=0.8pt, line join=miter, visible on=<#1>]
+    (#2,{#3-#5/2}) rectangle ({#2+#4*#6/100},{#3+#5/2});}
