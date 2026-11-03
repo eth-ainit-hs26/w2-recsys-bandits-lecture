@@ -1,13 +1,16 @@
 % ===== opener.tex: the opener of weekend 2 (13 and 14 November 2026), six frames =====
 % Why recommendation, advertising and customer profiles matter, for an audience of managers.
 % Asked for by Carlos on 2026-11-03 ("build it in 6 slides"), from the opener ideas in his notes.
-% Order: the money, how much a machine chooses, compared to what, a toy of six customers, the field
-% studies behind the toy, and the hand-over to the weekend's games.
+% Order: the money, how much a machine chooses, compared to what, then three measurements of
+% 2026: what a better model adds at Meta, a shopping assistant at Amazon (and the question again),
+% and a customer profile learned from raw transactions at Nubank, which hands over to the weekend.
+% Frames 4 to 6 replaced an invented table, a study of 2018 and a sketch on 2026-11-03, when Carlos
+% asked for measured numbers like those of frames 1 to 3, recent ones preferred.
 %
 % No number is typed here: numbers.tex is written by tools/opener_numbers.py, which cites each
-% source and asserts the arithmetic. Frame 4 is invented and says so. A "Say" comment above each
-% frame is the talk track. README.md has the sources, the choices made without asking, and the
-% checks. Build from this folder:
+% source and asserts the arithmetic. Every number is measured and reported by its source. A "Say"
+% comment above each frame is the talk track. README.md has the sources, the choices made without
+% asking, and the checks. Build from this folder:
 %   python3 tools/opener_numbers.py
 %   ../style/tools/build.sh opener.tex
 \documentclass[aspectratio=169]{beamer}
@@ -121,116 +124,117 @@
   \end{tikzpicture}
 \end{frame}
 
-% ===== Frame 4. Six invented customers =====
-% Say: An invented example. You have one retention offer and time for two calls. A churn model lists
-% your customers by their chance of leaving, and you would call the first two, Lea and Marco. Now
-% suppose you knew what the call does to each of them. The call changes nothing for Lea, raises
-% Marco's chance of leaving from 70 to 75 percent, and lowers Nina's and Jonas's by 20 and 15 points.
-% Whom should you have called?
-\begin{frame}{Six customers, two calls: whom do you call?}
-  \begin{tikzpicture}[x=1cm, y=1cm]
-    \path[use as bounding box] (0,0.1) rectangle (13,-5.4);
-    \node[src, anchor=south west] at (0,-0.3) {Invented customers};
-    \sheetband{0}{11.3}{-0.9}{hatch}{brand}
-    \sheetgrid{0}{-0.9}{2.3}{3.0}{3}{6}{0.55}
-    \node[phead, anchor=base] at (1.15,-0.9) {Customer};
-    \node[phead, anchor=base] at (3.8,-0.9) {Chance of leaving};
-    \node[phead, anchor=base] at (6.8,-0.9) {If we call};
-    \node[phead, anchor=base] at (9.8,-0.9) {Change};
-    \foreach \i in {1,...,6} {
-      \pgfmathsetmacro{\yy}{-1.05-0.55*(\i-0.5)}
-      \node[pcell, font=\normalsize] at (1.15,\yy) {\cuName{\i}};
-      \node[pcell, font=\normalsize] at (3.8,\yy) {\cuRisk{\i}\%};
-      \node[pcell, font=\normalsize, visible on=<3->] at (6.8,\yy) {\cuCall{\i}\%};
-      \node[pcell, font=\normalsize, visible on=<3->] at (9.8,\yy) {\cuChange{\i}};
-    }
-    \draw[muted, line width=0.9pt, dash pattern=on 3pt off 2.2pt, visible on=<2->]
-      (-0.1,-1.09) rectangle (11.4,-2.11);
-    \node[anchor=west, inner sep=0, font=\small, text=muted, text width=1.45cm, align=flush left,
-      visible on=<2->] at (11.55,-1.6) {Called by risk};
-    \draw[brand, line width=1.3pt, line join=miter, visible on=<4->]
-      (-0.1,-2.19) rectangle (11.4,-3.21);
-    \node[anchor=west, inner sep=0, font=\small, text=brand, text width=1.45cm, align=flush left,
-      visible on=<4->] at (11.55,-2.7) {Called by response};
-    \node[gloss, anchor=north west, text width=11.2cm, visible on=<4->] at (0,-4.55)
-      {By risk, nothing changes for Lea and Marco becomes more likely to cancel.};
+% ===== Frame 4. What a better model adds: Meta, 2026 =====
+% Say: The newest numbers, from Meta's earnings call of 21 October 2026, about July to September.
+% Its finance chief Susan Li listed what each change to a model added. A conversion is what the
+% advertiser wants from an ad: a purchase, an install, a sign-up. The large ranking model GEM,
+% extended to more places, raised conversions by 9.6 percent for ads for apps, and by 1.7 percent
+% for ads whose conversion happens on the advertiser's own website. A new generative way of picking
+% the candidate ads raised them by nearly 2 percent on Facebook Feed, in the groups it targeted.
+% Improvements to the retrieval model Andromeda, a more complex model among them, added 1.4 percent
+% on Facebook. Note the sizes: a few percent per change. Advertisers notice: the average price of an
+% ad rose 14 percent in a year, which Meta puts down to better ad performance and a better economy.
+% Meta's ad revenue for those three months was 63.1 billion dollars, 26 percent more than a year
+% earlier. These are Meta's own measurements, and it publishes no method.
+\begin{frame}{What a better model added at Meta in 2026}
+  \begin{tikzpicture}[x=1mm, y=1mm]
+    \path[use as bounding box] (0,1) rectangle (130,-54);
+    \node[measure, font=\normalsize\itshape, anchor=north west] at (0,0)
+      {More conversions after one change to a model, July to September 2026};
+    \node[src, anchor=north west] at (0,-5.8)
+      {A conversion is what the advertiser wants from an ad: a purchase, an install, a sign-up.};
+    \gainbar{2-}{-14}{43}{\barMetaApp}{Ads for apps}
+      {+\metaApp\%\gainafter{ranking model GEM}}
+    \gainbar{2-}{-21.5}{43}{\barMetaFeed}{Facebook Feed ads}
+      {{\large\mdseries\itshape nearly} +\metaFeed\%\gainafter{generative retrieval, targeted groups}}
+    \gainbar{2-}{-29}{43}{\barMetaWebsite}{Ads for websites}
+      {+\metaWebsite\%\gainafter{ranking model GEM}}
+    \gainbar{2-}{-36.5}{43}{\barMetaAndromeda}{Facebook ads}
+      {+\metaAndromeda\%\gainafter{retrieval model Andromeda}}
+    \draw[ruledark, line width=0.6pt, visible on=<3->] (0,-40.5) to (130,-40.5);
+    \node[anchor=west, inner sep=0, font=\large, visible on=<3->] at (0,-45.2)
+      {Price per ad, in a year: \textcolor{brand}{\Large\bfseries +\metaPrice\%}};
+    \node[gloss, anchor=north west, text width=5.4cm, visible on=<3->] at (62,-41.6)
+      {Meta: driven by better ad performance and a better economy.};
+    \node[src, anchor=north west, text width=130mm] at (0,-50.6)
+      {Meta, earnings call of 21 October 2026: Susan Li, finance chief. No method given.};
   \end{tikzpicture}
 \end{frame}
 
-% ===== Frame 5. The field studies behind the toy =====
-% Say: The toy has a real counterpart. Eva Ascarza analysed two field experiments: at a membership
-% organization in North America, which added a gift to its renewal communication in an A/B test,
-% and at a wireless telecom firm in the Middle East, which texted an offer of extra credit for
-% recharging. In simulations on both sets of data, aiming the offer at the customers it moves
-% lowered churn by 4.1 to 8.7 percentage points more than aiming it at the customers most likely to
-% leave. In some cases, aiming at the customers most likely to leave raised churn. A customer profile
-% has to say what moves a customer, as well as what the customer is likely to do.
-% Note for the lecturer: the 4.1 to 8.7 points are the American Marketing Association's summary,
-% from the award it gave the paper in 2023. The paper's abstract gives no number, and an earlier
-% talk abstract of hers said "up to seven percentage points". The paper body was not read.
-\begin{frame}{Call the customers the offer can move}
-  \begin{tikzpicture}[x=1cm, y=1cm]
-    \path[use as bounding box] (0,0.1) rectangle (13,-5.4);
-    \node[chip, align=flush center, text width=2.5cm, font=\normalsize] (offer) at (1.35,-2.2)
-      {One retention offer};
-    \node[chip strong, align=flush center, text width=3.2cm, font=\normalsize, inner xsep=2.6mm,
-      inner ysep=2.4mm] (move) at (5.6,-1.0) {Aim at the customers it moves};
-    \node[chip dim, align=flush center, text width=3.2cm, font=\normalsize, inner xsep=2.6mm,
-      inner ysep=2.4mm] (risk) at (5.6,-3.4) {Aim at the customers most likely to leave};
-    \treelink{edge strong}{elab}{offer}{move}{}
-    \treelink{edge dim}{elab dim}{offer}{risk}{}
-    \node[anchor=west, text width=4.6cm, align=flush left, inner sep=0, text=muted,
-      visible on=<3->] at (8.1,-3.4) {In some cases, aiming at them raised churn};
-    \node[anchor=west, text width=4.6cm, align=flush left, inner sep=0, visible on=<2->]
-      at (8.1,-1.0) {\textcolor{brand}{\Large\bfseries \ascLow{} to \ascHigh{}} percentage
-      points less churn than aiming by risk};
-    \node[src, anchor=north west, text width=13cm] at (0,-4.65)
-      {Eva Ascarza, Journal of Marketing Research, 2018: two field experiments, at a membership
-       organization in North America and a telecom firm in the Middle East. The numbers as summarized
-       by the American Marketing Association, 2023; the comparison was simulated on the field data.};
+% ===== Frame 5. A shopping assistant, and the question again: Amazon, 2026 =====
+% Say: Amazon, eight days later. On its call of 29 October 2026 its chief executive Andy Jassy said
+% that over 400 million customers used Alexa for Shopping, its agentic shopping assistant, in the
+% last 12 months, with interactions up 570 percent in a year. It researches products, compares
+% options, checks a year of price history and suggests gifts. Then the kind of number a vendor puts
+% on a slide: US customers who use it spend 50 percent more per order than those who do not. Ask
+% the question from before: compared to what? The customers chose to use the assistant, and people
+% who shop a lot, or buy expensive things, may be the ones who use it. Only an experiment like Kumar
+% and Hosanagar's could tell how much of the 50 percent the assistant caused.
+\begin{frame}{\amzUsers{} million customers used a shopping assistant}
+  \begin{tikzpicture}[x=1mm, y=1mm]
+    \path[use as bounding box] (0,1) rectangle (130,-54);
+    \node[head, anchor=north west] at (0,0) {Alexa for Shopping, Amazon};
+    \node[measure, anchor=north west, text width=55mm] at (0,-7)
+      {Users in the last 12 months};
+    \node[big, anchor=north west] at (0,-12.5) {over \amzUsers{} million};
+    \node[measure, anchor=north west, text width=55mm] at (0,-22.5)
+      {Interactions, change in a year};
+    \node[big, anchor=north west] at (0,-28) {+\amzInteractions\%};
+    \node[measure, anchor=north west, text width=55mm] at (0,-37.5)
+      {It compares products, checks a year of prices and suggests gifts.};
+    \draw[ruling, line width=0.4pt, visible on=<2->] (59,1) to (59,-46);
+    \node[head, anchor=north west, visible on=<2->] at (63,0) {Spending per order};
+    \node[measure, anchor=north west, text width=67mm, visible on=<2->] at (63,-7)
+      {US customers: users against non-users};
+    \node[anchor=east, inner sep=0, visible on=<2->] at (81,-17.5) {Non-users};
+    \draw[bar plain, visible on=<2->] (83,-20) rectangle ({83+\barAmzWithout},-15);
+    \node[anchor=west, inner sep=0, font=\large, visible on=<2->]
+      at ({85.5+\barAmzWithout},-17.5) {\amzWithout};
+    \node[anchor=east, inner sep=0, visible on=<2->] at (81,-24.5) {Users};
+    \fill[hatch, visible on=<2->] (83,-27) rectangle ({83+\barAmzWith},-22);
+    \draw[brand, line width=0.7pt, line join=miter, visible on=<2->]
+      (83,-27) rectangle ({83+\barAmzWith},-22);
+    \node[anchor=west, inner sep=0, font=\large, visible on=<2->]
+      at ({85.5+\barAmzWith},-24.5) {\amzWith};
+    \node[anchor=west, inner sep=0, visible on=<2->] at (83,-32)
+      {\textcolor{brand}{\Large\bfseries +\amzPerOrder\%} \large per order};
+    \node[gloss, anchor=north west, text width=5.2cm, visible on=<3->] at (63,-37)
+      {Compared to what? The users chose the assistant themselves.};
+    \node[src, anchor=north west, text width=130mm] at (0,-49.5)
+      {Amazon, earnings call of 29 October 2026: Andy Jassy, chief executive. No method given.};
   \end{tikzpicture}
 \end{frame}
 
-% ===== Frame 6. The hand-over =====
-% Say: A village shopkeeper knew her regulars: what each one buys and what each one would like next.
-% Migros and Coop have millions of cardholders, and nobody can know them by heart. A machine has to
-% learn it. It places every customer as a point, and customers who buy alike end up close together.
-% A new customer is read from the neighbours. How the machine finds those places is this weekend's
-% subject, and we start with a video store.
-\begin{frame}{What the shopkeeper knew, a machine must learn}
-  \begin{tikzpicture}[x=1cm, y=1cm]
-    \path[use as bounding box] (0,0.1) rectangle (13,-5.4);
-    \node[head, anchor=north west] at (0,0) {The village shop};
-    \node[measure, anchor=north west] at (0,-0.6) {She knows every regular};
-    \node[chip strong, font=\normalsize, inner xsep=2.6mm, inner ysep=2.2mm] (keeper)
-      at (1.16,-2.75) {Shopkeeper};
-    \foreach \i/\yy in {1/-1.55, 2/-2.35, 3/-3.15, 4/-3.95} {
-      \node[chip, font=\small, minimum width=1.3cm, minimum height=0.6cm] (r\i) at (3.9,\yy)
-        {\cuName{\i}};
-    }
-    \treelink{edge strong}{elab}{keeper}{r1}{}
-    \treelink{edge strong}{elab}{keeper}{r2}{}
-    \treelink{edge strong}{elab}{keeper}{r3}{}
-    \treelink{edge strong}{elab}{keeper}{r4}{}
-    \node[head, anchor=north west, visible on=<2->] at (5.1,0) {Millions of regulars};
-    \node[src, anchor=north west, visible on=<2->] at (5.1,-0.6)
-      {Loyalty cards such as Migros Cumulus and Coop Supercard};
-    \draw[axis, visible on=<2->] (5.1,-4.75) to (8.2,-4.75);
-    \draw[axis, visible on=<2->] (5.1,-4.75) to (5.1,-1.15);
-    \foreach \x/\y in {5.65/-1.7, 5.9/-1.55, 6.15/-1.75, 5.8/-1.95, 6.05/-2.05, 5.55/-2.0, 6.3/-1.95,
-                       7.15/-2.2, 7.45/-2.05, 7.7/-2.3, 7.3/-2.45, 7.55/-2.6, 7.05/-2.5, 7.8/-2.55,
-                       6.2/-3.9, 6.5/-3.8, 6.8/-4.0, 6.35/-4.15, 6.65/-4.3, 6.1/-4.2, 6.9/-4.25} {
-      \fill[dot, visible on=<2->] (\x,\y) circle (0.055);
-    }
-    \node[src, anchor=north west, visible on=<2->] at (5.1,-4.85) {Invented points};
-    \draw[brand, line width=0.5pt, visible on=<3->] (7.43,-2.55) circle (0.68);
-    \draw[brand, line width=1.1pt, fill=paper, visible on=<3->] (7.45,-3.0) circle (0.1);
-    \node[anchor=north, inner sep=0, font=\scriptsize\itshape, text=brand, visible on=<3->]
-      at (7.35,-3.38) {a new customer};
-    \node[gloss, anchor=north west, text width=3.45cm, visible on=<3->] at (8.3,-1.0)
-      {Customers who buy alike sit close together.};
-    \node[gloss, anchor=north west, text width=3.45cm, visible on=<4->] at (8.3,-2.6)
-      {This weekend: how a machine learns where each customer sits.};
+% ===== Frame 6. A customer profile learned from the raw transactions: Nubank, 2026 =====
+% Say: Last, the customer profile itself. Nubank, a digital bank, describes how it reads its
+% customers in a paper presented at a KDD workshop in 2026, whose latest version is of October 2026.
+% Its credit model used 291 prepared features, such as the average spend over a period or a credit
+% bureau score. Its new model reads the raw transactions, over 100 billion of them from over 100
+% million customers, and learns a profile of each customer by itself. Added to the existing models,
+% the learned profile improved every task the bank reports, each on its own score: income by 7.54
+% percent, spending by 6.85, lending risk by 2.23, and credit default by 1.25 percent (by 1.81 in a
+% second market). The credit model is in use for the credit decisions of over 100 million customers,
+% and the bank says its gain matched a typical year of improvements. No new data went in: only a
+% better reading of the transactions the bank already had. These are the bank's own figures,
+% measured on its past data. How a machine learns such a profile is this weekend's subject, and we
+% start with a video store.
+\begin{frame}{A profile learned from \nuTx{} billion transactions}
+  \begin{tikzpicture}[x=1mm, y=1mm]
+    \path[use as bounding box] (0,1) rectangle (130,-54);
+    \node[measure, font=\normalsize\itshape, anchor=north west] at (0,0)
+      {Nubank: gain from adding the learned profile, each task on its own score};
+    \gainbar{2-}{-12}{43}{\barNuIncome}{Income}{+\nuIncome\%}
+    \gainbar{2-}{-20}{43}{\barNuSpend}{Spending}{+\nuSpend\%}
+    \gainbar{2-}{-28}{43}{\barNuLending}{Lending risk}{+\nuLending\%}
+    \gainbar{2-}{-36}{43}{\barNuCreditOne}{Credit default}{+\nuCreditOne\%\gainafter{in use}}
+    \node[gloss, anchor=north west, text width=3.2cm, visible on=<3->] at (84,-23)
+      {For over \nuCustomers~million customers: a typical year of gains in one step.};
+    \draw[ruledark, line width=0.6pt, visible on=<4->] (0,-42.5) to (130,-42.5);
+    \node[anchor=west, inner sep=0, font=\large, visible on=<4->] at (0,-46.8)
+      {No new data: only a better reading of the bank's own transactions.};
+    \node[src, anchor=north west, text width=130mm] at (0,-50.9)
+      {Braithwaite and others (Nubank), KDD 2026 Workshop on Machine Learning in Finance, arXiv
+       2507.23267.};
   \end{tikzpicture}
 \end{frame}
 

@@ -162,8 +162,11 @@ publishes it with the rest of the repository, so a push makes it public.
 
 `opener-deck/` holds the opener of weekend 2: six frames, for managers, on why recommendation,
 advertising and customer profiles matter (the advertising money of 2025, how much of what people watch
-and buy a machine suggested, "compared to what?", an invented table of six customers, Ascarza's
-retention study, and the hand-over to the weekend's video store game). It is a LaTeX deck in Codex
+and buy a machine suggested, "compared to what?", then three measurements published in October 2026:
+what better models added to conversions at Meta, Amazon's shopping assistant and its 50% more per
+order, and the customer profile Nubank learns from 100 billion transactions, which hands over to the
+weekend). Frames 4 to 6 were redone the same day at Carlos's request for measured, recent numbers;
+the first version is commit `b165aeb`. It is a LaTeX deck in Codex
 plates, the official HS26 style, so it does NOT use the FS26 theme of `slides/` and `theme/`; its style
 is the copy in `style/`, whose CLAUDE.md says where the canonical copy lives. Every number comes from
 `opener-deck/tools/opener_numbers.py`. Build with `../style/tools/build.sh opener.tex` from inside

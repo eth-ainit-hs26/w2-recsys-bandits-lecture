@@ -5,7 +5,12 @@ managers. They show why recommendation, advertising and customer profiles matter
 games and lectures on recommender systems and bandits. Built on 2026-11-03 at Carlos's request ("Build
 it in 6 slides, please"), from the opener ideas in his research notes, in the Codex plates style.
 
-- `opener.pdf`: the deck, 6 frames over 21 pages (the clicks).
+The same day he asked for frames 4 to 6 to be redone like frames 1 to 3: "I want statistics, concrete
+hard numbers measured", recent ones preferred. They now carry three measurements published in
+October 2026 (Meta, Amazon, Nubank). The first frames 4 to 6 (an invented table of six customers,
+Ascarza's retention study of 2018, a village shopkeeper) are in git history at commit `b165aeb`.
+
+- `opener.pdf`: the deck, 6 frames over 20 pages (the clicks).
 - `opener-handout.pdf`: one page per frame, its last click.
 
 ## The six frames
@@ -15,11 +20,12 @@ it in 6 slides, please"), from the opener ideas in his research notes, in the Co
 | 1 | Three companies, 1.5 billion dollars of ads a day | 3 | Advertising revenue in 2025: Google 294.7, Meta 196.2, Amazon 68.6 billion dollars; together 559.5 billion, about 1.5 billion a day. Each ad is a guess about one person |
 | 2 | A machine suggested much of what we watch and buy | 4 | A question to the room (what share of your YouTube hours did you go looking for?), then YouTube over 70% of watch time, Netflix 75% of viewing, Amazon 35% of purchases |
 | 3 | The question to ask: compared to what? | 3 | The 35% share counts purchases that would have happened anyway. A randomized experiment: 11% more sales of a product and its recommended substitutes. Published field tests more often report 1% to 5% more revenue |
-| 4 | Six customers, two calls: whom do you call? | 4 | Invented. Called by risk, the calls change nothing for Lea and remind Marco to cancel; called by response, Nina and Jonas stay |
-| 5 | Call the customers the offer can move | 3 | Ascarza: aiming the offer at the customers it moves gave 4.1 to 8.7 percentage points less churn than aiming by risk; aiming by risk sometimes raised churn |
-| 6 | What the shopkeeper knew, a machine must learn | 4 | The village shopkeeper knows every regular; with millions of loyalty cards a machine places customers as points, and a new customer is read from the neighbours. The hand-over to the weekend |
+| 4 | What a better model added at Meta in 2026 | 3 | July to September 2026, more conversions after one change to a model: ads for apps +9.6%, Facebook Feed ads nearly +2%, ads for websites +1.7%, Facebook ads +1.4%. The price per ad rose 14% in a year, which Meta puts down to better ad performance and a better economy |
+| 5 | 400 million customers used a shopping assistant | 3 | Alexa for Shopping: over 400 million users in 12 months, interactions +570% in a year. US users spend 50% more per order than non-users. Compared to what? The users chose the assistant themselves |
+| 6 | A profile learned from 100 billion transactions | 4 | Nubank adds a profile learned from raw transactions to its models: income +7.54%, spending +6.85%, lending risk +2.23%, credit default +1.25% (in use for over 100 million customers, a typical year of gains in one step). No new data: only a better reading of the bank's own transactions |
 
-The talk track is the `% Say:` comment above each frame in `opener.tex`. Frame 6 hands over to the
+The talk track is the `% Say:` comment above each frame in `opener.tex`. Frame 3's question comes back
+on frame 5, and frame 6 hands over to the weekend: how a machine learns a profile, starting with the
 video store game ("Once Upon a Video Store", in `w2-cx-private`, folder `01_nearest_neighbours/`).
 
 ## Build and checks
@@ -37,20 +43,19 @@ python3 ../style/tools/make_handout.py opener.pdf opener-handout.pdf
 
 No number is typed into `opener.tex`. `tools/opener_numbers.py` holds every number next to the
 sentence of its source, asserts the arithmetic (the rounded values, the total, the daily figure, the
-bar lengths) and the conclusions of the invented table (calling by risk picks Lea and Marco and raises
-the chance of leaving, calling by response picks Nina and Jonas and lowers it), and writes
-`numbers.tex` and `tools/expected.txt`. `tools/check_numbers.py` reads the 25 expected strings back
-from the rendered PDF.
+bar lengths, the order of the bars), and writes `numbers.tex` and `tools/expected.txt`.
+`tools/check_numbers.py` reads the 27 expected strings back from the rendered PDF.
 
-State of the build of 2026-11-03: 21 pages, 0 log errors, 0 em and en dashes, no build metadata, no
-element that moves between clicks, all 25 numbers found in the PDF. Every frame was rendered and read
-at full size.
+State of the build of 2026-11-03, after the new frames 4 to 6: 20 pages, 0 log errors, 0 em and en
+dashes, no build metadata, no element that moves between clicks, all 27 numbers found in the PDF.
+Every page of frames 4 to 6, each click included, was rendered and read.
 
 ## Sources
 
 Grades as in the research notes: READ (the primary page was read), REVIEW (quoted by a published
 review), SECONDARY (a press report or an excerpt of the primary document). The three revenues of
-frame 1 were read in the primary documents by the second reader on 2026-11-03.
+frame 1 were read in the primary documents by the second reader on 2026-11-03. Every source of frames
+4 to 6 was read on 2026-11-03 in the built-in browser.
 
 | Frame | Claim | Source | Grade |
 |---|---|---|---|
@@ -62,36 +67,37 @@ frame 1 were read in the primary documents by the second reader on 2026-11-03.
 | 2, 3 | Amazon: 35% of purchases | McKinsey, "How retailers can keep up with consumers", 1 October 2013, https://www.mckinsey.com/industries/retail/our-insights/how-retailers-can-keep-up-with-consumers . McKinsey names no source; Jannach and Jugovac trace it to "a statement of Amazon's CEO in 2006" | READ |
 | 3 | 11% gain in total sales of a product and its recommended substitutes, randomized experiment | Kumar and Hosanagar, Information Systems Research 30(3), 2019, abstract: https://ideas.repec.org/a/inm/orisre/v30y2019i3p819-838.html | READ |
 | 3 | Revenue increases "more often reported to lie between one and five percent" | Jannach and Jugovac, ACM TMIS 10(4), 2019, https://arxiv.org/html/1908.08328v3 | READ (arXiv version) |
-| 5 | Two field experiments; targeting by sensitivity to the intervention is "significantly more effective" than targeting by risk | Ascarza, Journal of Marketing Research 55(1), 80 to 98, 2018, DOI 10.1509/jmr.16.0163, the published abstract as served by Crossref | READ (abstract only) |
-| 5 | 4.1 to 8.7 percentage points less churn; "in some instances" targeting by risk increased churn; the telecom firm in the Middle East | The award committee's statement, AMA press release, 3 April 2023, https://www.ama.org/press-releases/eva-ascarza-receives-2023-weitz-winer-odell-award-for-retention-futility/ | READ |
-| 5 | The comparison comes from simulations on both datasets | AMA, 24 April 2019, https://www.ama.org/2019/04/24/escarzas-retention-futility-targeting-high-risk-customers-might-be-ineffective-wins-2018-award/ | READ |
-| 6 | Migros Cumulus and Coop Supercard, named as examples only | no figure on the slide | |
-
-The body of Ascarza's paper was not read: the journal's site refused automated reading, and no open
-copy turned up. Its abstract gives no number. The 4.1 to 8.7 points therefore come from the AMA's
-award summary, whose sentence is garbled as printed ("reduced churn rates 4.1 to by 8.7 percentage
-points"), and the slide's source line says so. An earlier talk abstract of hers, on a seminar page of
-the Universidad de Chile (https://www.dii.uchile.cl/eventos/ciclo-seminarios-cea-mipp-13/), says "a
-further reduction of up to seven percentage points in churn rate" instead.
+| 4 | Conversions: generative retrieval on Facebook Feed "nearly 2%" in "targeted segments"; GEM on more surfaces, off-site conversion campaigns +1.7% and app ad conversions +9.6%; Andromeda +1.4% on Facebook | Meta, earnings call of 21 October 2026, Susan Li, transcript: https://stockanalysis.com/stocks/meta/transcripts/718643-q3-2026/ | READ (third-party transcript) |
+| 4 | "The global average price per ad increased 14% year-over-year, driven by ad performance gains and improvements in macro conditions"; ad revenue 63.1 billion USD in the quarter, up 26% (Say only) | the same call | READ (third-party transcript) |
+| 5 | "Over 400 million customers have used Alexa for Shopping, our agentic shopping assistant, in the last 12 months. With customer interactions up 570% year over year. U.S. customers using Alexa for Shopping are spending 50% more per order than those who don't." | Amazon, earnings call of 29 October 2026, Andy Jassy, transcript: https://singjupost.com/amazon-com-inc-q3-2026-earnings-call-transcript/ (the passage is behind its "Continue Reading" button) | READ (third-party transcript) |
+| 6 | Over 100 billion transactions of over 100 million members; 291 tabular features in the credit model; Table 2: income F1 +7.54%, spend R2 +6.85%, lending AUC +2.23%, credit default AUC +1.81% (market 2) and +1.25% (market 1), relative to the baseline models | Braithwaite and others (Nubank), "Your Spending Needs Attention: Modeling Financial Habits with Transformers", arXiv 2507.23267, version 3 of 29 October 2026, presented at the 9th Workshop on Machine Learning in Finance at KDD 2026, https://arxiv.org/abs/2507.23267v3 | READ |
+| 6 | In use for the credit decisions of over 100 million users; "a contribution equivalent in magnitude to an entire year's typical cumulative gains"; "without adding new data sources or manual feature engineering" | the same paper, section 4.3 | READ |
 
 ## Choices made without asking
 
-1. **The order**, from the recommendation in the notes: the money, how much a machine chooses,
-   compared to what, a toy, the field studies behind the toy, the hand-over.
+1. **The order**: the money, how much a machine chooses, compared to what, and then three
+   measurements of autumn 2026, from advertising (Meta) to a shopping assistant (Amazon) to the
+   customer profile itself (Nubank), which leads into the weekend's subject, representation learning.
 2. **No title page.** The opener comes after the weekend's own title, so frame 1 starts with the money.
 3. **Netflix 75% from the 2012 blog**, kept with its year. The often quoted "80% of hours streamed"
    was left out because its wording could not be read in the source.
 4. **YouTube "over 70%"** is drawn as a 70% bar and labelled "over 70%".
 5. **The question on frame 2** comes before the bars, so the room guesses first.
-6. **Frame 4 is invented and says so** ("Invented customers"). Its numbers were chosen to show the
-   point in two calls: a call changes nothing for Lea (80% either way), raises Marco's chance of
-   leaving (70% to 75%), and lowers Nina's (50% to 30%) and Jonas's (40% to 25%).
-7. **Frame 5 keeps the number 4.1 to 8.7 and credits it to the AMA's summary**, with the hedge that
-   the comparison was simulated on the field data. "Two field experiments" is the abstract's wording.
-8. **Frame 6 names Migros Cumulus and Coop Supercard** as examples of loyalty cards without their
-   member counts, which only a press report gives (Blick, 2025). Its points are invented and say so.
-9. **The deck lives in this public repository**, next to the weekend 2 lecture, and copies the style
-   into `../style/`. A push publishes it on GitHub Pages; nothing links to it yet.
+6. **Frame 4 shows conversions and the price per ad.** Conversions are what the models raised; the
+   price per ad is where it shows up in money, in Meta's own words. The quarter's ad revenue (63.1
+   billion dollars, up 26%) is in the Say only, because nothing ties all of it to the models.
+7. **Frame 5 reuses frame 3's question.** Amazon compares users with non-users, who chose for
+   themselves, so the slide draws the 50% the way frame 3 draws the 11% and asks "compared to what?".
+8. **Frame 6 shows four of the paper's five results**, with its two decimals so that nothing is
+   rounded. The second credit market (+1.81%) is in the Say only. The "32% increase in our
+   long-term surrogate metric" is left out because the paper does not define the metric.
+9. **Frame 6's gloss is the paper's online result** ("an entire year's typical cumulative gains"),
+   and the closing line is its sentence on new data. The paper also calls the 1.25% "3 x a typical
+   model launch"; the slide uses the year.
+10. **Two leads were left out**: Stripe's card-testing detection from 59% to 97% (2025, an engineer's
+    post on X that was not read) and Revolut's PRAGMA (2026, gains against baselines it never names).
+11. **The deck lives in this public repository**, next to the weekend 2 lecture, and copies the style
+    into `../style/`. A push publishes it on GitHub Pages; nothing links to it yet.
 
 ## Simplifications to know when presenting
 
@@ -102,17 +108,25 @@ further reduction of up to seven percentage points in churn rate" instead.
 - Frame 3's 11% is an average: the effect varied across products.
 - Frame 1 compares annual totals: Google's line is "Google advertising" (search, YouTube ads and the
   network), Amazon's is "advertising services".
-- The "Change" column of frame 4 is in percentage points.
+- Frame 4's four gains come from different launches on different groups of ads, so they do not add
+  up. "Ads for websites" stands for Meta's "off-site conversion campaigns", and "targeted groups" for
+  its "targeted segments". Meta credits the 14% rise of the price per ad to ad performance and the
+  economy together, without a split.
+- Frame 5's numbers are Amazon's, said on a call, with no method. The 400 million count users over
+  12 months, and the 50% compares US users with US non-users.
+- Frame 6's gains are relative changes, each on its own score (F1 for income, R2 for spending, AUC
+  for the others), measured on past data. The bank says it could not run an A/B test of every variant
+  because the outcome takes long to observe.
 
 ## Open items
 
 1. The deck is linked from nowhere: neither `../index.html` nor the course site has it.
 2. It has not been projected in HG D 7.2. The hatching and the hairlines fade first on a weak projector.
-3. Read Ascarza's paper (Journal of Marketing Research 55(1), 80 to 98, DOI 10.1509/jmr.16.0163)
-   through the ETH library, to confirm the 4.1 and the 8.7 in its own tables, and then credit the paper
-   alone on frame 5.
+3. Frames 4 and 5 rest on third-party transcripts of the calls. Meta's and Amazon's investor pages
+   carry the official recordings; nobody has listened to them.
+4. Frames 4 to 6 have not had a second reader, unlike frames 1 to 3.
 
-## Second read
+## Second read (frames 1 to 3 and the first frames 4 to 6)
 
 A second reader (a separate agent that saw only the deck, the generator, the notes and the sources)
 checked every claim on the slides and in the Say comments on 2026-11-03 and found no wrong number.
@@ -127,7 +141,4 @@ Fixed after its report, on the same day:
 - Frame 2's Say: the 35% is McKinsey's, which names no source.
 - Frame 3: "on average" added to the experiment's measure; its Say no longer applies the 1% to 5%
   to the advertising revenue of frame 1.
-- Frame 4: the call makes Marco "more likely to cancel" (70% to 75%), on the slide and in the Say.
-- Frame 5: "two field experiments" (the abstract), the 4.1 to 8.7 credited to the AMA's summary on
-  the slide, and a note for the lecturer under the Say in `opener.tex`; the Say follows the AMA's
-  description of the two studies.
+- The other fixes concerned the first frames 4 and 5, which have since been replaced.

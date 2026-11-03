@@ -4,8 +4,8 @@
 Run from opener-deck/:   python3 tools/opener_numbers.py
 
 No number is typed into opener.tex. Each one is defined here next to the sentence of its source,
-checked on 3 November 2026, and the script asserts the arithmetic the slides rely on. The six
-customers of frame 4 are INVENTED and say so on the slide. README.md lists the sources with links.
+checked on 3 November 2026, and the script asserts the arithmetic the slides rely on. Every number
+is measured and reported by its source; none is invented. README.md lists the sources with links.
 """
 from pathlib import Path
 
@@ -46,41 +46,62 @@ WITHOUT, WITH = 100, 100 + LIFT
 #   and five percent".
 TYP_LOW, TYP_HIGH = 1, 5
 
-# FRAME 5: Ascarza, Journal of Marketing Research 55(1), 80 to 98, 2018.
-# The number is the award committee's, in the AMA release of 3 April 2023: "Targeting by customer
-#   sensitivity to the offer rather than churn risk reduced churn rates 4.1 to by 8.7 percentage
-#   points." The published abstract (Crossref) gives no number. An earlier talk abstract of hers
-#   says "a further reduction of up to seven percentage points". The paper body was not read, so the
-#   slide credits the AMA summary.
-ASC_LOW, ASC_HIGH = 4.1, 8.7
-assert ASC_LOW < ASC_HIGH
+# FRAME 4: Meta, earnings call of 21 October 2026 (July to September 2026), Susan Li, finance chief.
+# Read in the transcript on stockanalysis.com on 2026-11-03:
+#   "In Q3, we launched this approach to generative retrieval on Facebook Feed, driving a nearly 2%
+#    increase in conversions across targeted segments. In addition, we expanded our GEM model for ads
+#    ranking to additional surfaces, driving a 1.7% increase in conversions for off-site conversion
+#    campaigns and a 9.6% increase in app ad conversions."
+#   "In Q3, improvements to Andromeda, such as scaling model complexity and throughput, increased
+#    conversions by 1.4% on Facebook."
+#   "The global average price per ad increased 14% year-over-year, driven by ad performance gains and
+#    improvements in macro conditions relative to Q3 of last year."
+#   "Q3 family of apps ad revenue was $63.1 billion, up 26%" (used in the Say only).
+META = {"App": 9.6, "Feed": 2.0, "Website": 1.7, "Andromeda": 1.4}   # Feed is "nearly 2%"
+META_PRICE_PER_AD = 14
+META_MM_PER_PCT = 4.5                   # bar length in mm per percent of more conversions
+meta_bar = {k: round(META_MM_PER_PCT * v, 2) for k, v in META.items()}
+assert max(meta_bar.values()) <= 50, meta_bar
+assert sorted(META.values(), reverse=True) == [META[k] for k in ("App", "Feed", "Website", "Andromeda")]
 
-# FRAME 4: six INVENTED customers, two calls.
-# chance of leaving, and chance of leaving if we call, in whole percent
-CUSTOMERS = [("Lea", 80, 80), ("Marco", 70, 75), ("Nina", 50, 30),
-             ("Jonas", 40, 25), ("Sara", 30, 25), ("Luca", 10, 10)]
-CALLS = 2
-risks = [r for _, r, _ in CUSTOMERS]
-assert risks == sorted(risks, reverse=True), "rows are listed by chance of leaving, highest first"
-change = [c+(-r) for _, r, c in CUSTOMERS]
-by_risk = sorted(range(6), key=lambda i: (-CUSTOMERS[i][1]))[:CALLS]
-by_response = sorted(range(6), key=lambda i: change[i])[:CALLS]
-assert by_risk == [0, 1] and by_response == [2, 3], (by_risk, by_response)
-assert not set(by_risk) & set(by_response)
-assert sum(change[i] for i in by_risk) > 0      # calling by risk raises the chance of leaving
-assert change[0] == 0 and change[1] > 0         # no change for Lea, Marco more likely to cancel
-assert sum(change[i] for i in by_response) < 0  # calling by response lowers it
-assert all(0 <= r <= 100 and 0 <= c <= 100 for _, r, c in CUSTOMERS)
+# FRAME 5: Amazon, earnings call of 29 October 2026 (July to September 2026), Andy Jassy, chief
+# executive. Read in the transcript on singjupost.com on 2026-11-03:
+#   "Over 400 million customers have used Alexa for Shopping, our agentic shopping assistant, in the
+#    last 12 months. With customer interactions up 570% year over year. U.S. customers using Alexa
+#    for Shopping are spending 50% more per order than those who don't."
+AMZ_USERS_MILLION = 400
+AMZ_INTERACTIONS_PCT = 570
+AMZ_PER_ORDER_PCT = 50
+AMZ_WITHOUT, AMZ_WITH = 100, 100 + AMZ_PER_ORDER_PCT    # spending per order, non-users set to 100
+AMZ_MM_PER_UNIT = 0.25                  # bar length in mm per index point
+assert AMZ_WITH * AMZ_MM_PER_UNIT <= 38
 
-
-def fmt_signed(d):
-    """+5, 0, and a minus sign typeset in maths for a negative change."""
-    if d == 0:
-        return "0"
-    if d > 0:
-        return "+%d" % d
-    return "$\\mathord{-}%d$" % abs(d)
-
+# FRAME 6: Nubank, Braithwaite et al., "Your Spending Needs Attention: Modeling Financial Habits with
+# Transformers", arXiv 2507.23267, version 3 of 29 October 2026, "Presented at 9th Workshop on
+# Machine Learning in Finance at KDD 2026". Read on arXiv on 2026-11-03:
+#   "over 100 billion transactions across 100M+ members"
+#   "In total there are 291 tabular (numerical or categorical) features. Some are derived from
+#    transaction sources (e.g., average spend over a given period) [...] all improvements are
+#    reported as relative improvement (%) in AUC over a LightGBM model trained on tabular features
+#    only, which is our production baseline."
+#   Table 2, "nuFormer improvements across tasks and markets vs. baseline models, reported as ordinary
+#    relative lift": credit default market 1 AUC +1.25%, credit default market 2 AUC +1.81%, lending
+#    market 1 AUC +2.23%, income prediction F1 +7.54%, spend prediction R2 +6.85%.
+#   "nuFormer is currently deployed to 100% of customers in one of our markets, serving credit
+#    decisions for over 100 million users."
+#   "The deployed model drove a 32% increase in our long-term surrogate metric, a contribution
+#    equivalent in magnitude to an entire year's typical cumulative gains [...] these improvements
+#    came purely from enhanced representation learning on existing transaction data, without adding
+#    new data sources or manual feature engineering."
+# The gains are shown with the paper's two decimals, so that nothing is rounded.
+NU_TX_BILLION = 100
+NU_CUSTOMERS_MILLION = 100
+NU_FEATURES = 291                       # named in the Say of frame 6 only
+NU = {"Income": 7.54, "Spend": 6.85, "Lending": 2.23, "CreditTwo": 1.81, "CreditOne": 1.25}
+NU_MM_PER_PCT = 5.5
+nu_bar = {k: round(NU_MM_PER_PCT * v, 2) for k, v in NU.items()}
+assert max(nu_bar.values()) <= 42, nu_bar
+assert sorted(NU.values(), reverse=True) == list(NU.values())
 
 lines = ["% numbers.tex: WRITTEN BY tools/opener_numbers.py. Do not edit by hand; rerun the script.",
          "\\newcommand{\\adGoogle}{%.1f}" % ad_bn["Google"],
@@ -99,19 +120,38 @@ lines = ["% numbers.tex: WRITTEN BY tools/opener_numbers.py. Do not edit by hand
          "\\newcommand{\\liftWith}{%d}" % WITH,
          "\\newcommand{\\typLow}{%d}" % TYP_LOW,
          "\\newcommand{\\typHigh}{%d}" % TYP_HIGH,
-         "\\newcommand{\\ascLow}{%.1f}" % ASC_LOW,
-         "\\newcommand{\\ascHigh}{%.1f}" % ASC_HIGH]
-for key, idx in (("Name", 0), ("Risk", 1), ("Call", 2)):
-    cases = "\\or ".join(str(c[idx]) for c in CUSTOMERS)
-    lines.append("\\newcommand{\\cu%s}[1]{\\ifcase#1\\or %s\\fi}" % (key, cases))
-lines.append("\\newcommand{\\cuChange}[1]{\\ifcase#1\\or %s\\fi}"
-             % "\\or ".join(fmt_signed(d) for d in change))
+         "\\newcommand{\\metaApp}{%.1f}" % META["App"],
+         "\\newcommand{\\metaFeed}{%d}" % META["Feed"],
+         "\\newcommand{\\metaWebsite}{%.1f}" % META["Website"],
+         "\\newcommand{\\metaAndromeda}{%.1f}" % META["Andromeda"],
+         "\\newcommand{\\metaPrice}{%d}" % META_PRICE_PER_AD,
+         "\\newcommand{\\barMetaApp}{%.2f}" % meta_bar["App"],
+         "\\newcommand{\\barMetaFeed}{%.2f}" % meta_bar["Feed"],
+         "\\newcommand{\\barMetaWebsite}{%.2f}" % meta_bar["Website"],
+         "\\newcommand{\\barMetaAndromeda}{%.2f}" % meta_bar["Andromeda"],
+         "\\newcommand{\\amzUsers}{%d}" % AMZ_USERS_MILLION,
+         "\\newcommand{\\amzInteractions}{%d}" % AMZ_INTERACTIONS_PCT,
+         "\\newcommand{\\amzPerOrder}{%d}" % AMZ_PER_ORDER_PCT,
+         "\\newcommand{\\amzWithout}{%d}" % AMZ_WITHOUT,
+         "\\newcommand{\\amzWith}{%d}" % AMZ_WITH,
+         "\\newcommand{\\barAmzWithout}{%.2f}" % (AMZ_MM_PER_UNIT * AMZ_WITHOUT),
+         "\\newcommand{\\barAmzWith}{%.2f}" % (AMZ_MM_PER_UNIT * AMZ_WITH),
+         "\\newcommand{\\nuTx}{%d}" % NU_TX_BILLION,
+         "\\newcommand{\\nuCustomers}{%d}" % NU_CUSTOMERS_MILLION]
+for key, value in NU.items():
+    lines.append("\\newcommand{\\nu%s}{%.2f}" % (key, value))
+    lines.append("\\newcommand{\\barNu%s}{%.2f}" % (key, nu_bar[key]))
 Path("numbers.tex").write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 # the strings tools/check_numbers.py expects to find in the rendered PDF
 expect = ["%.1f" % v for v in ad_bn.values()] + ["%.1f" % total_bn, "%.1f" % per_day_bn]
 expect += ["%d%%" % v for v in SHARE.values()] + ["%d%%" % LIFT, "%d" % WITHOUT, "%d" % WITH]
-expect += ["%d%% to %d%%" % (TYP_LOW, TYP_HIGH), "%.1f to %.1f" % (ASC_LOW, ASC_HIGH)]
-expect += [c[0] for c in CUSTOMERS] + ["%d%%" % c[1] for c in CUSTOMERS]
+expect += ["%d%% to %d%%" % (TYP_LOW, TYP_HIGH)]
+expect += ["+%.1f%%" % META["App"], "nearly +%d%%" % META["Feed"], "+%.1f%%" % META["Website"],
+           "+%.1f%%" % META["Andromeda"], "+%d%%" % META_PRICE_PER_AD]
+expect += ["%d million" % AMZ_USERS_MILLION, "+%d%%" % AMZ_INTERACTIONS_PCT,
+           "+%d%%" % AMZ_PER_ORDER_PCT, "%d" % AMZ_WITH]
+expect += ["%d billion" % NU_TX_BILLION, "%d million" % NU_CUSTOMERS_MILLION]
+expect += ["+%.2f%%" % NU[k] for k in ("Income", "Spend", "Lending", "CreditOne")]   # on the slide
 Path("tools/expected.txt").write_text("\n".join(expect) + "\n", encoding="utf-8")
 print("numbers.tex written: %d macros; tools/expected.txt: %d strings" % (len(lines)+(-1), len(expect)))
