@@ -51,6 +51,9 @@ Specifically:
 │   ├── shared/data.js          THE data layer — books matrix v2, archetypes, helpers
 │   ├── shared/style.css        ETH chrome, Okabe-Ito CVD-safe palette
 │   └── (18 viz files; see below)
+├── colab/three-portraits/      Weekend 2 Colab notebook "Three portraits of a product"
+│                               (Amazon Reviews 2023, three embeddings, a scoreboard);
+│                               generator build_notebook.py, own CLAUDE.md
 ├── original-decks/             Original PDFs from before the rebuild
 │   ├── w2_bandits.pdf
 │   └── w2_recsys.pdf
@@ -141,9 +144,28 @@ Three items remain to make the lecture fully production-ready:
 2. **Integration / rehearsal pass.** Walking through the deck with the viz open, end-to-end timing.
 3. **Real ETH wordmark asset.** Currently a small-caps text fallback on the title slide.
 
+## The Colab notebook (added 2026-11-03)
+
+`colab/three-portraits/` holds a Colab notebook for the weekend 2 participants, apart from the
+90-minute lecture: three embeddings of 25,612 Amazon video-game products (from the description, from
+behaviour, and as semantic IDs) and a scoreboard of four recommenders. Its own CLAUDE.md has the
+build, the test route on Carlos's Colab Pro account and the measured results. The Pages workflow
+publishes it with the rest of the repository, so a push makes it public.
+
 ## When in doubt
 
 - Read `NARRATIVE_PLAN.md` first. It is the contract.
 - Then `BOOKS_MATRIX.md` if you are touching anything that consumes `shared/data.js`.
 - Then this file.
 - Then ask the user.
+
+## Maintenance contract
+
+- This file is the working memory for this repository. After any major change here, meaning a new
+  demo, notebook or deck, a renamed or moved directory, a changed build or deploy procedure, or a
+  changed data format, UPDATE THIS FILE IN THE SAME COMMIT.
+- Every subdirectory that holds work of its own carries its own CLAUDE.md, and that file must itself
+  carry this same maintenance contract, including this propagation rule. When you create a
+  subdirectory, create its CLAUDE.md at the same time.
+- Keep it concrete: real file names, real identifiers, real commands. Record the gotchas that cost
+  someone an hour. Do not restate what the code already says plainly.

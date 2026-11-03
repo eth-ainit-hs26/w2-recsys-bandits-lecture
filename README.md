@@ -31,6 +31,7 @@ managers, framed as a single question: *what is the difference between
 | View the slides | `slides/lecture.pdf` |
 | Build the slides from source | `cd slides && bash build.sh` (LuaLaTeX) |
 | Run any one visualization | `open visualizations/<name>.html` |
+| Run the Colab notebook (real Amazon data, three embeddings) | `colab/three-portraits/three-portraits.ipynb`, opened in Colab from GitHub |
 | Read the narrative arc | `NARRATIVE_PLAN.md` |
 | Read the data design | `BOOKS_MATRIX.md` |
 | Get the design system | `theme/ainit-academic/` |
@@ -44,6 +45,7 @@ recsys_bandits_lecture/
 ├── slides/                 Beamer source + compiled PDF
 ├── theme/ainit-academic/   Custom Beamer theme (LuaLaTeX, EB Garamond)
 ├── visualizations/         18 single-file interactive viz (D3 + KaTeX)
+├── colab/three-portraits/  Weekend 2 Colab notebook and its generator
 ├── original-decks/         Pre-rebuild lecture PDFs (Nov 2025)
 └── archive/                Early prototypes
 ```
