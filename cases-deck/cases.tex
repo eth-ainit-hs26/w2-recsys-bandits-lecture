@@ -27,23 +27,25 @@
 % row of similar homes appears beside it. Airbnb's engineers gave each home a list of 32
 % numbers, learned from more than 800 million search sessions: homes that the same guest clicked in
 % one session end up with similar numbers. The similar homes are the 12 nearest neighbours of the home
-% on the screen, among the homes free on the same dates. In an A/B test, the row with this method got
-% 21 percent more clicks, and 4.9 percent more guests found there the home they finally booked. That
-% row matters: search and similar homes together bring 99 percent of Airbnb's bookings. What it cost: a
-% new home has no sessions yet, so its numbers are the average of the 3 closest homes of the same type
-% and price. And 32 numbers was a choice: more numbers fitted better offline, but every vector has to
-% sit in the memory of the search machines. What they decided: learn from the home the guest finally
-% booked as well as from the clicks, and launch only after offline tests and an online experiment. The
-% source is Airbnb's engineering blog of March 2018; the paper appeared at KDD the same year.
+% on the screen, among the homes in the same market and free on the same dates. The A/B test compared
+% this with the old method, which ran the search ranking for the same place and kept the homes of the
+% same price range and type. With the nearest neighbours the row had a 21 percent higher click rate,
+% and 4.9 percent more guests found there the home they finally booked. That row matters: search and
+% similar homes together bring 99 percent of Airbnb's bookings. What it cost: a new home has no sessions
+% yet, so its numbers are the average of the 3 closest homes of the same type and price. And 32 numbers
+% was a trade-off between the offline results and the memory of the search machines, which hold every
+% vector. What they decided: learn from the home the guest finally booked as well as from the clicks,
+% and launch only after offline tests and an online experiment. The source is Airbnb's engineering blog
+% of March 2018; the paper appeared at KDD the same year.
 \begin{frame}{Airbnb, 2018: similar homes are nearest neighbours}
   \begin{tikzpicture}[x=1mm, y=1mm]
     \path[use as bounding box] (0,1) rectangle (130,-54);
     \cardbuilt{This weekend: Friday 08:00, the video store}
-      {Each home is a list of \abDims~numbers, learned from \abSessions~million search sessions.
+      {Each home is a list of \abDims~numbers, learned from over \abSessions~million search sessions.
        Similar homes: its \abK~nearest neighbours.}
     \cardresult{Result, A/B test}
     \cardnumber{1}{+\abCtr\%}{click rate of the row of similar homes}
-    \cardnumber{2}{+\abFound\%}{bookings discovered in this row}
+    \cardnumber{2}{+\abFound\%}{guests who found their booking here}
     \cardcost{A new home has no sessions yet: its numbers are the average of \abCold~similar homes nearby.}
     \carddecided{Airbnb}{Learn from the homes guests booked as well as clicked; launch after an online test.}
     \cardsource{Grbovic and others (Airbnb), Airbnb Tech Blog, 13 March 2018. Grbovic and Cheng, KDD 2018.}
@@ -53,16 +55,19 @@
 % ===== Frame 2. Friday 10:00, after matrix factorization: the Netflix Prize, 2006 to 2009 =====
 % Say: The second case is the most famous contest in this field. In October 2006 Netflix published 100
 % million ratings, from 480,000 customers, and offered one million dollars to whoever guessed hidden
-% ratings 10 percent better than its own system. Its own system, Cinematch, was a nearest neighbour
-% method: films similar by their ratings, our case of 08:00. 51,051 people from 186 countries entered.
-% In July 2009 a team of seven reached 10.06 percent, measured on ratings that Netflix kept hidden, and
-% won on 21 September. The winning entries held more than 100 models, most of them matrix
-% factorizations: the profiles of this morning, one row per customer, one row per film. What it cost:
-% the ratings were anonymous, but two researchers matched them to ratings that people had posted
-% publicly on IMDb, and identified customers, with what their films suggested about their politics.
-% What Netflix decided: it had announced a second prize; after the US Federal Trade Commission asked
-% about privacy and a law firm filed a lawsuit, Netflix cancelled it in March 2010. A contest is one way
-% to buy research: the winners had to license their methods to Netflix.
+% ratings 10 percent better than its own system did at the start. Its own system, Cinematch, was a
+% nearest neighbour method: films similar by their ratings, our case of 08:00. 51,051 contestants from
+% 186 countries registered. In July 2009 a team of seven reached 10.06 percent better than Cinematch,
+% measured on ratings that Netflix kept hidden, and won on 21 September. By 2008 their winning entries
+% held more than 100 models, most of them matrix factorizations: the profiles of this morning, one row
+% per customer, one row per film; the final blend of 2009 held hundreds. What it cost: the ratings were
+% anonymous, but two researchers matched them to ratings that people had posted publicly on IMDb. Of
+% about 50 IMDb users they tried, they found two in the Netflix data, and for one of them the films
+% suggested political and religious views. The authors call it a proof of concept. What Netflix decided:
+% it had announced a second contest; the US Federal Trade Commission raised privacy concerns and a law
+% firm filed a lawsuit. In March 2010 Netflix cancelled the contest, settled the lawsuit, and told the
+% FTC that any future data would go only to researchers who sign a contract limiting its use. A contest
+% is one way to buy research: the winners had to grant Netflix a non-exclusive licence to their methods.
 \begin{frame}{Netflix, 2009: the prize went to factorization}
   \begin{tikzpicture}[x=1mm, y=1mm]
     \path[use as bounding box] (0,1) rectangle (130,-54);
@@ -71,57 +76,64 @@
        \nfTarget\% better than its own system.}
     \cardresult{Result, on hidden ratings}
     \cardnumber{1}{\nfWin\%}{better than Netflix's own system}
-    \cardnumber{2}{\nfModels+}{models, most of them factorizations}
-    \cardcost{Researchers matched the anonymous ratings to public ratings on IMDb and identified customers.}
-    \carddecided{Netflix}{After a question from the FTC and a lawsuit, cancel the second prize (March 2010).}
+    \cardnumber{2}{\nfModels+}{models by 2008, most factorizations}
+    \cardcost{Researchers matched public IMDb ratings to the anonymous data: \nsFound~of~about~\nsSample~IMDb
+      users identified.}
+    \carddecided{Netflix}{After FTC privacy concerns and a lawsuit, cancel Netflix Prize 2 (March 2010).}
     \cardsource{Netflix Prize rules (2006) and results (2009). Koren, Bell, Volinsky, IEEE Computer 2009.
-      Narayanan and Shmatikov, IEEE S\&P 2008. Netflix blog, 12 March 2010.}
+      Narayanan and Shmatikov, IEEE S\&P 2008. Netflix blog and FTC letter, 12 March 2010.}
   \end{tikzpicture}
 \end{frame}
 
 % ===== Frame 3. Friday 12:00, after the bandits: Adyen, how to send each payment, 2020 to 2025 =====
 % Say: The third case comes from payments. Adyen processes card payments for shops and services. A
 % payment can go to the customer's bank in several ways: with 3D Secure or without, as an instant retry,
-% with the message formatted another way. Each payment has 2 to 15 such options. A model predicts which
-% option gets the payment approved, and the rule is the one from this lecture, epsilon-greedy: the best
-% guess almost always, a random option now and then. Adyen then tested a smarter way to explore,
-% which tries the options that are nearly as good more often. Each version got 5 percent of the live
-% traffic for 4 weeks. Result: 0.1 percent more approved payments. That sounds like nothing, but at
-% Adyen's volume it is, by their estimate, 9 million more approved payments a year. What it cost: every
-% explored payment risks a decline. And a surprise: smarter exploring left fewer declines in the data,
-% and the next model trained on that data scored 0.2 percent lower; the authors link the two. What Adyen decided: rules come first.
-% Merchant contracts and card network rules remove options before the bandit picks, and risky options
-% are pruned too. In 2020 the bandit replaced A/B tests per merchant and bank, whose samples were too
-% small; the models are retrained every 7 days.
-\begin{frame}{Adyen, 2025: a bandit gets more payments approved}
+% with the message formatted another way. After the filters for contracts, card network rules and risk,
+% a payment typically has 2 to 15 such options. A model predicts which option gets the payment approved,
+% and the rule is the one from this lecture, epsilon-greedy: the best guess almost always, a random
+% option now and then. Adyen then tested a smarter way to explore, which tries the options that are
+% nearly as good more often. In the main comparison each version got 5 percent of the live traffic for
+% 4 weeks. Result: the best smarter version approved 0.1 percent more payments than the epsilon-greedy
+% bandit already running. That sounds like nothing, but at Adyen's volume it is, by their estimate, 9
+% million more approved payments a year. The paper does not say whether Adyen switched. What it cost:
+% every explored payment risks a decline. And a surprise: smarter exploring left fewer declines in the
+% data, and the next model trained on that data did 0.2 percent worse; the authors attribute the drop
+% to the missing declines. What Adyen decided: rules come first. Merchant contracts and card network
+% rules remove options before the bandit picks, and risky options are pruned too. By November 2020 the
+% bandit had replaced A/B tests per merchant and bank: with more payment features the test groups got
+% too small, and every test had to be rerun when the world changed. The models are retrained every 7
+% days.
+\begin{frame}{Adyen, 2025: a better bandit approves more payments}
   \begin{tikzpicture}[x=1mm, y=1mm]
     \path[use as bounding box] (0,1) rectangle (130,-54);
     \cardbuilt{This weekend: Friday 12:00, the bandits}
-      {Each payment can reach the bank in \adOptMin~to \adOptMax~ways. Epsilon-greedy picks the best
+      {Most payments can reach the bank in \adOptMin~to~\adOptMax~ways. Epsilon-greedy picks the best
        bet, and now and then another.}
     \cardresult{Result, A/B test}
     \cardnumber{1}{+\adUplift\%}{approval rate, smarter exploring}
     \cardnumber{2}{\adExtra M}{more approvals a year, estimated}
     \cardcost{Exploring risks declines. Smarter exploring left fewer declines in the data: the next model
-      scored \adRegress\% lower.}
+      did \adRegress\% worse.}
     \carddecided{Adyen}{Rules first: contracts and card network rules remove options before the bandit
       picks.}
     \cardsource{Vangara and Egg (Adyen), OARS workshop, KDD 2025. van Rooijen (Adyen), Adyen Knowledge Hub,
-      2 November 2020.}
+      2~November 2020.}
   \end{tikzpicture}
 \end{frame}
 
 % ===== Frame 4. Friday 14:00, after gradient descent: what Netflix put into production, 2012 =====
 % Say: Back to Netflix, three years on. A year into the prize, the leading team had blended 107 models,
 % after more than 2,000 hours of work, and reached 8.43 percent; they gave Netflix the code. The
-% factorizations of the prize learn by gradient descent, this afternoon's method: one contestant published it in December
-% 2006, with a step size of 0.001, and a pass over all 100 million ratings took his laptop 7.5 seconds.
-% Netflix took the two strongest of the 107 models, a matrix factorization and a neural network, into
-% production. What it cost: they were built for 100 million ratings, Netflix had more than 5 billion, and
-% they had to keep learning as members added ratings. And the winning blend of 2009, hundreds of models
-% for 10.06 percent? Netflix measured it offline and did not ship it: in its words, the additional
-% accuracy did not seem to justify the engineering effort. Netflix also says an offline score only
-% decides what to test next; the A/B test decides. The source is Netflix's engineering blog, April 2012.
+% factorizations of the prize learn by gradient descent, this afternoon's method: one contestant
+% published it in December 2006, with a step size of 0.001, and a pass over all 100 million ratings took
+% his laptop about 7.5 seconds. Netflix took the two strongest of the 107 models into production: a
+% matrix factorization and a neural network called a restricted Boltzmann machine. What it cost: they
+% were built for 100 million ratings, Netflix had more than 5 billion, and they had to keep learning as
+% members added ratings. And the winning blend of 2009, hundreds of models for 10.06 percent? Netflix
+% tested some of the newer methods offline: the gains it measured did not seem to justify the
+% engineering, and by then its focus had moved on, one reason being the move to streaming. Netflix also
+% says an offline score only decides what to test next; the A/B test decides. The source is Netflix's engineering blog,
+% April 2012.
 \begin{frame}{Netflix, 2012: the winning blend did not ship}
   \begin{tikzpicture}[x=1mm, y=1mm]
     \path[use as bounding box] (0,1) rectangle (130,-54);
@@ -133,7 +145,7 @@
     \cardnumber{2}{\nfWin\%}{hundreds of models, 2009}
     \cardcost{Built for \nfBuiltFor~million ratings, the models had to learn from more than \nfHad~billion,
       and keep learning as members rated.}
-    \carddecided{Netflix}{Ship those two. The winning blend's extra accuracy did not seem worth the
+    \carddecided{Netflix}{Ship those two. Newer methods: the offline gains did not seem worth the
       engineering.}
     \cardsource{Amatriain and Basilico (Netflix), Netflix Tech Blog, 6 April and 20 June 2012. Funk, blog,
       11 December 2006.}
@@ -142,7 +154,8 @@
 
 % ===== Frame 5. Friday 14:00, the map: which technique answers which business question =====
 % Say: To close the weekend, the three questions behind these cases. Which products, or clients, are
-% like this one? Nearest neighbours: Airbnb's similar homes, and the same idea at LinkedIn and Pinterest.
+% like this one? Nearest neighbours: Airbnb's similar homes, and the same idea at Amazon, which
+% recommends the items most similar to what a customer bought, and at Pinterest.
 % Which product will this client want, though we never showed it? Matrix factorization: the Netflix
 % Prize, learned by gradient descent, and Spotify's weekly playlist. Which option should we use, while
 % we are still learning which one works? A bandit: Adyen's payments, and before them Yahoo's front page,
@@ -158,7 +171,7 @@
       {Which products, or clients, are like this one?};
     \mapchip{1-}{71}{-11}{nn}{Nearest neighbours}
     \node[lbl, anchor=west, text width=35mm] at (95,-11)
-      {\textcolor{ink}{Airbnb, 08:00}\\ also LinkedIn, Pinterest};
+      {\textcolor{ink}{Airbnb, 08:00}\\ also Amazon, Pinterest};
     \node[question, anchor=west, text width=50mm] at (0,-25.5)
       {Which unseen product will this client want?};
     \mapchip{1-}{71}{-25.5}{mf}{Matrix factorization}
@@ -169,7 +182,7 @@
     \mapchip{1-}{71}{-40}{bd}{Bandits}
     \node[lbl, anchor=west, text width=35mm] at (95,-40)
       {\textcolor{ink}{Adyen, 12:00}\\ also Yahoo, Microsoft, Spotify, Amazon};
-    \cardsource{LinkedIn, KDD 2024. Pinterest, KDD 2018. Spotify, slides 2014 and 2015. Yahoo, WWW 2010.
+    \cardsource{Amazon, IEEE Internet Computing 2003. Pinterest, KDD 2018. Spotify, slides 2014 and 2015. Yahoo, WWW 2010.
       Microsoft, arXiv 2016. Spotify, RecSys 2018. Amazon, KDD 2017.}
   \end{tikzpicture}
 \end{frame}

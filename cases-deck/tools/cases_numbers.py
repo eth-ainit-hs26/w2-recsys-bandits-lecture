@@ -30,6 +30,11 @@ def num(name, text, on_slide=None):
 #   "The dimensionality of the listing embeddings was set to d = 32, as we found that to be a good
 #    trade-off between offline performance [...] and the memory needed to store vectors in RAM memory of
 #    search machines for the purposes of real-time similarity calculations."
+#   "At the time of testing embeddings the existing algorithm for Similar Listings consisted of calling our
+#    main Search Ranking model for the same location as the given listing followed by filtering on same price
+#    range and listing type as the given listing." (the control of the A/B test, Say)
+#   "[...] vectors v(lj) of all listings from the same market that are available for the same set of dates
+#    (if check-in and check-out dates are set)."
 #   "The k=12 listings with the highest similarity were shown as similar listings."
 #   "The A/B test showed that embedding-based solution lead to a 21% increase in Similar Listing carousel
 #    CTR and 4.9% more guests discovering the listing they ended up booking in the Similar Listing
@@ -71,22 +76,41 @@ num("abCold", "%d" % AIRBNB["cold_neighbours"], "%d similar homes" % AIRBNB["col
 #    different countries."
 # Bennett and Lanning, "The Netflix Prize", KDD Cup and Workshop 2007, p. 3: Cinematch uses "a variant of
 #    Pearson's correlation with all other movies to determine a list of "similar" movies".
-# Koren, Bell, Volinsky, "Matrix Factorization Techniques for Recommender Systems", IEEE Computer 42(8), 2009:
-#   "Our winning entries consist of more than 100 different predictor sets, the majority of which are
-#    factorization models using some variants of the methods described here."
+# Koren, Bell, Volinsky, "Matrix Factorization Techniques for Recommender Systems", IEEE Computer 42(8), 2009.
+# The 100+ are the team's entries before the final one, hence "by 2008" on the slide:
+#   "[...] won the 2007 Progress Prize with the best score at the time: 8.43 percent better than Netflix.
+#    Later, we aligned with team Big Chaos to win the 2008 Progress Prize with a score of 9.46 percent. At the
+#    time of this writing, we are still in first place, inching toward the 10 percent landmark. Our winning
+#    entries consist of more than 100 different predictor sets, the majority of which are factorization models
+#    using some variants of the methods described here."
 #   "matrix factorization models are superior to classic nearest-neighbor techniques"
-# Narayanan and Shmatikov, "How To Break Anonymity of the Netflix Prize Dataset", arXiv cs/0610105 (v2 2007),
-#   abstract; published as "Robust De-anonymization of Large Sparse Datasets", IEEE S&P 2008, pp. 111-125:
+# Narayanan and Shmatikov, arXiv cs/0610105, listed as "How To Break Anonymity of the Netflix Prize Dataset";
+#   the PDF of v2 (22 November 2007) is titled "Robust De-anonymization of Large Datasets (How to Break
+#   Anonymity of the Netflix Prize Dataset)". Published as "Robust De-anonymization of Large Sparse Datasets",
+#   IEEE S&P 2008, pp. 111-125, read in the authors' copy (www.cs.cornell.edu/~shmat/shmat_oak08netflix.pdf):
 #   "Using the Internet Movie Database as the source of background knowledge, we successfully identified the
 #    Netflix records of known users, uncovering their apparent political preferences and other potentially
-#    sensitive information."
+#    sensitive information." (abstract)
+#   "we worked with a very small sample of around 50 IMDb users. Our results should thus be viewed as a proof
+#    of concept. They do not imply anything about the percentage of IMDb users who can be identified in the
+#    Netflix Prize dataset." (Sec. 5)
+#   "Given our small sample of IMDb users, our algorithm identified the records of two users in the Netflix
+#    Prize dataset with eccentricities of around 28 and 15, respectively." (Sec. 5)
+#   "Consider the information that we have been able to deduce by locating one of these users' entire movie
+#    viewing history [...] his political orientation may be revealed [...] and his religious views [...]"
 # Neil Hunt, "Netflix Prize Update", Netflix blog, 12 March 2010 (archived):
 #   "the Federal Trade Commission (FTC) asked us how a Netflix Prize sequel might affect Netflix members'
 #    privacy, and a lawsuit was filed by KamberLaw LLC pertaining to the sequel."
+#   "We have reached an understanding with the FTC and have settled the lawsuit with plaintiffs."
 #   "we have decided to not pursue the Netflix Prize sequel that we announced on August 6, 2009."
+# FTC closing letter, Mithal to Freeman (counsel for Netflix), 12 March 2010, read in the Wayback copy of 13 July
+# 2025 (scanned; OCR errors corrected): "staff identified a number of concerns related to Prize 2. These include
+#    the risk of re-identification [...]"; "Netflix stated that if it releases a second data set in the future,
+#    it would not do so publicly; rather, it would release such data only to researchers who contractually agree
+#    to specific limitations on its use."
 NETFLIX = {"ratings_million": 100, "customers_thousand": 480, "prize_million": 1, "target_pct": 10,
            "win_pct": 10.06, "win_rmse": 0.8567, "cinematch_rmse": 0.9525, "models": 100,
-           "contestants": 51051, "countries": 186}
+           "contestants": 51051, "countries": 186, "imdb_sample": 50, "imdb_found": 2}
 # the 10.06% is the rules' own measure: 1 - 0.8567 / 0.9525
 assert abs(100 * (1 - NETFLIX["win_rmse"] / NETFLIX["cinematch_rmse"]) - NETFLIX["win_pct"]) < 0.01
 num("nfRatings", "%d" % NETFLIX["ratings_million"], "%d million ratings" % NETFLIX["ratings_million"])
@@ -94,6 +118,8 @@ num("nfPrize", "%d" % NETFLIX["prize_million"], "$%d million" % NETFLIX["prize_m
 num("nfTarget", "%d" % NETFLIX["target_pct"], "%d%% better" % NETFLIX["target_pct"])
 num("nfWin", "%.2f" % NETFLIX["win_pct"], "%.2f%%" % NETFLIX["win_pct"])
 num("nfModels", "%d" % NETFLIX["models"], "%d+" % NETFLIX["models"])
+num("nsFound", "%d" % NETFLIX["imdb_found"], "%d of about %d" % (NETFLIX["imdb_found"], NETFLIX["imdb_sample"]))
+num("nsSample", "%d" % NETFLIX["imdb_sample"])
 num("nfCustomers", "%d" % NETFLIX["customers_thousand"])            # Say only
 num("nfContestants", "{:,}".format(NETFLIX["contestants"]))          # Say only
 num("nfCountries", "%d" % NETFLIX["countries"])                      # Say only
@@ -105,9 +131,14 @@ num("nfCountries", "%d" % NETFLIX["countries"])                      # Say only
 # August 2025; arXiv 2412.00569 v2 (https://arxiv.org/abs/2412.00569), read in full:
 #   "Currently, [pi] is [epsilon]-greedy, using a boosting model during exploitation."
 #   "its linear regret due to the reliance on uniform random exploration is an expensive trade off."
-#   "This process typically produced |A_t| in [2, 15] actions per transaction, with median 4 actions."
+#   "This process typically produced |A_t| in [2, 15] actions per transaction, with median 4 actions." (after
+#    the rule-based filtering and the risk-based pruning quoted below, hence "Most payments" on the slide)
 #   "Both policies are A/B tested by routing 5% of the live traffic to each variant over a four-week period."
-#   "The baseline [epsilon]-greedy policies were set at three levels of exploration: 1%, 4%, and 6%."
+#   "The baseline uniform random [epsilon]-greedy policies were set at three levels of exploration: 1%, 4%, and
+#    6%. Each variant received 5% of the total traffic to ensure a fair comparison. We conducted experiments
+#    over a four-week period."
+#   Table 3: Oracle 1, 5% of traffic, 4 weeks; Oracles 2 and 3, 5%, 1 week; [epsilon]-greedy, 5%, 4 weeks.
+#    Hence "in the main comparison" in the Say.
 #   "Figure 2 shows that the best-performing SquareCB variant achieved a +0.1% uplift over the baseline
 #    [epsilon]-greedy policy within the four-week test period. This improvement translates to an estimated
 #    9 million incremental authorized transactions per year. The confidence intervals (95%) indicate that
@@ -115,6 +146,8 @@ num("nfCountries", "%d" % NETFLIX["countries"])                      # Say only
 #   "bandit feedback from the baseline [epsilon]-greedy policies exhibits a class imbalance of approximately
 #    87.4% positive rewards. Under the SquareCB regime, this imbalance increases to 93.5%, which correlates
 #    with a 0.2% performance regression (see Figure 10)."
+#   Caption of Figure 10: "The performance drop in the SquareCB-based training data is attributed to an increased
+#    imbalance between positive and negative labels." Hence "did 0.2% worse" on the slide.
 #   "(1) Rule-based Filtering: Remove actions that conflict with predefined constraints, such as: Merchant
 #    payment service provider contracts, Card network regulations (e.g., country restrictions imposed by
 #    Visa/MasterCard), Transaction amount thresholds. (2) Risk-based Pruning: Exclude actions considered
@@ -124,8 +157,11 @@ num("nfCountries", "%d" % NETFLIX["countries"])                      # Say only
 # Knowledge Hub, 2 November 2020: the options include requiring 3D Secure or not, an account (card) update,
 # "Optimizing the payment message formatting (ISO message)" and "Instantly retrying a payment"; "In total,
 # this results in hundreds of optimizations that can be chosen."; the previous solution was A/B tests per
-# account and bank, with a "Small sample problem"; "a full-fledged reinforcement learning set-up was
-# out-of-reach from a technology perspective."
+# account and bank, with a "Small sample problem. Adding additional payment features (e.g. amount or transaction
+# type) could result in small and thus insignificant A/B test groups." and "The result of an experiment is
+# deterministic, i.e. if the underlying world changes then the experiment would have to be re-run again.";
+# "a full-fledged reinforcement learning set-up was out-of-reach from a technology perspective." The post gives
+# no launch date, hence "By November 2020" in the Say.
 ADYEN = {"opt_min": 2, "opt_max": 15, "opt_median": 4, "uplift_pct": 0.1, "extra_million": 9, "traffic_pct": 5,
          "weeks": 4, "pos_eg_pct": 87.4, "pos_sq_pct": 93.5, "regress_pct": 0.2, "retrain_days": 7,
          "train_hours": 4, "cores": 32}
@@ -133,7 +169,7 @@ num("adOptMin", "%d" % ADYEN["opt_min"], "%d to %d ways" % (ADYEN["opt_min"], AD
 num("adOptMax", "%d" % ADYEN["opt_max"])
 num("adUplift", "%.1f" % ADYEN["uplift_pct"], "+%.1f%%" % ADYEN["uplift_pct"])
 num("adExtra", "%d" % ADYEN["extra_million"], "%dM" % ADYEN["extra_million"])
-num("adRegress", "%.1f" % ADYEN["regress_pct"], "%.1f%% lower" % ADYEN["regress_pct"])
+num("adRegress", "%.1f" % ADYEN["regress_pct"], "%.1f%% worse" % ADYEN["regress_pct"])
 num("adTraffic", "%d" % ADYEN["traffic_pct"])                       # Say only
 num("adWeeks", "%d" % ADYEN["weeks"])                               # Say only
 num("adRetrain", "%d" % ADYEN["retrain_days"])                       # Say only
@@ -157,7 +193,11 @@ num("adRetrain", "%d" % ADYEN["retrain_days"])                       # Say only
 #   "you might be wondering what happened with the final Grand Prize ensemble that won the $1M two years later.
 #    [...] blending hundreds of predictive models to finally cross the finish line. We evaluated some of the
 #    new methods offline but the additional accuracy gains that we measured did not seem to justify the
-#    engineering effort needed to bring them into a production environment."
+#    engineering effort needed to bring them into a production environment. Also, our focus on improving
+#    Netflix personalization had shifted to the next level by then."
+#   "One of the reasons our focus in the recommendation algorithms has changed is because Netflix as a whole has
+#    changed dramatically in the last few years. Netflix launched an instant streaming service in 2007, one year
+#    after the Netflix Prize began."
 # Part 2, 20 June 2012: "since the mapping is not perfect, offline performance is used only as an indication
 #    to make informed decisions on follow up tests."
 # Koren, "The BellKor Solution to the Netflix Grand Prize", August 2009, Sec. IV-A: "All models are learned by

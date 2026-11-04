@@ -40,6 +40,11 @@ Build and check, from this folder: the commands in README.md, section "Build and
   `tools/check_numbers.py` and `tools/split_parts.py`.
 - **A new frame changes the parts.** `tools/split_parts.py` fails when the deck's frame count differs from its
   `PARTS` table; update the table, README.md and this file together.
+- **Check the claims against the sources, as well as the numbers.** `tools/check_numbers.py` only proves that
+  the numbers reached the PDF. The second read of 2026-11-04 (README, section "Second read") found no wrong
+  number but several claims stronger than their sources: what a count covers ("100+ models by 2008"), how many
+  were identified ("2 of about 50"), what a test compared ("a better bandit" against the one running). Give
+  every new case such a read by a second agent with the source files.
 - **This repository is public and every push to main publishes it on GitHub Pages**, the deck included. The
   course site (AINIT-PAGE) links it only after Carlos approves it.
 
