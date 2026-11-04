@@ -1,0 +1,59 @@
+% ===== cases-kit.tex: the drawings of the weekend 2 cases, Codex plates style =====
+% Load after ../style/ainit-preamble. Every frame is a picture in mm, bounding box
+% (0,1) rectangle (130,-54), as in ../opener-deck. What it adds:
+%   styles   src (a source line), measure (what a number counts), big (a number in the rubric),
+%            head (a bold heading), question (the business question over a case), lbl (a small
+%            italic label), body (a block of text), session (the box naming this weekend's session)
+%            The first four are copied from ../opener-deck/opener-kit.tex (2026-11-03).
+%   \sessionbox{overlay}{x}{y}{text}   this weekend's session and exercise of a case, top left at (x,y)
+%   \mapchip{overlay}{x}{y}{name}{text}  a technique as a strong chip on the closing map
+%   The case card, the same two by two grid on every case frame (click 1 to 4):
+%   \cardbuilt{session}{text}      top left: the session box and what was built (click 1)
+%   \cardresult{label}             top right: its hairline and label, e.g. "Result, A/B test" (click 2)
+%   \cardnumber{1 or 2}{big}{what it counts}   a number of the result, row 1 or 2 (click 2)
+%   \cardcost{text}                bottom left: the rule across and "What it cost" (click 3)
+%   \carddecided{company}{text}    bottom right: "What <company> decided" (click 4)
+%   \cardsource{text}              the source line, up to two lines, on every click
+
+\tikzset{
+  src/.style={font=\scriptsize\itshape, text=muted, inner sep=0, align=flush left},
+  measure/.style={font=\small\itshape, text=muted, inner sep=0, align=flush left},
+  big/.style={font=\LARGE\bfseries, text=brand, inner sep=0},
+  head/.style={font=\large\bfseries, text=ink, inner sep=0},
+  question/.style={font=\large\itshape, text=ink, inner sep=0, align=flush left},
+  lbl/.style={font=\small\itshape, text=muted, inner sep=0, align=flush left},
+  body/.style={font=\normalsize, text=ink, inner sep=0, align=flush left},
+  session/.style={draw=brand, line width=0.6pt, line join=miter, fill=paper, inner xsep=1.8mm,
+    inner ysep=1.2mm, font=\small\itshape, text=brand, align=flush left},
+}
+
+% \sessionbox{overlay}{x}{y}{text}: a hairline violet box, its top left corner at (x,y)
+\newcommand{\sessionbox}[4]{%
+  \node[session, anchor=north west, visible on=<#1>] at (#2,#3) {#4};}
+
+% \mapchip{overlay}{x}{y}{name}{text}: a strong chip of fixed width on the closing map, centred at (x,y)
+\newcommand{\mapchip}[5]{%
+  \node[chip strong, minimum width=38mm, minimum height=9mm, inner xsep=2.6mm, inner ysep=2.4mm,
+    font=\normalsize, visible on=<#1>] (#4) at (#2,#3) {#5};}
+
+% ----- the case card. Geometry in mm; the left column is 68 wide, the right one starts at 77 -----
+\newcommand{\cardbuilt}[2]{%
+  \sessionbox{1-}{0}{0.5}{#1}
+  \node[body, anchor=north west, text width=68mm] at (0,-8.6) {#2};}
+\newcommand{\cardresult}[1]{%
+  \draw[ruling, line width=0.4pt, visible on=<2->] (73,1) to (73,-23.5);
+  \node[lbl, anchor=north west, visible on=<2->] at (77,0) {#1};}
+\newcommand{\cardnumber}[3]{%
+  \ifnum#1=1 \def\cardy{-4.5}\else \def\cardy{-14.3}\fi
+  \node[big, anchor=north west, visible on=<2->] at (77,\cardy) {#2};
+  \node[measure, anchor=north west, text width=30.5mm, visible on=<2->] at (99.5,\cardy-0.6) {#3};}
+\newcommand{\cardcost}[1]{%
+  \draw[ruledark, line width=0.6pt, visible on=<3->] (0,-25.5) to (130,-25.5);
+  \node[lbl, anchor=north west, visible on=<3->] at (0,-28) {What it cost};
+  \node[body, anchor=north west, text width=68mm, visible on=<3->] at (0,-32.4) {#1};}
+\newcommand{\carddecided}[2]{%
+  \draw[ruling, line width=0.4pt, visible on=<4->] (73,-27) to (73,-45.5);
+  \node[lbl, anchor=north west, visible on=<4->] at (77,-28) {What #1 decided};
+  \node[body, anchor=north west, text width=53mm, visible on=<4->] at (77,-32.4) {#2};}
+\newcommand{\cardsource}[1]{%
+  \node[src, anchor=north west, text width=130mm] at (0,-47.6) {#1};}

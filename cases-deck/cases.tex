@@ -1,0 +1,177 @@
+% ===== cases.tex: business cases of the weekend 2 techniques, one at the end of each Friday lecture =====
+% Asked for on 2026-11-04 after the BMAI HS26 evaluation asked for real business use cases. Carlos chose
+% "one case per lecture" and 10 to 15 minutes in all: frame 1 closes the nearest neighbours lecture
+% (08:00), frame 2 matrix factorization (10:00), frame 3 the bandits (12:00), frames 4 and 5 gradient
+% descent (14:00), where frame 5 maps business questions to the three techniques.
+% Every case frame is the same two by two card: what was built, the result, what it cost, what was
+% decided. No number is typed here: numbers.tex is written by tools/cases_numbers.py, which keeps the
+% sentence of each source. A "Say" comment above each frame is the talk track. README.md has the
+% sources with their grades, the choices made without asking and the open items. Build from this folder:
+%   python3 tools/cases_numbers.py
+%   ../style/tools/build.sh cases.tex
+\documentclass[aspectratio=169]{beamer}
+\input{../style/ainit-preamble}
+\input{../style/ainit-course}
+\input{cases-kit}
+\input{numbers}
+\renewcommand{\deckslug}{AI in Industry, weekend 2}
+\renewcommand{\currentweekend}{b}
+\title{Who uses it, and what it paid}
+\author{Carlos Cotrini}
+\hypersetup{pdftitle={Who uses it, and what it paid}, pdfauthor={Carlos Cotrini}}
+
+\begin{document}
+
+% ===== Frame 1. Friday 08:00, after the nearest neighbours: Airbnb, 2018 =====
+% Say: A first case for what we just did in the video store. When a guest looks at a home on Airbnb, a
+% row of similar homes appears beside it. Airbnb's engineers gave each home a list of 32
+% numbers, learned from more than 800 million search sessions: homes that the same guest clicked in
+% one session end up with similar numbers. The similar homes are the 12 nearest neighbours of the home
+% on the screen, among the homes free on the same dates. In an A/B test, the row with this method got
+% 21 percent more clicks, and 4.9 percent more guests found there the home they finally booked. That
+% row matters: search and similar homes together bring 99 percent of Airbnb's bookings. What it cost: a
+% new home has no sessions yet, so its numbers are the average of the 3 closest homes of the same type
+% and price. And 32 numbers was a choice: more numbers fitted better offline, but every vector has to
+% sit in the memory of the search machines. What they decided: learn from the home the guest finally
+% booked as well as from the clicks, and launch only after offline tests and an online experiment. The
+% source is Airbnb's engineering blog of March 2018; the paper appeared at KDD the same year.
+\begin{frame}{Airbnb, 2018: similar homes are nearest neighbours}
+  \begin{tikzpicture}[x=1mm, y=1mm]
+    \path[use as bounding box] (0,1) rectangle (130,-54);
+    \cardbuilt{This weekend: Friday 08:00, the video store}
+      {Each home is a list of \abDims~numbers, learned from \abSessions~million search sessions.
+       Similar homes: its \abK~nearest neighbours.}
+    \cardresult{Result, A/B test}
+    \cardnumber{1}{+\abCtr\%}{click rate of the row of similar homes}
+    \cardnumber{2}{+\abFound\%}{bookings discovered in this row}
+    \cardcost{A new home has no sessions yet: its numbers are the average of \abCold~similar homes nearby.}
+    \carddecided{Airbnb}{Learn from the homes guests booked as well as clicked; launch after an online test.}
+    \cardsource{Grbovic and others (Airbnb), Airbnb Tech Blog, 13 March 2018. Grbovic and Cheng, KDD 2018.}
+  \end{tikzpicture}
+\end{frame}
+
+% ===== Frame 2. Friday 10:00, after matrix factorization: the Netflix Prize, 2006 to 2009 =====
+% Say: The second case is the most famous contest in this field. In October 2006 Netflix published 100
+% million ratings, from 480,000 customers, and offered one million dollars to whoever guessed hidden
+% ratings 10 percent better than its own system. Its own system, Cinematch, was a nearest neighbour
+% method: films similar by their ratings, our case of 08:00. 51,051 people from 186 countries entered.
+% In July 2009 a team of seven reached 10.06 percent, measured on ratings that Netflix kept hidden, and
+% won on 21 September. The winning entries held more than 100 models, most of them matrix
+% factorizations: the profiles of this morning, one row per customer, one row per film. What it cost:
+% the ratings were anonymous, but two researchers matched them to ratings that people had posted
+% publicly on IMDb, and identified customers, with what their films suggested about their politics.
+% What Netflix decided: it had announced a second prize; after the US Federal Trade Commission asked
+% about privacy and a law firm filed a lawsuit, Netflix cancelled it in March 2010. A contest is one way
+% to buy research: the winners had to license their methods to Netflix.
+\begin{frame}{Netflix, 2009: the prize went to factorization}
+  \begin{tikzpicture}[x=1mm, y=1mm]
+    \path[use as bounding box] (0,1) rectangle (130,-54);
+    \cardbuilt{This weekend: Friday 10:00, the matchmaker}
+      {Netflix shared \nfRatings~million ratings and offered \$\nfPrize~million for guesses
+       \nfTarget\% better than its own system.}
+    \cardresult{Result, on hidden ratings}
+    \cardnumber{1}{\nfWin\%}{better than Netflix's own system}
+    \cardnumber{2}{\nfModels+}{models, most of them factorizations}
+    \cardcost{Researchers matched the anonymous ratings to public ratings on IMDb and identified customers.}
+    \carddecided{Netflix}{After a question from the FTC and a lawsuit, cancel the second prize (March 2010).}
+    \cardsource{Netflix Prize rules (2006) and results (2009). Koren, Bell, Volinsky, IEEE Computer 2009.
+      Narayanan and Shmatikov, IEEE S\&P 2008. Netflix blog, 12 March 2010.}
+  \end{tikzpicture}
+\end{frame}
+
+% ===== Frame 3. Friday 12:00, after the bandits: Adyen, how to send each payment, 2020 to 2025 =====
+% Say: The third case comes from payments. Adyen processes card payments for shops and services. A
+% payment can go to the customer's bank in several ways: with 3D Secure or without, as an instant retry,
+% with the message formatted another way. Each payment has 2 to 15 such options. A model predicts which
+% option gets the payment approved, and the rule is the one from this lecture, epsilon-greedy: the best
+% guess almost always, a random option now and then. Adyen then tested a smarter way to explore,
+% which tries the options that are nearly as good more often. Each version got 5 percent of the live
+% traffic for 4 weeks. Result: 0.1 percent more approved payments. That sounds like nothing, but at
+% Adyen's volume it is, by their estimate, 9 million more approved payments a year. What it cost: every
+% explored payment risks a decline. And a surprise: smarter exploring left fewer declines in the data,
+% and the next model trained on that data scored 0.2 percent lower; the authors link the two. What Adyen decided: rules come first.
+% Merchant contracts and card network rules remove options before the bandit picks, and risky options
+% are pruned too. In 2020 the bandit replaced A/B tests per merchant and bank, whose samples were too
+% small; the models are retrained every 7 days.
+\begin{frame}{Adyen, 2025: a bandit gets more payments approved}
+  \begin{tikzpicture}[x=1mm, y=1mm]
+    \path[use as bounding box] (0,1) rectangle (130,-54);
+    \cardbuilt{This weekend: Friday 12:00, the bandits}
+      {Each payment can reach the bank in \adOptMin~to \adOptMax~ways. Epsilon-greedy picks the best
+       bet, and now and then another.}
+    \cardresult{Result, A/B test}
+    \cardnumber{1}{+\adUplift\%}{approval rate, smarter exploring}
+    \cardnumber{2}{\adExtra M}{more approvals a year, estimated}
+    \cardcost{Exploring risks declines. Smarter exploring left fewer declines in the data: the next model
+      scored \adRegress\% lower.}
+    \carddecided{Adyen}{Rules first: contracts and card network rules remove options before the bandit
+      picks.}
+    \cardsource{Vangara and Egg (Adyen), OARS workshop, KDD 2025. van Rooijen (Adyen), Adyen Knowledge Hub,
+      2 November 2020.}
+  \end{tikzpicture}
+\end{frame}
+
+% ===== Frame 4. Friday 14:00, after gradient descent: what Netflix put into production, 2012 =====
+% Say: Back to Netflix, three years on. A year into the prize, the leading team had blended 107 models,
+% after more than 2,000 hours of work, and reached 8.43 percent; they gave Netflix the code. The
+% factorizations of the prize learn by gradient descent, this afternoon's method: one contestant published it in December
+% 2006, with a step size of 0.001, and a pass over all 100 million ratings took his laptop 7.5 seconds.
+% Netflix took the two strongest of the 107 models, a matrix factorization and a neural network, into
+% production. What it cost: they were built for 100 million ratings, Netflix had more than 5 billion, and
+% they had to keep learning as members added ratings. And the winning blend of 2009, hundreds of models
+% for 10.06 percent? Netflix measured it offline and did not ship it: in its words, the additional
+% accuracy did not seem to justify the engineering effort. Netflix also says an offline score only
+% decides what to test next; the A/B test decides. The source is Netflix's engineering blog, April 2012.
+\begin{frame}{Netflix, 2012: the winning blend did not ship}
+  \begin{tikzpicture}[x=1mm, y=1mm]
+    \path[use as bounding box] (0,1) rectangle (130,-54);
+    \cardbuilt{This weekend: Friday 14:00, gradient descent}
+      {Netflix put the two strongest prize models into production: a matrix factorization and a
+       neural network.}
+    \cardresult{Result, on hidden ratings}
+    \cardnumber{1}{\nfPPGain\%}{\nfPPModels~models, 2007}
+    \cardnumber{2}{\nfWin\%}{hundreds of models, 2009}
+    \cardcost{Built for \nfBuiltFor~million ratings, the models had to learn from more than \nfHad~billion,
+      and keep learning as members rated.}
+    \carddecided{Netflix}{Ship those two. The winning blend's extra accuracy did not seem worth the
+      engineering.}
+    \cardsource{Amatriain and Basilico (Netflix), Netflix Tech Blog, 6 April and 20 June 2012. Funk, blog,
+      11 December 2006.}
+  \end{tikzpicture}
+\end{frame}
+
+% ===== Frame 5. Friday 14:00, the map: which technique answers which business question =====
+% Say: To close the weekend, the three questions behind these cases. Which products, or clients, are
+% like this one? Nearest neighbours: Airbnb's similar homes, and the same idea at LinkedIn and Pinterest.
+% Which product will this client want, though we never showed it? Matrix factorization: the Netflix
+% Prize, learned by gradient descent, and Spotify's weekly playlist. Which option should we use, while
+% we are still learning which one works? A bandit: Adyen's payments, and before them Yahoo's front page,
+% Microsoft's MSN, Spotify's home page and an Amazon landing page. In every case, ask four things: what
+% was the result compared to, how it was measured, what it cost, and which rules applied.
+\begin{frame}{Which technique answers which question}
+  \begin{tikzpicture}[x=1mm, y=1mm]
+    \path[use as bounding box] (0,1) rectangle (130,-54);
+    \node[lbl, anchor=north west] at (0,0) {The business question};
+    \node[lbl, anchor=north] at (71,0) {The technique};
+    \node[lbl, anchor=north west] at (95,0) {The cases};
+    \node[question, anchor=west, text width=50mm] at (0,-11)
+      {Which products, or clients, are like this one?};
+    \mapchip{1-}{71}{-11}{nn}{Nearest neighbours}
+    \node[lbl, anchor=west, text width=35mm] at (95,-11)
+      {\textcolor{ink}{Airbnb, 08:00}\\ also LinkedIn, Pinterest};
+    \node[question, anchor=west, text width=50mm] at (0,-25.5)
+      {Which unseen product will this client want?};
+    \mapchip{1-}{71}{-25.5}{mf}{Matrix factorization}
+    \node[lbl, anchor=west, text width=35mm] at (95,-25.5)
+      {\textcolor{ink}{Netflix, 10:00, 14:00}\\ also Spotify};
+    \node[question, anchor=west, text width=50mm] at (0,-40)
+      {Which option to use, while still learning which works?};
+    \mapchip{1-}{71}{-40}{bd}{Bandits}
+    \node[lbl, anchor=west, text width=35mm] at (95,-40)
+      {\textcolor{ink}{Adyen, 12:00}\\ also Yahoo, Microsoft, Spotify, Amazon};
+    \cardsource{LinkedIn, KDD 2024. Pinterest, KDD 2018. Spotify, slides 2014 and 2015. Yahoo, WWW 2010.
+      Microsoft, arXiv 2016. Spotify, RecSys 2018. Amazon, KDD 2017.}
+  \end{tikzpicture}
+\end{frame}
+
+\end{document}

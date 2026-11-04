@@ -60,6 +60,10 @@ Specifically:
 ├── opener-deck/                The weekend 2 opener (2026-11-03): six frames on why
 │                               recommendation, advertising and customer profiles matter,
 │                               opener.pdf and a handout; own CLAUDE.md and README.md
+├── cases-deck/                 Business cases of the weekend 2 techniques (2026-11-04): one
+│                               case at the end of each Friday lecture (Airbnb, the Netflix
+│                               Prize, Adyen, Netflix 2012) and a closing map; cases.pdf, a
+│                               handout and one PDF per lecture; own CLAUDE.md and README.md
 ├── original-decks/             Original PDFs from before the rebuild
 │   ├── w2_bandits.pdf
 │   └── w2_recsys.pdf
@@ -173,6 +177,19 @@ is the copy in `style/`, whose CLAUDE.md says where the canonical copy lives. Ev
 `opener-deck/` (lualatex, three passes). The design conventions of this file (Okabe-Ito colours, no
 bold, six equations) belong to the FS26 lecture and do not bind the HS26 decks. Nothing links to the
 opener yet; a push makes the PDF public on Pages.
+
+## The cases deck (added 2026-11-04)
+
+`cases-deck/` holds the talk of business cases asked for after the BMAI HS26 evaluation: four cases, one at
+the end of each Friday lecture of weekend 2, and a map of business questions to the three techniques, 10 to 15
+minutes in all (Carlos's choice of 2026-11-04). Airbnb's similar homes after the video store (08:00), the
+Netflix Prize after the matchmaker (10:00), Adyen's epsilon-greedy bandit on payments after the bandits
+(12:00), what Netflix put into production after gradient descent (14:00), then the map. Every case frame is
+the same two by two card: what was built, the result and how it was measured, what it cost, what the company
+decided. Every number comes from `cases-deck/tools/cases_numbers.py`, next to its source sentence; the
+README grades every source. Same style and build as the opener: Codex plates from `style/`, built with
+`../style/tools/build.sh cases.tex` from inside `cases-deck/`. Nothing links to it yet; the course site
+links it only after Carlos approves it.
 
 ## When in doubt
 
