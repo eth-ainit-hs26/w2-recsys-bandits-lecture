@@ -63,7 +63,7 @@ version was read), SECONDARY (a press report). All read on 2026-11-04. Sites tha
 | 2 | 51,051 contestants from 186 countries (Say) | Netflix Prize leaderboard, https://web.archive.org/web/20090926213457/http://www.netflixprize.com/leaderboard | READ |
 | 2 | Cinematch is a correlation between films, a neighbour method (Say) | Bennett and Lanning, "The Netflix Prize", KDD Cup and Workshop 2007, https://www.cs.uic.edu/~liub/KDD-cup-2007/proceedings/The-Netflix-Prize-Bennett.pdf | READ |
 | 2 | "more than 100 different predictor sets, the majority of which are factorization models" | Koren, Bell, Volinsky, "Matrix Factorization Techniques for Recommender Systems", IEEE Computer 42(8), 2009, DOI 10.1109/MC.2009.263, read in the author copy https://web.archive.org/web/20110401191222/http://www2.research.att.com/~volinsky/papers/ieeecomputer.pdf | READ |
-| 2 | Netflix records of known users identified through IMDb | Narayanan and Shmatikov, "How To Break Anonymity of the Netflix Prize Dataset", https://arxiv.org/abs/cs/0610105 (abstract read); published as "Robust De-anonymization of Large Sparse Datasets", IEEE Symposium on Security and Privacy 2008, pp. 111-125, DOI 10.1109/SP.2008.33 (Crossref and Semantic Scholar records read) | READ (arXiv), REVIEW (S&P 2008) |
+| 2 | Netflix records of known users identified through IMDb, in a proof of concept on "a few dozen IMDb users" | Narayanan and Shmatikov, "Robust De-anonymization of Large Sparse Datasets", IEEE Symposium on Security and Privacy 2008, pp. 111-125, DOI 10.1109/SP.2008.33, authors' copy https://www.cs.cornell.edu/~shmat/shmat_oak08netflix.pdf ; preprint "How To Break Anonymity of the Netflix Prize Dataset", https://arxiv.org/abs/cs/0610105 | READ |
 | 2 | Second prize dropped after the FTC's question and the KamberLaw lawsuit | Neil Hunt, "Netflix Prize Update", Netflix blog, 12 March 2010, https://web.archive.org/web/20110104112307/http://blog.netflix.com/2010/03/this-is-neil-hunt-chief-product-officer.html | READ |
 | 3 | Production policy epsilon-greedy with a boosting model; 2 to 15 actions per payment, median 4; 5% of live traffic per variant, four weeks; +0.1% for SquareCB over epsilon-greedy, an estimated 9 million more authorised transactions a year; 87.4% and 93.5% positive rewards, "correlates with a 0.2% performance regression"; contracts, card network rules and amount thresholds filter the actions, fraud risk prunes them; retrained every 7 days (Say) | Vangara and Egg (Adyen), "Contextual Bandits in Payment Processing: Non-uniform Exploration and Supervised Learning", OARS workshop at KDD 2025, https://arxiv.org/abs/2412.00569 (version 2) | READ |
 | 3 | The options (3D Secure, card update, message format, instant retry); the bandit replaced A/B tests per account and bank | van Rooijen (Adyen), "Optimizing payment conversion rates with contextual multi-armed bandits", Adyen Knowledge Hub, 2 November 2020, https://www.adyen.com/knowledge-hub/optimizing-payment-conversion-rates-with-contextual-multi-armed-bandits | READ |
@@ -107,7 +107,7 @@ version was read), SECONDARY (a press report). All read on 2026-11-04. Sites tha
 - Frame 1, "bookings discovered in this row", stands for "4.9% more guests discovering the listing they ended
   up booking in the Similar Listing carousel".
 - Frame 2, "100+ models, most of them factorizations", is BellKor's description of its own winning entries.
-- Frame 2 cites the S&P 2008 paper; the claim was read in the abstract of its arXiv version.
+- Frame 2, "identified customers": the IMDb test was a proof of concept on a few dozen IMDb users, of whom two were identified.
 - Frame 3's +0.1% compares a smarter exploration rule (SquareCB) with epsilon-greedy. A comparison of the
   bandit with the A/B tests it replaced (2020) is published only as charts without numbers.
 - Frame 3, "the next model scored 0.2% lower": the paper says the more imbalanced data "correlates with a 0.2%
@@ -124,13 +124,19 @@ version was read), SECONDARY (a press report). All read on 2026-11-04. Sites tha
    result. PicPay (a Brazilian payments app, KDD 2023) says it rejected collaborative filtering for financial
    services because purchases are rare.
 4. Box of frame 3: rename to the 12:00 game when it is final.
-5. No frame on Swiss or EU rules, to keep one case per lecture. A case ready for one, READ in the FDPIC's
-   final report of 15 April 2024 on Digitec Galaxus (EDÖB-A-B3653401/5, in German,
-   https://www.edoeb.admin.ch/dam/en/sd-web/UbgCr4c7n-cD/20240415_Schlussbericht_Galaxus.pdf ): to order, customers
-   needed an account and had to accept the analysis of their shopping behaviour, with no way to object except
-   to direct marketing; the investigation ran from 15 February 2021; the FDPIC found that the profiles allow
-   an assessment of essential aspects of personality, as in "high-risk profiling" under the new law (left
-   open, because the old law applied), and made six recommendations, the sixth a guest checkout as a
-   proportionate way out. Digitec Galaxus accepted the sixth "without acknowledging a legal obligation" (our
-   translation), said it had already anticipated recommendations 1, 5 and part of 2, and rejected 3, 4 and
-   the rest of 2.
+5. No frame on Swiss or EU rules, to keep one case per lecture. Material for one, all READ, is in the
+   research notes (`git_ainit/research_notes/Business cases of the weekend 2 techniques/risks_rules.md`, local
+   and private):
+   - The FDPIC's final report of 15 April 2024 on Digitec Galaxus (EDÖB-A-B3653401/5, in German,
+     https://www.edoeb.admin.ch/dam/en/sd-web/UbgCr4c7n-cD/20240415_Schlussbericht_Galaxus.pdf ): to order,
+     customers needed an account and had to accept the analysis of their shopping behaviour, with no way to
+     object except to direct marketing; tying this to a mandatory account was found disproportionate; six
+     recommendations, of which Digitec Galaxus accepted the sixth "without acknowledging a legal obligation" (our
+     translation) and rejected 3, 4 and part of 2. The FDPIC closed the case on 12 February 2026: customers can
+     now switch website personalisation off with a single click (https://www.edoeb.admin.ch/en/digitec-galaxus-en ).
+   - ING (Netherlands), 2014: a trial of offers from other companies matched to customers' payments, postponed
+     after criticism from the AFM, the central bank and the data protection authority. In 2019 the Dutch
+     authority wrote that reusing payment data for direct marketing without consent is "probably incompatible"
+     with the purpose of collection (our translation).
+   - EU Digital Services Act, Article 38: very large platforms must offer, for each recommender system, at least
+     one option not based on profiling.
