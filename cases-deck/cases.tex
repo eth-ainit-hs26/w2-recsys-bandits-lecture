@@ -22,73 +22,76 @@
 
 \begin{document}
 
-% ===== Frame 1. Friday 08:00, after the nearest neighbours: Airbnb, 2018 =====
-% Say: A first case for what we just did in the video store. When a guest looks at a home on Airbnb, a
-% row of similar homes appears beside it. Airbnb's engineers gave each home a list of 32
-% numbers, learned from more than 800 million search sessions: homes that the same guest clicked in
-% one session end up with similar numbers. The similar homes are the 12 nearest neighbours of the home
-% on the screen, among the homes in the same market and free on the same dates. The A/B test compared
-% this with the old method, which ran the search ranking for the same place and kept the homes of the
-% same price range and type. With the nearest neighbours the row had a 21 percent higher click rate,
-% and 4.9 percent more guests found there the home they finally booked. That row matters: search and
-% similar homes together bring 99 percent of Airbnb's bookings. What it cost: a new home has no sessions
-% yet, so its numbers are the average of the 3 closest homes of the same type and price. And 32 numbers
-% was a trade-off between the offline results and the memory of the search machines, which hold every
-% vector. What they decided: learn from the home the guest finally booked as well as from the clicks,
-% and launch only after offline tests and an online experiment. The source is Airbnb's engineering blog
-% of March 2018; the paper appeared at KDD the same year.
-\begin{frame}{Airbnb, 2018: similar homes are nearest neighbours}
+% ===== Frame 1. Friday 08:00, after the nearest neighbours: Etsy, search candidates by inner product, 2024 =====
+% Say: A first case for what we just did in the video store, from Etsy, the marketplace for handmade and
+% vintage goods, with more than 100 million items. When you type a search, Etsy first shortlists several
+% thousand products. Historically, keyword search did that. Since this work part of the shortlist comes the
+% way we did it: your search, with your context such as your location and your recent searches, becomes a list
+% of numbers; every product becomes a list of numbers; and the products with the highest inner product join
+% the shortlist. One trick: Etsy appends a few quality numbers to every product's list, such as its shop's
+% popularity, and matching weights to the search's list, so the same inner product scores relevance and quality
+% at once. In A/B tests on live traffic, the new search raised the purchase rate of searches by 5.58 percent and
+% the conversion rate of the whole site by 2.63 percent. Both are relative changes, aggregated over several
+% tests. What it cost: a plain version of the model lost to old keyword search on popular searches. Of the
+% products people bought after such a search, it had 32 percent among its top 100 results; keyword search had
+% 63 percent. Adding the person's context closed the gap. Training takes about 72 hours on 4 GPUs. What Etsy
+% decided: speed first. The shortlist must come back within tens of milliseconds, so Etsy searches a compressed
+% index, fetches five times more products than it needs and re-ranks them: under 4 percent of the true nearest
+% products are missed, and 99 percent of the lookups take under 20 milliseconds. The source is Etsy's paper, a
+% preprint of 2023 presented at a conference in 2024.
+\begin{frame}{Etsy, 2024: nearest neighbours join keyword search}
   \begin{tikzpicture}[x=1mm, y=1mm]
     \path[use as bounding box] (0,1) rectangle (130,-54);
     \cardbuilt{This weekend: Friday 08:00, the video store}
-      {Each home is a list of \abDims~numbers, learned from over \abSessions~million search sessions.
-       Similar homes: its \abK~nearest neighbours.}
-    \cardresult{Result, A/B test}
-    \cardnumber{1}{+\abCtr\%}{click rate of the row of similar homes}
-    \cardnumber{2}{+\abFound\%}{guests who found their booking here}
-    \cardcost{A new home has no sessions yet: its numbers are the average of \abCold~similar homes nearby.}
-    \carddecided{Airbnb}{Learn from the homes guests booked as well as clicked; launch after an online test.}
-    \cardsource{Grbovic and others (Airbnb), Airbnb Tech Blog, 13 March 2018. Grbovic and Cheng, KDD 2018.}
+      {Each search and each product is a list of numbers; the products nearest by inner product join the
+       shortlist.}
+    \cardresult{Result, A/B tests, relative}
+    \cardnumber{1}{+\etCvr\%}{conversion rate of the whole site}
+    \cardnumber{2}{+\etOspr\%}{purchase rate of searches}
+    \cardcost{On popular searches a plain version found \etHeadBase\%~of~the~products~bought;
+      keyword~search~\etHeadBM\%.}
+    \carddecided{Etsy}{A compressed index: under~\etLoss\% of the nearest products missed, lookups within
+      \etMs~ms.}
+    \cardsource{Jha, Subramaniyam, Benjamin, Taula (Etsy), IEEE FMLDS 2024; preprint arXiv, June 2023.}
   \end{tikzpicture}
 \end{frame}
 
-% ===== Frame 2. Friday 10:00, after matrix factorization: the Netflix Prize, 2006 to 2009 =====
-% Say: The second case is the most famous contest in this field. In October 2006 Netflix published 100
-% million ratings, from 480,000 customers, and offered one million dollars to whoever guessed hidden
-% ratings 10 percent better than its own system did at the start. Its own system, Cinematch, was a
-% nearest neighbour method: films similar by their ratings, our case of 08:00. 51,051 contestants from
-% 186 countries registered. In July 2009 a team of seven reached 10.06 percent better than Cinematch,
-% measured on ratings that Netflix kept hidden, and won on 21 September. By 2008 their winning entries
-% held more than 100 models, most of them matrix factorizations: the profiles of this morning, one row
-% per customer, one row per film; the final blend of 2009 held hundreds. What it cost: the ratings were
-% anonymous, but two researchers matched them to ratings that people had posted publicly on IMDb. Of
-% about 50 IMDb users they tried, they found two in the Netflix data, and for one of them the films
-% suggested political and religious views. The authors call it a proof of concept. What Netflix decided:
-% it had announced a second contest; the US Federal Trade Commission raised privacy concerns and a law
-% firm filed a lawsuit. In March 2010 Netflix cancelled the contest, settled the lawsuit, and told the
-% FTC that any future data would go only to researchers who sign a contract limiting its use. A contest
-% is one way to buy research: the winners had to grant Netflix a non-exclusive licence to their methods.
-\begin{frame}{Netflix, 2009: the prize went to factorization}
+% ===== Frame 2. Friday 10:00, after matrix factorization: Spotify, audiobook recommendations, 2024 =====
+% Say: The second case is from 2024. When Spotify added audiobooks, it had almost nothing to learn from: at
+% launch each audiobook had to be bought before it could be streamed, and a quarter of the listeners made three
+% quarters of the audiobook hours. But over 70 percent of the first audiobook listeners had listened to
+% podcasts. So Spotify's engineers built something close to the matchmaker: a list of numbers for every
+% listener and every audiobook, here 128 numbers each, and a score that is their inner product. In the
+% matchmaker we learned the numbers directly; Spotify computes them with two networks, from what people
+% streamed, podcasts included, and from each book's description. The shelf "Audiobook for you" on the home
+% page picks from the audiobooks whose numbers have the highest inner product with the listener's. The test:
+% 11.5 million monthly users, split at random into 3 groups: the model already in production, a simpler new
+% model, and this one. Result: against the production model, the rate of people starting a new audiobook rose
+% by 46.8 percent, a relative change; with the simpler model it rose by 23.9 percent. What it cost: in offline
+% tests, for users who had never touched an audiobook, its suggestions cover only 12 percent of the catalogue,
+% against 19.3 percent for the simpler model. It is more accurate, on a narrower shelf. What Spotify decided:
+% the model went into production for every eligible user, and the narrower catalogue is a trade-off to revisit
+% later. The source is Spotify's paper at the Web Conference 2024.
+\begin{frame}{Spotify, 2024: podcasts reveal audiobook tastes}
   \begin{tikzpicture}[x=1mm, y=1mm]
     \path[use as bounding box] (0,1) rectangle (130,-54);
     \cardbuilt{This weekend: Friday 10:00, the matchmaker}
-      {Netflix shared \nfRatings~million ratings and offered \$\nfPrize~million for guesses
-       \nfTarget\% better than its own system.}
-    \cardresult{Result, on hidden ratings}
-    \cardnumber{1}{\nfWin\%}{better than Netflix's own system}
-    \cardnumber{2}{\nfModels+}{models by 2008, most factorizations}
-    \cardcost{Researchers matched public IMDb ratings to the anonymous data: \nsFound~of~about~\nsSample~IMDb
-      users identified.}
-    \carddecided{Netflix}{After FTC privacy concerns and a lawsuit, cancel Netflix Prize 2 (March 2010).}
-    \cardsource{Netflix Prize rules (2006) and results (2009). Koren, Bell, Volinsky, IEEE Computer 2009.
-      Narayanan and Shmatikov, IEEE S\&P 2008. Netflix blog and FTC letter, 12 March 2010.}
+      {Each listener and each audiobook is \spDims~numbers, learned from what people streamed, podcasts
+       included.}
+    \cardresult{Result, A/B test}
+    \cardnumber{1}{+\spStart\%}{listeners starting a new audiobook}
+    \cardnumber{2}{\spUsers M}{monthly active users in the test}
+    \cardcost{For users new to audiobooks its picks cover only \spCoverNew\% of the catalogue, against
+      \spCoverPlain\% for a simpler model.}
+    \carddecided{Spotify}{In production for every eligible user; the narrower catalogue to be revisited.}
+    \cardsource{De Nadai and others (Spotify), Companion Proceedings of the Web Conference (WWW) 2024.}
   \end{tikzpicture}
 \end{frame}
 
-% ===== Frame 3. Friday 12:00, after the bandits: Adyen, how to send each payment, 2020 to 2025 =====
-% Say: The third case comes from payments. Adyen processes card payments for shops and services. A
-% payment can go to the customer's bank in several ways: with 3D Secure or without, as an instant retry,
-% with the message formatted another way. After the filters for contracts, card network rules and risk,
+% ===== Frame 3. Friday 12:00, after the bandits: Adyen, how to send each payment, 2025 =====
+% Say: The third case comes from payments, published in 2025. Adyen processes card payments for shops
+% and services. Before a payment goes to the customer's bank, Adyen can change how it is sent: the logic,
+% or the data attached to the transaction. After the filters for contracts, card network rules and risk,
 % a payment typically has 2 to 15 such options. A model predicts which option gets the payment approved,
 % and the rule is the one from this lecture, epsilon-greedy: the best guess almost always, a random
 % option now and then. Adyen then tested a smarter way to explore, which tries the options that are
@@ -99,10 +102,10 @@
 % every explored payment risks a decline. And a surprise: smarter exploring left fewer declines in the
 % data, and the next model trained on that data did 0.2 percent worse; the authors attribute the drop
 % to the missing declines. What Adyen decided: rules come first. Merchant contracts and card network
-% rules remove options before the bandit picks, and risky options are pruned too. By November 2020 the
-% bandit had replaced A/B tests per merchant and bank: with more payment features the test groups got
-% too small, and every test had to be rerun when the world changed. The models are retrained every 7
-% days.
+% rules remove options before the bandit picks, and risky options are pruned too. The models are
+% retrained every 7 days. The explored payments have a second use: Adyen evaluates new versions on
+% these logs offline, alongside its A/B tests, after one analysis found 58 percent of its A/B tests flat
+% or inconclusive, more than 20 weeks of testing a year wasted.
 \begin{frame}{Adyen, 2025: a better bandit approves more payments}
   \begin{tikzpicture}[x=1mm, y=1mm]
     \path[use as bounding box] (0,1) rectangle (130,-54);
@@ -116,74 +119,73 @@
       did \adRegress\% worse.}
     \carddecided{Adyen}{Rules first: contracts and card network rules remove options before the bandit
       picks.}
-    \cardsource{Vangara and Egg (Adyen), OARS workshop, KDD 2025. van Rooijen (Adyen), Adyen Knowledge Hub,
-      2~November 2020.}
+    \cardsource{Vangara and Egg (Adyen), OARS workshop, KDD 2025. Egg (Adyen), Off-policy Evaluation for
+      Payments at Adyen, arXiv, January 2025.}
   \end{tikzpicture}
 \end{frame}
 
-% ===== Frame 4. Friday 14:00, after gradient descent: what Netflix put into production, 2012 =====
-% Say: Back to Netflix, three years on. A year into the prize, the leading team had blended 107 models,
-% after more than 2,000 hours of work, and reached 8.43 percent; they gave Netflix the code. The
-% factorizations of the prize learn by gradient descent, this afternoon's method: one contestant
-% published it in December 2006, with a step size of 0.001, and a pass over all 100 million ratings took
-% his laptop about 7.5 seconds. Netflix took the two strongest of the 107 models into production: a
-% matrix factorization and a neural network called a restricted Boltzmann machine. What it cost: they
-% were built for 100 million ratings, Netflix had more than 5 billion, and they had to keep learning as
-% members added ratings. And the winning blend of 2009, hundreds of models for 10.06 percent? Netflix
-% tested some of the newer methods offline: the gains it measured did not seem to justify the
-% engineering, and by then its focus had moved on, one reason being the move to streaming. Netflix also
-% says an offline score only decides what to test next; the A/B test decides. The source is Netflix's engineering blog,
-% April 2012.
-\begin{frame}{Netflix, 2012: the winning blend did not ship}
+% ===== Frame 4. Friday 14:00, after gradient descent: LinkedIn, large ranking models, 2024 =====
+% Say: The last case of the day is LinkedIn, 2024. LinkedIn, with more than 1 billion members, ranks the
+% posts in your feed, the jobs it suggests and the ads it shows with models trained by gradient descent,
+% this afternoon's method. The feed model has billions of parameters, and it now learns from all feed
+% sessions, up from 13 percent. The training runs on several GPUs at once. In online A/B tests, the new
+% models brought 0.5 percent more member sessions in the feed, about 0.9 percent more qualified job
+% applications, both in job search and in job suggestions, and a 4.3 percent higher click rate on ads. All
+% three are relative changes. What it cost: one training run took 70 hours; in LinkedIn's benchmarks,
+% splitting the model's large tables across the GPUs brought it down to 20. And many early runs diverged, so
+% the step size now grows slowly over the first half of training, where it used to grow over the first 5
+% percent. What LinkedIn decided: more training steps would have helped, but every experiment would have taken
+% longer. So they took bigger steps: a learning rate three times larger closed almost all of the gap. And a new
+% model starts from the previous one, stays close to it, and learns only from the newest data; in their tests
+% this cut training time by 96 percent. One model, for short-lived posts, is retrained every 8 hours. The
+% source is LinkedIn's paper at KDD 2024.
+\begin{frame}{LinkedIn, 2024: bigger steps instead of longer training}
   \begin{tikzpicture}[x=1mm, y=1mm]
     \path[use as bounding box] (0,1) rectangle (130,-54);
     \cardbuilt{This weekend: Friday 14:00, gradient descent}
-      {Netflix put the two strongest prize models into production: a matrix factorization and a
-       neural network.}
-    \cardresult{Result, on hidden ratings}
-    \cardnumber{1}{\nfPPGain\%}{\nfPPModels~models, 2007}
-    \cardnumber{2}{\nfWin\%}{hundreds of models, 2009}
-    \cardcost{Built for \nfBuiltFor~million ratings, the models had to learn from more than \nfHad~billion,
-      and keep learning as members rated.}
-    \carddecided{Netflix}{Ship those two. Newer methods: the offline gains did not seem worth the
-      engineering.}
-    \cardsource{Amatriain and Basilico (Netflix), Netflix Tech Blog, 6 April and 20 June 2012. Funk, blog,
-      11 December 2006.}
+      {Models rank the feed, jobs and ads. The feed's has billions of parameters, trained on several GPUs.}
+    \cardresult{Result, A/B tests, relative}
+    \cardnumber{1}{+\liSessions\%}{member sessions in the feed}
+    \cardnumber{2}{+\liAdsCtr\%}{click rate on ads}
+    \cardcost{A training run took \liHoursBefore~hours; splitting the model across GPUs cut it to
+      \liHoursAfter~hours. Many early runs diverged.}
+    \carddecided{LinkedIn}{Longer training would slow experiments: triple the learning rate instead.}
+    \cardsource{Borisyuk and others (LinkedIn), LiRank: Industrial Large Scale Ranking Models at LinkedIn,
+      KDD 2024.}
   \end{tikzpicture}
 \end{frame}
 
 % ===== Frame 5. Friday 14:00, the map: which technique answers which business question =====
-% Say: To close the weekend, the three questions behind these cases. Which products, or clients, are
-% like this one? Nearest neighbours: Airbnb's similar homes, and the same idea at Amazon, which
-% recommends the items most similar to what a customer bought, and at Pinterest.
-% Which product will this client want, though we never showed it? Matrix factorization: the Netflix
-% Prize, learned by gradient descent, and Spotify's weekly playlist. Which option should we use, while
-% we are still learning which one works? A bandit: Adyen's payments, and before them Yahoo's front page,
-% Microsoft's MSN, Spotify's home page and an Amazon landing page. In every case, ask four things: what
-% was the result compared to, how it was measured, what it cost, and which rules applied.
+% Say: To close today's lectures, the four questions behind these cases. Which products, or people, are
+% nearest to this one? Nearest neighbours: Etsy's search, and the same idea in Airbnb's search and in
+% Snapchat's friend suggestions. Which product will this client want, though we never showed it? Matrix
+% factorization and its successors: Spotify's audiobooks, Pinterest's home feed, and Uber Eats, which replaced
+% thousands of factorizations, one per city, with one model. Which option should we use, while we are still
+% learning which one works? A bandit: Adyen's payments, Amazon Payments choosing the picture and tagline that
+% each visitor sees on the page where people start an application, and Dream11 choosing the payment gateway. A
+% bandit bought as a service can also disappear: Microsoft retired its bandit service, Azure Personalizer, in
+% 2026. And how do we learn all these numbers from billions of examples? Gradient descent on many GPUs:
+% LinkedIn, and Kuaishou, a Chinese video app that trains a recommender, OneRec, on 90 servers with 8 GPUs
+% each. In every case, ask four things: what was the result compared to, how it was measured, what it cost, and
+% which rules applied.
 \begin{frame}{Which technique answers which question}
   \begin{tikzpicture}[x=1mm, y=1mm]
     \path[use as bounding box] (0,1) rectangle (130,-54);
     \node[lbl, anchor=north west] at (0,0) {The business question};
-    \node[lbl, anchor=north] at (71,0) {The technique};
-    \node[lbl, anchor=north west] at (95,0) {The cases};
-    \node[question, anchor=west, text width=50mm] at (0,-11)
-      {Which products, or clients, are like this one?};
-    \mapchip{1-}{71}{-11}{nn}{Nearest neighbours}
-    \node[lbl, anchor=west, text width=35mm] at (95,-11)
-      {\textcolor{ink}{Airbnb, 08:00}\\ also Amazon, Pinterest};
-    \node[question, anchor=west, text width=50mm] at (0,-25.5)
-      {Which unseen product will this client want?};
-    \mapchip{1-}{71}{-25.5}{mf}{Matrix factorization}
-    \node[lbl, anchor=west, text width=35mm] at (95,-25.5)
-      {\textcolor{ink}{Netflix, 10:00, 14:00}\\ also Spotify};
-    \node[question, anchor=west, text width=50mm] at (0,-40)
-      {Which option to use, while still learning which works?};
-    \mapchip{1-}{71}{-40}{bd}{Bandits}
-    \node[lbl, anchor=west, text width=35mm] at (95,-40)
-      {\textcolor{ink}{Adyen, 12:00}\\ also Yahoo, Microsoft, Spotify, Amazon};
-    \cardsource{Amazon, IEEE Internet Computing 2003. Pinterest, KDD 2018. Spotify, slides 2014 and 2015. Yahoo, WWW 2010.
-      Microsoft, arXiv 2016. Spotify, RecSys 2018. Amazon, KDD 2017.}
+    \node[lbl, anchor=north] at (67,0) {The technique};
+    \node[lbl, anchor=north west] at (90,0) {The cases};
+    \foreach \y/\q/\n/\t/\c/\a in {
+        -10/{Which products, or people, are nearest to this one?}/nn/{Nearest neighbours}/{Etsy, 08:00}/{also Airbnb, Snap},
+        -21/{Which unseen product will this client want?}/mf/{Matrix factorization}/{Spotify, 10:00}/{also Pinterest, Uber},
+        -32/{Which option to use, while still learning which works?}/bd/{Bandits}/{Adyen, 12:00}/{also Amazon, Dream11},
+        -43/{How to learn the numbers from billions of examples?}/gd/{Gradient descent}/{LinkedIn, 14:00}/{also Kuaishou}} {
+      \node[question, font=\normalsize\itshape, anchor=west, text width=45mm] at (0,\y) {\q};
+      \mapchip{1-}{67}{\y}{\n}{\t}
+      \node[lbl, anchor=west, text width=40mm] at (90,\y) {\textcolor{ink}{\c}\\ \a};
+    }
+    \node[src, anchor=north west, text width=130mm] at (0,-48.6)
+      {Airbnb, arXiv 2026. Snap, SIGIR 2023. Pinterest, KDD 2022. Uber, engineering blog 2023. Amazon, AWS blog 2026.
+       Dream11, arXiv 2023. Kuaishou, arXiv 2025.};
   \end{tikzpicture}
 \end{frame}
 

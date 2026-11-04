@@ -1,13 +1,16 @@
 # CLAUDE.md : cases-deck/, business cases of the weekend 2 techniques
 
 A short talk for managers in four parts, one case at the end of each Friday lecture of weekend 2 of AINIT HS26
-(13 November 2026), then a map: Airbnb's similar homes, nearest neighbours (08:00); the Netflix Prize, matrix
-factorization (10:00); Adyen's payments, an epsilon-greedy bandit (12:00); what Netflix put into production,
-gradient descent at scale (14:00); then one frame that maps three business questions to the three techniques
-(14:00). Asked for on 2026-11-04 after the BMAI HS26 evaluation, whose most repeated request (six comments, and
-the same in HS25 and FS26) was real business use cases. Carlos chose the slot ("one case per lecture") and the
-length (10 to 15 minutes in all) the same day. It follows `../opener-deck/` and repeats none of its numbers.
-README.md has the frames, the sources with their grades, the choices made without asking and the open items.
+(13 November 2026), then a map: Etsy's search, nearest neighbours by inner product (08:00, FMLDS 2024);
+Spotify's audiobooks, a vector per listener and per audiobook (10:00, WWW 2024); Adyen's payments, an
+epsilon-greedy bandit (12:00, KDD workshop 2025); LinkedIn's ranking models, gradient descent at scale (14:00,
+KDD 2024); then one frame that maps four business questions to the four techniques (14:00). Asked for on
+2026-11-04 after the BMAI HS26 evaluation, whose most repeated request (six comments, and the same in HS25 and
+FS26) was real business use cases. Carlos chose the slot ("one case per lecture") and the length (10 to 15
+minutes in all) the same day. That evening he rejected version 1 (Airbnb 2018, the Netflix Prize, Netflix 2012;
+commits `b840920` to `405acd3`) as old: "Results should be latest from 2021." It follows `../opener-deck/` and
+repeats none of its numbers. README.md has the frames, the sources with their grades, the choices made without
+asking and the open items.
 
 ## Files
 
@@ -25,6 +28,11 @@ Build and check, from this folder: the commands in README.md, section "Build and
 
 ## Gotchas
 
+- **Every case is a result published in 2021 or later** (Carlos, 2026-11-04). Check the year of every source
+  of a card, a map row or a source line before proposing it; an older paper may give background in the Say only.
+- **`../style/tools/check.sh` rejects the word "candidate"** in the PDF, among its build-metadata words
+  (README.md, CLAUDE.md, TBD, placeholder, FIXME, mockup, .tex), so a slide about retrieval candidates fails the
+  check. The slides say "shortlist".
 - **Every frame is a picture in mm** (`x=1mm, y=1mm`, bounding box `(0,1) rectangle (130,-54)`), as in the
   opener. Body text at `\normalsize` holds about 40 characters a line in the 68 mm left column of a card and
   about 31 in the 53 mm right one.
@@ -41,10 +49,13 @@ Build and check, from this folder: the commands in README.md, section "Build and
 - **A new frame changes the parts.** `tools/split_parts.py` fails when the deck's frame count differs from its
   `PARTS` table; update the table, README.md and this file together.
 - **Check the claims against the sources, as well as the numbers.** `tools/check_numbers.py` only proves that
-  the numbers reached the PDF. The second read of 2026-11-04 (README, section "Second read") found no wrong
-  number but several claims stronger than their sources: what a count covers ("100+ models by 2008"), how many
-  were identified ("2 of about 50"), what a test compared ("a better bandit" against the one running). Give
-  every new case such a read by a second agent with the source files.
+  the numbers reached the PDF. The second read of version 1 found no wrong number but several claims stronger
+  than their sources: what a count covers, how many were identified, what a test compared ("a better bandit"
+  against the one running). Give every new case such a read by a second agent with the source files; README.md,
+  section "Second read", has what the read of version 2 changed.
+- **The map's rows are tight.** Four rows at y = -10, -21, -32, -43 and the source line at -48.6; the questions
+  are `\normalsize` in 45 mm, the chips at x = 67 (`\mapchip` is 7.6 mm high), the cases column at x = 90 and
+  40 mm wide, so "also" holds two company names. A third name wraps to a third line and touches the next row.
 - **This repository is public and every push to main publishes it on GitHub Pages**, the deck included. The
   course site (AINIT-PAGE) links it only after Carlos approves it.
 

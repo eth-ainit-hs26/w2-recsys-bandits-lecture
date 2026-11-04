@@ -1,10 +1,11 @@
 # Cases deck: who uses it, and what it paid
 
 Four business cases of the weekend 2 techniques, for AINIT HS26, Friday 13 November 2026: one case at the end
-of each Friday lecture, then a map of business questions to the three techniques. Asked for on 2026-11-04,
+of each Friday lecture, then a map of four business questions to the techniques. Asked for on 2026-11-04,
 after the BMAI HS26 evaluation, whose most repeated request (six comments, and the same in HS25 and FS26) was
 real business use cases. Carlos chose the slot ("one case per lecture") and the length (10 to 15 minutes in
-all) the same day.
+all) the same day. The same evening he rejected the cases of version 1 as old: "Results should be latest from
+2021." Every case and every source of the map in version 2 was published from 2022 to 2026.
 
 - `cases.pdf`: the deck, 5 frames over 17 pages (the clicks).
 - `cases-handout.pdf`: one page per frame, its last click.
@@ -16,11 +17,11 @@ all) the same day.
 
 | # | Slot | Title | Technique | On the slide |
 |---|---|---|---|---|
-| 1 | Friday 08:00, after the video store | Airbnb, 2018: similar homes are nearest neighbours | Nearest neighbours on learned vectors | 32 numbers per home, learned from over 800 million search sessions; the 12 nearest neighbours. A/B test against the old similar homes: click rate of the row +21%, guests who found their booking in the row +4.9%. Cost: a new home borrows the average of 3 similar homes. Decided: learn from bookings as well as clicks, launch after an online test |
-| 2 | Friday 10:00, after the matchmaker | Netflix, 2009: the prize went to factorization | Matrix factorization | 100 million ratings, 1 million dollars for 10% better guesses. On hidden ratings: 10.06%; 100+ models by 2008, most of them factorizations. Cost: public IMDb ratings matched to the anonymous data, 2 of about 50 IMDb users identified. Decided: Netflix Prize 2 cancelled after FTC privacy concerns and a lawsuit, March 2010 |
+| 1 | Friday 08:00, after the video store | Etsy, 2024: nearest neighbours join keyword search | Nearest neighbours by inner product, on vectors from a two-tower model | Each search and each product a list of numbers; the products nearest by inner product join the shortlist. A/B tests, relative: site-wide conversion rate +2.63%, purchase rate of searches +5.58%. Cost: on popular searches a plain version found 32% of the products bought, keyword search 63%. Decided: a compressed index: under 4% of the nearest products missed, lookups within 20 ms |
+| 2 | Friday 10:00, after the matchmaker | Spotify, 2024: podcasts reveal audiobook tastes | A vector per listener and per audiobook, scored by inner product (a two-tower model on a graph of podcasts and audiobooks) | 128 numbers each, learned from what people streamed, podcasts included. A/B test with 11.5M monthly active users: +46.8% listeners starting a new audiobook. Cost: for users new to audiobooks its picks cover 12.0% of the catalogue, against 19.3% for a simpler model. Decided: in production for every eligible user; the narrower catalogue to be revisited |
 | 3 | Friday 12:00, after the bandits | Adyen, 2025: a better bandit approves more payments | Epsilon-greedy contextual bandit | 2 to 15 ways to send most payments. A/B test: +0.1% approval rate from smarter exploring, 9M more approvals a year (Adyen's estimate). Cost: exploring risks declines; the next model did 0.2% worse. Decided: contracts and card network rules remove options first |
-| 4 | Friday 14:00, after gradient descent | Netflix, 2012: the winning blend did not ship | Matrix factorization learned by gradient descent | 8.43% with 107 models (2007), 10.06% with hundreds (2009). Cost: built for 100 million ratings, Netflix had more than 5 billion. Decided: ship the two strongest models; for newer methods, the offline gains did not seem worth the engineering |
-| 5 | Friday 14:00 | Which technique answers which question | All three | Three business questions, the technique for each, this weekend's case and other companies that use it |
+| 4 | Friday 14:00, after gradient descent | LinkedIn, 2024: bigger steps instead of longer training | Gradient descent at scale: ranking models with billions of parameters, trained on several GPUs | Models rank the feed, jobs and ads. A/B tests, relative: +0.5% member sessions in the feed, +4.3% click rate on ads. Cost: a training run took 70 hours, 20 after splitting the model across GPUs; many early runs diverged. Decided: triple the learning rate in place of longer training |
+| 5 | Friday 14:00 | Which technique answers which question | All four | Four business questions, the technique for each, this weekend's case and other companies that use it (Airbnb, Snap; Pinterest, Uber; Amazon, Dream11; Kuaishou), with the venue and year of each source |
 
 Every case frame is the same two by two card, one quarter per click: what was built, with this weekend's
 session (top left); the result and how it was measured (top right); what it cost (bottom left); what the
@@ -42,129 +43,146 @@ python3 tools/split_parts.py cases.pdf
 ```
 
 No number is typed into `cases.tex`. `tools/cases_numbers.py` holds every number next to the sentence of its
-source, asserts the Netflix arithmetic (10.06% = 1 - 0.8567 / 0.9525), and writes `numbers.tex` and
-`tools/expected.txt`. `tools/check_numbers.py` reads the 20 expected strings back from the rendered PDF.
+source, asserts the order of Etsy's three models on popular searches (final model 72%, keyword search 63%,
+plain version 32%), and writes `numbers.tex` and `tools/expected.txt`. `tools/check_numbers.py` reads the 19
+expected strings back from the rendered PDF.
 
-State on 2026-11-04, after the second read: 17 pages, 0 log errors, 0 em and en dashes, no build metadata,
-nothing moves between clicks, all 20 numbers found in the PDF. The last click of every frame was rendered and
-read.
+State on 2026-11-04, version 2 after its second read: 17 pages, 0 log errors, 0 em and en dashes, no build
+metadata, nothing moves between clicks, all 19 numbers found in the PDF. The last click of every frame was
+rendered and read.
 
 ## Sources
 
-Grades: READ (the primary text was read), REVIEW (only a bibliographic record or the abstract of another
-version was read), SECONDARY (a press report). All read on 2026-11-04. Sites that refused automated reading
-(Medium, ACM, IEEE) were read through web.archive.org copies or author copies, as noted.
+Grades: READ (the primary text was read), REVIEW (the source contradicts itself, or its venue or date is
+uncertain). All read on 2026-11-04. A preprint or a company blog has no peer review; the Source column says
+which each one is.
 
 | Frame | Claim | Source | Grade |
 |---|---|---|---|
-| 1 | 32 numbers per listing, more than 800 million search click sessions, k=12 among the listings of the same market free on the same dates, A/B test against the old Similar Listings algorithm (the search ranking for the same location, filtered on price range and listing type; Say), +21% carousel click rate and 4.9% more guests discovering the listing they booked, mean of 3 listings for a new one, 99% of bookings from search and similar listings (Say), learning from the booked listing | Grbovic, Cheng, Zhang, Yang, Siclait, Jones (Airbnb), "Listing Embeddings for Similar Listing Recommendations and Real-time Personalization in Search Ranking", The Airbnb Tech Blog, 13 March 2018, https://medium.com/airbnb-engineering/listing-embeddings-for-similar-listing-recommendations-and-real-time-personalization-in-search-601172f7603e , read at http://web.archive.org/web/20260725105017/https://medium.com/airbnb-engineering/listing-embeddings-for-similar-listing-recommendations-and-real-time-personalization-in-search-601172f7603e | READ |
-| 1 | Offline tests, then online tests, before production | Grbovic and Cheng, "Real-time Personalization using Embeddings for Search Ranking at Airbnb", KDD 2018, DOI 10.1145/3219819.3219885, abstract at https://www.kdd.org/kdd2018/accepted-papers/view/real-time-personalization-using-embeddings-for-search-ranking-at-airbnb | READ (abstract) |
-| 2 | 1,000,000 USD for at least 10% better than Cinematch; more than 100 million ratings from over 480 thousand customers; the winners license their method to Netflix (Say) | Netflix Prize Rules, https://web.archive.org/web/20061105165727/http://www.netflixprize.com/rules | READ |
-| 2 | 10.06% improvement, RMSE 0.8567 against 0.9525, submitted 26 July 2009, awarded 21 September 2009 | "Grand Prize awarded to team BellKor's Pragmatic Chaos", Netflix Prize forum, https://web.archive.org/web/20091228043112/http://www.netflixprize.com/community/viewtopic.php?id=1537 | READ |
-| 2 | 51,051 contestants from 186 countries (Say) | Netflix Prize leaderboard, https://web.archive.org/web/20090926213457/http://www.netflixprize.com/leaderboard | READ |
-| 2 | Cinematch is a correlation between films, a neighbour method (Say) | Bennett and Lanning, "The Netflix Prize", KDD Cup and Workshop 2007, https://www.cs.uic.edu/~liub/KDD-cup-2007/proceedings/The-Netflix-Prize-Bennett.pdf | READ |
-| 2 | "more than 100 different predictor sets, the majority of which are factorization models", said of the team's winning entries up to the 2008 Progress Prize (8.43% in 2007, 9.46% in 2008), written before the final entry | Koren, Bell, Volinsky, "Matrix Factorization Techniques for Recommender Systems", IEEE Computer 42(8), 2009, DOI 10.1109/MC.2009.263, read in the author copy https://web.archive.org/web/20110401191222/http://www2.research.att.com/~volinsky/papers/ieeecomputer.pdf | READ |
-| 2 | The records of 2 users found in the Netflix data from the public IMDb ratings of "around 50 IMDb users", a "proof of concept"; for one of them, political and religious views (Say) | Narayanan and Shmatikov, "Robust De-anonymization of Large Sparse Datasets", IEEE Symposium on Security and Privacy 2008, pp. 111-125, DOI 10.1109/SP.2008.33, authors' copy https://www.cs.cornell.edu/~shmat/shmat_oak08netflix.pdf ; preprint https://arxiv.org/abs/cs/0610105 , listed as "How To Break Anonymity of the Netflix Prize Dataset" (its version 2 PDF is titled "Robust De-anonymization of Large Datasets") | READ |
-| 2 | The sequel (Prize 2) dropped after the FTC's question and the KamberLaw lawsuit; the lawsuit settled (Say) | Neil Hunt, "Netflix Prize Update", Netflix blog, 12 March 2010, https://web.archive.org/web/20110104112307/http://blog.netflix.com/2010/03/this-is-neil-hunt-chief-product-officer.html | READ |
-| 2 | FTC staff's concerns about Prize 2, the risk of re-identification first; any future data only to researchers who agree by contract to limits on its use (Say) | FTC, closing letter to Netflix's counsel, 12 March 2010, https://www.ftc.gov/sites/default/files/documents/closing_letters/netflix-inc./100312netflixletter.pdf , read at http://web.archive.org/web/20250713123753/https://www.ftc.gov/sites/default/files/documents/closing_letters/netflix-inc./100312netflixletter.pdf | READ |
+| 1 | More than 100 million items, several thousand candidates per search (Say); candidate retrieval "historically" powered by lexical matching (Say), and the inverted index retrieval system still described in the present tense beside the new one (Sec. IV), hence "join keyword search"; the query tower takes the user's location, recent searches and other history (Say); trained with cosine similarity; quality numbers such as shop popularity appended to each product vector and weights to the query vector, scored by one inner product (Say); A/B tests on live traffic, aggregated: site-wide conversion rate +2.63%, organic search purchase rate +5.58%; Recall@100 on head queries (Table I): Base 0.32, BM25 0.63, the final model 0.72; 4 A100 GPUs, about 72 hours (Say); a 4-bit product quantizer fastscan index in Faiss, re-ranking after fetching 5 times K, recall loss under 4% against exact nearest neighbours, P99 latency under 20 ms (in the bullet on the index; "tens of milliseconds" is the requirement, Say) | Jha, Subramaniyam, Benjamin, Taula (Etsy), "Unified Embedding Based Personalized Retrieval in Etsy Search", 2024 IEEE International Conference on Future Machine Learning and Data Science (FMLDS), Sydney, pp. 258-264, DOI 10.1109/FMLDS63805.2024.00055 (Crossref); preprint https://arxiv.org/abs/2306.04833 , v1 7 June 2023 (both A/B numbers already in it), v2 25 September 2024, read in full | READ |
+| 2 | 11.5 million monthly active users in 3 random groups: the production model, the 2T model, 2T-HGNN; the shelf "Audiobook for you" (Say); new audiobooks start rate +46.83% for 2T-HGNN and +23.87% for 2T (Table 5), "a 46% surge in the rate of people starting new audiobooks" (Sec. 1); 128-dimensional vectors, close "in dot product distance", computed by two towers from listening history, demographics and each book's title and description (Sec. 4.3.1, Say); podcasts and audiobooks linked when one user streams both; over 70% of the first audiobook listeners had listened to podcasts, at launch 25% of users made 75% of the audiobook streaming hours (Figure 2A), each audiobook had to be bought at launch (Say); coverage, offline, for users who "never interacted with an audiobook" 12.0% for 2T-HGNN against 19.3% for 2T (Table 3), a trade-off "to be eventually re-consider[ed]"; in production for all eligible users | De Nadai, Fabbri, Gigioli, Wang, Li, Silvestri, Kim, Lin, Radosavljevic, Ghael, Nyhan, Bouchard, Lalmas-Roelleke, Damianou (Spotify), "Personalized Audiobook Recommendations at Spotify Through Graph Neural Networks", Companion Proceedings of the ACM Web Conference 2024 (WWW '24 Companion, Industry Track), pp. 403-412, DOI 10.1145/3589335.3648339; https://arxiv.org/abs/2403.05185 , read in full | READ. The stream rate is REVIEW (abstract +23%, Table 5 +25.82%) and stays off the slide |
 | 3 | Production policy epsilon-greedy with a boosting model; typically 2 to 15 actions per payment after the rule and risk filters, median 4; 5% of live traffic per variant, four weeks for the main comparison (two variants ran one week, Table 3); +0.1% for the best SquareCB variant over epsilon-greedy, an estimated 9 million more authorised transactions a year; 87.4% and 93.5% positive rewards, "correlates with a 0.2% performance regression", a drop the caption of Figure 10 attributes to the imbalance; contracts, card network rules and amount thresholds filter the actions, fraud risk prunes them; retrained every 7 days (Say) | Vangara and Egg (Adyen), "Contextual Bandits in Payment Processing: Non-uniform Exploration and Supervised Learning", OARS workshop at KDD 2025, https://arxiv.org/abs/2412.00569 (version 2) | READ |
-| 3 | The options (3D Secure, card update, message format, instant retry); the bandit replaced A/B tests per account and bank, whose groups got too small as payment features were added and which had to be rerun when the world changed (Say) | van Rooijen (Adyen), "Optimizing payment conversion rates with contextual multi-armed bandits", Adyen Knowledge Hub, 2 November 2020, https://www.adyen.com/knowledge-hub/optimizing-payment-conversion-rates-with-contextual-multi-armed-bandits | READ |
-| 4 | 8.43%, more than 2000 hours, 107 algorithms, the source code; SVD and RBM into production; built for 100 million ratings against more than 5 billion; some of the Grand Prize's new methods evaluated offline, their gains "did not seem to justify the engineering effort"; the focus had shifted, streaming being one reason (Say) | Amatriain and Basilico, "Netflix Recommendations: Beyond the 5 stars (Part 1)", The Netflix Tech Blog, 6 April 2012, https://web.archive.org/web/20130105140308/http://techblog.netflix.com/2012/04/netflix-recommendations-beyond-5-stars.html | READ |
-| 4 | Offline scores only decide which A/B test follows (Say) | the same, Part 2, 20 June 2012, https://web.archive.org/web/20130115100808/http://techblog.netflix.com/2012/06/netflix-recommendations-beyond-5-stars.html | READ |
-| 4 | "All models are learned by stochastic gradient descent" (Say) | Koren, "The BellKor Solution to the Netflix Grand Prize", August 2009, https://www2.seas.gwu.edu/~simhaweb/champalg/cf/papers/KorenBellKor2009.pdf | READ |
-| 4 | Learning rate 0.001; a pass over 100 million ratings in about 7.5 seconds on a laptop (Say) | Funk, "Netflix Update: Try This at Home", 11 December 2006, https://sifter.org/~simon/journal/20061211.html | READ |
-| 5 | Amazon: item-to-item collaborative filtering, a similar-items table of items that customers tend to buy together (cosine of item vectors over customers); recommends the items most similar to what a customer bought | Linden, Smith, York (Amazon), "Amazon.com Recommendations: Item-to-Item Collaborative Filtering", IEEE Internet Computing 7(1), 2003, pp. 76-80, DOI 10.1109/MIC.2003.1167344, copy read at https://www.cs.umd.edu/~samir/498/Amazon-Recommendations.pdf | READ |
-| 5 | Pinterest: related pins are the nearest neighbours of a pin's vector | Ying and others, "Graph Convolutional Neural Networks for Web-Scale Recommender Systems", KDD 2018, https://arxiv.org/abs/1806.01973 | READ |
-| 5 | Spotify: implicit matrix factorization, Discover Weekly | Johnson, "Algorithmic Music Discovery at Spotify", slides, 13 January 2014, https://web.archive.org/web/20160112235452/http://www.slideshare.net/MrChrisJohnson/algorithmic-music-recommendations-at-spotify ; Johnson and Newett, "From Idea to Execution: Spotify's Discover Weekly", slides, November 2015, https://web.archive.org/web/20161221213105/http://www.slideshare.net/MrChrisJohnson/from-idea-to-execution-spotifys-discover-weekly | READ (transcripts) |
-| 5 | Yahoo: contextual bandit (LinUCB) for the front page | Li, Chu, Langford, Schapire, "A Contextual-Bandit Approach to Personalized News Article Recommendation", WWW 2010, https://arxiv.org/abs/1003.0146 | READ |
-| 5 | Microsoft: Decision Service, epsilon-greedy on MSN | Agarwal and others, "Making Contextual Decisions with Low Technical Debt", https://arxiv.org/abs/1606.03966 (no published venue found) | READ |
-| 5 | Spotify: epsilon-greedy bandit for the home page | McInerney and others, "Explore, Exploit, and Explain: Personalizing Explainable Recommendations with Bandits", RecSys 2018, DOI 10.1145/3240323.3240354, author copy http://www.jamesmc.com/s/BartRecSys.pdf | READ |
-| 5 | Amazon: Thompson sampling bandit for a page layout | Hill and others, "An Efficient Bandit Algorithm for Realtime Multivariate Optimization", KDD 2017, https://arxiv.org/abs/1810.09558 | READ |
+| 3 | Interventions such as "adjusting logic or modifying transaction metadata" (Say); "58% of tests were flat or inconclusive, resulting in over 20 weeks per year of wasted experimentation time" (Say); off-policy evaluation "alongside traditional on-policy evaluation" (Say) | Egg (Adyen), "Off-policy Evaluation for Payments at Adyen", https://arxiv.org/abs/2501.10470 , v1 15 January 2025 (preprint) | READ |
+| 4 | More than 1 billion members (Say); online A/B tests, relative: +0.5% member sessions in the Feed, +0.89% and +0.87% qualified applications in job search and job suggestions (Table 7, Say; the abstract's +1.76% is their sum), +4.3% Ads CTR; a global Feed model with billions of parameters (Sec. 3.9); synchronous training on multiple GPUs with Horovod; model parallelism of the embedding tables, training time from 70 to 20 hours in benchmarks; the Feed trained on 100% of sessions, up from 13% (Say); many diverging runs, warm-up from 5% to 50% of the training steps (Say); more training steps ruled out for "experimentation velocity", a three-fold learning rate closed almost all of the gap; incremental training starts from the previous model and stays close to it, one day of new data against a 21-day fresh start, training time -96% (Sec. 3.6, Tables 3 to 5, Say); the model for short-lived posts retrained every 8 hours (Say) | Borisyuk, Zhou, Song, Zhu, Tiwana, Parameswaran and 28 others (LinkedIn), "LiRank: Industrial Large Scale Ranking Models at LinkedIn", KDD '24, Barcelona, DOI 10.1145/3637528.3671561; https://arxiv.org/abs/2402.06859 (version 2), read in full | READ |
+| 5 | Airbnb: each search and each listing a vector from a two-tower model, the listings nearest to the search kept as candidates; launched in search and promotional emails | Abdool and others (Airbnb), "Applying Embedding-Based Retrieval to Airbnb Search", https://arxiv.org/abs/2601.06873 (preprint, January 2026); "Embedding-Based Retrieval for Airbnb Search", Airbnb blog, 2025, https://airbnb.tech/ai-ml/embedding-based-retrieval-for-airbnb-search/ | READ |
+| 5 | Snap: friend suggestions from the nearest neighbours of a user's vector, next to friends of friends | Shi and others (Snap), "Embedding Based Retrieval in Friend Recommendation", SIGIR '23, pp. 3330-3334, DOI 10.1145/3539618.3591848; Kung and others (Snap), "Improving Embedding-Based Retrieval in Friend Recommendation with ANN Query Expansion", SIGIR '24, pp. 2930-2934, DOI 10.1145/3626772.3661367 | READ |
+| 5 | Pinterest: one vector per user (PinnerFormer) for the home feed, "deployed in production as of Fall 2021" | Pancha, Zhai, Leskovec, Rosenberg (Pinterest), "PinnerFormer: Sequence Modeling for User Representation at Pinterest", KDD '22, pp. 3702-3712, DOI 10.1145/3534678.3539156, https://arxiv.org/abs/2205.04507 | READ |
+| 5 | Uber Eats: one two-tower model "replaces thousands of city DeepMF models" (Say) | Ling, Barr, Kurra, Zhu, Marcott (Uber), "Innovative Recommendation Applications Using Two Tower Embeddings at Uber", Uber Engineering Blog, 26 July 2023, read in the copy http://web.archive.org/web/20251012030030/https://www.uber.com/blog/innovative-recommendation-applications-using-two-tower-embeddings/ (the live page refused automated reading) | READ (no business result) |
+| 5 | Amazon Payments: a contextual bandit (LinUCB) picks the image and tagline each visitor sees on the page of a payments product, where an application starts; tested for seven weeks against the static page (Say) | John and Gozluklu (Amazon), "Uplifting conversion across the acquisition funnel with personalization using contextual bandits on AWS", AWS Machine Learning Blog, 1 October 2026, https://aws.amazon.com/blogs/machine-learning/uplifting-conversion-across-the-acquisition-funnel-with-personalization-using-contextual-bandits-on-aws/ | READ |
+| 5 | Dream11: bandits choose the payment gateway of each transaction (Say) | Chaudhary, Rai, Gupta, "Maximizing Success Rate of Payment Routing using Non-stationary Bandits", https://arxiv.org/abs/2308.01028 (version 2, October 2023) | READ; the venue year is REVIEW (printed as 2023 and as 2024) |
+| 5 | Microsoft retired Azure Personalizer in 2026 (Say) | Azure update of 29 September 2023: "On 1 October 2026 AI Services Personalizer will be retired.", http://web.archive.org/web/20231206025711id_/https://azure.microsoft.com/en-us/updates/ai-services-personalizer-will-be-retired-on-1-october-2026/ ; Microsoft Lifecycle, https://learn.microsoft.com/en-us/lifecycle/end-of-support/end-of-support-2026 ; the Learn page says 25 August 2026, https://learn.microsoft.com/en-us/previous-versions/azure/ai-services/personalizer/what-is-personalizer | READ; the day is REVIEW (two dates, both in 2026) |
+| 5 | Kuaishou: OneRec, a recommender trained on "90 servers for training, each equipped with 8 flagship GPUs" (Say) | OneRec Team (Kuaishou), "OneRec Technical Report", https://arxiv.org/abs/2506.13695 (version 1 June 2025, read version 4; a technical report) | READ |
 
 ## Choices made without asking
 
 1. **10 to 15 minutes in all**, read as about 2.5 minutes per case and 1 minute for the map.
-2. **The cases.** Airbnb has the clearest A/B result for nearest neighbours on learned vectors. The Netflix
-   Prize is the best known matrix factorization case and gives the failure case the brief asked for. Adyen is
-   the only finance case found with a primary source and a measured result, and runs epsilon-greedy, the rule
-   taught at 12:00. Netflix 2012 is the clearest case of cost against accuracy.
-3. **Netflix twice, on purpose**: the prize at 10:00, what shipped at 14:00, so the second Netflix frame needs
-   no new setting.
-4. **Cases read and not used**, all READ. Named on the map: Amazon's item-to-item filtering (no measured
-   result in the paper), Pinterest PinSage (10% to 30% more repins, KDD 2018), Microsoft's Decision
-   Service on MSN (more than 25% click rate over the editors' order, epsilon 33%), Spotify's home page (more
-   than 20% stream rate over a static order, exploration capped at 10%), Amazon's page layout (21% over the
-   median of 48 layouts), Yahoo's front page (12.5% more clicks, offline replay). Also read: Spotify Discover
-   Weekly (trained by alternating least squares), Adyen AutoRescue (about 6% more orders recovered, a thin
-   method) and LinkedIn job matching (+2.37% successful job search sessions, arXiv 2024).
-5. **One card for every case**, four clicks, the same labels in the same places.
-6. **No title page**: each frame is shown alone at the end of a lecture.
-7. **The session boxes** name the video store (08:00), the matchmaker (10:00), the bandits (12:00) and
+2. **Results from 2021 on**, Carlos's rule for version 2. The oldest source on the slides is Pinterest's (KDD
+   2022, deployed autumn 2021).
+3. **The cases.** Etsy: an A/B result of nearest neighbours by inner product, with a failure (the plain version
+   against keyword search) and a speed trade-off. Spotify: a vector per listener and per audiobook, a randomised
+   test of 11.5 million users, a trade-off stated by the authors. Adyen: the only finance case with a primary
+   source and a measured result; it runs epsilon-greedy, the rule taught at 12:00. LinkedIn: the learning rate
+   and the training time decided by the speed of experiments.
+4. **Spotify in place of Twitter's TwHIN** (KDD 2022) at 10:00. TwHIN's free vectors per user are closer to the
+   matchmaker, but its online result (cost per conversion -10.3%) comes from ads models that take the vectors as
+   inputs, and the traffic shares, the duration and the computation are withheld. Uber's blog (2023) is the
+   only source found that names matrix factorization in production after 2021, and it gives no business result.
+5. **Cases read and not used**, all READ: LinkedIn job matching (arXiv 2024, +2.37% successful job search
+   sessions), LinkedIn LiNR (CIKM 2024, +3% professional daily active users), Deezer (KDD 2021, a chart without
+   numbers, tested in 2020), Expedia AdaptEx (RecSys 2023, no lift number), Amazon's causal bandit on Amazon.com
+   pages (ORSUM 2022, +0.16% in the best of six cells), Netflix's foundation model (2025, no result). Read and
+   set aside: Morgan Stanley's assistant (a vendor story, 2024), Stripe's payments foundation model (2025, no
+   method or measurement described), LinkedIn 360Brew (withdrawn from arXiv). Amazon's WWW 2024 paper, in which
+   Thompson sampling "catastrophically fails" on production data, is a risk case that no frame uses.
+6. **One card for every case**, four clicks, the same labels in the same places.
+7. **No title page**: each frame is shown alone at the end of a lecture.
+8. **The session boxes** name the video store (08:00), the matchmaker (10:00), the bandits (12:00) and
    gradient descent (14:00). The 12:00 game was not final on 2026-11-04, so its box names the subject.
-8. **"9M"** on frame 3: the number column is too narrow for "9 million".
-9. **None of the opener's numbers.** Netflix's 75%, in the same 2012 blog post, is left out.
-10. **Amazon in place of LinkedIn on the map**, after the second read. LinkedIn's job matching answers "which
-    jobs suit this member", closer to the second question, and its KDD 2024 venue is not confirmed. Amazon's
-    item-to-item filtering answers the first question exactly. Amazon is named twice on the map, for two
-    techniques.
+9. **"9M" and "11.5M"** on frames 3 and 2: the number column is too narrow for "9 million".
+10. **None of the opener's numbers.** Three numbers of the talk track share a value with the opener's and
+    count other things: Spotify's 70% and 75%, Etsy's 100 million items.
+11. **The map has four rows**, one per lecture, so gradient descent has a row of its own (version 1 had three).
+    Expedia was dropped from the bandits row for space. Microsoft's retired Personalizer is the vendor risk, in
+    the Say only.
+12. **The year in each title is the year of the venue.** Etsy's preprint is from June 2023, its conference
+    from 2024; Adyen's test ran before 30 November 2024, its workshop was in 2025.
 
 ## Simplifications to know when presenting
 
-- Frame 1, "guests who found their booking here", stands for "4.9% more guests discovering the listing they
-  ended up booking in the Similar Listing carousel". The control was the old Similar Listings algorithm.
-- Frame 2, "100+ models by 2008, most factorizations", is BellKor's description of its winning entries up to the
-  2008 Progress Prize. The final blend of 2009 held hundreds (Koren 2009 blends a set of 454 predictors).
-- Frame 2, "2 of about 50 IMDb users identified": the authors call it a proof of concept that says nothing
-  about the share of IMDb users who could be identified.
-- Frame 2, "Netflix Prize 2": Hunt's post calls it the sequel; the FTC letter calls it Prize 2.
+- Frame 1, "nearest by inner product": Etsy trains with cosine similarity and serves an inner product of
+  vectors with quality numbers appended.
+- Frame 1, "found 32% of the products bought" stands for Recall@100 on head queries: the share of purchased
+  products among the top 100 results of popular searches. The final model reaches 72%.
+- Frame 1, "join keyword search": the paper describes Etsy's inverted index retrieval in the present tense
+  beside the new one, and does not say whether the new retrieval replaced it for any traffic.
+- Frame 1, "under 4% of the nearest products missed" is the recall loss of the compressed index with
+  re-ranking, against exact nearest neighbours; "lookups within 20 ms" is the P99 latency stated for the index,
+  99% of the lookups. The P99 of the whole model with its quality numbers, 18 ms, is reported separately.
+- Frames 1 and 4 mark their results as relative changes. Frame 2's +46.8% is relative too; its header has no
+  "relative" because its second number is the size of the test.
+- Frame 2: in the matchmaker the numbers of each customer and film are free parameters. Spotify computes them
+  with two networks (the towers) from listening history, demographics, each book's title and description and the
+  graph of podcasts and audiobooks, and scores them by inner product, as in the matchmaker.
+- Frame 2, "+46.8%" is Table 5's 46.83%, the rate of people starting new audiobooks. Its baseline is taken as
+  the production model from the design of the test (three groups); Table 5 does not name it. The simpler model
+  is 2T, the same towers without the graph network: +23.87%, and no significant change in stream rate.
+- Frame 2, "users new to audiobooks" are Table 3's cold-start users, who never interacted with an audiobook.
+  "Cover" is catalogue coverage: the share of the catalogue that appears in the recommendations, measured
+  offline.
 - Frame 3's +0.1% compares a smarter exploration rule (SquareCB) with the epsilon-greedy bandit already
-  running. The paper does not say whether Adyen switched. A comparison of the bandit with the A/B tests it
-  replaced (by November 2020) is published only as charts without numbers.
+  running. The paper does not say whether Adyen switched.
 - Frame 3, "the next model did 0.2% worse": the text says the more imbalanced data "correlates with a 0.2%
   performance regression"; the caption of Figure 10 attributes the drop to the imbalance.
 - Frame 3, "Most payments ... 2 to 15 ways": the paper's "typically", counted after the rule and risk filters.
-- Frame 3, "2025" is the year of the workshop. The test ran before 30 November 2024: version 1 of the paper
-  already reports it; the 9 million estimate first appears in version 2.
-- Frame 4 calls the restricted Boltzmann machine "a neural network"; the Say names it once.
-- Frame 4, "Newer methods: the offline gains did not seem worth the engineering": Netflix evaluated some of the
-  new methods of the Grand Prize offline, and gives a second reason, its focus had moved on.
-- Frame 4's 8.43% and 10.06% are both improvements over Netflix's Cinematch on hidden ratings, from two teams,
-  two years apart.
+- Frame 4, "splitting the model across GPUs" stands for 4D model parallelism: the embedding tables are split
+  across the worker processes. The 70 and 20 hours are from LinkedIn's benchmarks.
+- Frame 4, "triple the learning rate" came after the warm-up was lengthened from 5% to 50% of the training
+  steps; the paper says the longer warm-up made the higher rates stable.
+- Frame 4's results come from online tests of several of the paper's techniques, deployed one by one.
+- Frame 4, "about 0.9 percent more qualified job applications" (Say): Table 7 gives +0.89% for job search and
+  +0.87% for job suggestions (JYMBII), two products; the abstract adds them into +1.76%.
+- Frame 5, "Matrix factorization and its successors" (Say): Pinterest and Uber learn their vectors with towers,
+  and Uber's towers replaced per-city factorizations. Pinterest's online tests use its user vector as an input of
+  the home feed's ranking model.
+
+## Version 1
+
+Commits `b840920`, `fa1c3de` and `405acd3`, 2026-11-04: Airbnb 2018 (similar homes), the Netflix Prize 2009,
+Adyen 2025 and Netflix 2012, and a map of sources from 2003 to 2018. Rejected the same day for its age. Adyen
+stayed; its frame cites only the two 2025 papers since then.
 
 ## Second read
 
-After the first commit (`b840920`) a second agent checked every claim of `cases.tex` against its source. No
-number was wrong. Fixed in the next commit:
+After version 2 was built, a second agent checked every claim of `cases.tex` against its source. No number on
+a slide was wrong. Changed:
 
-- Frame 1: "over 800 million"; "guests who found their booking here"; the Say names the A/B control, the same
-  market, a 21 percent higher click rate, and the 32 numbers as a trade-off between offline results and memory.
-- Frame 2: "100+ models by 2008"; "2 of about 50 IMDb users identified"; "Netflix Prize 2" after "FTC privacy
-  concerns"; the FTC letter added to the sources; the Say adds the settlement, the contract-only data, the
-  non-exclusive licence, "registered" contestants and Cinematch at the start as the baseline.
-- Frame 3: the title "a better bandit approves more payments"; "Most payments"; "did 0.2% worse"; the Say says
-  what the +0.1% compares, the main comparison's four weeks, that the paper does not say whether Adyen
-  switched, and "By November 2020".
-- Frame 4: "Newer methods: the offline gains"; the Say drops a quotation that was not verbatim, adds the second
-  reason (the focus had moved on), names the restricted Boltzmann machine, and says "about 7.5 seconds".
-- Frame 5: Amazon in place of LinkedIn (choice 10).
-- `tools/cases_numbers.py`: the Adyen sentence on the 1%, 4% and 6% levels is verbatim again ("uniform
-  random"); the title of the arXiv preprint is given as listed and as printed.
+- Frame 1: the title "nearest neighbours join keyword search" (was "search results are nearest neighbours";
+  ranking stages follow the shortlist, and the inverted index retrieval still runs); "join the shortlist"; "under
+  4% of the nearest products missed, lookups within 20 ms"; the result header says "relative"; the Say has shop
+  popularity in place of rating and "tens of milliseconds".
+- Frame 2: "users new to audiobooks" (was "new users"); the Say: each audiobook had to be bought at launch, the
+  25% and 75% are audiobook hours at launch, two networks compute the numbers, the coverage is offline.
+- Frame 4: the result header says "relative"; the Say has about 0.9% more qualified job applications in job
+  search and in job suggestions (was 1.76%, the sum of the two), and a new model that stays close to the
+  previous one and learns only from the newest data.
+- Frame 5, the Say: "To close today's lectures" (Saturday follows); Kuaishou trains "a recommender, OneRec";
+  Amazon's bandit picks the picture and tagline on the page where an application starts.
+- `tools/cases_numbers.py`: the 8-hour quote is in Sec. 3.9.
 
-Not checked: the full text of Airbnb's KDD 2018 paper (ACM sent a bot challenge; every number on the slide is
-from the blog); whether LinkedIn's paper appeared at KDD 2024 (Crossref has no record); whether Adyen shipped
-SquareCB.
+Not checked: the control of Etsy's A/B tests; whether Etsy's 20 ms includes the query's own computation;
+whether Personalizer is offline (Microsoft's pages give the retirement date only).
 
 ## Open items
 
 1. The deck is linked from nowhere. The course site gets it only after Carlos's yes.
 2. It has not been projected in HG D 7.2.
-3. No bank or insurer was found with matrix factorization, or nearest neighbours on embeddings, and an online
-   result. PicPay (a Brazilian payments app, KDD 2023) says it rejected collaborative filtering for financial
-   services because purchases are rare.
+3. No bank or insurer was found with nearest neighbours or matrix factorization and an online result published
+   from 2021 on. Finance is Adyen's frame and two names on the map (Amazon Payments, Dream11).
 4. Box of frame 3: rename to the 12:00 game when it is final.
-5. No frame on Swiss or EU rules, to keep one case per lecture. Material for one, all READ, is in the
-   research notes (`git_ainit/research_notes/Business cases of the weekend 2 techniques/risks_rules.md`, local
-   and private):
+5. Spotify's paper gives two stream rates (abstract +23%, Table 5 +25.82%); the slide shows neither.
+6. No frame on Swiss or EU rules, to keep one case per lecture. Material for one, READ, is in the research
+   notes (`git_ainit/research_notes/Business cases of the weekend 2 techniques/risks_rules.md`, local and
+   private):
    - The FDPIC's final report of 15 April 2024 on Digitec Galaxus (EDÖB-A-B3653401/5, in German,
      https://www.edoeb.admin.ch/dam/en/sd-web/UbgCr4c7n-cD/20240415_Schlussbericht_Galaxus.pdf ): to order,
      customers needed an account and had to accept the analysis of their shopping behaviour, with no way to
@@ -172,9 +190,5 @@ SquareCB.
      recommendations, of which Digitec Galaxus accepted the sixth "without acknowledging a legal obligation" (our
      translation) and rejected 3, 4 and part of 2. The FDPIC closed the case on 12 February 2026: customers can
      now switch website personalisation off with a single click (https://www.edoeb.admin.ch/en/digitec-galaxus-en ).
-   - ING (Netherlands), 2014: a trial of offers from other companies matched to customers' payments, postponed
-     after criticism from the AFM, the central bank and the data protection authority. In 2019 the Dutch
-     authority wrote that reusing payment data for direct marketing without consent is "probably incompatible"
-     with the purpose of collection (our translation).
-   - EU Digital Services Act, Article 38: very large platforms must offer, for each recommender system, at least
-     one option not based on profiling.
+   - EU Digital Services Act (2022), Article 38: very large platforms must offer, for each recommender system, at
+     least one option not based on profiling.
