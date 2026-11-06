@@ -79,6 +79,8 @@ Safari, Firefox and Edge.
   grid `minmax()`, flex-wrap rows. No fixed `width`/`min-width` in pixels that can exceed a 360 px
   screen.
 - 16 px minimum side gutter on phones, no horizontal page scroll.
+- The intro (`.lede`) under each demo title spans the full width (`max-width: none`, overriding
+  the 70ch in `shared/style.css`), at `clamp(1.05rem, 1rem + 0.4vw, 1.2rem)`; done for Demos 1–3.
 - Hover effects inside `@media (hover: hover)`, so touch screens do not get stuck hover states;
   a visible `:focus-visible` style on everything clickable; animations off under
   `prefers-reduced-motion`.
