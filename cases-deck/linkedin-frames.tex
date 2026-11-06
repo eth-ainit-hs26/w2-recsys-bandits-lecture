@@ -19,13 +19,14 @@
 % Say: LinkedIn chooses which ad a member sees by the chance that the member will click it. That chance goes into
 % the ad auction, and the price of the ad is linked to it, so it has to be accurate. And a click means different
 % things to different advertisers: for some a like or a comment counts as a click they pay for, for others only a
-% visit to their website. [click] All this for more than a billion members.
+% visit to their website. [click] LinkedIn has more than a billion members.
 \begin{frame}{LinkedIn's ads: the chance of a click}
   \begin{tikzpicture}[x=1mm, y=1mm]
     \path[use as bounding box] (0,1) rectangle (130,-54);
     \node[body, anchor=north west, text width=64mm] at (0,0)
       {The chance that a member clicks an ad enters the ad auction, and the price depends on it.\par\vspace{2.4mm}
-       Each advertiser chooses what counts as a click: a like, a comment or a visit to its website.};
+       Advertisers choose which clicks they pay for: some count likes or comments, others only visits to their
+       website.};
     \node[big, anchor=north west, visible on=<2->] at (76,-1) {Over \liMembers{} billion};
     \node[body, anchor=north west, text width=54mm, visible on=<2->] at (76,-10) {members};
     \node[src, anchor=north west, text width=130mm] at (0,-50.6) {\lasource};
@@ -35,7 +36,8 @@
 % ===== Frame 2. Lists of numbers, learned by gradient descent =====
 % Say: How the chance is computed. A network takes facts about the member, the ad, the advertiser and the moment.
 % LinkedIn's earlier model stopped there. The new one also has a list of numbers for every advertiser, every
-% campaign and every ad, as the matchmaker had a list for every customer and every film. [click] And it learns them
+% campaign and every ad, as the matchmaker had a list for every customer and every film. The picture shows one chance; in fact the
+% network gives three, one for each family of clicks that advertisers pay for. [click] And it learns them
 % the same way. In training, for each ad shown in the logs, the model predicts the chance of a click and compares it
 % with whether the member clicked, and gradient descent nudges the lists and the network so that the predictions
 % come closer. The paper names Adam and AdaGrad for its models, two refinements of gradient descent.
@@ -65,11 +67,11 @@
 \end{frame}
 
 % ===== Frame 3. The value =====
-% Say: The value. LinkedIn tested the new model, the lists together with other changes to the network, against the
-% earlier one in online A/B tests. [click] The click rate on ads rose by 4.3 percent, a relative change, and the
-% new model went into production. [click] Keeping it up to date also got cheaper. In a test, instead of training
-% each model from scratch on 14 days of data, LinkedIn started from the last model and trained it on the newest half
-% day: training took 96 percent less time, and the score on the test data (AUC) even rose slightly, by 0.18
+% Say: The value. LinkedIn added the lists and other changes to the network one after another and checked them in
+% online A/B tests. [click] In all, the click rate on ads rose by 4.3 percent, a relative change, and the changes
+% went into production. [click] Keeping it up to date can also be much cheaper. In an offline test, instead of
+% training each model from scratch on 14 days of data, LinkedIn started from the earlier models, held the new one
+% close to them so that it would not forget, and trained it on the newest half day: training took 96 percent less time, and the score on the test data (AUC) even rose slightly, by 0.18
 % percent. The paper does not say whether the ads model is updated this way in production.
 \begin{frame}{The value: A/B tests}
   \begin{tikzpicture}[x=1mm, y=1mm]
@@ -86,8 +88,8 @@
     \draw[draw=ruling, line width=0.4pt, visible on=<3->] (0,-31) to (130,-31);
     \node[big, anchor=north west, visible on=<3->] at (0,-34.6) {\textminus\liIncCut\%};
     \node[measure, anchor=north west, text width=102mm, visible on=<3->] at (25,-35.2)
-      {training time in a test, when each new model starts from the last one and learns from the newest half day of
-       data};
+      {training time in an offline test, when each new model builds on the earlier ones and learns from the newest half
+       day of data};
     \node[src, anchor=north west, text width=130mm] at (0,-50.6) {\lasource};
   \end{tikzpicture}
 \end{frame}

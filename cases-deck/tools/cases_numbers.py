@@ -221,14 +221,14 @@ assert abs(LIRANK["jobs_search_pct"] + LIRANK["jobs_suggest_pct"] - LIRANK["jobs
 assert round(LIRANK["jobs_search_pct"], 1) == round(LIRANK["jobs_suggest_pct"], 1) == 0.9
 num("liJobs", "%.1f" % LIRANK["jobs_search_pct"])                          # Say only, "about 0.9" in both products
 num("liAdsCtr", "%.1f" % LIRANK["ads_ctr_pct"], "+%.1f%%" % LIRANK["ads_ctr_pct"])
-num("liMembers", "%d" % LIRANK["members_billion"])                         # Say only
+num("liMembers", "%d" % LIRANK["members_billion"])                         # Say only in cases.tex; slide of linkedin.tex
 num("liHoursBefore", "%d" % LIRANK["hours_before"], "%d hours" % LIRANK["hours_before"])
 num("liHoursAfter", "%d" % LIRANK["hours_after"], "%d hours" % LIRANK["hours_after"])
 num("liSessFrom", "%d" % LIRANK["sessions_from_pct"])                      # Say only
 num("liSessTo", "%d" % LIRANK["sessions_to_pct"])                          # Say only
 num("liWarmFrom", "%d" % LIRANK["warmup_from_pct"])                        # Say only
 num("liWarmTo", "%d" % LIRANK["warmup_to_pct"])                            # Say only
-num("liIncCut", "%d" % LIRANK["incremental_cut_pct"])                      # Say only
+num("liIncCut", "%d" % LIRANK["incremental_cut_pct"])                      # Say only in cases.tex; slide of linkedin.tex
 num("liRetrain", "%d" % LIRANK["retrain_hours"])                           # Say only
 
 
@@ -494,8 +494,8 @@ for s in ["%d weeks" % AMAZON["weeks"], "high single-digit"]:
 #    advertisement, member, advertiser, ad-member interaction. Baseline model doesn't have Id features. In the Table 5
 #    we show relative improvements of each of the techniques including ID embeddings, Quantization, Lowrank DCNv2,
 #    TransAct and Isotonic calibration layer. [...] We have deployed techniques to production and observed 4.3% CTR
-#    relative improvement in online A/B tests." (Sec. 5.3) Hence "the lists and four other changes" in the Say: the
-#    4.3% is not the lists' alone.
+#    relative improvement in online A/B tests." (Sec. 5.3) Hence "the lists and other changes" on the slide and in
+#    the Say: the 4.3% is not the lists' alone, and the changes came one after another.
 #   "While Adam was generally effective, models with numerous sparse features required AdaGrad" (Sec. 6.2): both are
 #    forms of gradient descent. Hence "gradient descent learns the numbers".
 #   Table 3, "Incremental Experiments Settings", Ads CTR: cold start data range "14 days", incremental data range

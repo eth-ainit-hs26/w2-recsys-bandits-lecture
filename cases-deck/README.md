@@ -163,9 +163,9 @@ the method as a diagram whose top line ties it to the block's game; the value of
 
 | File | Frames (pages) | Content |
 |---|---|---|
-| `spotify-home.tex`, `spotify-home-frames.tex`, `spotify-home.pdf`, `spotify-home-handout.pdf` | 3 (7) | Music or podcasts on the home page, the usual rule of past listening, over 600 million users; epsilon-greedy with a network for the estimates (three invented mixes as bars), 98.5% and 1.5%; the A/B test against the mix of the last 90 days: +36.6% streams per podcast shelf shown, +1.28% minutes listened, in production since March 2025 |
-| `amazon.tex`, `amazon-frames.tex`, `amazon.pdf`, `amazon-handout.pdf` | 3 (7) | One image and one tagline per page, the steps started, submitted, approved, a page that wins the first step can lose the last; one UCB score per step, added up (an invented table: the first step alone picks pair A, the sum pair B); the A/B test of 7 weeks: approvals up by a high single-digit percentage in one group, no pair beat the fixed page in the other, Amazon's sentence on exploration |
-| `linkedin.tex`, `linkedin-frames.tex`, `linkedin.pdf`, `linkedin-handout.pdf` | 3 (7) | The chance of a click enters the auction and the price, what counts as a click, over 1 billion members; a list of numbers for every advertiser, campaign and ad, learned from clicks by gradient descent; +4.3% click rate on ads in A/B tests, 96% less training time in a test of incremental training |
+| `spotify-home.tex`, `spotify-home-frames.tex`, `spotify-home.pdf`, `spotify-home-handout.pdf` | 3 (7) | Music or podcasts on the home page, a common rule of past listening, over 600 million users; epsilon-greedy with a network for the estimates (three invented mixes as bars), 98.5% and 1.5%; the A/B test against the mix of the last 90 days: +36.6% streams per podcast shelf shown, +1.28% minutes listened, in production as of March 2025 |
+| `amazon.tex`, `amazon-frames.tex`, `amazon.pdf`, `amazon-handout.pdf` | 3 (7) | One image and one tagline per page, the steps started, submitted, approved, a page that wins the first step can lose the last; one UCB score per step, added up (an invented table: the first step alone picks pair A, the sum pair B); the A/B test of 7 weeks: approvals up by a high single-digit percentage in one group (so far, not reported as significant), no pair the bandit tried beat the fixed page in the other, Amazon's sentence on exploration |
+| `linkedin.tex`, `linkedin-frames.tex`, `linkedin.pdf`, `linkedin-handout.pdf` | 3 (7) | The chance of a click enters the auction and the price, which clicks advertisers pay for, over 1 billion members; a list of numbers for every advertiser, campaign and ad, learned from clicks by gradient descent; +4.3% click rate on ads in A/B tests, 96% less training time in an offline test of incremental training |
 
 The game of each: Spotify's home page and Amazon tie to "Once Upon a Mirror" (`w2-cx-private/03_bandits`: the
 mirror counts taps, epsilon-greedy spins a roulette, UCB adds a bonus to the estimate, "the fewer dots, the bigger
@@ -173,7 +173,7 @@ the bonus"); LinkedIn ties to "Once Upon a Matchmaker" (`02_matrix_factorization
 customer and film, improved by gradient descent).
 
 Words on the slides, counted as in "Simplified" (handouts, `pdftotext` and `wc -w`, without the footer line):
-Spotify's home page 175 (62, 63, 50 a slide), Amazon 192 (57, 70, 65), LinkedIn 155 (54, 44, 57), after the second
+Spotify's home page 175 (59, 65, 51 a slide), Amazon 196 (57, 70, 69), LinkedIn 156 (54, 44, 58), after the second
 read below. Amazon's 70 include the 12 numbers of its table. The audiobooks deck has 152.
 
 State on 2026-11-06: 0 log errors, 0 em and en dashes, no build metadata, nothing moves between clicks; 7, 2 and 3
@@ -197,11 +197,11 @@ Sources, grade READ; the sentences are in `tools/cases_numbers.py` and in
 Choices made without asking:
 
 - "The slides for the matrix factorization part" read as `spotify.tex`, the case deck after the 10:00 block.
-- Spotify frame 1: "The usual rule gives each user the mix of their past listening". The paper calls this rule,
+- Spotify frame 1: "A common rule gives users the mix of their past listening". The paper calls this rule,
   calibration, "a widely used approach in industry" and does not say which rule ran before the bandit; the control
   of its A/B test was the mix of the last 90 days.
 - Spotify frame 2: the three mixes and their bars are invented (the paper does not list its set of mixes), marked
-  "Invented estimates" in the source line, and generated with an assert that half and half is the highest. The
+  "Invented mixes and estimates" in the source line, and generated with an assert that half and half is the highest. The
   reward is "the chance of a stream from the page" (a stream from any shelf counts). "98.5% of the pages" for the
   epsilon-greedy split of 1.5%.
 - Spotify frame 3: the paper's impression-to-stream ratio as "streams per podcast shelf shown"; bars at 100 and
@@ -215,7 +215,7 @@ Choices made without asking:
 - LinkedIn frame 2: "gradient descent" for the paper's optimizers, Adam and AdaGrad (Sec. 6.2, said of its models
   in general).
 - LinkedIn frame 3: the +4.3% belongs to the lists together with other changes of the network (the paper names
-  quantization, low-rank DCNv2, TransAct and isotonic calibration beside the lists); the 96% is marked "in a test".
+  quantization, low-rank DCNv2, TransAct and isotonic calibration beside the lists); the 96% is marked "in an offline test".
 - The weekend deck: the three come after Airbnb, as sections 4 to 6 ("Spotify's home page", "Amazon Payments",
   "LinkedIn's ads"), and the first three keep their order. The style draws Ge'ez numerals up to five, so section 6
   shows the digit 6.
@@ -231,19 +231,43 @@ Open items of these decks:
 
 ### Second read, 2026-11-06 (evening)
 
-An agent read every claim of the three decks against the source files, and the same claims were read again by hand
-in the sources before any change. What changed:
+An agent read every claim of the three decks against the source files: 20 findings, no wrong number. Each finding
+was read again in the source before a change. What changed on the slides:
 
+- Spotify frame 1: "A common rule" (the paper: "a widely used approach in industry"; it names a second kind of
+  target); "tastes can change with the hour, the day of the week, even the device", for the paper's "may vary"
+  (its Figure 1 shows hours and days, no device).
+- Spotify frame 2: "Invented mixes and estimates" in the source line; the paper never lists its mixes.
+- Spotify frame 3: "In production as of March 2025", the paper's words; a preprint of September 2025 cannot say it
+  still runs.
 - Amazon frame 3: "No pair it tried beat the fixed page" (the post: the model "explored most of its arm pool yet
-  found no combination that beat the static page"). Under the first group, "relative change, so far": the post says
-  it "currently" sees the lift and calls the lifts directional, without saying they are significant (talk track).
-- Amazon talk track: no "separate model for each group" (the post advises one model per group and does not say it
-  ran one); the parts are "reviewed", the post's word; the check before the launch is "in its estimates", for the
-  post's "negative directional lift".
-- Spotify frame 1: "tastes can change", for the paper's "may vary".
-- LinkedIn talk track: training compares predictions with the clicks in the logs (the paper does not learn from each
-  ad as it is shown); incremental training raised "the score on the test data (AUC)" by 0.18%, where it said
-  "accuracy".
+  found no combination that beat the static page"). Under the first group, "relative change so far, not reported as
+  significant": the post says it "currently" sees the lift and calls the lifts directional, while it calls the fall
+  in the second group significant.
+- LinkedIn frame 1: "Advertisers choose which clicks they pay for: some count likes or comments, others only visits
+  to their website", for the paper's examples ("such as") of chargeable clicks.
+- LinkedIn frame 3: "in an offline test, when each new model builds on the earlier ones": the 96% comes from an
+  offline test, and incremental training also keeps the new model close to the earlier ones (Sec. 3.6), which a
+  plain restart from the last model does not.
+
+What changed in the talk tracks: Spotify's reward is engagement, a stream for example; the random mixes gave fewer
+successes and a weaker model, and "too far from what people like" is the authors' explanation; UCB is one of the
+authors' plans. Amazon: no "separate model for each group" (the post advises it and does not say it ran it); the
+parts are "reviewed", the post's word; the check before the launch was offline estimates; the scores are computed
+for every prospect, and a visitor without one sees the fixed page; new images and taglines are the post's advice,
+with no plan stated. LinkedIn: the changes came one after another, checked in online A/B tests; incremental training
+"can" make updates cheaper (the paper does not say the ads model is updated this way); training compares predictions
+with the clicks in the logs; the gain was "the score on the test data (AUC)", +0.18%, where it said "accuracy"; the
+network gives three chances, one for each family of paid clicks, where the picture shows one; "LinkedIn has more than
+a billion members", the paper's count of all members.
+
+Kept as they are, with the reason:
+
+- Spotify frame 2, "Chance of a stream from the page": the paper's reward is engagement "e.g. streams"; the slide
+  keeps the concrete example, and the talk track says engagement.
+- LinkedIn frame 2: the loop of gradient descent reaches the lists only, the new part on the slide; the talk track
+  says the network learns too.
+- LinkedIn frame 3, "LinkedIn put the new model into production", for "We have deployed techniques to production".
 
 The sections below describe `cases.tex`, version 2 of 2026-11-04.
 

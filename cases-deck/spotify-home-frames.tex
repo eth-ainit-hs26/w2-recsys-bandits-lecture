@@ -17,17 +17,17 @@
 
 % ===== Frame 1. Music or podcasts =====
 % Say: Spotify's home page is a stack of shelves, some of music, some of podcasts. How many of each should a
-% listener see? The usual rule gives each user the mix of their own past listening. But tastes move: the paper's
+% listener see? A common rule gives each user the mix of their own past listening. But tastes move: the paper's
 % first figure shows the share of podcasts rising and falling over the day and over the week, and the authors write
-% that preferences vary with the time of day, the day of the week, even the device. The rule only looks back.
+% that preferences may vary with the time of day, the day of the week, even the device. The rule only looks back.
 % [click] And this page is built for more than 600 million users.
 \begin{frame}{Spotify's home page: music or podcasts?}
   \begin{tikzpicture}[x=1mm, y=1mm]
     \path[use as bounding box] (0,1) rectangle (130,-54);
     \node[body, anchor=north west, text width=64mm] at (0,0)
-      {The home page shows shelves of music and podcasts. The usual rule gives each user the mix of their past
+      {The home page shows shelves of music and podcasts. A common rule gives users the mix of their past
        listening.\par\vspace{2.4mm}
-       But tastes can change with the time of day, the day of the week and the device.};
+       But tastes can change with the hour, the day of the week, even the device.};
     \node[big, anchor=north west, visible on=<2->] at (76,-1) {Over \shUsers{} million};
     \node[body, anchor=north west, text width=54mm, visible on=<2->] at (76,-10) {users of the home page};
     \node[src, anchor=north west, text width=130mm] at (0,-50.6) {\shsource};
@@ -36,13 +36,14 @@
 
 % ===== Frame 2. Epsilon-greedy with a network =====
 % Say: The bandit, in the words of our mirror game. The arms are mixes: mostly music, half and half, mostly podcasts.
-% These three are my invention; the paper does not list its mixes. The reward is a stream: one if the listener plays
-% anything from the page, zero if not, the tap of the mirror. The mirror estimated each product by counting taps.
+% These three are my invention; the paper does not list its mixes. The reward is engagement, for example a stream:
+% one if the listener plays anything from the page, zero if not, the tap of the mirror. The mirror estimated each product by counting taps.
 % Here a network estimates the chance of a stream for every mix, from the listener's history, the device, the time
 % of day and the day of the week. It learned from two weeks of logs and was checked on a third. The bandit shows the
 % mix with the highest estimate. [click] And it spins a roulette, as the mirror did: on 98.5 percent of the pages
 % the highest estimate, on 1.5 percent a random mix near the listener's usual one. Spotify also tried a mix drawn
-% at random from all of them; those pages strayed too far from what people like.
+% at random from all of them; it gave fewer successes to learn from and a weaker model. The authors' explanation:
+% such pages often stray too far from what people like.
 \begin{frame}{Epsilon-greedy on the home page}
   \begin{tikzpicture}[x=1mm, y=1mm]
     \path[use as bounding box] (0,1) rectangle (130,-54);
@@ -68,7 +69,7 @@
       {\textbf{\shGreedy\%} of the pages: the highest estimate.};
     \node[body, anchor=north west, text width=130mm, visible on=<2->] at (0,-43.4)
       {\textbf{\shExplore\%}: a random mix near the usual one.};
-    \node[src, anchor=north west, text width=130mm] at (0,-50.6) {Invented estimates. \shsource};
+    \node[src, anchor=north west, text width=130mm] at (0,-50.6) {Invented mixes and estimates. \shsource};
   \end{tikzpicture}
 \end{frame}
 
@@ -77,8 +78,8 @@
 % 7-day version of the same rule offline. [click] The measure: streams per podcast shelf shown. It rose by 36.6
 % percent, a relative change. Over shelves of both kinds the rise was 3.93 percent. [click] And people listened
 % more: minutes listened on the whole platform rose by 1.28 percent, and the share of users who started a stream
-% from the home page by 1.54 percent. The bandit has been in production since March 2025. The paper gives neither
-% the size nor the length of the test. Spotify's next step, in its own words: UCB, which "has been shown to
+% from the home page by 1.54 percent. The bandit was in production as of March 2025. The paper gives neither
+% the size nor the length of the test. Among the authors' plans: to try UCB, which "has been shown to
 % outperform epsilon-greedy strategies in many settings".
 \begin{frame}{The value: an A/B test}
   \begin{tikzpicture}[x=1mm, y=1mm]
@@ -103,7 +104,7 @@
     \node[anchor=north west, inner sep=0, font=\large, visible on=<3->] at (74,-40) {+\shMinutes\%};
     \node[measure, anchor=north west, text width=37mm, visible on=<3->] at (93,-40.6)
       {minutes listened on Spotify, relative change};
-    \node[body, anchor=north west, text width=64mm, visible on=<3->] at (0,-40) {In production since \shDeployed.};
+    \node[body, anchor=north west, text width=64mm, visible on=<3->] at (0,-40) {In production as of \shDeployed.};
     \node[src, anchor=north west, text width=130mm] at (0,-50.6) {\shsource};
   \end{tikzpicture}
 \end{frame}

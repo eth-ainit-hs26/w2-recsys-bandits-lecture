@@ -49,9 +49,9 @@
 % is large for a kind of visitor the pair has rarely seen. And there is one score for each step: started,
 % submitted, approved. These numbers are invented. A bandit for the first step alone would choose pair A: the best
 % score for starts, but the worst for approvals. [click] Amazon adds the three scores, with about equal weights, and
-% shows the pair with the highest sum: pair B. Before the launch, Amazon checked it: in its estimates, a bandit for
-% any single step consistently pushed at least one other step down. The scores are computed once a week for every customer,
-% and the page only looks up the chosen pair.
+% shows the pair with the highest sum: pair B. Before the launch, Amazon's offline estimates showed that a bandit
+% for any single step consistently pushed at least one other step down. The scores are computed once a week for every prospect,
+% and the page only looks up the chosen pair; a visitor without one sees the fixed page.
 \begin{frame}{One UCB score for each step}
   \begin{tikzpicture}[x=1mm, y=1mm]
     \path[use as bounding box] (0,1) rectangle (130,-54);
@@ -87,7 +87,7 @@
 % relative change. The post gives no exact figure, and it calls these lifts directional: it does not say they are
 % statistically significant. [click] In the second group the bandit explored most of its pairs and found none that
 % beat the fixed page. Approvals fell, and the drop was statistically significant. [click] Amazon's reading: the model did its job. The pool of images and taglines held
-% no winner for that group, and the exploring showed it. So the next step is new images and taglines. Amazon also
+% no winner for that group, and the exploring showed it. Amazon's advice for such a case: renew the images and taglines and keep the algorithm. Amazon also
 % advises making the fixed page one of the arms, so that UCB falls back on it when nothing beats it.
 \begin{frame}{The value: an A/B test of \amWeeks{} weeks}
   \begin{tikzpicture}[x=1mm, y=1mm]
@@ -99,7 +99,7 @@
     \draw[good, line width=1.8pt, -{Triangle[length=3mm, width=3.4mm]}] (38,-17.2) to (38,-8.4);
     \node[body, anchor=north west, text width=84mm] at (45,-8.6)
       {Approvals rose by a high single-digit percentage.\par
-       {\small\itshape\color{muted} relative change, so far}};
+       {\small\itshape\color{muted} relative change so far, not reported as significant}};
     % the second group (click 2)
     \node[chip, font=\small, text width=27mm, align=center, minimum width=30mm, minimum height=7.6mm, inner sep=1.5pt,
       visible on=<2->] at (16,-29.4) {Another group};
