@@ -267,15 +267,15 @@ for s in ["%d million items" % ETSY["items_million"],
           "%d%%" % round(100 * ETSY["head_final"])]:
     show("etsy", s)
 
-# INVENTED toy numbers for frames 3 and 4 (no source): the search "mothers day gift" and five items, four numbers
+# INVENTED toy numbers for frames 3 and 4 (no source): the search "mothers day gift" and four items, three numbers
 # each, small integers so that the room can multiply in its head. The script computes every product, sum and the
-# order; nothing is typed in etsy.tex. Chosen so that the item with the word "gift" (gift wrap) ranks low and the
-# necklace, which shares no word with the search, ranks first.
-ET_QUERY = (2, 1, -1, 1)
-ET_ITEMS = [("Gift wrap", "W", (-1, 0, 2, 1)), ("Flower necklace", "N", (2, 2, -1, 0)),
-            ("Bridge print", "B", (0, -1, 1, -2)), ("Photo mug", "M", (1, 1, 0, 1)),
-            ("Recipe board", "R", (1, 2, 0, 1))]
-ABCD = "abcd"
+# order; nothing is typed in etsy.tex. Chosen so that the item with the word "gift" (gift wrap) ranks last and the
+# necklace, which shares no word with the search, ranks first. Until the simplification of 2026-11-06 (Carlos:
+# "too complicated", "25% simpler") there were five items of four numbers each, with a bridge print.
+ET_QUERY = (2, 1, -1)
+ET_ITEMS = [("Gift wrap", "W", (-1, 0, 2)), ("Flower necklace", "N", (2, 2, -1)),
+            ("Photo mug", "M", (1, 1, 0)), ("Recipe board", "R", (1, 2, 0))]
+ABCD = "abc"
 for i, v in enumerate(ET_QUERY):
     num("etQ" + ABCD[i], "%d" % v)
 scores = {}
@@ -291,18 +291,18 @@ for name, key, vec in ET_ITEMS:
 ranked = sorted(ET_ITEMS, key=lambda it: -scores[it[1]])
 assert len(set(scores.values())) == len(scores)                  # no ties, so the order is unambiguous
 assert ranked[0][1] == "N"                                       # the necklace comes first
-assert [it[1] for it in ranked].index("W") >= 3                  # gift wrap falls out of the top 3
+assert [it[1] for it in ranked].index("W") >= 2                  # gift wrap falls out of the top 2
 for r, (name, key, vec) in enumerate(ranked):
-    num("etRank" + "ABCDE"[r] + "name", name)
-    num("etRank" + "ABCDE"[r] + "sum", "%d" % scores[key])
+    num("etRank" + "ABCD"[r] + "name", name)
+    num("etRank" + "ABCD"[r] + "sum", "%d" % scores[key])
 print("Etsy toy order:", [(it[0], scores[it[1]]) for it in ranked])
 
 # ----- Spotify: the source block of CASE 2 above. Frame 3 draws the start rate of new audiobooks as bars
 # against the production model: 100, then 100 plus each relative change of Table 5 (23.87 and 46.83).
 num("spIdxPlain", "%.2f" % (100 + SPOTIFY["start_plain_pct"]))   # a bar length only
 num("spIdxFull", "%.2f" % (100 + SPOTIFY["start_pct"]))          # a bar length only
-for s in ["%d%%" % SPOTIFY["heavy_users_pct"], "%d%%" % SPOTIFY["heavy_hours_pct"],
-          "%d%%" % SPOTIFY["from_podcasts_pct"], "%d numbers" % SPOTIFY["dims"],
+# Frame 1 says the quarter and the three quarters in words since the simplification of 2026-11-06 (no bars).
+for s in ["%d%%" % SPOTIFY["from_podcasts_pct"], "%d numbers" % SPOTIFY["dims"],
           "%.1f million" % SPOTIFY["test_users_million"],
           "+%.1f%%" % SPOTIFY["start_plain_pct"], "+%.1f%%" % SPOTIFY["start_pct"]]:
     show("spotify", s)

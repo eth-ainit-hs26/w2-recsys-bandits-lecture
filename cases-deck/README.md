@@ -23,7 +23,7 @@ slide. They are separate from `cases.tex`, whose cards are version 2 of 2026-11-
 
 | File | Frames (pages) | His plan |
 |---|---|---|
-| `etsy.tex`, `etsy.pdf`, `etsy-handout.pdf` | 5 (12) | Etsy and its shortlist, why keyword matching fails; the training data; a list of numbers for every search and every item; the new search, sorting by inner product step by step; cost and value |
+| `etsy.tex`, `etsy.pdf`, `etsy-handout.pdf` | 5 (11) | Etsy and its shortlist, why keyword matching fails; the training data; a list of numbers for every search and every item; the new search, sorting by inner product step by step; cost and value |
 | `spotify.tex`, `spotify.pdf`, `spotify-handout.pdf` | 3 (6) | Little data at launch; 128 numbers per listener and audiobook from two networks and a graph; the A/B test |
 | `airbnb.tex`, `airbnb.pdf`, `airbnb-handout.pdf` | 3 (7) | The first stage of search; two networks and the nearest homes; three A/B tests and their value |
 
@@ -38,8 +38,8 @@ python3 tools/check_numbers.py etsy.pdf tools/expected-etsy.txt
 python3 ../style/tools/make_handout.py etsy.pdf etsy-handout.pdf
 ```
 
-State on 2026-11-06: 0 log errors, 0 em and en dashes, no build metadata, nothing moves between clicks; 11, 7
-and 3 numbers found in the PDFs. Every page of the three decks was rendered and read.
+State on 2026-11-06, after the simplification: 0 log errors, 0 em and en dashes, no build metadata, nothing moves
+between clicks; 11, 5 and 3 numbers found in the PDFs. Every page of the three decks was rendered and read.
 
 Sources: Etsy and Spotify as for frames 1 and 2 of `cases.tex` (IEEE FMLDS 2024; WWW 2024 Companion). Airbnb:
 Abdool and 12 others, "Applying Embedding-Based Retrieval to Airbnb Search", arXiv 2601.06873, January 2026, a
@@ -47,30 +47,78 @@ preprint (https://arxiv.org/abs/2601.06873), and their post "Embedding-Based Ret
 Airbnb's engineering blog, April 2025 (https://airbnb.tech/ai-ml/embedding-based-retrieval-for-airbnb-search/).
 Grade READ for both; the source sentences are in `tools/cases_numbers.py`.
 
+### Simplified, 2026-11-06
+
+Carlos, after the first build: "This is too complicated for me. The slides need to be simplified. Make then 25%
+simpler". Measured on the handouts (the last click of every frame; words counted by `pdftotext` and `wc -w`,
+the source line and the page number included):
+
+| Deck | Words before | Words after | Change | Pages before | Pages after |
+|---|---|---|---|---|---|
+| Etsy | 460 | 344 | -25% | 12 | 11 |
+| Spotify | 219 | 152 | -31% | 6 | 6 |
+| Airbnb | 243 | 155 | -36% | 7 | 7 |
+
+What changed:
+
+- All three: shorter source lines ("Jha and others (Etsy), IEEE FMLDS 2024."), and a shorter title wherever the
+  title repeated a number of the slide.
+- Etsy: frame 1 lost the sentence that its funnel already shows; frame 2 lost its lead sentence and one of four
+  rows; frame 3 has one-line inputs and a plain sentence in place of the balloon; frame 4 has four items of three
+  numbers (it had five of four; the bridge print is gone) and four pages instead of five, since the items now
+  appear together with their inner products; frame 5 has shorter labels ("Plain version", his own words).
+- Spotify: frame 1 lost its bars, which repeated the text, and shows "Over 70%" large at the second click; frame
+  2 has a one-line lead ("The matchmaker learned the numbers. Here two networks compute them."), a graph of two
+  podcasts and two audiobooks, four cells per list and no "128 numbers" labels; frame 3 is "The value: an A/B
+  test", with shorter group names and no reference line.
+- Airbnb: frame 1 lost the sentence on what Airbnb is and the half sentence its funnel shows; frame 2 has nine
+  points and three nearest homes (it had fourteen and five) and no box around them; frame 3 is "The value: three
+  A/B tests", without the labels "Version 1" to "Version 3", and keeps one quote, the paper's. The blog's
+  comparison with the largest gains of two years is in the talk track only.
+- Fixed on the way: the italic arrow labels of the two funnels (Etsy and Airbnb, frame 1) cut the top border of
+  the box below them, also in the first build; they now have `inner sep=0.4pt`. A label of Spotify frame 2
+  touched the box of the audiobook network.
+
+### Second read, 2026-11-06
+
+An agent read every claim of the three decks against the source files, and each finding was checked in the paper
+before a change. What changed:
+
+- Etsy: the training rows are positive actions "such as" cart adds and purchases (the paper's words), so frame
+  2 no longer says "one row per search that ended in a cart add or a purchase", and frame 3 names cart adds and
+  purchases where it said "random items". Keyword matching still runs beside the new retrieval (talk track of
+  frame 4), so frame 1 keeps "used to come from keyword matching only".
+- Spotify: the graph links items of all three kinds (a podcast and an audiobook, two podcasts, two audiobooks),
+  and frame 2 draws both kinds of link. The listener's numbers are computed at each visit and the networks are
+  retrained every day (talk track).
+- Airbnb: "a hundred thousand homes" holds for popular places (frame 1). The new model's top results are added
+  to those of the old first stage (a union), hence "used to be only a simple linear model". The blog's
+  comparison of April 2025 concerns the bookings lift of the new system; the combined +0.31% comes from the
+  paper (talk track of frame 3).
+
 Choices made without asking:
 
 - Etsy: he named slides one, two, four and five. Slide two is read as the data, slide three as the lists of
   numbers he described with it.
 - Etsy frame 1: the search "mothers day gift" is the paper's example; the necklace listing is invented, and the
   source line says so.
-- Etsy frame 2: the four rows are invented; the counts are the paper's ("more than 150 million interactions"
+- Etsy frame 2: the three rows are invented; the counts are the paper's ("more than 150 million interactions"
   from "up to 30 million users", one month of cart adds and purchases).
-- Etsy frames 3 and 4: invented small integers, four per list. `tools/cases_numbers.py` computes every product,
-  sum and the order, and asserts that the necklace comes first and the gift wrap, the only item with the word
-  "gift", falls out of the top three. The cells are tinted by sign as in the video store (blue above 0, orange
-  below, grey for 0, stronger from 2 and from -2 on), a solid tint where Codex plates otherwise hatch.
-- Etsy frame 4 is built over five clicks in his order: the search's numbers, the items' numbers, one inner
-  product worked out, all inner products, the sorted list with the top three as the shortlist. A click only
+- Etsy frames 3 and 4: invented small integers, three per list, four items. `tools/cases_numbers.py` computes
+  every product, sum and the order, and asserts that the necklace comes first and the gift wrap, the only item
+  with the word "gift", falls out of the top two. The cells are tinted by sign as in the video store (blue above
+  0, orange below, grey for 0, stronger from 2 and from -2 on), a solid tint where Codex plates otherwise hatch.
+- Etsy frame 4 is built over four pages: the search's numbers; one inner product worked out (the necklace); every
+  item with its numbers and its inner product; the sorted list with the top two as the shortlist. A click only
   adds, so the "animation" also plays in a PDF viewer.
 - Etsy frame 5: the comparison is recall@100 on popular (head) searches, Table I of the paper.
-- Spotify frame 1: small share bars for the 25% and 75% and the "over 70%"; he asked for diagrams on frames 2
-  and 3 only.
+- Spotify frame 1: the quarter and the three quarters are in the text, and "Over 70%" is large at the second
+  click; he asked for diagrams on frames 2 and 3 only.
 - Spotify frame 3: bars against the production model, drawn at 100, 123.87 and 146.83.
-- Airbnb frame 1: an opening sentence on what Airbnb is, and "whatever the search" for the paper's
-  "query-independent score".
+- Airbnb frame 1: "whatever the search" for the paper's "query-independent score".
 - Airbnb frame 2: the inputs of both networks from Sec. 4.5; the picture of homes as points is a drawing.
 - Airbnb frame 3: the three versions as boxes (two networks; a clustered index; a larger network); the paper's
-  phrase is quoted, the blog's sentence paraphrased.
+  phrase is quoted, the blog's sentence is in the talk track.
 
 Open items of these decks:
 

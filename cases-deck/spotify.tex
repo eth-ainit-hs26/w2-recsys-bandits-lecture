@@ -4,6 +4,9 @@
 % listener and per audiobook, the shelf "Audiobook for you" by inner product, two networks that compute the numbers
 % every day from inputs on both sides and a graph of podcasts and audiobooks; (3) the A/B test of 11.5 million users
 % in three groups and the two gains in new audiobook starts. Diagrams on frames 2 and 3, as he asked.
+% Simplified the same day after his "This is too complicated for me ... Make them 25% simpler": frame 1 lost its
+% bars (the text says the same), frame 2 has a graph of four items and shorter labels, frame 3 has no reference
+% line. README.md, section "One deck per case", has the counts.
 % No number is typed here: numbers.tex is written by tools/cases_numbers.py (block CASE 2), which keeps the
 % sentence of each source. A "Say" comment above each frame is the talk track. Build and check from this folder:
 %   python3 tools/cases_numbers.py
@@ -19,37 +22,26 @@
 \title{Spotify: audiobooks by inner product}
 \author{Carlos Cotrini}
 \hypersetup{pdftitle={Spotify: audiobooks by inner product}, pdfauthor={Carlos Cotrini}}
-\newcommand{\spsource}{De Nadai and others (Spotify), Companion Proceedings of the Web Conference (WWW) 2024.}
+\newcommand{\spsource}{De Nadai and others (Spotify), WWW 2024 Companion.}
 
 \begin{document}
 
 % ===== Frame 1. Little data to learn from =====
 % Say: When Spotify launched audiobooks it had little data to learn from. Each audiobook had to be bought before
-% it could be streamed, so few people tried one, and the listening was concentrated: about a quarter of the users
-% made three quarters of the listening hours. [click] But Spotify knew something else about its users: over 70
-% percent of the first audiobook listeners already listened to podcasts. Podcast tastes were the way in.
+% it could be streamed, so few people tried one, and the listening was concentrated: about a quarter of the
+% audiobook listeners made three quarters of the listening hours. [click] But Spotify knew something else about
+% its users: over 70 percent of the first audiobook listeners already listened to podcasts. Podcast tastes were
+% the way in.
 \begin{frame}{Spotify's audiobooks: little data to learn from}
   \begin{tikzpicture}[x=1mm, y=1mm]
     \path[use as bounding box] (0,1) rectangle (130,-54);
     \node[body, anchor=north west, text width=64mm] at (0,0)
       {When Spotify launched audiobooks it had little data to learn from.\par\vspace{2.4mm}
-       Each audiobook had to be bought before it could be streamed, and about a quarter of the users made three
-       quarters of the listening hours.};
-    \node[body, anchor=north west, text width=64mm, visible on=<2->] at (0,-35)
-      {But over \spFromPodcasts\% of the first audiobook listeners already listened to podcasts.};
-    \draw[draw=ruling, line width=0.4pt] (70,1) to (70,-47);
-    \node[measure, anchor=north west, text width=58mm] at (74,0) {Audiobook listening hours at launch};
-    \node[anchor=east, inner sep=0, font=\small] at (95,-9) {Users};
-    \sharebox{1-}{97}{-9}{22}{4.4}{\spHeavyUsers}
-    \node[anchor=west, inner sep=0, font=\large] at (121,-9) {\spHeavyUsers\%};
-    \node[anchor=east, inner sep=0, font=\small] at (95,-16) {Their hours};
-    \sharebox{1-}{97}{-16}{22}{4.4}{\spHeavyHours}
-    \node[anchor=west, inner sep=0, font=\large] at (121,-16) {\spHeavyHours\%};
-    \node[measure, anchor=north west, text width=56mm, visible on=<2->] at (74,-30)
-      {First audiobook listeners who already listened to podcasts};
-    \sharebox{2-}{97}{-41}{22}{4.4}{\spFromPodcasts}
-    \node[anchor=east, inner sep=0, font=\small, visible on=<2->] at (95,-41) {over};
-    \node[anchor=west, inner sep=0, font=\large, visible on=<2->] at (121,-41) {\spFromPodcasts\%};
+       Each audiobook had to be bought before it could be streamed, and about a quarter of the audiobook listeners
+       made three quarters of the listening hours.};
+    \node[big, anchor=north west, visible on=<2->] at (76,-1) {Over \spFromPodcasts\%};
+    \node[body, anchor=north west, text width=54mm, visible on=<2->] at (76,-10)
+      {of the first audiobook listeners already listened to podcasts.};
     \node[src, anchor=north west, text width=130mm] at (0,-50.6) {\spsource};
   \end{tikzpicture}
 \end{frame}
@@ -57,49 +49,47 @@
 % ===== Frame 2. Two networks, a graph and an inner product =====
 % Say: Every listener and every audiobook gets a list of 128 numbers. The shelf "Audiobook for you" on the home page
 % picks from the audiobooks whose numbers have the highest inner product with the listener's. In the matchmaker we
-% learned the numbers directly. Here two networks compute them every day, from inputs on both sides: for the
-% listener, what they listened to, audiobooks, podcasts and artists, and their age and country; for the audiobook,
-% its language, genre, title and description. [click] And a graph that links a podcast and an audiobook whenever
-% one user streamed both. It feeds both networks, so podcast tastes carry over to audiobooks.
+% learned the numbers directly. Here two networks, trained again every day, compute them from inputs on both
+% sides: for the listener, what they listened to, audiobooks, podcasts and artists, and their age and country; for
+% the audiobook, its language, genre, title and description. The audiobooks' numbers are computed once a day, the
+% listener's at each visit. [click] And a graph that links two items, a podcast and an audiobook or two of a kind,
+% whenever one user streamed both. It feeds both networks, so podcast tastes carry over to audiobooks.
 \begin{frame}{\spDims{} numbers for every listener and every audiobook}
   \begin{tikzpicture}[x=1mm, y=1mm]
     \path[use as bounding box] (0,1) rectangle (130,-54);
     \node[body, anchor=north west, text width=130mm] at (0,0)
-      {In the matchmaker the numbers were learned directly. Here two networks compute them every day, from inputs
-       on both sides.};
+      {The matchmaker learned the numbers. Here two networks compute them.};
     % inputs
-    \node[anchor=north, inner sep=0, font=\small, text width=52mm, align=center] at (22,-11.5)
-      {Listening history:\\ audiobooks, podcasts, artists\\ age and country};
-    \node[anchor=north, inner sep=0, font=\small, text width=40mm, align=center] at (110,-11.5)
-      {Language, genre,\\ title and description};
-    % the graph of podcasts and audiobooks (click 2)
-    \node[lbl, anchor=south, visible on=<2->] at (57,-12.6) {podcasts};
-    \node[lbl, anchor=south, visible on=<2->] at (75,-12.6) {audiobooks};
-    \foreach \a/\b in {14.5/14.5, 14.5/18.5, 18.5/14.5, 18.5/22.5, 22.5/18.5, 22.5/22.5}
-      {\draw[draw=nib, line width=0.5pt, visible on=<2->] (57,-\a) to (75,-\b);}
-    \foreach \ny in {14.5,18.5,22.5} {
+    \node[anchor=north, inner sep=0, font=\small, align=center] at (22,-9) {Listening history,\\ age, country};
+    \node[anchor=north, inner sep=0, font=\small, align=center] at (110,-9) {Language, genre,\\ title, description};
+    % the graph (click 2): two podcasts (circles), two audiobooks (squares); links of both kinds
+    \node[lbl, anchor=south, visible on=<2->] at (57,-10.6) {podcasts};
+    \node[lbl, anchor=south, visible on=<2->] at (75,-10.6) {audiobooks};
+    \foreach \b/\d in {13.5/13.5, 19.5/13.5, 19.5/19.5}
+      {\draw[draw=nib, line width=0.5pt, visible on=<2->] (57,-\b) to (75,-\d);}
+    \draw[draw=nib, line width=0.5pt, visible on=<2->] (55.65,-13.5) to[bend right=75] (55.65,-19.5);
+    \draw[draw=nib, line width=0.5pt, visible on=<2->] (76.35,-13.5) to[bend left=75] (76.35,-19.5);
+    \foreach \ny in {13.5,19.5} {
       \draw[draw=nib, line width=0.6pt, fill=paper, visible on=<2->] (57,-\ny) circle (1.35);
       \fill[hatch fine, visible on=<2->] (73.65,-\ny-1.35) rectangle (76.35,-\ny+1.35);
       \draw[draw=brand, line width=0.6pt, line join=miter, visible on=<2->] (73.65,-\ny-1.35) rectangle (76.35,-\ny+1.35);}
-    \node[elab dim, anchor=north, visible on=<2->] at (66,-25.2) {linked when one user streamed both};
+    \node[elab dim, anchor=north, visible on=<2->] at (66,-22) {linked by a shared listener};
     % the networks
-    \node[net] (lnet) at (22,-32) {Listener network};
-    \node[net] (anet) at (110,-32) {Audiobook network};
-    \draw[flow] (22,-23.9) to (lnet.north);
-    \draw[flow] (110,-20.1) to (anet.north);
-    \draw[flow, visible on=<2->] (66,-28.6) to (66,-32) to (lnet.east);
-    \draw[flow, visible on=<2->] (66,-32) to (anet.west);
+    \node[net] (lnet) at (22,-29.5) {Listener network};
+    \node[net] (anet) at (110,-29.5) {Audiobook network};
+    \draw[flow] (22,-17.4) to (lnet.north);
+    \draw[flow] (110,-17.4) to (anet.north);
+    \draw[flow, visible on=<2->] (66,-25.6) to (66,-29.5) to (lnet.east);
+    \draw[flow, visible on=<2->] (66,-29.5) to (anet.west);
     % the numbers, the inner product and the shelf
-    \draw[flow] (lnet.south) to (22,-38.2);
-    \draw[flow] (anet.south) to (110,-38.2);
-    \hatchcells{1-}{10.5}{-40.4}{6}
-    \hatchcells{1-}{98.5}{-40.4}{6}
-    \node[lbl, anchor=north] at (22,-43.2) {\spDims{} numbers};
-    \node[lbl, anchor=north] at (110,-43.2) {\spDims{} numbers};
-    \node[elab, inner sep=1pt] (ip) at (66,-40.4) {inner product};
-    \draw[flow] (36,-40.4) to (ip.west);
-    \draw[flow] (96,-40.4) to (ip.east);
-    \node[chip, font=\normalsize, minimum height=5.6mm, minimum width=36mm, inner sep=1.5pt] (shelf) at (66,-47.2)
+    \draw[flow] (lnet.south) to (22,-35.8);
+    \draw[flow] (anet.south) to (110,-35.8);
+    \hatchcells{1-}{15.1}{-38}{4}
+    \hatchcells{1-}{103.1}{-38}{4}
+    \node[elab, inner sep=1pt] (ip) at (66,-38) {inner product};
+    \draw[flow] (31.4,-38) to (ip.west);
+    \draw[flow] (100.6,-38) to (ip.east);
+    \node[chip, font=\normalsize, minimum height=5.6mm, minimum width=36mm, inner sep=1.5pt] (shelf) at (66,-45.6)
       {Audiobook for you};
     \draw[flow] (ip.south) to (shelf.north);
     \node[src, anchor=north west, text width=130mm] at (0,-50.6) {\spsource};
@@ -108,35 +98,33 @@
 
 % ===== Frame 3. The A/B test =====
 % Say: The value. Spotify ran an A/B test on 11.5 million monthly users, split at random into three groups: the
-% model already in production, the same two networks without the graph, and the full model with the graph.
+% model already in production, two networks without the graph, and the full model with the graph.
 % [click] The measure: the share of listeners who started a new audiobook. Against the production model it rose by
-% 46.8 percent with the full model and by 23.9 percent with the networks alone: the graph, that is the podcasts,
-% doubled the gain. Both are relative changes. The full model has been in production since, for every eligible user.
-\begin{frame}{The A/B test: \spUsers{} million users in three groups}
+% 46.8 percent with the full model and by 23.9 percent with the networks alone: the graph roughly doubled the
+% gain. Both are relative changes. The full model has been in production since, for every eligible user.
+\begin{frame}{The value: an A/B test}
   \begin{tikzpicture}[x=1mm, y=1mm]
     \path[use as bounding box] (0,1) rectangle (130,-54);
-    \node[chip, font=\normalsize, text width=22mm, align=center, minimum width=26mm, inner sep=2pt] (users) at (13,-28)
+    \node[chip, font=\normalsize, text width=25mm, align=center, minimum width=28mm, inner sep=2pt] (users) at (14.5,-28)
       {\spUsers{} million monthly users};
-    \node[lbl, anchor=north] at (13,-35.6) {split at random};
-    \foreach \gy/\gname/\gtext in {-13/g1/{Production model}, -28/g2/{Two networks, no graph},
+    \node[lbl, anchor=north] at (14.5,-34) {split at random};
+    \foreach \gy/\gname/\gtext in {-13/g1/{Production model}, -28/g2/{Two networks},
                                    -43/g3/{Two networks and the graph}}
       {\node[chip, font=\small, text width=33mm, align=center, minimum width=36mm, minimum height=7.6mm,
          inner sep=1.5pt] (\gname) at (52,\gy) {\gtext};}
     \draw[draw=nib, line width=0.7pt, line join=miter] (users.east) to (30,-28);
     \draw[draw=nib, line width=0.7pt, line join=miter] (30,-13) to (30,-43);
     \foreach \gy in {-13,-28,-43} {\draw[flow] (30,\gy) to (33.9,\gy);}
-    % the measure and the bars (click 2): production = the reference, bar length 22 mm
-    \node[measure, anchor=north west, text width=56mm, visible on=<2->] at (74,0)
-      {Listeners starting a new audiobook, relative to the production model};
+    % the measure and the bars (click 2): the production model's bar is 22 mm long
+    \node[measure, anchor=north west, text width=56mm, visible on=<2->] at (74,-3)
+      {Listeners starting a new audiobook};
     \draw[bar plain, visible on=<2->] (74,-15.5) rectangle (96,-10.5);
-    \node[anchor=west, inner sep=0, font=\small\itshape, text=muted, visible on=<2->] at (98.5,-13) {reference};
     \fill[hatch, visible on=<2->] (74,-30.5) rectangle ({74+22*\spIdxPlain/100},-25.5);
     \draw[brand, line width=0.7pt, line join=miter, visible on=<2->] (74,-30.5) rectangle ({74+22*\spIdxPlain/100},-25.5);
     \node[anchor=west, inner sep=0, font=\large, visible on=<2->] at ({76.5+22*\spIdxPlain/100},-28) {+\spStartPlain\%};
     \fill[hatch, visible on=<2->] (74,-45.5) rectangle ({74+22*\spIdxFull/100},-40.5);
     \draw[brand, line width=0.7pt, line join=miter, visible on=<2->] (74,-45.5) rectangle ({74+22*\spIdxFull/100},-40.5);
     \node[big, anchor=west, visible on=<2->] at ({76.5+22*\spIdxFull/100},-43) {+\spStart\%};
-    \draw[draw=muted, line width=0.5pt, dash pattern=on 2pt off 1.6pt, visible on=<2->] (96,-9) to (96,-47);
     \node[src, anchor=north west, text width=130mm] at (0,-50.6) {\spsource};
   \end{tikzpicture}
 \end{frame}

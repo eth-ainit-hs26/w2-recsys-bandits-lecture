@@ -18,6 +18,8 @@ and value), `spotify.tex` (3 frames) and `airbnb.tex` (3 frames: the first stage
 nearest homes, three A/B tests; arXiv preprint of January 2026 and Airbnb's blog of April 2025). He asked that
 day for five 10-minute cases, one after each Friday block, none older than five years. Which deck goes after
 which block, and whether they replace `cases.tex`, is still open (README.md, section "One deck per case").
+The same day he found them "too complicated" and asked for them "25% simpler": the words on the slides went down
+by 25%, 31% and 36% (README.md, subsection "Simplified"). Keep them at that level of detail.
 
 ## Files
 
@@ -44,14 +46,16 @@ Build and check, from this folder: the commands in README.md, section "Build and
   (README.md, CLAUDE.md, TBD, placeholder, FIXME, mockup, .tex), so a slide about retrieval candidates fails the
   check. The slides say "shortlist".
 - **The toy numbers of `etsy.tex` (frames 3 and 4) are invented and generated.** `tools/cases_numbers.py` holds
-  the search's list and the five items' lists, computes the products, the sums and the order (macros `\etQa` to
-  `\etQd`, `\etNa`, `\etNpa`, `\etNsum`, `\etRankAname` and so on) and asserts that the necklace comes first
-  and the gift wrap falls out of the top three. Change them there, never in the deck.
+  the search's list and the four items' lists, three numbers each, computes the products, the sums and the order
+  (macros `\etQa` to `\etQc`, `\etNa`, `\etNpa`, `\etNsum`, `\etRankAname` and so on) and asserts that the
+  necklace comes first and the gift wrap falls out of the top two. Change them there, never in the deck.
 - **`\ncell` tints a number by its sign**, as the video store does (`w2-cx-private`, `01_nearest_neighbours`,
   NOTATION.md): blue above 0, orange below, grey for 0, the stronger tint from 2 and from -2 on. It takes an
   integer or a macro that expands to one, and prints a true minus sign.
 - **A chip grows with its text.** `stage` (the steps of a search pipeline) has a minimum width of 54 mm; a longer
-  label widens one chip only, so give all chips of a pipeline the same `minimum width` (Airbnb frame 1: 59 mm).
+  label widens one chip only, so give all chips of a pipeline the same `minimum width` (Airbnb frame 1: 59 mm). An arrow label between two
+  such chips (`elab`, filled with paper) cuts the top border of the lower chip when the gap is under about 5.5 mm;
+  give it `inner sep=0.4pt`, as both funnels of frame 1 do.
 - **Every frame is a picture in mm** (`x=1mm, y=1mm`, bounding box `(0,1) rectangle (130,-54)`), as in the
   opener. Body text at `\normalsize` holds about 40 characters a line in the 68 mm left column of a card and
   about 31 in the 53 mm right one.

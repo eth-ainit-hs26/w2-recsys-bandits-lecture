@@ -1,9 +1,12 @@
 % ===== etsy.tex: the Etsy case in five frames, asked for by Carlos on 2026-11-06 =====
 % His dictated plan: (1) Etsy, its 100 million items, the shortlist of several thousand and the ranking, and why
 % keyword matching fails ("mothers day gift"); (2) the data the model was trained on; (3) a list of numbers for
-% every search and every item; (4) the new search: the search becomes numbers, the items are sorted by inner
+% every search and every item; (4) a search arrives: the search becomes numbers, the items are sorted by inner
 % product, shown step by step; (5) the cost and the value. He named slides one, two, four and five; the third is
 % read as the numbers of (3), which he described together with the data.
+% Simplified the same day after his "This is too complicated for me ... Make them 25% simpler": shorter text,
+% three rows in the data table, three numbers per list and four items in frame 4, four pages in frame 4 instead
+% of five, plain text instead of a balloon in frame 3. README.md, section "One deck per case", has the counts.
 % No number is typed here: numbers.tex is written by tools/cases_numbers.py, which keeps the sentence of each
 % source. The numbers of frames 3 and 4 are INVENTED (small integers for the room), and the slides say so.
 % A "Say" comment above each frame is the talk track. Build and check from this folder:
@@ -20,7 +23,7 @@
 \title{Etsy: search by inner product}
 \author{Carlos Cotrini}
 \hypersetup{pdftitle={Etsy: search by inner product}, pdfauthor={Carlos Cotrini}}
-\newcommand{\etsysource}{Jha, Subramaniyam, Benjamin, Taula (Etsy), IEEE FMLDS 2024.}
+\newcommand{\etsysource}{Jha and others (Etsy), IEEE FMLDS 2024.}
 
 \begin{document}
 
@@ -35,15 +38,14 @@
   \begin{tikzpicture}[x=1mm, y=1mm]
     \path[use as bounding box] (0,1) rectangle (130,-54);
     \node[body, anchor=north west, text width=64mm] at (0,0)
-      {Etsy is an online marketplace for handmade, vintage and craft items.\par\vspace{2.4mm}
-       For each search it first shortlists several thousand items, then ranks the shortlist.\par\vspace{2.4mm}
-       The shortlist used to come from keyword matching only, which fails when buyers and sellers use different
+      {Etsy is a marketplace for handmade and vintage items.\par\vspace{2.4mm}
+       Its shortlist used to come from keyword matching only, which fails when buyers and sellers use different
        words.};
     \node[stage] (all) at (99,-3.7) {More than \etItems{} million items};
     \node[stage] (short) at (99,-15.9) {A shortlist of several thousand};
     \node[stage] (ranked) at (99,-28.1) {Ranked results};
-    \draw[flow] (all) to node[elab, anchor=west, xshift=1.2mm] {keyword matching} (short);
-    \draw[flow] (short) to node[elab, anchor=west, xshift=1.2mm] {ranking model} (ranked);
+    \draw[flow] (all) to node[elab, inner sep=0.4pt, anchor=west, xshift=1.2mm] {keyword matching} (short);
+    \draw[flow] (short) to node[elab, inner sep=0.4pt, anchor=west, xshift=1.2mm] {ranking model} (ranked);
     \node[lbl, anchor=west, visible on=<2->] at (72,-37.5) {Buyer types};
     \node[textbox, anchor=west, visible on=<2->] (buyer) at (91,-37.5) {mothers day gift};
     \node[lbl, anchor=west, visible on=<2->] at (72,-47.2) {Seller wrote};
@@ -51,44 +53,40 @@
     \draw[draw=muted, line width=0.6pt, dash pattern=on 3pt off 2.2pt, visible on=<2->]
       (100,-39.9) to (100,-44.7);
     \node[elab dim, anchor=west, visible on=<2->] at (101.5,-42.3) {no word in common};
-    \node[src, anchor=north west, text width=130mm] at (0,-50.6)
-      {\etsysource{} The necklace listing is invented.};
+    \node[src, anchor=north west, text width=130mm] at (0,-50.6) {\etsysource{} The listing is invented.};
   \end{tikzpicture}
 \end{frame}
 
 % ===== Frame 2. The training data =====
-% Say: What did Etsy learn from? Its own search logs. Every search that ended with an item added to the cart or
-% bought is one row: the search words, who searched, with their location and what they searched or clicked
-% before, and the item. These rows are made up, but this is the shape. Etsy took one month of such rows from its
-% apps and its website: more than 150 million of them, from up to 30 million users. During training the model
-% also sees random items as examples of what the search did not want.
+% Say: What did Etsy learn from? Its own search logs. Every positive action after a search, such as adding an item
+% to the cart or buying it, is one row: the search words, who searched, with their location and what they
+% searched or clicked before, and the item. One search can give several rows. These rows are made up, but this is
+% the shape. Etsy took one month of such rows from its apps and its website: more than 150 million of them, from
+% up to 30 million users. During training the model also sees other items, random ones and look-alikes, as
+% examples of what the search did not want.
 \begin{frame}{The training data: a month of search logs}
   \begin{tikzpicture}[x=1mm, y=1mm]
     \path[use as bounding box] (0,1) rectangle (130,-54);
     \node[body, anchor=north west, text width=130mm] at (0,0)
-      {One row per search that ended in a cart add or a purchase.};
-    \node[measure, anchor=north west, text width=130mm] at (0,-6.2)
       {\etMonths{} month: more than \etInteractions{} million rows, from up to \etUsers{} million users.};
-    % the grid: columns at 0, 33, 81, 112, 130; header from -14.2 to -20.2; four rows of 6.6
-    \fill[hatch fine] (0,-12.9) rectangle (130,-14.2);
-    \draw[brand, line width=0.4pt] (0,-12.9) rectangle (130,-14.2);
-    \draw[draw=nib, line width=0.7pt, line join=miter] (0,-14.2) rectangle (130,-46.6);
-    \draw[draw=ruledark, line width=0.8pt] (0,-20.2) to (130,-20.2);
-    \foreach \ry in {-26.8,-33.4,-40} {\draw[draw=ruling, line width=0.4pt] (0,\ry) to (130,\ry);}
-    \foreach \cx in {33,81,112} {\draw[draw=ruling, line width=0.4pt] (\cx,-14.2) to (\cx,-46.6);}
+    % the grid: columns at 0, 33, 81, 112, 130; header from -10 to -16.6; three rows of 7.6
+    \fill[hatch fine] (0,-8.7) rectangle (130,-10);
+    \draw[brand, line width=0.4pt] (0,-8.7) rectangle (130,-10);
+    \draw[draw=nib, line width=0.7pt, line join=miter] (0,-10) rectangle (130,-39.4);
+    \draw[draw=ruledark, line width=0.8pt] (0,-16.6) to (130,-16.6);
+    \foreach \ry in {-24.2,-31.8} {\draw[draw=ruling, line width=0.4pt] (0,\ry) to (130,\ry);}
+    \foreach \cx in {33,81,112} {\draw[draw=ruling, line width=0.4pt] (\cx,-10) to (\cx,-39.4);}
     \foreach \cx/\h in {0/Search, 33/Who searched, 81/Item, 112/Action}
-      {\node[anchor=west, inner sep=0, font=\small\bfseries, text=ink] at (\cx+2,-17.2) {\h};}
+      {\node[anchor=west, inner sep=0, font=\small\bfseries, text=ink] at (\cx+2,-13.3) {\h};}
     \foreach \ry/\a/\b/\c/\d in {
-        -23.5/mothers day gift/{Zurich, searched necklaces}/Flower necklace/purchase,
-        -30.1/bridge photos/{New York, clicked print shops}/Bridge print/cart add,
-        -36.7/wedding guest book/{Porto, bought wedding decor}/Guest book/purchase,
-        -43.3/wool socks/{Oslo, searched knitting}/Knitted socks/cart add}
+        -20.4/mothers day gift/{Zurich, searched necklaces}/Flower necklace/purchase,
+        -28/bridge photos/{New York, clicked print shops}/Bridge print/cart add,
+        -35.6/wool socks/{Oslo, searched knitting}/Knitted socks/cart add}
       {\node[anchor=west, inner sep=0, font=\small] at (2,\ry) {\a};
        \node[anchor=west, inner sep=0, font=\small] at (35,\ry) {\b};
        \node[anchor=west, inner sep=0, font=\small] at (83,\ry) {\c};
        \node[anchor=west, inner sep=0, font=\small] at (114,\ry) {\d};}
-    \node[src, anchor=north west, text width=130mm] at (0,-50.6)
-      {The rows are invented; the counts are Etsy's. \etsysource};
+    \node[src, anchor=north west, text width=130mm] at (0,-50.6) {The rows are invented. \etsysource};
   \end{tikzpicture}
 \end{frame}
 
@@ -96,104 +94,104 @@
 % Say: From those rows Etsy trains two networks. The first reads the search together with the person: the
 % words, the location, the recent searches, the shops clicked. Out comes a list of numbers. The second reads an
 % item: its title, tags and category, and the searches that led to it in the past. Out comes a list of numbers
-% of the same length. Here four numbers each, made up; Etsy's lists are longer. [click] Training moves the
+% of the same length. Here three numbers each, made up; Etsy's lists are longer. [click] Training moves the
 % numbers until the inner product, multiply number by number and add, as in the video store, is high for the
-% item someone bought after that search and low for random items. For our search and the necklace it is 7.
+% items someone added to the cart or bought after that search, and low for other items. For our search and the
+% necklace it is 7.
 \begin{frame}{Every search and every item becomes a list of numbers}
   \begin{tikzpicture}[x=1mm, y=1mm]
     \path[use as bounding box] (0,1) rectangle (130,-54);
-    \node[anchor=north, inner sep=0, font=\small, text width=58mm, align=center] at (30,0)
-      {The search words, the location,\\ recent searches and shops clicked};
-    \node[anchor=north, inner sep=0, font=\small, text width=58mm, align=center] at (100,0)
-      {The item's title, tags and category,\\ and the searches that led to it before};
-    \node[net] (qnet) at (30,-17.5) {Search network};
-    \node[net] (pnet) at (100,-17.5) {Item network};
-    \draw[flow] (30,-8.6) to (qnet.north);
-    \draw[flow] (100,-8.6) to (pnet.north);
-    \draw[flow] (qnet.south) to (30,-26.4);
-    \draw[flow] (pnet.south) to (100,-26.4);
-    \ncellrow{1-}{18.9}{-29.5}{7.4}{\etQa,\etQb,\etQc,\etQd}
-    \ncellrow{1-}{88.9}{-29.5}{7.4}{\etNa,\etNb,\etNc,\etNd}
-    \node[lbl, anchor=north] at (30,-32.6) {mothers day gift, a user in Zurich};
-    \node[lbl, anchor=north] at (100,-32.6) {\etNameN};
-    \node[gloss, anchor=north west, text width=10cm, visible on=<2->] at (8,-37.4)
-      {Training moves the numbers until the inner product is high for the item bought after the search, and low
-       for random items. Here it is \etNsum.};
+    \node[anchor=north, inner sep=0, font=\small] at (30,0) {The search words and who searched};
+    \node[anchor=north, inner sep=0, font=\small] at (100,0) {The item's title, tags and category};
+    \node[net] (qnet) at (30,-13) {Search network};
+    \node[net] (pnet) at (100,-13) {Item network};
+    \draw[flow] (30,-4.4) to (qnet.north);
+    \draw[flow] (100,-4.4) to (pnet.north);
+    \draw[flow] (qnet.south) to (30,-21.9);
+    \draw[flow] (pnet.south) to (100,-21.9);
+    \ncellrow{1-}{22.6}{-25}{7.4}{\etQa,\etQb,\etQc}
+    \ncellrow{1-}{92.6}{-25}{7.4}{\etNa,\etNb,\etNc}
+    \node[lbl, anchor=north] at (30,-28.1) {mothers day gift, in Zurich};
+    \node[lbl, anchor=north] at (100,-28.1) {\etNameN};
+    \node[body, anchor=north west, text width=130mm, visible on=<2->] at (0,-37)
+      {Training makes the inner product high for items bought or added to the cart after the search: here
+       \etNsum.};
     \node[src, anchor=north west, text width=130mm] at (0,-50.6) {Invented numbers. \etsysource};
   \end{tikzpicture}
 \end{frame}
 
-% ===== Frame 4. The new search: sort by inner product =====
+% ===== Frame 4. A search arrives: sort by inner product =====
 % Say: Now a search arrives. [the frame opens on it] The search network turns "mothers day gift", with this
-% person's context, into its list of numbers. [click] The item numbers were computed in advance, one list per
-% item; here five items. [click] For each item, the inner product with the search: multiply number by number,
-% then add. For the necklace: 4, 2, 1 and 0, sum 7. [click] The same for every item. [click] Sort by the inner
-% product: the top of the list joins the shortlist. The necklace comes first although it shares no word with
-% the search, and the gift wrap, which has the word gift, falls out. Etsy does this for more than 100 million
-% items within milliseconds, with an index built for nearest neighbours. The numbers are made up.
-\begin{frame}{The new search: sort the items by inner product}
+% person's context, into its list of numbers. [click] Take one item, the necklace; its numbers were computed in
+% advance. The inner product: multiply number by number, then add. 4, 2 and 1, sum 7. [click] The same for every
+% item, here four. [click] Sort by the inner product: the top two join the shortlist. The necklace comes first
+% although it shares no word with the search. The gift wrap, which has the word gift, comes last; keyword
+% matching, which still runs beside it, can bring it in. Etsy finds almost the same top among more than 100
+% million items in tens of milliseconds, with an index that trades a little accuracy for speed. The numbers are
+% made up.
+\begin{frame}{A search arrives: sort by inner product}
   \begin{tikzpicture}[x=1mm, y=1mm]
     \path[use as bounding box] (0,1) rectangle (130,-54);
     % the search on top
     \node[anchor=west, inner sep=0, font=\small\itshape, text=brand] at (0,-4) {mothers day gift};
-    \ncellrow{1-}{37}{-4}{9}{\etQa,\etQb,\etQc,\etQd}
-    % the band: one item worked out under the search (click 3)
-    \foreach \cx in {37,46,55,64} {
-      \node[inner sep=0, font=\small, text=muted, visible on=<3->] at (\cx,-8.2) {$\times$};
-      \draw[draw=ruledark, line width=0.6pt, visible on=<3->] (\cx-3.2,-15.6) to (\cx+3.2,-15.6);}
-    \node[anchor=west, inner sep=0, font=\small, visible on=<3->] at (0,-12.4) {\etNameN};
-    \ncellrow{3-}{37}{-12.4}{9}{\etNa,\etNb,\etNc,\etNd}
-    \ncellrow{3-}{37}{-19}{9}{\etNpa,\etNpb,\etNpc,\etNpd}
-    \foreach \cx in {41.5,50.5,59.5} {\node[inner sep=0, font=\small, visible on=<3->] at (\cx,-19) {$+$};}
-    \node[inner sep=0, font=\small, visible on=<3->] at (70.4,-19) {$=$};
-    \ncell{3-}{76.6}{-19}{\etNsum}
-    \node[lbl, anchor=north, visible on=<3->] at (76.6,0.4) {inner};
-    \node[lbl, anchor=north, visible on=<3->] at (76.6,-3.4) {product};
-    \draw[draw=ruling, line width=0.5pt, dash pattern=on 2pt off 1.6pt, visible on=<2->] (0,-23.4) to (81,-23.4);
-    % the items, their numbers computed in advance (click 2), their inner products (click 4)
-    \foreach \ry/\k in {-27.4/W,-32.4/N,-37.4/B,-42.4/M,-47.4/R} {
-      \node[anchor=west, inner sep=0, font=\small, visible on=<2->] at (0,\ry) {\csname etName\k\endcsname};
-      \ncellrow{2-}{37}{\ry}{9}{\csname et\k a\endcsname,\csname et\k b\endcsname,\csname et\k c\endcsname,%
-        \csname et\k d\endcsname}
-      \ncell{4-}{76.6}{\ry}{\csname et\k sum\endcsname}}
-    % sorted (click 5): the top three join the shortlist, the rest is left out
-    \node[lbl, anchor=north west, text width=44mm, visible on=<5->] at (86,-15.6)
-      {Sorted by inner product; the top three join the shortlist};
-    \foreach \ry/\r in {-27.4/A,-32.4/B,-37.4/C,-42.4/D,-47.4/E} {
-      \node[anchor=west, inner sep=0, font=\small, visible on=<5->] at (88.5,\ry) {\csname etRank\r name\endcsname};
-      \ncell{5-}{124.2}{\ry}{\csname etRank\r sum\endcsname}}
-    \draw[draw=brand, line width=0.9pt, line join=miter, visible on=<5->] (86.4,-24.9) rectangle (128.6,-39.9);
-    \draw[draw=muted, line width=0.6pt, line join=miter, dash pattern=on 2.4pt off 1.8pt, visible on=<5->]
-      (86.4,-40.1) rectangle (128.6,-49.9);
+    \ncellrow{1-}{37}{-4}{9}{\etQa,\etQb,\etQc}
+    % one item worked out under the search (click 2)
+    \foreach \cx in {37,46,55} {
+      \node[inner sep=0, font=\small, text=muted, visible on=<2->] at (\cx,-8.2) {$\times$};
+      \draw[draw=ruledark, line width=0.6pt, visible on=<2->] (\cx-3.2,-15.6) to (\cx+3.2,-15.6);}
+    \node[anchor=west, inner sep=0, font=\small, visible on=<2->] at (0,-12.4) {\etNameN};
+    \ncellrow{2-}{37}{-12.4}{9}{\etNa,\etNb,\etNc}
+    \ncellrow{2-}{37}{-19}{9}{\etNpa,\etNpb,\etNpc}
+    \foreach \cx in {41.5,50.5} {\node[inner sep=0, font=\small, visible on=<2->] at (\cx,-19) {$+$};}
+    \node[inner sep=0, font=\small, visible on=<2->] at (61.4,-19) {$=$};
+    \ncell{2-}{67.6}{-19}{\etNsum}
+    \node[lbl, anchor=north, visible on=<2->] at (67.6,0.4) {inner};
+    \node[lbl, anchor=north, visible on=<2->] at (67.6,-3.4) {product};
+    \draw[draw=ruling, line width=0.5pt, dash pattern=on 2pt off 1.6pt, visible on=<3->] (0,-23.4) to (72,-23.4);
+    % every item with its numbers and its inner product (click 3)
+    \foreach \ry/\k in {-27.4/W,-32.4/N,-37.4/M,-42.4/R} {
+      \node[anchor=west, inner sep=0, font=\small, visible on=<3->] at (0,\ry) {\csname etName\k\endcsname};
+      \ncellrow{3-}{37}{\ry}{9}{\csname et\k a\endcsname,\csname et\k b\endcsname,\csname et\k c\endcsname}
+      \ncell{3-}{67.6}{\ry}{\csname et\k sum\endcsname}}
+    % sorted (click 4): the top two join the shortlist, the rest is left out
+    \node[lbl, anchor=north west, text width=44mm, visible on=<4->] at (84,-15.6)
+      {Sorted: the top two join the shortlist};
+    \foreach \ry/\r in {-27.4/A,-32.4/B,-37.4/C,-42.4/D} {
+      \node[anchor=west, inner sep=0, font=\small, visible on=<4->] at (86.5,\ry) {\csname etRank\r name\endcsname};
+      \ncell{4-}{124.2}{\ry}{\csname etRank\r sum\endcsname}}
+    \draw[draw=brand, line width=0.9pt, line join=miter, visible on=<4->] (84.4,-24.9) rectangle (128.6,-34.9);
+    \draw[draw=muted, line width=0.6pt, line join=miter, dash pattern=on 2.4pt off 1.8pt, visible on=<4->]
+      (84.4,-35.1) rectangle (128.6,-44.9);
     \node[src, anchor=north west, text width=130mm] at (0,-50.6) {Invented numbers.};
   \end{tikzpicture}
 \end{frame}
 
-% ===== Frame 5. What it cost and what it paid =====
-% Say: The cost: training takes about 72 hours on 4 GPUs, from one month of cart adds and purchases. The value,
-% measured in A/B tests on live traffic and aggregated over several tests: the conversion rate of the whole site
-% rose by 2.63 percent, and the purchase rate of searches by 5.58 percent, both relative changes. [click] Was it
-% easy? No. Measure: of the products people bought after a popular search, how many were among a version's top
-% 100? A plain version that read only the search words and the item text found 32 percent; keyword search found
-% 63 percent; the final model, with the person's context and the quality numbers, found 72 percent.
-\begin{frame}{What it cost and what it paid}
+% ===== Frame 5. Cost and value =====
+% Say: The cost: training takes about 72 hours on 4 GPUs, from one month of cart adds and purchases; the item
+% side also draws on a year of past searches. The value, measured in A/B tests on live traffic and aggregated
+% over several tests: the conversion rate of the whole site rose by 2.63 percent, and the purchase rate of
+% searches by 5.58 percent, both relative changes. [click] Was it easy? No. An offline measure: of the products
+% people bought after a popular search, how many were among a version's top 100? A plain version that read only
+% the search words and the item text found 32 percent; keyword search found 63 percent; the final model, with
+% the person's context and the quality numbers among other things, found 72 percent.
+\begin{frame}{Cost and value}
   \begin{tikzpicture}[x=1mm, y=1mm]
     \path[use as bounding box] (0,1) rectangle (130,-54);
     \node[lbl, anchor=north west] at (0,0) {Cost};
     \node[big, anchor=north west] at (0,-5) {\etHours{} hours};
-    \node[measure, anchor=north west, text width=29mm] at (32,-5.6) {of training, on~\etGpus{}~GPUs};
+    \node[measure, anchor=north west, text width=29mm] at (32,-5.6) {on~\etGpus{}~GPUs};
     \node[big, anchor=north west] at (0,-14.6) {\etMonths{} month};
-    \node[measure, anchor=north west, text width=29mm] at (32,-15.2) {of cart adds and purchases};
+    \node[measure, anchor=north west, text width=29mm] at (32,-15.2) {of search logs};
     \draw[draw=ruling, line width=0.4pt] (63,1) to (63,-24.4);
     \node[lbl, anchor=north west] at (67,0) {Value: A/B tests, relative change};
     \node[big, anchor=north west] at (67,-5) {+\etCvr\%};
-    \node[measure, anchor=north west, text width=33mm] at (97,-5.6) {conversion rate of the whole site};
+    \node[measure, anchor=north west, text width=33mm] at (97,-5.6) {site conversion rate};
     \node[big, anchor=north west] at (67,-14.6) {+\etOspr\%};
-    \node[measure, anchor=north west, text width=33mm] at (97,-15.2) {purchase rate of searches};
+    \node[measure, anchor=north west, text width=33mm] at (97,-15.2) {search purchase rate};
     \draw[draw=ruledark, line width=0.6pt, visible on=<2->] (0,-26.4) to (130,-26.4);
     \node[lbl, anchor=north west, visible on=<2->] at (0,-28.6)
-      {Popular searches: the share of the products bought that a version had in its top 100};
-    \foreach \ry/\lab/\v in {-35.2/{Plain: search words and item text only}/\etHeadBase,
+      {Popular searches: share of the bought products found in the top 100};
+    \foreach \ry/\lab/\v in {-35.2/{Plain version}/\etHeadBase,
                              -40.8/{Keyword search}/\etHeadBM, -46.4/{Final model}/\etHeadFinal} {
       \node[anchor=east, inner sep=0, font=\small, visible on=<2->] at (66,\ry) {\lab};
       \sharebox{2-}{69}{\ry}{44}{4.2}{\v}

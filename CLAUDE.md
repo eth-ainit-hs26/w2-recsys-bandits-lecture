@@ -195,10 +195,11 @@ README grades every source. Same style and build as the opener: Codex plates fro
 links it only after Carlos approves it.
 
 Since 2026-11-06 the folder also holds one short deck per case, its text dictated by Carlos slide by slide, with
-diagrams: `etsy.tex` (5 frames, the search by inner product built over five clicks with invented numbers from the
+diagrams: `etsy.tex` (5 frames, the search by inner product built over four pages with invented numbers from the
 generator), `spotify.tex` (3 frames) and `airbnb.tex` (3 frames, Airbnb's embedding-based retrieval, preprint of
 January 2026 and blog of April 2025). He asked that day for five 10-minute cases, one after each Friday block,
-none older than five years; which deck goes after which block is open. Same build and checks, with
+none older than five years; which deck goes after which block is open. The same day he asked for them "25%
+simpler", and the words on their slides went down by 25%, 31% and 36% (`cases-deck/README.md`). Same build and checks, with
 `tools/check_numbers.py <deck>.pdf tools/expected-<deck>.txt`.
 
 ## When in doubt
