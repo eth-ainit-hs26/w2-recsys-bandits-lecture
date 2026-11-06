@@ -66,6 +66,8 @@ Specifically:
 │                               a handout and one PDF per lecture; own CLAUDE.md and README.md
 │                               Since 2026-11-06 also one deck per case, dictated by
 │                               Carlos: etsy.tex (5 frames), spotify.tex (3), airbnb.tex (3),
+│                               and, built in his model's style, spotify-home.tex,
+│                               amazon.tex, linkedin.tex (3 each, bandits and advertising),
 │                               merged in weekend2-cases.tex; rules in PRINCIPLES.md
 ├── original-decks/             Original PDFs from before the rebuild
 │   ├── w2_bandits.pdf
@@ -203,7 +205,11 @@ none older than five years; which deck goes after which block is open. The same 
 simpler", and the words on their slides went down by 25%, 31% and 36% (`cases-deck/README.md`). The same evening
 they became one deck for the weekend, `weekend2-cases.tex` (28 pages, a divider per case), built from the same
 frames files, and `cases-deck/PRINCIPLES.md` collected the lessons and the rules for the next case decks. Same build and checks, with
-`tools/check_numbers.py <deck>.pdf tools/expected-<deck>.txt`.
+`tools/check_numbers.py <deck>.pdf tools/expected-<deck>.txt`. Later that evening Carlos chose the cases of the
+bandit block and of advertising and asked for them in the style of the matrix factorization case: `spotify-home.tex`
+(Spotify's home page, epsilon-greedy), `amazon.tex` (Amazon Payments, one UCB score per step of an application) and
+`linkedin.tex` (LinkedIn's ads model, lists of numbers learned by gradient descent), 3 frames each, built on the
+pattern of `spotify.tex` without dictation; the weekend deck has 6 sections and 52 pages since.
 
 ## When in doubt
 

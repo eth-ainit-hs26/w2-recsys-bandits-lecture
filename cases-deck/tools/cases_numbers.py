@@ -235,7 +235,7 @@ num("liRetrain", "%d" % LIRANK["retrain_hours"])                           # Say
 # ===== THE CASE DECKS OF 2026-11-06: etsy.tex (5 frames), spotify.tex (3), airbnb.tex (3) =====
 # Carlos asked on 2026-11-06 for one short deck per case, the text of each slide dictated by him, with diagrams.
 # Their macros join numbers.tex; the strings each PDF must show go to tools/expected-<deck>.txt.
-deck_expect = {"etsy": [], "spotify": [], "airbnb": []}
+deck_expect = {"etsy": [], "spotify": [], "airbnb": [], "spotify-home": [], "amazon": [], "linkedin": []}
 
 
 def show(deck, s):
@@ -351,9 +351,175 @@ for s in ["+%.2f%%" % AIRBNB["conv_pct"], "+%.1f%%" % AIRBNB["email_pct"], "%d%%
     show("airbnb", s)
 
 
+# ===== THE BANDIT AND ADVERTISING CASE DECKS, 2026-11-06 (evening): spotify-home.tex, amazon.tex, linkedin.tex =====
+# Carlos chose three of eight candidates ("Spotify, Amazon Payments, and LinkedIn Lirank") and asked: "Produce the
+# slides, follow the style from the slides for the matrix factorization part". Read as the Spotify audiobooks deck
+# (spotify.tex, the case after the 10:00 matrix factorization block): three frames, the problem, the method as a
+# diagram tied to the block's game, the value as an A/B test. The quotes and locators of all three are also in
+# git_ainit/research_notes/Business cases of the weekend 2 techniques/chosen_bandit_and_ads_cases.md.
+
+# == Spotify's home page: a contextual bandit chooses the mix of music and podcasts, 2025 ==
+# Feijer, Abdollahpouri, Gupta, Clare, Wen, Wasson, Dimakopoulou, Nazari, Kretschman, Lalmas (Spotify, NYU, Uber),
+# "Calibrated Recommendations with Contextual Bandits", CONSEQUENCES workshop at ACM RecSys 2025 (arXiv comment:
+# "Accepted at ACM RecSys '25, CONSEQUENCES workshop"); arXiv 2509.05460 v1, 5 September 2025
+# (https://arxiv.org/abs/2509.05460), read in full on 2026-11-06:
+#   "Spotify's Home page features a variety of content types, including music, podcasts, and audiobooks. However,
+#    historical data is heavily skewed toward music" and "users' preference towards different content types may vary
+#    depending on the time of day, the day of week, or even the device they use." (abstract)
+#   "A widely used approach in industry for diversifying recommendations based on user preferences is calibration"
+#    and "These calibration techniques aim to align the composition of recommendation sets with the historical
+#    distribution of content types consumed by the user." (Sec. 1) Hence "The usual rule gives each user the mix of
+#    their past listening"; the paper does not say which rule ran before the bandit.
+#   "We conducted an online A/B test in which the control variant was the 90-day SC" (Sec. 3.2); SC is "Steck's
+#    calibration approach", the target "computed based on [...] long-term (last 90 days) historical user preferences"
+#    (Sec. 3.1). Hence the control group "The mix of the last 90 days".
+#   "the content type of each shelf include music or podcast" (Sec. 3, the evaluations)
+#   "Spotify's Home page construction for more than 600 Million users" (Sec. 2.2.3). Hence "Over 600 million users
+#    of the home page"; the paper does not say how many of them get the bandit's mix.
+#   "Select a content-type probability distribution p_k from a discrete set P" (Sec. 2.2). P is not listed, so the
+#    three mixes of frame 2 and their estimates are INVENTED, and the slide says so.
+#   "r_k = 1 if the user u_k engages with (e.g. streams) any shelf i in I_k, and 0 otherwise" (Sec. 2.2). Hence "the
+#    chance of a stream from the page", the tap of the mirror game.
+#   "a fully connected neural network (MLP) with two hidden layers (sizes 256 and 64)" and "Input features include
+#    user demographics and past consumption behavior across content types aggregated over various time windows,
+#    content representations, contextual signals (e.g., device type)" and "temporal signals (e.g., time of day and
+#    day of week)" (Sec. 2.2.1). Hence "Listening history, device, time of day".
+#   "We use an epsilon-greedy strategy: with a small probability of 1.5%, we sample p_k in P from the logging policy"
+#    and, of a uniform draw and "a truncated Gaussian centered around p(c|u) as defined in Equation (3)": "The latter
+#    yielded more positive training samples and improved model performance." (Sec. 2.2.2) Hence "1.5%: a random mix
+#    near the usual one".
+#   Table 2, "Online A/B experiment results vs SC (90 days)": Podcast i2s "+36.6%", Overall i2s "+3.93%", Consumption
+#    "+1.28%", Activity "+1.54%". Sec. 3.2: "impression efficiency measured by impression-to-stream (i2s) ratios,
+#    homepage activity (measured by fraction of users initiating a stream from the homepage) and overall consumption
+#    (measured by overall minutes streamed on the platform)". The items of the page are shelves (Sec. 3). The size
+#    and the length of the test are not stated.
+#   "the system has been successfully deployed at Spotify as of March 2025." (Sec. 3.2)
+#   "3 weeks of user data is collected and two weeks is used for training the model and the last week is used for
+#    evaluations." (Sec. 2.2)
+#   "use of upper confidence bound (UCB)-based exploration [18, 34], which has been shown to outperform epsilon-greedy
+#    strategies in many settings." (Sec. 4, future work)
+SPHOME = {"users_million": 600, "days": 90, "explore_pct": 1.5, "pod_i2s_pct": 36.6, "all_i2s_pct": 3.93,
+          "minutes_pct": 1.28, "activity_pct": 1.54, "weeks_data": 3, "deployed": "March 2025"}
+num("shUsers", "%d" % SPHOME["users_million"])
+num("shDays", "%d" % SPHOME["days"])
+num("shExplore", "%.1f" % SPHOME["explore_pct"])
+num("shGreedy", "%.1f" % (100 - SPHOME["explore_pct"]))
+num("shPod", "%.1f" % SPHOME["pod_i2s_pct"])
+num("shAllItoS", "%.2f" % SPHOME["all_i2s_pct"])                 # Say only
+num("shMinutes", "%.2f" % SPHOME["minutes_pct"])
+num("shActivity", "%.2f" % SPHOME["activity_pct"])               # Say only
+num("shWeeksData", "%d" % SPHOME["weeks_data"])                  # Say only
+num("shDeployed", SPHOME["deployed"])
+num("shIdxPod", "%.2f" % (100 + SPHOME["pod_i2s_pct"]))          # a bar length only: 100 for the control
+# INVENTED for frame 2 (no source gives the mixes or their estimates): three mixes and the network's estimate of a
+# stream from the page for one listener at one moment, as bar lengths in mm. The story: the half and half mix has the
+# highest estimate, so the greedy step shows it; the slide marks the estimates as invented.
+SH_EST = {"music": 30, "half": 40, "podcasts": 22}
+assert max(SH_EST, key=SH_EST.get) == "half" and len(set(SH_EST.values())) == 3
+num("shEstMusic", "%d" % SH_EST["music"])
+num("shEstHalf", "%d" % SH_EST["half"])
+num("shEstPod", "%d" % SH_EST["podcasts"])
+for s in ["Over %d million" % SPHOME["users_million"], "last %d days" % SPHOME["days"],
+          "%.1f%%" % (100 - SPHOME["explore_pct"]), "%.1f%%" % SPHOME["explore_pct"],
+          "+%.1f%%" % SPHOME["pod_i2s_pct"], "+%.2f%%" % SPHOME["minutes_pct"], SPHOME["deployed"]]:
+    show("spotify-home", s)
+
+# == Amazon Payments: one UCB score for each step of an application, added up, 2026 ==
+# Chidi Prince John and Burak Gozluklu (Amazon), "Uplifting conversion across the acquisition funnel with
+# personalization using contextual bandits on AWS", AWS Machine Learning Blog, 1 October 2026
+# (https://aws.amazon.com/blogs/machine-learning/uplifting-conversion-across-the-acquisition-funnel-with-personalization-using-contextual-bandits-on-aws/),
+# read in full on 2026-11-06. The product is not named.
+#   "we share how Amazon Payments applied AI-based personalization to a product acquisition funnel, using a
+#    multi-objective contextual multi-armed bandit (MAB)"
+#   "In a seven-week online A/B test we currently see a high single-digit percentage relative lift in final-funnel
+#    conversion for one customer population, while another saw no improvement over the existing experience."
+#   "we chose UCB, a strategy that selects the arm with the highest estimated reward plus an uncertainty bonus" and
+#    "Its deterministic selection rule gives an auditable, reproducible decision for every impression"
+#   "Our production system represents each customer as a context vector of behavioral signals (payment behavior,
+#    transaction mix, and similar features)"
+#   "The bonus is context-dependent. It's large for a kind of visitor the arm has rarely seen, and small for one it
+#    has seen often."
+#   "The customer journey in our use case comprises three steps: application start, submission, and approval."
+#   "Content optimized for starts tends to attract a broad audience, yet approval depends on whether the offer
+#    genuinely suits the applicant. Optimizing one stage in isolation can degrade another. We refer to this as the
+#    seesaw problem." and "approvals are rare and delayed"
+#   "running one LinUCB model per stage (start, submit, approve) and combining their UCB scores through a linear
+#    combination" and "We used approximately equal weights." Hence the sum of frame 2.
+#   "Our content was assembled from two kinds of parts: industry-themed images and benefit-focused taglines" and
+#    "each arm is one (image, tagline) pairing"
+#   "approval decisions lag by days"
+#   "Policies optimized for a single funnel stage consistently produced at least one negative directional lift
+#    elsewhere." (Lessons learned, before deployment)
+#   "In our A/B test, one customer population saw directionally positive lifts across all three funnel metrics,
+#    currently a high single-digit percentage relative lift on the final stage. For the second population, the model
+#    explored most of its arm pool yet found no combination that beat the static page. The lifts were negative, and
+#    the approval regression was statistically significant. This was not a model failure. Thorough exploration can
+#    confirm that a content pool contains no winner."
+#   "only a conventional A/B test (bandit-personalized compared to static baseline) determines whether
+#    personalization outperforms your existing experience."
+#   "We run a weekly SageMaker AI batch job"; "There is no real-time model inference."; "If no recommendation exists
+#    for a visitor, the page falls back to the default static experience"; "Training one model per group";
+#    "Consider making the baseline an arm."
+#   Not stated: absolute rates, traffic, confidence intervals, the exact lift.
+AMAZON = {"weeks": 7, "steps": 3}
+num("amWeeks", "%d" % AMAZON["weeks"])
+num("amSteps", "%d" % AMAZON["steps"])                          # Say only
+# INVENTED for frame 2 (the post gives no scores): three (image, tagline) pairs and their UCB score at each step for
+# one visitor, small integers. The story, the seesaw: pair A has the best score for the first step and the worst for
+# the approval; pair B has the highest sum, so the sum of the three scores shows B. Equal weights, as in the post.
+AM_PAIRS = [("A", (6, 3, 1)), ("B", (4, 4, 4)), ("C", (3, 2, 3))]
+am_sum = {p: sum(v) for p, v in AM_PAIRS}
+assert max(AM_PAIRS, key=lambda pv: pv[1][0])[0] == "A"                    # the first step alone picks A
+assert min(AM_PAIRS, key=lambda pv: pv[1][2])[0] == "A"                    # A has the worst approval score
+assert max(am_sum, key=am_sum.get) == "B" and len(set(am_sum.values())) == 3   # the sum picks B, no ties
+assert len(set(v[0] for _, v in AM_PAIRS)) == 3                            # no tie in the first step either
+for p, v in AM_PAIRS:
+    for step, x in zip(["start", "sub", "app"], v):
+        num("am%s%s" % (p, step), "%d" % x)
+    num("am%ssum" % p, "%d" % am_sum[p])
+for s in ["%d weeks" % AMAZON["weeks"], "high single-digit"]:
+    show("amazon", s)
+
+# == LinkedIn's ads: the click model, gradient descent at scale, 2024 ==
+# The paper of CASE 4 above (LiRank, KDD 2024), read again on 2026-11-06 for its ads model:
+#   "At LinkedIn, ads selection relies on click-through-rate (CTR) prediction, estimating the likelihood of member
+#    clicks on recommended ads. This CTR probability informs ad auctions for displaying ads to members." (Sec. 3.2)
+#   "Advertisers customize chargeable clicks for campaigns, such as some advertisers consider social interaction such
+#    as 'like', 'comment' as chargeable clicks while others only consider visiting ads websites as clicks." (Sec. 3.2)
+#   "Ads charging prices are linked to click-through rate (CTR) probabilities, making accurate calibration
+#    essential." (Sec. 3.4)
+#   "besides traditional features from members and advertisers, we incorporate ID features to represent advertisers,
+#    campaigns, and advertisements." (Sec. 3.2) Table 8, test AUC of Ads CTR variants: "ID embeddings (IDs)" "+1.27%".
+#   "Our baseline model is a multilayer perceptron model [...] Features fall into five categories: contextual,
+#    advertisement, member, advertiser, ad-member interaction. Baseline model doesn't have Id features. In the Table 5
+#    we show relative improvements of each of the techniques including ID embeddings, Quantization, Lowrank DCNv2,
+#    TransAct and Isotonic calibration layer. [...] We have deployed techniques to production and observed 4.3% CTR
+#    relative improvement in online A/B tests." (Sec. 5.3) Hence "the lists and four other changes" in the Say: the
+#    4.3% is not the lists' alone.
+#   "While Adam was generally effective, models with numerous sparse features required AdaGrad" (Sec. 6.2): both are
+#    forms of gradient descent. Hence "gradient descent learns the numbers".
+#   Table 3, "Incremental Experiments Settings", Ads CTR: cold start data range "14 days", incremental data range
+#    "0.5 day", incremental iterations "4". Table 5, "Ads CTR model results summary", cold start against incremental
+#    training: test AUC "+0.18%", and a training time 96% shorter, printed with a minus sign (macro liIncCut above).
+#    Sec. 5.1: "We tested incremental training on both Feed ranking models and Ads CTR models." Hence "in a test" on
+#    the slide; the paper does not say that it runs in production for ads. "half a day" is in words on the slide.
+#   "Incremental training, on the other hand, not only uses the previous model for weight initialization but also
+#    leverages it to create an informative regularization term." (Sec. 3.6)
+#   "more than 1 billion members" (Sec. 1, macro liMembers above)
+#   Scope traps, kept off these slides: the 70 to 20 hours of Sec. 4.1 and the warm-up and learning rate of Sec. 6.2
+#   name no model; "billions of parameters" and "every 8 hours" are the Feed's (Sec. 3.9); the "30-dim ID embeddings"
+#   row is in the Feed's table (Sec. 5.2); Thompson sampling ran on the Feed (Sec. 3.8).
+LIADS = {"cold_days": 14, "inc_days": 0.5, "inc_iters": 4, "inc_auc_pct": 0.18}
+num("laColdDays", "%d" % LIADS["cold_days"])                     # Say only
+num("laIncAuc", "%.2f" % LIADS["inc_auc_pct"])                   # Say only
+for s in ["Over %d billion" % LIRANK["members_billion"], "+%.1f%%" % LIRANK["ads_ctr_pct"],
+          "%d%%" % LIRANK["incremental_cut_pct"]]:
+    show("linkedin", s)
+
+
 # ----- The weekend deck, weekend2-cases.tex (Carlos, 2026-11-06: "merge all this decks into a new deck for the
 # weekend"): one section per case deck, in this order, so its PDF must show every string of every case deck.
-WEEKEND_CASES = ["etsy", "spotify", "airbnb"]
+WEEKEND_CASES = ["etsy", "spotify", "airbnb", "spotify-home", "amazon", "linkedin"]
 deck_expect["weekend2-cases"] = [s for d in WEEKEND_CASES for s in deck_expect[d]]
 
 

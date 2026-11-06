@@ -1,0 +1,109 @@
+% ===== spotify-home-frames.tex: Spotify's home page, the epsilon-greedy case in three frames, 2026-11-06 =====
+% The frames of the case and their talk track. spotify-home.tex builds them alone; weekend2-cases.tex inputs this
+% file as one section of the weekend deck, so both decks share one source.
+% Carlos chose the case on 2026-11-06 ("Spotify, Amazon Payments, and LinkedIn Lirank") and asked: "Produce the
+% slides, follow the style from the slides for the matrix factorization part". Read as spotify.tex, the audiobooks
+% case after the 10:00 matrix factorization block: (1) the problem, a big number on click 2; (2) the method as a
+% diagram whose top line ties it to the block's game, here the mirror of "Once Upon a Mirror" (w2-cx-private,
+% 03_bandits: a mirror shows one product each morning, a tap is a click, epsilon-greedy spins a roulette), click 2
+% adding a part; (3) the value, an A/B test with group chips and hatched bars. He did not dictate these slides.
+% No number is typed here: numbers.tex is written by tools/cases_numbers.py (block "Spotify's home page"), which
+% keeps the sentence of each source. The three mixes of frame 2 and their estimates are INVENTED (the paper does not
+% list its mixes), and the slide says so. A "Say" comment above each frame is the talk track. Build and check:
+%   python3 tools/cases_numbers.py
+%   ../style/tools/build.sh spotify-home.tex
+%   python3 tools/check_numbers.py spotify-home.pdf tools/expected-spotify-home.txt
+\newcommand{\shsource}{Feijer and others (Spotify), CONSEQUENCES workshop at RecSys 2025.}
+
+% ===== Frame 1. Music or podcasts =====
+% Say: Spotify's home page is a stack of shelves, some of music, some of podcasts. How many of each should a
+% listener see? The usual rule gives each user the mix of their own past listening. But tastes move: the paper's
+% first figure shows the share of podcasts rising and falling over the day and over the week, and the authors write
+% that preferences vary with the time of day, the day of the week, even the device. The rule only looks back.
+% [click] And this page is built for more than 600 million users.
+\begin{frame}{Spotify's home page: music or podcasts?}
+  \begin{tikzpicture}[x=1mm, y=1mm]
+    \path[use as bounding box] (0,1) rectangle (130,-54);
+    \node[body, anchor=north west, text width=64mm] at (0,0)
+      {The home page shows shelves of music and podcasts. The usual rule gives each user the mix of their past
+       listening.\par\vspace{2.4mm}
+       But tastes can change with the time of day, the day of the week and the device.};
+    \node[big, anchor=north west, visible on=<2->] at (76,-1) {Over \shUsers{} million};
+    \node[body, anchor=north west, text width=54mm, visible on=<2->] at (76,-10) {users of the home page};
+    \node[src, anchor=north west, text width=130mm] at (0,-50.6) {\shsource};
+  \end{tikzpicture}
+\end{frame}
+
+% ===== Frame 2. Epsilon-greedy with a network =====
+% Say: The bandit, in the words of our mirror game. The arms are mixes: mostly music, half and half, mostly podcasts.
+% These three are my invention; the paper does not list its mixes. The reward is a stream: one if the listener plays
+% anything from the page, zero if not, the tap of the mirror. The mirror estimated each product by counting taps.
+% Here a network estimates the chance of a stream for every mix, from the listener's history, the device, the time
+% of day and the day of the week. It learned from two weeks of logs and was checked on a third. The bandit shows the
+% mix with the highest estimate. [click] And it spins a roulette, as the mirror did: on 98.5 percent of the pages
+% the highest estimate, on 1.5 percent a random mix near the listener's usual one. Spotify also tried a mix drawn
+% at random from all of them; those pages strayed too far from what people like.
+\begin{frame}{Epsilon-greedy on the home page}
+  \begin{tikzpicture}[x=1mm, y=1mm]
+    \path[use as bounding box] (0,1) rectangle (130,-54);
+    \node[body, anchor=north west, text width=130mm] at (0,0)
+      {The mirror counted taps. Here a network estimates the chances.};
+    % the network and its inputs
+    \node[anchor=north, inner sep=0, font=\small, align=center] at (19,-9) {Listening history,\\ device, time of day};
+    \node[net] (net) at (19,-25.5) {Network};
+    \draw[flow] (19,-16.8) to (net.north);
+    \draw[draw=nib, line width=0.7pt, line join=miter] (net.east) to (40,-25.5);
+    \draw[draw=nib, line width=0.7pt, line join=miter] (40,-18) to (40,-33);
+    \foreach \my in {-18,-25.5,-33} {\draw[flow] (40,\my) to (44.4,\my);}
+    % the estimates, INVENTED (tools/cases_numbers.py, SH_EST): one bar per mix, the highest hatched
+    \node[measure, anchor=north west] at (46,-9) {Chance of a stream from the page};
+    \foreach \my/\mname in {-18/Mostly music, -25.5/Half and half, -33/Mostly podcasts}
+      {\node[body, anchor=west] at (46,\my) {\mname};}
+    \draw[bar plain] (78,-20.5) rectangle ({78+\shEstMusic},-15.5);
+    \fill[hatch] (78,-28) rectangle ({78+\shEstHalf},-23);
+    \draw[brand, line width=0.7pt, line join=miter] (78,-28) rectangle ({78+\shEstHalf},-23);
+    \draw[bar plain] (78,-35.5) rectangle ({78+\shEstPod},-30.5);
+    % the roulette (click 2)
+    \node[body, anchor=north west, text width=130mm, visible on=<2->] at (0,-38.6)
+      {\textbf{\shGreedy\%} of the pages: the highest estimate.};
+    \node[body, anchor=north west, text width=130mm, visible on=<2->] at (0,-43.4)
+      {\textbf{\shExplore\%}: a random mix near the usual one.};
+    \node[src, anchor=north west, text width=130mm] at (0,-50.6) {Invented estimates. \shsource};
+  \end{tikzpicture}
+\end{frame}
+
+% ===== Frame 3. The A/B test =====
+% Say: The value. Spotify ran an A/B test: the bandit against the mix of the last 90 days, which had beaten a
+% 7-day version of the same rule offline. [click] The measure: streams per podcast shelf shown. It rose by 36.6
+% percent, a relative change. Over shelves of both kinds the rise was 3.93 percent. [click] And people listened
+% more: minutes listened on the whole platform rose by 1.28 percent, and the share of users who started a stream
+% from the home page by 1.54 percent. The bandit has been in production since March 2025. The paper gives neither
+% the size nor the length of the test. Spotify's next step, in its own words: UCB, which "has been shown to
+% outperform epsilon-greedy strategies in many settings".
+\begin{frame}{The value: an A/B test}
+  \begin{tikzpicture}[x=1mm, y=1mm]
+    \path[use as bounding box] (0,1) rectangle (130,-54);
+    \node[chip, font=\small, text width=26mm, align=center, minimum width=28mm, minimum height=7.6mm, inner sep=1.5pt]
+      (users) at (14.5,-24) {Home page\\ users};
+    \node[lbl, anchor=north] at (14.5,-29.4) {split at random};
+    \foreach \gy/\gname/\gtext in {-15/g1/{The mix of the last \shDays{} days}, -33/g2/{The bandit}}
+      {\node[chip, font=\small, text width=33mm, align=center, minimum width=36mm, minimum height=7.6mm,
+         inner sep=1.5pt] (\gname) at (52,\gy) {\gtext};}
+    \draw[draw=nib, line width=0.7pt, line join=miter] (users.east) to (30,-24);
+    \draw[draw=nib, line width=0.7pt, line join=miter] (30,-15) to (30,-33);
+    \foreach \gy in {-15,-33} {\draw[flow] (30,\gy) to (33.9,\gy);}
+    % the podcast measure and its bars (click 2): the control's bar is 22 mm long
+    \node[measure, anchor=north west, text width=56mm, visible on=<2->] at (74,-3)
+      {Streams per podcast shelf shown, relative change};
+    \draw[bar plain, visible on=<2->] (74,-17.5) rectangle (96,-12.5);
+    \fill[hatch, visible on=<2->] (74,-35.5) rectangle ({74+22*\shIdxPod/100},-30.5);
+    \draw[brand, line width=0.7pt, line join=miter, visible on=<2->] (74,-35.5) rectangle ({74+22*\shIdxPod/100},-30.5);
+    \node[big, anchor=west, visible on=<2->] at ({76.5+22*\shIdxPod/100},-33) {+\shPod\%};
+    % minutes listened and production (click 3)
+    \node[anchor=north west, inner sep=0, font=\large, visible on=<3->] at (74,-40) {+\shMinutes\%};
+    \node[measure, anchor=north west, text width=37mm, visible on=<3->] at (93,-40.6)
+      {minutes listened on Spotify, relative change};
+    \node[body, anchor=north west, text width=64mm, visible on=<3->] at (0,-40) {In production since \shDeployed.};
+    \node[src, anchor=north west, text width=130mm] at (0,-50.6) {\shsource};
+  \end{tikzpicture}
+\end{frame}

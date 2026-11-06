@@ -1,0 +1,116 @@
+% ===== amazon-frames.tex: Amazon Payments, the UCB case in three frames, 2026-11-06 =====
+% The frames of the case and their talk track. amazon.tex builds them alone; weekend2-cases.tex inputs this file as
+% one section of the weekend deck, so both decks share one source.
+% Carlos chose the case on 2026-11-06 ("Spotify, Amazon Payments, and LinkedIn Lirank") and asked: "Produce the
+% slides, follow the style from the slides for the matrix factorization part". Read as spotify.tex: (1) the problem,
+% here with the steps of an application drawn as a funnel, as airbnb.tex draws its search; (2) the method, its top
+% line tied to UCB in "Once Upon a Mirror" (w2-cx-private, 03_bandits: the estimate plus an exploration bonus, "the
+% fewer dots, the bigger the bonus"), click 2 adding a part; (3) the value, the A/B test. He did not dictate these
+% slides. The source is a blog post of Amazon on the AWS Machine Learning Blog, 1 October 2026.
+% No number is typed here: numbers.tex is written by tools/cases_numbers.py (block "Amazon Payments"), which keeps
+% the sentence of each source. The scores of frame 2 are INVENTED (the post gives none), and the slide says so.
+% A "Say" comment above each frame is the talk track. Build and check from this folder:
+%   python3 tools/cases_numbers.py
+%   ../style/tools/build.sh amazon.tex
+%   python3 tools/check_numbers.py amazon.pdf tools/expected-amazon.txt
+\newcommand{\amsource}{John and Gozluklu (Amazon), AWS Machine Learning Blog, 2026.}
+
+% ===== Frame 1. Which page for which visitor =====
+% Say: Amazon Payments invites customers to apply for one of its products; the post does not say which. The page
+% shows one image and one tagline. Amazon builds the pairs from a small set of reviewed parts, images about
+% industries and taglines about benefits, so there are many pairs, and each pair is an arm of a bandit. An
+% application has three steps: started, submitted, approved. Approvals are rare, and they come days later.
+% [click] And the steps pull against each other. A page that wins many starts draws a broad audience, but approval
+% depends on whether the offer suits the applicant. Amazon calls it the seesaw problem: optimizing one step alone
+% can hurt another.
+\begin{frame}{Amazon Payments: which page for which visitor?}
+  \begin{tikzpicture}[x=1mm, y=1mm]
+    \path[use as bounding box] (0,1) rectangle (130,-54);
+    \node[body, anchor=north west, text width=64mm] at (0,0)
+      {A page invites customers to apply for an Amazon Payments product. It shows one image and one tagline, from
+       many possible pairs.};
+    \node[body, anchor=north west, text width=64mm, visible on=<2->] at (0,-22)
+      {A page that wins the first step can lose the last.};
+    % the steps of one application, narrowing as a funnel
+    \node[lbl, anchor=north] at (99.5,0.4) {An application};
+    \node[stage, minimum width=54mm] (s1) at (99.5,-9.5) {Started};
+    \node[stage, minimum width=42mm] (s2) at (99.5,-22.5) {Submitted};
+    \node[stage, minimum width=30mm] (s3) at (99.5,-35.5) {Approved};
+    \draw[flow] (s1) to (s2);
+    \draw[flow] (s2) to node[elab, inner sep=0.4pt, anchor=west, xshift=1.2mm] {days later} (s3);
+    \node[src, anchor=north west, text width=130mm] at (0,-50.6) {\amsource};
+  \end{tikzpicture}
+\end{frame}
+
+% ===== Frame 2. One UCB score for each step =====
+% Say: How the bandit picks a pair, in the words of our mirror game. In the mirror, UCB scored each product by its
+% estimate plus a bonus: the fewer dots, the bigger the bonus. Amazon does the same for every pair, with one
+% difference: the estimate and the bonus depend on the visitor, on what Amazon knows of their payments. The bonus
+% is large for a kind of visitor the pair has rarely seen. And there is one score for each step: started,
+% submitted, approved. These numbers are invented. A bandit for the first step alone would choose pair A: the best
+% score for starts, but the worst for approvals. [click] Amazon adds the three scores, with about equal weights, and
+% shows the pair with the highest sum: pair B. Before the launch, Amazon checked it: in its estimates, a bandit for
+% any single step consistently pushed at least one other step down. The scores are computed once a week for every customer,
+% and the page only looks up the chosen pair.
+\begin{frame}{One UCB score for each step}
+  \begin{tikzpicture}[x=1mm, y=1mm]
+    \path[use as bounding box] (0,1) rectangle (130,-54);
+    \node[body, anchor=north west, text width=130mm] at (0,0)
+      {Each score is an estimate plus a bonus, as in the mirror.};
+    % the table, INVENTED scores (tools/cases_numbers.py, AM_PAIRS): cells 18 mm wide that touch
+    \node[lbl, anchor=base west] at (0,-13) {For one visitor};
+    \foreach \cx/\ctext in {44/Started, 62/Submitted, 80/Approved} {\node[lbl, anchor=base] at (\cx,-13) {\ctext};}
+    \node[lbl, anchor=base, visible on=<2->] at (104,-13) {Sum};
+    \foreach \ry/\rp in {-18/A, -23.6/B, -29.2/C} {\node[body, anchor=west] at (0,\ry) {Pair \rp};}
+    \scellwin{1-}{44}{-18}{\amAstart}
+    \scell{1-}{62}{-18}{\amAsub}
+    \scell{1-}{80}{-18}{\amAapp}
+    \scell{1-}{44}{-23.6}{\amBstart}
+    \scell{1-}{62}{-23.6}{\amBsub}
+    \scell{1-}{80}{-23.6}{\amBapp}
+    \scell{1-}{44}{-29.2}{\amCstart}
+    \scell{1-}{62}{-29.2}{\amCsub}
+    \scell{1-}{80}{-29.2}{\amCapp}
+    \scell{2-}{104}{-18}{\amAsum}
+    \scellwin{2-}{104}{-23.6}{\amBsum}
+    \scell{2-}{104}{-29.2}{\amCsum}
+    \node[body, anchor=north west, text width=130mm] at (0,-35.6) {The first step alone would choose pair A.};
+    \node[body, anchor=north west, text width=130mm, visible on=<2->] at (0,-41)
+      {Amazon shows the highest sum: pair B.};
+    \node[src, anchor=north west, text width=130mm] at (0,-50.6) {Invented scores. \amsource};
+  \end{tikzpicture}
+\end{frame}
+
+% ===== Frame 3. The A/B test =====
+% Say: The value. Amazon ran an A/B test of seven weeks: the bandit against the fixed page, in two groups of
+% customers. In the first group all three steps went up so far, approvals by a high single-digit percentage, a
+% relative change. The post gives no exact figure, and it calls these lifts directional: it does not say they are
+% statistically significant. [click] In the second group the bandit explored most of its pairs and found none that
+% beat the fixed page. Approvals fell, and the drop was statistically significant. [click] Amazon's reading: the model did its job. The pool of images and taglines held
+% no winner for that group, and the exploring showed it. So the next step is new images and taglines. Amazon also
+% advises making the fixed page one of the arms, so that UCB falls back on it when nothing beats it.
+\begin{frame}{The value: an A/B test of \amWeeks{} weeks}
+  \begin{tikzpicture}[x=1mm, y=1mm]
+    \path[use as bounding box] (0,1) rectangle (130,-54);
+    \node[body, anchor=north west, text width=130mm] at (0,0) {The bandit against the fixed page:};
+    % the first group
+    \node[chip, font=\small, text width=27mm, align=center, minimum width=30mm, minimum height=7.6mm, inner sep=1.5pt]
+      at (16,-13) {One group of customers};
+    \draw[good, line width=1.8pt, -{Triangle[length=3mm, width=3.4mm]}] (38,-17.2) to (38,-8.4);
+    \node[body, anchor=north west, text width=84mm] at (45,-8.6)
+      {Approvals rose by a high single-digit percentage.\par
+       {\small\itshape\color{muted} relative change, so far}};
+    % the second group (click 2)
+    \node[chip, font=\small, text width=27mm, align=center, minimum width=30mm, minimum height=7.6mm, inner sep=1.5pt,
+      visible on=<2->] at (16,-29.4) {Another group};
+    \draw[bad, line width=1.8pt, -{Triangle[length=3mm, width=3.4mm]}, visible on=<2->] (38,-24.8) to (38,-33.6);
+    \node[body, anchor=north west, text width=84mm, visible on=<2->] at (45,-25)
+      {No pair it tried beat the fixed page. Approvals fell.\par
+       {\small\itshape\color{muted} statistically significant}};
+    % the lesson (click 3)
+    \node[body, anchor=north west, text width=100mm, visible on=<3->] at (0,-38.8)
+      {Amazon: \textquotedblleft Thorough exploration can confirm that a content pool contains no
+       winner.\textquotedblright};
+    \node[src, anchor=north west, text width=130mm] at (0,-50.6) {\amsource};
+  \end{tikzpicture}
+\end{frame}

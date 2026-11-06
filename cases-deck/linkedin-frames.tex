@@ -1,0 +1,93 @@
+% ===== linkedin-frames.tex: LinkedIn's ads, the advertising case in three frames, 2026-11-06 =====
+% The frames of the case and their talk track. linkedin.tex builds them alone; weekend2-cases.tex inputs this file as
+% one section of the weekend deck, so both decks share one source.
+% Carlos chose the case on 2026-11-06 ("Spotify, Amazon Payments, and LinkedIn Lirank") and asked: "Produce the
+% slides, follow the style from the slides for the matrix factorization part". Read as spotify.tex: (1) the problem,
+% a big number on click 2; (2) the method as a diagram whose top line ties it to "Once Upon a Matchmaker"
+% (w2-cx-private, 02_matrix_factorization: a list of numbers for every customer and film, improved by gradient
+% descent), click 2 adding the loop of learning; (3) the value, as airbnb.tex shows it: big numbers, a rule, a cost.
+% He did not dictate these slides. The paper is the one of card 4 of cases.tex (LiRank, KDD 2024); this deck uses
+% only what it says of the ads model (tools/cases_numbers.py, block "LinkedIn's ads", lists the scope traps).
+% No number is typed here: numbers.tex is written by tools/cases_numbers.py, which keeps the sentence of each source.
+% A "Say" comment above each frame is the talk track. Build and check from this folder:
+%   python3 tools/cases_numbers.py
+%   ../style/tools/build.sh linkedin.tex
+%   python3 tools/check_numbers.py linkedin.pdf tools/expected-linkedin.txt
+\newcommand{\lasource}{Borisyuk and others (LinkedIn), KDD 2024.}
+
+% ===== Frame 1. The chance of a click =====
+% Say: LinkedIn chooses which ad a member sees by the chance that the member will click it. That chance goes into
+% the ad auction, and the price of the ad is linked to it, so it has to be accurate. And a click means different
+% things to different advertisers: for some a like or a comment counts as a click they pay for, for others only a
+% visit to their website. [click] All this for more than a billion members.
+\begin{frame}{LinkedIn's ads: the chance of a click}
+  \begin{tikzpicture}[x=1mm, y=1mm]
+    \path[use as bounding box] (0,1) rectangle (130,-54);
+    \node[body, anchor=north west, text width=64mm] at (0,0)
+      {The chance that a member clicks an ad enters the ad auction, and the price depends on it.\par\vspace{2.4mm}
+       Each advertiser chooses what counts as a click: a like, a comment or a visit to its website.};
+    \node[big, anchor=north west, visible on=<2->] at (76,-1) {Over \liMembers{} billion};
+    \node[body, anchor=north west, text width=54mm, visible on=<2->] at (76,-10) {members};
+    \node[src, anchor=north west, text width=130mm] at (0,-50.6) {\lasource};
+  \end{tikzpicture}
+\end{frame}
+
+% ===== Frame 2. Lists of numbers, learned by gradient descent =====
+% Say: How the chance is computed. A network takes facts about the member, the ad, the advertiser and the moment.
+% LinkedIn's earlier model stopped there. The new one also has a list of numbers for every advertiser, every
+% campaign and every ad, as the matchmaker had a list for every customer and every film. [click] And it learns them
+% the same way. In training, for each ad shown in the logs, the model predicts the chance of a click and compares it
+% with whether the member clicked, and gradient descent nudges the lists and the network so that the predictions
+% come closer. The paper names Adam and AdaGrad for its models, two refinements of gradient descent.
+\begin{frame}{Numbers for every advertiser, campaign and ad}
+  \begin{tikzpicture}[x=1mm, y=1mm]
+    \path[use as bounding box] (0,1) rectangle (130,-54);
+    \node[body, anchor=north west, text width=130mm] at (0,0)
+      {The matchmaker learned lists from ratings; here, from clicks.};
+    % inputs: the facts, and one list of numbers per advertiser, campaign and ad
+    \node[anchor=north, inner sep=0, font=\small, align=center] at (24,-9) {Facts about the\\ member and the ad};
+    \foreach \ly/\lname in {-10.5/advertiser, -16/campaign, -21.5/ad}
+      {\node[lbl, anchor=east] at (94,\ly) {\lname};
+       \hatchcells{1-}{98}{\ly}{4}}
+    \node[net] (net) at (60,-30.5) {Network};
+    \draw[flow] (24,-17.4) |- (net.west);
+    \draw[flow] (105,-24.2) |- (net.east);
+    \node[chip, font=\normalsize, minimum height=5.6mm, minimum width=36mm, inner sep=1.5pt] (out) at (60,-42.4)
+      {Chance of a click};
+    \draw[flow] (net.south) to (out.north);
+    % the loop of learning (click 2)
+    \draw[draw=nib, line width=0.7pt, line join=miter, visible on=<2->] (out.east) to (122,-42.4) to (122,-16);
+    \draw[flow, visible on=<2->] (122,-16) to (114.6,-16);
+    \node[elab, anchor=east, visible on=<2->] at (120.4,-36.4) {gradient descent};
+    \node[lbl, anchor=north, visible on=<2->] at (100,-43.6) {click or no click};
+    \node[src, anchor=north west, text width=130mm] at (0,-50.6) {\lasource};
+  \end{tikzpicture}
+\end{frame}
+
+% ===== Frame 3. The value =====
+% Say: The value. LinkedIn tested the new model, the lists together with other changes to the network, against the
+% earlier one in online A/B tests. [click] The click rate on ads rose by 4.3 percent, a relative change, and the
+% new model went into production. [click] Keeping it up to date also got cheaper. In a test, instead of training
+% each model from scratch on 14 days of data, LinkedIn started from the last model and trained it on the newest half
+% day: training took 96 percent less time, and the score on the test data (AUC) even rose slightly, by 0.18
+% percent. The paper does not say whether the ads model is updated this way in production.
+\begin{frame}{The value: A/B tests}
+  \begin{tikzpicture}[x=1mm, y=1mm]
+    \path[use as bounding box] (0,1) rectangle (130,-54);
+    \node[chip, font=\small, minimum width=38mm, minimum height=7.6mm, inner sep=1.5pt] (m1) at (20,-4)
+      {Earlier model};
+    \node[chip, font=\small, text width=46mm, align=center, minimum width=50mm, minimum height=7.6mm, inner sep=1.5pt]
+      (m2) at (82,-4) {With the lists and other changes};
+    \draw[flow] (m1) to (m2);
+    \node[big, anchor=north west, visible on=<2->] at (0,-14.6) {+\liAdsCtr\%};
+    \node[measure, anchor=north west, text width=60mm, visible on=<2->] at (0,-22.4) {click rate on ads, relative change};
+    \node[body, anchor=north west, text width=60mm, visible on=<2->] at (70,-14.6)
+      {LinkedIn put the new model into production.};
+    \draw[draw=ruling, line width=0.4pt, visible on=<3->] (0,-31) to (130,-31);
+    \node[big, anchor=north west, visible on=<3->] at (0,-34.6) {\textminus\liIncCut\%};
+    \node[measure, anchor=north west, text width=102mm, visible on=<3->] at (25,-35.2)
+      {training time in a test, when each new model starts from the last one and learns from the newest half day of
+       data};
+    \node[src, anchor=north west, text width=130mm] at (0,-50.6) {\lasource};
+  \end{tikzpicture}
+\end{frame}

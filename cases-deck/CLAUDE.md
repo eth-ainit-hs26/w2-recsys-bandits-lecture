@@ -22,6 +22,13 @@ The same day he found them "too complicated" and asked for them "25% simpler": t
 by 25%, 31% and 36% (README.md, subsection "Simplified"). Keep them at that level of detail. The same evening
 the three became one deck for the weekend, `weekend2-cases.tex`, which inputs each case's frames file, and
 `PRINCIPLES.md` collected the lessons and the rules for the next case decks (bandits, advertising).
+Later that evening (another session) he chose three of eight candidates for the bandit block and for advertising,
+"Spotify, Amazon Payments, and LinkedIn Lirank", and asked for the slides "in the style from the slides for the
+matrix factorization part", so these were built without dictation on the pattern of `spotify.tex`:
+`spotify-home.tex` (Spotify's home page, epsilon-greedy picks the mix of music and podcasts, RecSys 2025 workshop),
+`amazon.tex` (Amazon Payments, one UCB score per step of an application, AWS blog of October 2026) and
+`linkedin.tex` (LinkedIn's ads model, lists of numbers learned by gradient descent, KDD 2024), 3 frames each,
+sections 4 to 6 of the weekend deck (README.md, section "The bandit and advertising decks").
 
 ## Files
 
@@ -34,12 +41,12 @@ the three became one deck for the weekend, `weekend2-cases.tex`, which inputs ea
 | `tools/check_numbers.py` | `python3 tools/check_numbers.py cases.pdf`: reads every expected string back from the rendered PDF |
 | `tools/split_parts.py` | `python3 tools/split_parts.py cases.pdf`: one PDF per lecture (`case1-nearest-neighbours.pdf` to `case4-gradient-descent.pdf`), pages copied from the deck. Its `PARTS` table says which frames go where: frames 1, 2, 3, then 4 and 5 together |
 | `cases.pdf`, `cases-handout.pdf`, `case1-...pdf` to `case4-...pdf` | The outputs, committed. LaTeX intermediates are ignored by `../.gitignore` |
-| `etsy-frames.tex`, `spotify-frames.tex`, `airbnb-frames.tex` | The frames of the case decks of 2026-11-06 with their `% Say:` talk track and the source macro (`\etsysource`, `\spsource`, `\absource`). Edit a case here |
-| `etsy.tex`, `spotify.tex`, `airbnb.tex` | Wrappers: the preamble (`cases-kit.tex`, `numbers.tex`), then `\input{<case>-frames}`; each builds one case alone |
-| `weekend2-cases.tex` | The deck for the weekend: title page, one `\section` per case (the style draws the divider), each case's frames file |
+| `etsy-frames.tex`, `spotify-frames.tex`, `airbnb-frames.tex`, `spotify-home-frames.tex`, `amazon-frames.tex`, `linkedin-frames.tex` | The frames of the case decks of 2026-11-06 with their `% Say:` talk track and the source macro (`\etsysource`, `\spsource`, `\absource`, `\shsource`, `\amsource`, `\lasource`). Edit a case here |
+| `etsy.tex`, `spotify.tex`, `airbnb.tex`, `spotify-home.tex`, `amazon.tex`, `linkedin.tex` | Wrappers: the preamble (`cases-kit.tex`, `numbers.tex`), then `\input{<case>-frames}`; each builds one case alone |
+| `weekend2-cases.tex` | The deck for the weekend: title page, one `\section` per case (the style draws the divider), each case's frames file; 6 sections, 52 pages |
 | `PRINCIPLES.md` | The lessons of the case decks and the rules for the next ones; the file to hand a new conversation |
-| `etsy.pdf`, `spotify.pdf`, `airbnb.pdf`, `weekend2-cases.pdf` and their `-handout.pdf` | Their outputs, committed |
-| `tools/expected-etsy.txt`, `-spotify.txt`, `-airbnb.txt`, `-weekend2-cases.txt` | Written by `tools/cases_numbers.py`: the strings each deck must show (the weekend deck: those of the cases in `WEEKEND_CASES`); `python3 tools/check_numbers.py etsy.pdf tools/expected-etsy.txt` |
+| `etsy.pdf`, `spotify.pdf`, `airbnb.pdf`, `spotify-home.pdf`, `amazon.pdf`, `linkedin.pdf`, `weekend2-cases.pdf` and their `-handout.pdf` | Their outputs, committed |
+| `tools/expected-<deck>.txt` for each deck above and `-weekend2-cases.txt` | Written by `tools/cases_numbers.py`: the strings each deck must show (the weekend deck: those of the cases in `WEEKEND_CASES`); `python3 tools/check_numbers.py etsy.pdf tools/expected-etsy.txt` |
 
 Build and check, from this folder: the commands in README.md, section "Build and checks".
 
@@ -86,6 +93,17 @@ Build and check, from this folder: the commands in README.md, section "Build and
 - **The map's rows are tight.** Four rows at y = -10, -21, -32, -43 and the source line at -48.6; the questions
   are `\normalsize` in 45 mm, the chips at x = 67 (`\mapchip` is 7.6 mm high), the cases column at x = 90 and
   40 mm wide, so "also" holds two company names. A third name wraps to a third line and touches the next row.
+- **The invented examples of `spotify-home.tex` and `amazon.tex` (frame 2 of each) are generated too**: the bars of
+  the three mixes (`SH_EST`, asserted: half and half highest) and the table of three pairs (`AM_PAIRS`, asserted:
+  pair A best for the first step and worst for the approval, pair B the highest sum). Each slide says "Invented"
+  in its source line.
+- **LiRank is three products in one paper** (feed, jobs, ads). `linkedin.tex` uses only what the paper says of the
+  ads model; the block "LinkedIn's ads" of `tools/cases_numbers.py` lists the facts that belong to the feed or name
+  no model. The text extraction of the PDF scrambles its tables: the row "30-dim ID embeddings" sits in the feed's
+  table, so check a table in the PDF before using it.
+- **The dash hook rejects a new Python comment heading made of a hash, a space and a run of hyphens**, the form of
+  the old sub-headings of `tools/cases_numbers.py`: two or more hyphens between spaces count as a dash, and the old
+  headings pass only because they were already there. The blocks added on 2026-11-06 use `# == name ==`.
 - **This repository is public and every push to main publishes it on GitHub Pages**, the deck included. The
   course site (AINIT-PAGE) links it only after Carlos approves it.
 

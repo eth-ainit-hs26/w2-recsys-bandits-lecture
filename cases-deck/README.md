@@ -147,10 +147,103 @@ Choices made without asking:
 Open items of these decks:
 
 1. Which case goes after which block. Etsy and Airbnb are both nearest neighbours on two-tower vectors; Spotify
-   fits the matchmaker. The 12:00, 14:00 and 16:00 blocks have no deck yet; candidates are in
-   `git_ainit/research_notes/Business cases of the weekend 2 techniques/recent_*.md`.
+   fits the matchmaker. Since the evening of 2026-11-06 the 12:00 block has two decks and advertising one (next
+   section); the 16:00 block has none.
 2. Whether these decks replace `cases.tex`.
 3. Linked from nowhere; the course site gets them only after Carlos's yes.
+
+## The bandit and advertising decks, 2026-11-06 (evening)
+
+Carlos asked for "the business-case decks for the bandit block and for advertising ... the same way as the Etsy,
+Spotify and Airbnb decks", candidates first. Eight candidates went to him in chat, two paragraphs each; he chose
+"Spotify, Amazon Payments, and LinkedIn Lirank", then wrote "Produce the slides, follow the style from the slides
+for the matrix factorization part". He dictated none of these three: they follow `spotify.tex`, the case after the
+10:00 matrix factorization block, in three frames: the problem, with a big number or a funnel at the second click;
+the method as a diagram whose top line ties it to the block's game; the value of an A/B test.
+
+| File | Frames (pages) | Content |
+|---|---|---|
+| `spotify-home.tex`, `spotify-home-frames.tex`, `spotify-home.pdf`, `spotify-home-handout.pdf` | 3 (7) | Music or podcasts on the home page, the usual rule of past listening, over 600 million users; epsilon-greedy with a network for the estimates (three invented mixes as bars), 98.5% and 1.5%; the A/B test against the mix of the last 90 days: +36.6% streams per podcast shelf shown, +1.28% minutes listened, in production since March 2025 |
+| `amazon.tex`, `amazon-frames.tex`, `amazon.pdf`, `amazon-handout.pdf` | 3 (7) | One image and one tagline per page, the steps started, submitted, approved, a page that wins the first step can lose the last; one UCB score per step, added up (an invented table: the first step alone picks pair A, the sum pair B); the A/B test of 7 weeks: approvals up by a high single-digit percentage in one group, no pair beat the fixed page in the other, Amazon's sentence on exploration |
+| `linkedin.tex`, `linkedin-frames.tex`, `linkedin.pdf`, `linkedin-handout.pdf` | 3 (7) | The chance of a click enters the auction and the price, what counts as a click, over 1 billion members; a list of numbers for every advertiser, campaign and ad, learned from clicks by gradient descent; +4.3% click rate on ads in A/B tests, 96% less training time in a test of incremental training |
+
+The game of each: Spotify's home page and Amazon tie to "Once Upon a Mirror" (`w2-cx-private/03_bandits`: the
+mirror counts taps, epsilon-greedy spins a roulette, UCB adds a bonus to the estimate, "the fewer dots, the bigger
+the bonus"); LinkedIn ties to "Once Upon a Matchmaker" (`02_matrix_factorization`: a list of numbers for every
+customer and film, improved by gradient descent).
+
+Words on the slides, counted as in "Simplified" (handouts, `pdftotext` and `wc -w`, without the footer line):
+Spotify's home page 175 (62, 63, 50 a slide), Amazon 192 (57, 70, 65), LinkedIn 155 (54, 44, 57), after the second
+read below. Amazon's 70 include the 12 numbers of its table. The audiobooks deck has 152.
+
+State on 2026-11-06: 0 log errors, 0 em and en dashes, no build metadata, nothing moves between clicks; 7, 2 and 3
+strings found in the PDFs (`tools/expected-spotify-home.txt`, `-amazon.txt`, `-linkedin.txt`). The weekend deck has
+52 pages, a handout of 27 pages, and all 31 strings found. Every page of the three decks was rendered and read.
+
+Sources, grade READ; the sentences are in `tools/cases_numbers.py` and in
+`git_ainit/research_notes/Business cases of the weekend 2 techniques/chosen_bandit_and_ads_cases.md`:
+
+- Spotify: Feijer, Abdollahpouri, Gupta and 7 others (Spotify, NYU, Uber), "Calibrated Recommendations with
+  Contextual Bandits", CONSEQUENCES workshop at ACM RecSys 2025, arXiv 2509.05460, September 2025
+  (https://arxiv.org/abs/2509.05460).
+- Amazon: Chidi Prince John and Burak Gozluklu (Amazon), "Uplifting conversion across the acquisition funnel with
+  personalization using contextual bandits on AWS", AWS Machine Learning Blog, 1 October 2026
+  (https://aws.amazon.com/blogs/machine-learning/uplifting-conversion-across-the-acquisition-funnel-with-personalization-using-contextual-bandits-on-aws/).
+- LinkedIn: Borisyuk and 33 others, "LiRank: Industrial Large Scale Ranking Models at LinkedIn", KDD 2024, the paper
+  of card 4 of `cases.tex`. This deck uses only what it says of the ads model: the paper covers the feed, jobs and
+  ads, and its 70 to 20 hours of training, its learning rate, its "billions of parameters" and its retraining
+  every 8 hours do not concern the ads model.
+
+Choices made without asking:
+
+- "The slides for the matrix factorization part" read as `spotify.tex`, the case deck after the 10:00 block.
+- Spotify frame 1: "The usual rule gives each user the mix of their past listening". The paper calls this rule,
+  calibration, "a widely used approach in industry" and does not say which rule ran before the bandit; the control
+  of its A/B test was the mix of the last 90 days.
+- Spotify frame 2: the three mixes and their bars are invented (the paper does not list its set of mixes), marked
+  "Invented estimates" in the source line, and generated with an assert that half and half is the highest. The
+  reward is "the chance of a stream from the page" (a stream from any shelf counts). "98.5% of the pages" for the
+  epsilon-greedy split of 1.5%.
+- Spotify frame 3: the paper's impression-to-stream ratio as "streams per podcast shelf shown"; bars at 100 and
+  136.6; "split at random" for an online A/B test, whose assignment the paper does not describe.
+- Amazon frame 1: "an Amazon Payments product", since the post does not name it; the funnel narrows as a drawing.
+- Amazon frame 2: an invented table of three pairs (6, 3, 1; 4, 4, 4; 3, 2, 3), with asserts in
+  `tools/cases_numbers.py`: pair A has the best score for the first step and the worst for the approval, pair B the
+  highest sum; the scores are added with equal weights, as the post's "approximately equal weights".
+- Amazon frame 3: the lift in the post's words, "a high single-digit percentage", without bars, since the post gives
+  no number; arrows in the style's colours for a win (blue) and a loss (vermillion).
+- LinkedIn frame 2: "gradient descent" for the paper's optimizers, Adam and AdaGrad (Sec. 6.2, said of its models
+  in general).
+- LinkedIn frame 3: the +4.3% belongs to the lists together with other changes of the network (the paper names
+  quantization, low-rank DCNv2, TransAct and isotonic calibration beside the lists); the 96% is marked "in a test".
+- The weekend deck: the three come after Airbnb, as sections 4 to 6 ("Spotify's home page", "Amazon Payments",
+  "LinkedIn's ads"), and the first three keep their order. The style draws Ge'ez numerals up to five, so section 6
+  shows the digit 6.
+- `cases-kit.tex` has two new macros, `\scell` and `\scellwin`: the boxes of a small table of numbers, the chosen
+  one with a violet border.
+
+Open items of these decks:
+
+1. Which block each one follows: Spotify's home page and Amazon after 12:00 (bandits); LinkedIn's ads after 14:00
+   (gradient descent) or 16:00 (large-scale AI).
+2. Whether Carlos wants to change them by dictation, as he did with the first three.
+3. Linked from nowhere; the course site gets them only after his yes.
+
+### Second read, 2026-11-06 (evening)
+
+An agent read every claim of the three decks against the source files, and the same claims were read again by hand
+in the sources before any change. What changed:
+
+- Amazon frame 3: "No pair it tried beat the fixed page" (the post: the model "explored most of its arm pool yet
+  found no combination that beat the static page"). Under the first group, "relative change, so far": the post says
+  it "currently" sees the lift and calls the lifts directional, without saying they are significant (talk track).
+- Amazon talk track: no "separate model for each group" (the post advises one model per group and does not say it
+  ran one); the parts are "reviewed", the post's word; the check before the launch is "in its estimates", for the
+  post's "negative directional lift".
+- Spotify frame 1: "tastes can change", for the paper's "may vary".
+- LinkedIn talk track: training compares predictions with the clicks in the logs (the paper does not learn from each
+  ad as it is shown); incremental training raised "the score on the test data (AUC)" by 0.18%, where it said
+  "accuracy".
 
 The sections below describe `cases.tex`, version 2 of 2026-11-04.
 

@@ -24,6 +24,14 @@ advertising). Audience of the decks: managers with little formal math, 10 minute
   label touching a box.
 - **Jargon left the slides:** list of numbers (embedding), two networks (two towers), shortlist (candidate set),
   clustered index (IVF), "share of the bought products found in the top 100" (recall@100).
+- **"Follow the style of the slides for X" means: build without dictation, on the pattern of that deck.** For the
+  bandit and advertising decks he chose the cases, then wrote "Produce the slides, follow the style from the slides
+  for the matrix factorization part": they follow `spotify.tex` (the problem with a big number at the second click,
+  the method as a diagram tied to the block's game, the value of an A/B test), and README.md says which deck was
+  read as "the slides for X".
+- **The second read of those decks found the same kind of claim:** "No pair beat the fixed page" (the post: it
+  explored "most" of its pairs), a lift reported "currently" and "directionally" shown as a plain rise, a blog's
+  advice ("train separately") told as what the company did, "accuracy" for a test AUC, "may vary" told as "change".
 
 ## Principles
 
@@ -83,8 +91,9 @@ Details cut from a slide go into the `% Say:` talk track above its frame.
   back from the PDF.
 - Second read of every claim by an agent with the source texts (papers as text in the scratchpad). Check each
   finding in the source before changing a slide, and list the changes in README.md. Look for scope words (only,
-  every, popular), which source says what (paper or blog), how often something runs (daily, at each visit), and
-  what a test compared.
+  every, popular, most), which source says what (paper or blog), how often something runs (daily, at each visit),
+  what a test compared, hedges (may, currently, directional: a lift not claimed as significant) and advice that a
+  slide or a talk track tells as done.
 
 ### Checks before sending
 
@@ -99,6 +108,12 @@ Details cut from a slide go into the `% Say:` talk track above its frame.
 - A chip grows with its text: all chips of a pipeline get the same `minimum width`.
 - A centred `\small` label of 30 characters is about 50 mm wide: near the frame's edge, break it into two lines.
 - `shapes.geometric` is not loaded.
+- A chip's `\small` text wraps earlier than the estimate above; break a short label by hand ("Home page\\ users")
+  rather than let it break after the first word.
+- A two-line `measure` label above a bar needs about 9 mm above the bar's top edge, or its second line touches the
+  bar (Spotify's home page, frame 3).
+- The headers of a table of numbers: `anchor=base` at one y, or a word with descenders ("Approved") sits higher than
+  its neighbours.
 
 ## The blocks and their games
 
@@ -106,8 +121,8 @@ Details cut from a slide go into the `% Say:` talk track above its frame.
 |---|---|---|
 | 08:00 inner product, nearest neighbours | Once Upon a Video Store, `01_nearest_neighbours/` | Etsy, Airbnb |
 | 10:00 matrix factorization | Once Upon a Matchmaker, `02_matrix_factorization/` | Spotify |
-| 12:00 bandits | Once Upon a Mirror, `03_bandits/`: mirrors show one ad each morning, a tap is a click | open |
-| 14:00 matrix factorization by gradient descent | the Matchmaker, optional part | open |
+| 12:00 bandits | Once Upon a Mirror, `03_bandits/`: mirrors show one ad each morning, a tap is a click | Spotify's home page, Amazon Payments |
+| 14:00 matrix factorization by gradient descent | the Matchmaker, optional part | LinkedIn's ads (advertising; or after 16:00, open) |
 | 16:00 large-scale AI | | open |
 
 ## Files and commands
@@ -136,9 +151,11 @@ python3 ../style/tools/make_handout.py airbnb.pdf airbnb-handout.pdf
 4. Build and check `<case>.tex` and `weekend2-cases.tex`; update README.md and CLAUDE.md; `git pull --rebase`,
    commit, push.
 
-## Candidates for the bandit and advertising decks
+## Candidates for further decks
 
-In `git_ainit/research_notes/Business cases of the weekend 2 techniques/`:
+The bandit and advertising decks were chosen on 2026-11-06 from eight candidates (Spotify's home page, Amazon
+Payments, LinkedIn's ads; the five set aside are in `chosen_bandit_and_ads_cases.md` of the folder below). Candidates
+for a 16:00 deck or a replacement, in `git_ainit/research_notes/Business cases of the weekend 2 techniques/`:
 
 - `recent_bandits.md`: Amazon Payments, Dream11, Amazon retail, Expedia AdaptEx, Uber CRM e-mails, DoorDash, and a
   failure (Amazon, WWW 2024), all from 2021 on and checked against primary sources.
