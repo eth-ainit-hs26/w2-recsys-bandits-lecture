@@ -57,3 +57,46 @@
   \node[body, anchor=north west, text width=53mm, visible on=<4->] at (77,-32.4) {#2};}
 \newcommand{\cardsource}[1]{%
   \node[src, anchor=north west, text width=130mm] at (0,-47.6) {#1};}
+
+% ===== Added 2026-11-06 for the case decks etsy.tex, spotify.tex and airbnb.tex =====
+%   \ncell{overlay}{x}{y}{integer}   a number in a small box, tinted by its sign as in the video store
+%                                    (w2-cx-private, 01_nearest_neighbours, NOTATION.md): blue above 0,
+%                                    orange below 0, grey for 0, the stronger tint from 2 and from -2 on
+%   \ncellrow{overlay}{x}{y}{dx}{list}  \ncell for each entry of a comma list, from x in steps of dx
+%   \hatchcells{overlay}{x}{y}{n}    n hatched boxes in a row from x: a long list of numbers, values unshown
+%   \sharebox{overlay}{x}{y}{width}{height}{percent}  copied from ../opener-deck/opener-kit.tex: the hairline
+%                                    box is the whole, the violet hatched part the share; x the left edge, y the centre
+%   styles   net (a network: a strong chip), stage (a step of a search pipeline), flow (a plain arrow),
+%            textbox (a short text in a hairline box: what a buyer typed, what a seller wrote),
+%            bar plain (a bar for the reference group, copied from ../opener-deck/opener-kit.tex)
+\tikzset{
+  net/.style={chip strong, minimum width=34mm, minimum height=8.6mm, font=\normalsize,
+    inner xsep=2.6mm, inner ysep=2.4mm},
+  stage/.style={chip, minimum width=54mm, minimum height=7.4mm, font=\normalsize, inner sep=2pt},
+  flow/.style={draw=nib, line width=0.7pt, line join=miter, -{Triangle[length=2.3mm, width=1.7mm]}},
+  textbox/.style={draw=nib, line width=0.6pt, line join=miter, fill=paper, font=\small,
+    inner xsep=2mm, inner ysep=1.3mm, text=ink},
+  bar plain/.style={draw=nib, line width=0.7pt, line join=miter, fill=paper},
+}
+\newcommand{\ncell}[4]{%
+  \ifnum#4>1 \def\ncellfill{good!30!paper}\def\ncelltext{good!75!ink}%
+  \else\ifnum#4>0 \def\ncellfill{good!11!paper}\def\ncelltext{good!75!ink}%
+  \else\ifnum#4=0 \def\ncellfill{muted!13!paper}\def\ncelltext{muted}%
+  \else\ifnum#4>-2 \def\ncellfill{bad!11!paper}\def\ncelltext{bad!75!ink}%
+  \else\def\ncellfill{bad!30!paper}\def\ncelltext{bad!75!ink}\fi\fi\fi\fi
+  \node[draw=nib, line width=0.5pt, line join=miter, fill=\ncellfill, text=\ncelltext,
+    minimum width=6.4mm, minimum height=4.2mm, inner sep=0, font=\small, visible on=<#1>]
+    at (#2,#3) {\ifnum#4<0 \textminus\number-#4\else\number#4\fi};}
+\newcommand{\ncellrow}[5]{%
+  \foreach \ncv [count=\nci from 0] in {#5} {\ncell{#1}{#2+\nci*#4}{#3}{\ncv}}}
+\newcommand{\hatchcells}[4]{%
+  \foreach \hci in {1,...,#4} {
+    \fill[hatch fine, visible on=<#1>] ({#2+(\hci-1)*4.6-1.9},{#3-1.9}) rectangle ({#2+(\hci-1)*4.6+1.9},{#3+1.9});
+    \draw[brand, line width=0.5pt, line join=miter, visible on=<#1>]
+      ({#2+(\hci-1)*4.6-1.9},{#3-1.9}) rectangle ({#2+(\hci-1)*4.6+1.9},{#3+1.9});}}
+\newcommand{\sharebox}[6]{%
+  \fill[hatch, visible on=<#1>] (#2,{#3-#5/2}) rectangle ({#2+#4*#6/100},{#3+#5/2});
+  \draw[nib, line width=0.6pt, line join=miter, visible on=<#1>]
+    (#2,{#3-#5/2}) rectangle ({#2+#4},{#3+#5/2});
+  \draw[brand, line width=0.8pt, line join=miter, visible on=<#1>]
+    (#2,{#3-#5/2}) rectangle ({#2+#4*#6/100},{#3+#5/2});}

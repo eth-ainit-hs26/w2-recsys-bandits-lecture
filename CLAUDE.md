@@ -64,6 +64,8 @@ Specifically:
 │                               case at the end of each Friday lecture (Etsy 2024, Spotify
 │                               2024, Adyen 2025, LinkedIn 2024) and a closing map; cases.pdf,
 │                               a handout and one PDF per lecture; own CLAUDE.md and README.md
+│                               Since 2026-11-06 also one deck per case, dictated by
+│                               Carlos: etsy.tex (5 frames), spotify.tex (3), airbnb.tex (3)
 ├── original-decks/             Original PDFs from before the rebuild
 │   ├── w2_bandits.pdf
 │   └── w2_recsys.pdf
@@ -191,6 +193,13 @@ and how it was measured, what it cost, what the company decided. Every number co
 README grades every source. Same style and build as the opener: Codex plates from `style/`, built with
 `../style/tools/build.sh cases.tex` from inside `cases-deck/`. Nothing links to it yet; the course site
 links it only after Carlos approves it.
+
+Since 2026-11-06 the folder also holds one short deck per case, its text dictated by Carlos slide by slide, with
+diagrams: `etsy.tex` (5 frames, the search by inner product built over five clicks with invented numbers from the
+generator), `spotify.tex` (3 frames) and `airbnb.tex` (3 frames, Airbnb's embedding-based retrieval, preprint of
+January 2026 and blog of April 2025). He asked that day for five 10-minute cases, one after each Friday block,
+none older than five years; which deck goes after which block is open. Same build and checks, with
+`tools/check_numbers.py <deck>.pdf tools/expected-<deck>.txt`.
 
 ## When in doubt
 

@@ -1,0 +1,11 @@
+100 million items
+more than 150 million
+up to 30 million users
+72 hours
+4 GPUs
+1 month
++2.63%
++5.58%
+32%
+63%
+72%

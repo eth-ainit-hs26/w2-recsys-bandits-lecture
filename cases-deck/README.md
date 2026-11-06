@@ -13,6 +13,75 @@ all) the same day. The same evening he rejected the cases of version 1 as old: "
   `case4-gradient-descent.pdf`: the deck cut into the four slots, clicks included. The fourth holds frames 4
   and 5.
 
+## One deck per case, 2026-11-06
+
+On 2026-11-06 Carlos asked again for business cases, now five of 10 minutes each, one after each block of the
+Friday (08:00 inner product and nearest neighbours, 10:00 matrix factorization, 12:00 bandits, 14:00 matrix
+factorization by gradient descent, 16:00 large-scale AI), every case at most five years old. He first wanted
+ideas only ("Don't build anything show me ideas and then we shape them"), then dictated three decks slide by
+slide. They are separate from `cases.tex`, whose cards are version 2 of 2026-11-04.
+
+| File | Frames (pages) | His plan |
+|---|---|---|
+| `etsy.tex`, `etsy.pdf`, `etsy-handout.pdf` | 5 (12) | Etsy and its shortlist, why keyword matching fails; the training data; a list of numbers for every search and every item; the new search, sorting by inner product step by step; cost and value |
+| `spotify.tex`, `spotify.pdf`, `spotify-handout.pdf` | 3 (6) | Little data at launch; 128 numbers per listener and audiobook from two networks and a graph; the A/B test |
+| `airbnb.tex`, `airbnb.pdf`, `airbnb-handout.pdf` | 3 (7) | The first stage of search; two networks and the nearest homes; three A/B tests and their value |
+
+Build and checks, from this folder, for each of `etsy`, `spotify`, `airbnb`:
+
+```bash
+python3 tools/cases_numbers.py
+../style/tools/build.sh etsy.tex
+../style/tools/check.sh etsy.pdf
+python3 ../style/tools/check_overlays.py etsy.pdf
+python3 tools/check_numbers.py etsy.pdf tools/expected-etsy.txt
+python3 ../style/tools/make_handout.py etsy.pdf etsy-handout.pdf
+```
+
+State on 2026-11-06: 0 log errors, 0 em and en dashes, no build metadata, nothing moves between clicks; 11, 7
+and 3 numbers found in the PDFs. Every page of the three decks was rendered and read.
+
+Sources: Etsy and Spotify as for frames 1 and 2 of `cases.tex` (IEEE FMLDS 2024; WWW 2024 Companion). Airbnb:
+Abdool and 12 others, "Applying Embedding-Based Retrieval to Airbnb Search", arXiv 2601.06873, January 2026, a
+preprint (https://arxiv.org/abs/2601.06873), and their post "Embedding-Based Retrieval for Airbnb Search" on
+Airbnb's engineering blog, April 2025 (https://airbnb.tech/ai-ml/embedding-based-retrieval-for-airbnb-search/).
+Grade READ for both; the source sentences are in `tools/cases_numbers.py`.
+
+Choices made without asking:
+
+- Etsy: he named slides one, two, four and five. Slide two is read as the data, slide three as the lists of
+  numbers he described with it.
+- Etsy frame 1: the search "mothers day gift" is the paper's example; the necklace listing is invented, and the
+  source line says so.
+- Etsy frame 2: the four rows are invented; the counts are the paper's ("more than 150 million interactions"
+  from "up to 30 million users", one month of cart adds and purchases).
+- Etsy frames 3 and 4: invented small integers, four per list. `tools/cases_numbers.py` computes every product,
+  sum and the order, and asserts that the necklace comes first and the gift wrap, the only item with the word
+  "gift", falls out of the top three. The cells are tinted by sign as in the video store (blue above 0, orange
+  below, grey for 0, stronger from 2 and from -2 on), a solid tint where Codex plates otherwise hatch.
+- Etsy frame 4 is built over five clicks in his order: the search's numbers, the items' numbers, one inner
+  product worked out, all inner products, the sorted list with the top three as the shortlist. A click only
+  adds, so the "animation" also plays in a PDF viewer.
+- Etsy frame 5: the comparison is recall@100 on popular (head) searches, Table I of the paper.
+- Spotify frame 1: small share bars for the 25% and 75% and the "over 70%"; he asked for diagrams on frames 2
+  and 3 only.
+- Spotify frame 3: bars against the production model, drawn at 100, 123.87 and 146.83.
+- Airbnb frame 1: an opening sentence on what Airbnb is, and "whatever the search" for the paper's
+  "query-independent score".
+- Airbnb frame 2: the inputs of both networks from Sec. 4.5; the picture of homes as points is a drawing.
+- Airbnb frame 3: the three versions as boxes (two networks; a clustered index; a larger network); the paper's
+  phrase is quoted, the blog's sentence paraphrased.
+
+Open items of these decks:
+
+1. Which case goes after which block. Etsy and Airbnb are both nearest neighbours on two-tower vectors; Spotify
+   fits the matchmaker. The 12:00, 14:00 and 16:00 blocks have no deck yet; candidates are in
+   `git_ainit/research_notes/Business cases of the weekend 2 techniques/recent_*.md`.
+2. Whether these decks replace `cases.tex`.
+3. Linked from nowhere; the course site gets them only after Carlos's yes.
+
+The sections below describe `cases.tex`, version 2 of 2026-11-04.
+
 ## Frames
 
 | # | Slot | Title | Technique | On the slide |

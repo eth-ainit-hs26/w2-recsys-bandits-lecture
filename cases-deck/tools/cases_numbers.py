@@ -232,9 +232,131 @@ num("liIncCut", "%d" % LIRANK["incremental_cut_pct"])                      # Say
 num("liRetrain", "%d" % LIRANK["retrain_hours"])                           # Say only
 
 
+# ===== THE CASE DECKS OF 2026-11-06: etsy.tex (5 frames), spotify.tex (3), airbnb.tex (3) =====
+# Carlos asked on 2026-11-06 for one short deck per case, the text of each slide dictated by him, with diagrams.
+# Their macros join numbers.tex; the strings each PDF must show go to tools/expected-<deck>.txt.
+deck_expect = {"etsy": [], "spotify": [], "airbnb": []}
+
+
+def show(deck, s):
+    deck_expect[deck].append(s)
+
+
+# ----- Etsy: the source block of CASE 1 above, plus (same paper, Sec. VI.A, read 2026-11-06):
+#   "We create our training data by mining positive interactions such as cartadds and purchases from our search
+#    logs using past one month of data from across all our platforms. The dataset contains upto 30 millions users
+#    and more 150 million interactions." Hence frame 2: one month, more than 150 million, up to 30 million.
+#   "Specifically for queries like "mothers day gift" which are common on Etsy, retrieving relevant products just
+#    based on text features can be difficult." (Sec. I) Hence the search of frames 1, 3 and 4.
+#   Query-user tower inputs (Sec. III.C): the query text, the user's location, "a user's recent searches, recent
+#    shop clicks, terms from recently clicked items, and tags of all-time purchased items". Product tower (Sec.
+#    III.A and III.B): title, tags, category, attributes, and a graph of the queries that led to the product
+#    ("over a year of search logs containing positive interactions between queries and products").
+#   Table I, Recall@100 on head queries, UEPPR boost (the final model): 0.72.
+ETSY_DATA = {"months": 1, "interactions_million": 150, "users_million": 30}
+num("etMonths", "%d" % ETSY_DATA["months"])
+num("etInteractions", "%d" % ETSY_DATA["interactions_million"])
+num("etUsers", "%d" % ETSY_DATA["users_million"])
+num("etHeadFinal", "%d" % round(100 * ETSY["head_final"]))
+for s in ["%d million items" % ETSY["items_million"],
+          "more than %d million" % ETSY_DATA["interactions_million"],
+          "up to %d million users" % ETSY_DATA["users_million"],
+          "%d hours" % ETSY["train_hours"], "%d GPUs" % ETSY["gpus"], "%d month" % ETSY_DATA["months"],
+          "+%.2f%%" % ETSY["cvr_pct"], "+%.2f%%" % ETSY["ospr_pct"],
+          "%d%%" % round(100 * ETSY["head_base"]), "%d%%" % round(100 * ETSY["head_bm25"]),
+          "%d%%" % round(100 * ETSY["head_final"])]:
+    show("etsy", s)
+
+# INVENTED toy numbers for frames 3 and 4 (no source): the search "mothers day gift" and five items, four numbers
+# each, small integers so that the room can multiply in its head. The script computes every product, sum and the
+# order; nothing is typed in etsy.tex. Chosen so that the item with the word "gift" (gift wrap) ranks low and the
+# necklace, which shares no word with the search, ranks first.
+ET_QUERY = (2, 1, -1, 1)
+ET_ITEMS = [("Gift wrap", "W", (-1, 0, 2, 1)), ("Flower necklace", "N", (2, 2, -1, 0)),
+            ("Bridge print", "B", (0, -1, 1, -2)), ("Photo mug", "M", (1, 1, 0, 1)),
+            ("Recipe board", "R", (1, 2, 0, 1))]
+ABCD = "abcd"
+for i, v in enumerate(ET_QUERY):
+    num("etQ" + ABCD[i], "%d" % v)
+scores = {}
+for name, key, vec in ET_ITEMS:
+    prods = [a * b for a, b in zip(ET_QUERY, vec)]
+    scores[key] = sum(prods)
+    num("etName" + key, name)
+    for i, v in enumerate(vec):
+        num("et" + key + ABCD[i], "%d" % v)
+    for i, p in enumerate(prods):
+        num("et" + key + "p" + ABCD[i], "%d" % p)
+    num("et" + key + "sum", "%d" % scores[key])
+ranked = sorted(ET_ITEMS, key=lambda it: -scores[it[1]])
+assert len(set(scores.values())) == len(scores)                  # no ties, so the order is unambiguous
+assert ranked[0][1] == "N"                                       # the necklace comes first
+assert [it[1] for it in ranked].index("W") >= 3                  # gift wrap falls out of the top 3
+for r, (name, key, vec) in enumerate(ranked):
+    num("etRank" + "ABCDE"[r] + "name", name)
+    num("etRank" + "ABCDE"[r] + "sum", "%d" % scores[key])
+print("Etsy toy order:", [(it[0], scores[it[1]]) for it in ranked])
+
+# ----- Spotify: the source block of CASE 2 above. Frame 3 draws the start rate of new audiobooks as bars
+# against the production model: 100, then 100 plus each relative change of Table 5 (23.87 and 46.83).
+num("spIdxPlain", "%.2f" % (100 + SPOTIFY["start_plain_pct"]))   # a bar length only
+num("spIdxFull", "%.2f" % (100 + SPOTIFY["start_pct"]))          # a bar length only
+for s in ["%d%%" % SPOTIFY["heavy_users_pct"], "%d%%" % SPOTIFY["heavy_hours_pct"],
+          "%d%%" % SPOTIFY["from_podcasts_pct"], "%d numbers" % SPOTIFY["dims"],
+          "%.1f million" % SPOTIFY["test_users_million"],
+          "+%.1f%%" % SPOTIFY["start_plain_pct"], "+%.1f%%" % SPOTIFY["start_pct"]]:
+    show("spotify", s)
+
+# ----- Airbnb: embedding-based retrieval for search, 2025 blog and 2026 paper -----
+# Abdool, Banerjee, Paul, Kim, Liu, Xu, Yu, Gao, Ouyang, Gao, He, Moyerman, Katariya (Airbnb), "Applying
+# Embedding-Based Retrieval to Airbnb Search", arXiv 2601.06873 v1, 11 January 2026 (a preprint, no peer review;
+# https://arxiv.org/abs/2601.06873), read in full on 2026-11-06:
+#   "popular search locations can have around a hundred thousand available homes" (abstract)
+#   "Retrieval/Candidate Selection Model (Leaf Service): A low-latency model which can evaluate and filter tens of
+#    thousands of homes. The top K results are sent to the next stage." (Sec. 2)
+#   "Baseline: Our legacy system which uses a simple linear model to generate a query-independent score for all
+#    listings daily." (Sec. 6.1) Hence "scored every home once a day, whatever the search".
+#   "A key technical decision is that we designed the features used in the listing tower such that it could be
+#    computed entirely in an daily offline batch job. In this way, we only need to compute the query tower at
+#    inference time" (Sec. 4.5)
+#   Listing features: "aggregations based on historical engagement such as past views, wishlists, and reviews" and
+#    "amenities, location (S2Cell IDs of various resolutions), and guest capacity" (Sec. 4.5). Query features:
+#    "the location [...], number of guests, and geographic size of the search location" (Sec. 4.5 and 5)
+#   V1: "two-tower EBR model [...] with a pointwise loss function and inner product similarity. We do not use any
+#    ANN solutions here and instead take a union of the top results from the baseline model and the new EBR model
+#    scores." V2: "Same strategy as the V1 system but the EBR model now uses an IVF solution to reduce runtime and
+#    compute costs." V3: "an updated EBR model which now includes more features, larger network size (20% more
+#    parameters) and a pairwise loss function with Euclidean distance." (Sec. 6.1) IVF, Sec. 5.4: "an offline
+#    k-means clustering stage in our offline data pipeline that ran daily after the listing embeddings are
+#    re-computed" and nprobes "defines the number of closest clusters (to the query embedding) to retrieve
+#    listings from". Hence "join the shortlist" (a union) and "clustered index".
+#   "We conducted online A/B tests for each of the three major versions mentioned above. In total, the successive
+#    launches of these three retrieval systems yielded a combined relative 0.31% increase in conversion gains and
+#    the V3 system is currently in production. This conversion gain is a large portion of the team's annual goal
+#    and is on par with recent major innovations" (Sec. 6.3)
+#   "when adopting IVF as an ANN solution in the V2 system, we were able to yield a reduction in compute resources
+#    of around 16% relative to the baseline system." (Sec. 6.3)
+#   "for email promotional campaigns specifically, our A/B test yielded +2.3% bookings from email promotions"
+#    (Sec. 6.3)
+# Abdool and 12 others (Airbnb), "Embedding-Based Retrieval for Airbnb Search", Airbnb Engineering and Data Science
+# blog, 1 April 2025 (https://airbnb.tech/ai-ml/embedding-based-retrieval-for-airbnb-search/), read 2026-11-04:
+#   "the bookings lift from this new retrieval system was on par with some of the largest machine learning
+#    improvements to our search ranking in the past two years."
+AIRBNB = {"conv_pct": 0.31, "email_pct": 2.3, "compute_cut_pct": 16, "versions": 3, "years": 2}
+num("abConv", "%.2f" % AIRBNB["conv_pct"])
+num("abEmail", "%.1f" % AIRBNB["email_pct"])
+num("abCompute", "%d" % AIRBNB["compute_cut_pct"])
+num("abYears", "%d" % AIRBNB["years"])                      # "the past two years", in words on the slide
+for s in ["+%.2f%%" % AIRBNB["conv_pct"], "+%.1f%%" % AIRBNB["email_pct"], "%d%%" % AIRBNB["compute_cut_pct"]]:
+    show("airbnb", s)
+
+
 # ===== write =====
 Path("numbers.tex").write_text(
     "% numbers.tex: WRITTEN BY tools/cases_numbers.py. Do not edit by hand; rerun the script.\n"
     + "\n".join("\\newcommand{\\%s}{%s}" % (n, t) for n, t in macros) + "\n", encoding="utf-8")
 Path("tools/expected.txt").write_text("\n".join(expect) + "\n", encoding="utf-8")
-print("numbers.tex written: %d macros; tools/expected.txt: %d strings" % (len(macros), len(expect)))
+for deck, strings in deck_expect.items():
+    Path("tools/expected-%s.txt" % deck).write_text("\n".join(strings) + "\n", encoding="utf-8")
+print("numbers.tex written: %d macros; tools/expected.txt: %d strings; %s" % (len(macros), len(expect),
+      ", ".join("expected-%s.txt: %d" % (d, len(s)) for d, s in deck_expect.items())))
