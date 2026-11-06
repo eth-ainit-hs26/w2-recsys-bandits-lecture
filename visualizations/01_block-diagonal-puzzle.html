@@ -5,101 +5,206 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Block-diagonal puzzle</title>
   <link rel="stylesheet" href="shared/style.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
   <style>
-    .puzzle-wrap { position: relative; }
+    .viz-container .lede { font-size: clamp(1.05rem, 1rem + 0.4vw, 1.2rem); }
 
-    .energy-panel {
+    /* ═══ HOW TO PLAY (top) ═══ */
+    .howto {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px 32px;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 22px;
+      padding-bottom: 22px;
+      border-bottom: 1px solid var(--color-border);
+    }
+    .howto-steps { flex: 1 1 340px; }
+    .howto-steps h2 {
+      font-size: 1.15rem;
+      font-weight: 600;
+      margin: 0 0 10px;
+      color: var(--color-header-start);
+    }
+    .howto-steps ol {
+      padding-left: 1.4em;
+      font-size: 1.02rem;
+      line-height: 1.5;
+    }
+    .howto-steps li { margin-bottom: 6px; }
+    .howto-steps li:last-child { margin-bottom: 0; }
+
+    .goal { flex: 0 0 auto; margin: 0 auto; text-align: center; }
+    .goal-title {
+      font-size: 0.85rem;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      color: var(--color-text-muted);
+      margin-bottom: 6px;
+    }
+    .goal-frame {
+      display: grid;
+      grid-template-columns: auto auto;
+      grid-template-rows: auto auto;
+      gap: 4px 6px;
+      align-items: center;
+      font-size: 0.78rem;
+      color: var(--color-text-muted);
+    }
+    .goal-cols { grid-column: 2; text-align: center; }
+    .goal-rows { writing-mode: vertical-rl; }
+    .goal-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 34px);
+      grid-template-rows: repeat(4, 34px);
+      gap: 3px;
+    }
+    .goal-grid span {
       display: flex;
       align-items: center;
-      gap: 16px;
-      margin-bottom: 18px;
+      justify-content: center;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      font-weight: 700;
+    }
+    .goal-note {
+      margin-top: 8px;
+      font-size: 0.82rem;
+      color: var(--color-text-muted);
+      max-width: 210px;
+    }
+
+    /* ═══ SCORE ═══ */
+    .energy-panel {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px 16px;
       padding: 14px 18px;
       background: var(--color-neu-bg);
       border-radius: 8px;
       border: 1px solid var(--color-border);
     }
     .energy-label {
+      flex: 1 1 auto;
       font-weight: 600;
       color: var(--color-header-start);
-      font-size: 0.95rem;
+      font-size: 1rem;
       white-space: nowrap;
     }
     .energy-bar-track {
-      flex: 1;
-      height: 14px;
+      order: 3;
+      flex: 1 1 100%;
+      height: 16px;
       background: white;
       border: 1px solid var(--color-border);
-      border-radius: 7px;
-      overflow: hidden;
+      border-radius: 8px;
       position: relative;
     }
     .energy-bar-fill {
       height: 100%;
       width: 0%;
+      border-radius: 8px;
       background: linear-gradient(90deg, var(--color-tech), var(--color-pos));
       transition: width 0.3s ease;
     }
     .energy-bar-target {
       position: absolute;
-      top: -3px;
-      bottom: -3px;
+      top: -4px;
+      bottom: -4px;
       left: 85%;
       width: 2px;
-      background: var(--color-neg);
+      background: var(--color-header-start);
     }
     .energy-value {
       font-variant-numeric: tabular-nums;
-      font-weight: 600;
-      color: var(--color-text);
-      width: 60px;
+      font-weight: 700;
+      font-size: 1.1rem;
+      min-width: 3.2em;
       text-align: right;
     }
+    .energy-explain {
+      order: 4;
+      flex-basis: 100%;
+      font-size: 0.8rem;
+      color: var(--color-text-muted);
+      opacity: 0.85;
+    }
 
+    /* ═══ TOOLBAR: legend + buttons ═══ */
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px 24px;
+      margin: 16px 0 12px;
+    }
+    .toolbar .controls { margin-top: 0; }
+    .legend {
+      display: flex; gap: 8px 18px; flex-wrap: wrap;
+      font-size: 0.92rem; color: var(--color-text);
+      align-items: center;
+    }
+    .legend .item { display: inline-flex; align-items: center; gap: 6px; }
+    .legend .swatch {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px; height: 24px;
+      border-radius: 4px;
+      border: 1px solid var(--color-border);
+      font-weight: 700;
+      font-size: 0.8rem;
+    }
+
+    /* ═══ MATRIX ═══ */
     .matrix-scroll {
       overflow-x: auto;
       padding: 4px;
+      -webkit-overflow-scrolling: touch;
     }
-
     table.bd-matrix {
       border-collapse: collapse;
       margin: 0 auto;
       background: white;
-      border-radius: 8px;
-      overflow: hidden;
     }
     table.bd-matrix th, table.bd-matrix td {
       padding: 6px 4px;
       text-align: center;
       border: 1px solid var(--color-border);
-      position: relative;
       font-size: 0.95rem;
     }
     table.bd-matrix th {
       background: linear-gradient(45deg, var(--color-header-start), var(--color-header-end));
       color: white;
       font-weight: 600;
-      font-size: 0.78rem;
+      font-size: 0.8rem;
+    }
+    /* Row and column handles: drag with mouse, finger or pen. */
+    .handle {
       cursor: grab;
       user-select: none;
-      transition: transform 0.3s ease;
+      -webkit-user-select: none;
+      touch-action: none;
     }
-    table.bd-matrix th:active { cursor: grabbing; }
     table.bd-matrix th.item-header {
-      writing-mode: vertical-lr;
-      text-orientation: mixed;
+      writing-mode: vertical-rl;
+      transform: rotate(180deg);
       min-width: 32px;
       max-width: 32px;
-      padding: 6px 3px;
-      height: 96px;
+      padding: 8px 3px;
+      height: 104px;
+      white-space: nowrap;
     }
     table.bd-matrix th.corner {
-      background: linear-gradient(45deg, #495057, #343a40);
+      background: #495057;
       min-width: 110px;
       text-align: left;
       padding-left: 12px;
-      cursor: default;
-      writing-mode: horizontal-tb;
+      vertical-align: bottom;
+      line-height: 1.3;
     }
     table.bd-matrix td.person-name {
       background: var(--color-neu-bg);
@@ -107,28 +212,19 @@
       text-align: left;
       padding-left: 12px;
       border-right: 2px solid #dee2e6;
-      cursor: grab;
-      user-select: none;
-      font-size: 0.85rem;
+      font-size: 0.88rem;
       white-space: nowrap;
-      transition: transform 0.3s ease;
     }
-    table.bd-matrix td.person-name:active { cursor: grabbing; }
     table.bd-matrix td.cell {
-      font-weight: bold;
-      transition: background-color 0.3s ease, transform 0.15s;
-      cursor: default;
-      min-width: 26px;
-    }
-    table.bd-matrix td.cell:hover {
-      transform: scale(1.25);
-      z-index: 2;
+      font-weight: 700;
+      min-width: 28px;
+      transition: background-color 0.3s ease;
     }
 
-    .dragging { opacity: 0.5; background: #ffe066 !important; }
-    .drop-target { outline: 2px dashed var(--color-pos); outline-offset: -2px; }
+    .dragging { opacity: 0.55; background: #ffe066 !important; color: var(--color-text) !important; cursor: grabbing; }
+    .drop-target { outline: 3px solid var(--color-pos); outline-offset: -3px; }
 
-    /* Confetti canvas */
+    /* ═══ CELEBRATION ═══ */
     #confetti-canvas {
       position: fixed;
       top: 0; left: 0;
@@ -136,8 +232,6 @@
       pointer-events: none;
       z-index: 9999;
     }
-
-    /* Solved banner */
     .solved-banner {
       position: fixed;
       top: 30%;
@@ -145,11 +239,11 @@
       transform: translate(-50%, -50%) scale(0.7);
       background: linear-gradient(45deg, var(--color-pos), var(--color-outdoor));
       color: white;
-      padding: 24px 48px;
+      padding: 20px 36px;
       border-radius: 16px;
-      font-size: 2rem;
-      font-weight: 300;
-      letter-spacing: 0.5px;
+      font-size: clamp(1.3rem, 1rem + 2vw, 2rem);
+      font-weight: 400;
+      white-space: nowrap;
       box-shadow: 0 12px 40px rgba(0,0,0,0.25);
       opacity: 0;
       pointer-events: none;
@@ -161,81 +255,104 @@
       transform: translate(-50%, -50%) scale(1);
     }
 
-    .legend {
-      display: flex; gap: 18px; flex-wrap: wrap;
-      font-size: 0.85rem; color: var(--color-text-muted);
-      margin-top: 12px;
-      align-items: center;
-    }
-    .legend .item { display: inline-flex; align-items: center; gap: 4px; }
-    .legend .swatch {
-      display: inline-block;
-      width: 14px; height: 14px;
-      border-radius: 3px;
-      border: 1px solid var(--color-border);
-    }
+    .explainer em { font-style: normal; font-weight: 600; }
 
-    .hint {
-      font-size: 0.9rem;
-      color: var(--color-text-muted);
-      margin-top: 6px;
+    @media (max-width: 540px) {
+      table.bd-matrix th.item-header { min-width: 28px; max-width: 28px; height: 92px; }
+      table.bd-matrix td.cell { min-width: 24px; padding: 5px 2px; font-size: 0.85rem; }
+      table.bd-matrix th.corner, table.bd-matrix td.person-name { min-width: 0; padding-left: 8px; }
     }
   </style>
 </head>
 <body>
   <header class="eth-header">
     <div class="eth-logo">ETH<em>zürich</em></div>
-    <nav><a href="../">← Companion site</a></nav>
+    <nav><a href="../index.html">← All demos</a></nav>
   </header>
 
   <main class="viz-container">
     <h1>Block-diagonal puzzle</h1>
-    <p class="lede">Drag rows (readers) and columns (books) of the ratings matrix to find the hidden block-diagonal structure. The bar tracks how close you are to the optimum.</p>
+    <p class="lede">21 readers rated 16 books, shown in a scrambled order. Rearrange the table
+      until readers with the same taste sit together. Their ✅ ratings then form solid squares
+      along the diagonal: that pattern is called <strong>block-diagonal</strong>.</p>
 
     <div class="viz-card">
+      <!-- ═══ HOW TO PLAY ═══ -->
+      <div class="howto">
+        <div class="howto-steps">
+          <h2>How to play</h2>
+          <ol>
+            <li><strong>Move a reader:</strong> drag their name up or down.</li>
+            <li><strong>Move a book:</strong> drag its title left or right.</li>
+            <li>Put readers who like the same books next to each other, and books liked by the
+              same readers next to each other.</li>
+            <li>Keep going until the score passes the line at 85%.</li>
+          </ol>
+        </div>
+        <figure class="goal" aria-label="Goal: four blue squares of liked books along the diagonal">
+          <div class="goal-title">The goal looks like this</div>
+          <div class="goal-frame">
+            <span class="goal-cols">books →</span>
+            <span class="goal-rows">readers →</span>
+            <div class="goal-grid" id="goalGrid"></div>
+          </div>
+          <figcaption class="goal-note">Four reader groups, four book groups. The groups may come
+            in any order.</figcaption>
+        </figure>
+      </div>
+
+      <!-- ═══ SCORE ═══ -->
       <div class="energy-panel">
         <span class="energy-label">Block-diagonal score</span>
-        <div class="energy-bar-track" title="Cross 85% to solve!">
+        <div class="energy-bar-track" title="Pass 85% to solve the puzzle">
           <div id="energyFill" class="energy-bar-fill"></div>
           <div class="energy-bar-target"></div>
         </div>
         <span id="energyValue" class="energy-value">0%</span>
+        <span class="energy-explain">Rises as similar readers and similar books end up side by side.</span>
       </div>
 
+      <!-- ═══ LEGEND + BUTTONS ═══ -->
+      <div class="toolbar">
+        <div class="legend">
+          <span class="item"><span class="swatch cell-pos">✅</span>liked</span>
+          <span class="item"><span class="swatch cell-neg">❌</span>disliked</span>
+          <span class="item"><span class="swatch cell-neu">?</span>no clear opinion</span>
+        </div>
+        <div class="controls">
+          <button id="shuffleBtn">🔀 Shuffle</button>
+          <button id="revealBtn" class="secondary">✨ Show a solution</button>
+        </div>
+      </div>
+
+      <!-- ═══ MATRIX ═══ -->
       <div class="matrix-scroll">
         <table class="bd-matrix" id="matrix">
           <thead>
-            <tr id="headerRow"><th class="corner">📖 Reader / Book</th></tr>
+            <tr id="headerRow"><th class="corner">Reader ↓<br>Book →</th></tr>
           </thead>
           <tbody id="matrixBody"></tbody>
         </table>
-      </div>
-
-      <div class="controls">
-        <button id="shuffleBtn">🔀 Shuffle</button>
-        <button id="revealBtn" class="secondary">✨ Reveal optimal</button>
-        <span class="hint">Tip: drag a reader row by its name; drag a book column by its header.</span>
-      </div>
-
-      <div class="legend">
-        <span class="item"><span class="swatch" style="background:var(--color-pos-bg);border-color:var(--color-pos);"></span>✅ liked</span>
-        <span class="item"><span class="swatch" style="background:var(--color-neu-bg);"></span>? ambiguous</span>
-        <span class="item"><span class="swatch" style="background:var(--color-neg-bg);border-color:var(--color-neg);"></span>❌ disliked</span>
-        <span class="item"><span class="swatch" style="background:var(--color-unk-bg);border-color:var(--color-unk);"></span>— unread</span>
       </div>
     </div>
 
     <aside class="explainer">
       <h2>What's happening?</h2>
-      <p>Each row is a <em>reader</em>, each column a <em>book</em>, and each cell is a rating. Initially the order is scrambled and the matrix looks like noise. By rearranging rows and columns, you can group readers who agree and books they agree on — making clear <em>blocks</em> of blue (✅) and orange (❌) appear along the diagonal.</p>
-      <p>The <strong>score</strong> measures how well each cell's rating matches the sign expected at its position from the canonical clustering (Commuters · Literary · Practical · Scholars × Light Fiction · Demanding Fiction · Light Nonfiction · Demanding Nonfiction). Reaching <strong>85%</strong> means you've discovered (close to) the same clustering an embedding would find — except you did it by eye.</p>
+      <p>Each row is a reader, each column a book, each cell a rating. Scrambled, the table looks
+        like noise. Sorted, it shows four kinds of reader (Commuters, Literary, Practical,
+        Scholars) and four kinds of book (light and demanding fiction, light and demanding
+        nonfiction). The ✅ squares sit where a reader group meets the books it likes.</p>
+      <p>Once you see the blocks, 21 readers boil down to four tastes. That shorter description
+        is <em>compression</em>, and it is the grouping a recommender finds on its own, without
+        anyone dragging rows. A few readers fit no group cleanly; keep an eye on them, the lecture
+        comes back to them.</p>
     </aside>
   </main>
 
-  <footer class="eth-footer">CAS AINIT FS26 · W2 Recsys</footer>
+  <footer class="eth-footer">CAS AINIT HS26 · W2 Recsys</footer>
 
   <canvas id="confetti-canvas"></canvas>
-  <div id="solvedBanner" class="solved-banner">🎉 Solved! Block diagonal!</div>
+  <div id="solvedBanner" class="solved-banner">🎉 Solved! Block-diagonal!</div>
 
   <script src="shared/data.js"></script>
   <script>
@@ -248,8 +365,8 @@
     const N_ROWS = READERS.length;   // 21
     const N_COLS = BOOKS.length;     // 16
 
-    // Working state: indices into READERS / BOOKS arrays. The canonical order
-    // is the array order itself (block-diagonal optimum).
+    // Working state: indices into READERS / BOOKS arrays. The array order
+    // itself is one block-diagonal solution ("Show a solution").
     let rowOrder = d3Range(N_ROWS); // [0..20]
     let colOrder = d3Range(N_COLS); // [0..15]
 
@@ -259,61 +376,83 @@
       return a;
     }
 
-    // --------- Score ---------
-    // Canonical expected sign at table position (i, j) is the rating of the
-    // reader/book that *belongs* at (i, j) under canonical order, with null/0
-    // mapped to 0. The score sums (current rating at position (i,j)) ×
-    // (expected sign at (i,j)). The canonical permutation maximises this sum
-    // by construction. We normalise by the optimum so 1.0 = perfect, ~0 = noise.
-    function ratingNumeric(v) {
-      if (v === null || v === undefined) return 0;
-      if (v === 1)  return  1;
-      if (v === -1) return -1;
-      return 0;
-    }
-    const EXPECTED = [];           // EXPECTED[i][j] = sign at canonical position (i,j)
-    for (let i = 0; i < N_ROWS; i++) {
-      const row = new Array(N_COLS);
-      for (let j = 0; j < N_COLS; j++) {
-        row[j] = ratingNumeric(RATINGS[i][j]);
+    // --------- Goal thumbnail ---------
+    // Schematic of the solved table: reader group g likes book group g (✅),
+    // dislikes the opposite group (❌), and has no clear opinion on the rest.
+    const goalGrid = document.getElementById('goalGrid');
+    for (let g = 0; g < 4; g++) {
+      for (let h = 0; h < 4; h++) {
+        const v = g === h ? 1 : (g + h === 3 ? -1 : 0);
+        const s = document.createElement('span');
+        s.className = cellClass(v);
+        s.textContent = cellSymbol(v);
+        goalGrid.appendChild(s);
       }
-      EXPECTED.push(row);
     }
 
-    function rawScore(rowOrd, colOrd) {
+    // --------- Score ---------
+    // Neighbours that agree earn points. Two adjacent readers earn the dot
+    // product of their rating rows (+1 per book both ✅ or both ❌, -1 per
+    // book they disagree on), floored at 0; the same for two adjacent books.
+    // The score is that total over the best total any order can reach. It
+    // depends only on who sits next to whom, so blocks in any order score
+    // the same, and moving Tessa next to her twin Alice raises it.
+    const rowVec = r => RATINGS[r];
+    const colVec = c => RATINGS.map(row => row[c]);
+    function dot(a, b) {
       let s = 0;
-      for (let i = 0; i < rowOrd.length; i++) {
-        const r = rowOrd[i];
-        const exRow = EXPECTED[i];
-        const ratRow = RATINGS[r];
-        for (let j = 0; j < colOrd.length; j++) {
-          const c = colOrd[j];
-          s += ratingNumeric(ratRow[c]) * exRow[j];
-        }
-      }
+      for (let k = 0; k < a.length; k++) s += a[k] * b[k];
+      return s;
+    }
+    const link = (a, b) => Math.max(0, dot(a, b));
+
+    function agreement(order, vec) {
+      let s = 0;
+      for (let k = 0; k + 1 < order.length; k++) s += link(vec(order[k]), vec(order[k + 1]));
       return s;
     }
 
-    // The optimum is rawScore on the identity permutation.
-    const SCORE_OPTIMUM = rawScore(d3Range(N_ROWS), d3Range(N_COLS));
+    // Identical readers (or books) belong side by side, so the best order is
+    // found by trying every order of the distinct ones: 8 reader types and
+    // 7 book types, a few thousand orders, instant.
+    function bestAgreement(n, vec) {
+      const groups = new Map();
+      for (let i = 0; i < n; i++) {
+        const key = vec(i).join(',');
+        if (!groups.has(key)) groups.set(key, 0);
+        groups.set(key, groups.get(key) + 1);
+      }
+      const types = [...groups.keys()].map(k => k.split(',').map(Number));
+      const sizes = [...groups.values()];
+      let inside = 0;
+      types.forEach((t, k) => { inside += (sizes[k] - 1) * link(t, t); });
+      let best = 0;
+      (function walk(last, used, s, depth) {
+        if (depth === types.length) { if (s > best) best = s; return; }
+        for (let k = 0; k < types.length; k++) {
+          if (used & (1 << k)) continue;
+          walk(k, used | (1 << k), s + (last < 0 ? 0 : link(types[last], types[k])), depth + 1);
+        }
+      })(-1, 0, 0, 0);
+      return inside + best;
+    }
+
+    const SCORE_OPTIMUM = bestAgreement(N_ROWS, rowVec) + bestAgreement(N_COLS, colVec);
 
     function normalisedScore(rowOrd, colOrd) {
-      if (SCORE_OPTIMUM <= 0) return 0;
-      return rawScore(rowOrd, colOrd) / SCORE_OPTIMUM;
+      return (agreement(rowOrd, rowVec) + agreement(colOrd, colVec)) / SCORE_OPTIMUM;
     }
 
     // --------- Rendering ---------
     function cellClass(v) {
       if (v === 1)  return 'cell-pos';
       if (v === -1) return 'cell-neg';
-      if (v === 0)  return 'cell-neu';
-      return 'cell-unk';
+      return 'cell-neu';
     }
     function cellSymbol(v) {
       if (v === 1) return '✅';
       if (v === -1) return '❌';
-      if (v === 0) return '?';
-      return '—';
+      return '?';
     }
 
     const matrixEl = document.getElementById('matrix');
@@ -326,10 +465,9 @@
       colOrder.forEach((bookIdx, j) => {
         const b = BOOKS[bookIdx];
         const th = document.createElement('th');
-        th.className = 'item-header';
-        th.draggable = true;
+        th.className = 'item-header handle';
         th.dataset.colPos = j;
-        th.innerHTML = `<div class="icon-stack"><span class="nm">${b.label}</span></div>`;
+        th.textContent = b.label;
         th.title = `${b.title} — ${b.author} (${b.year})`;
         headerRowEl.appendChild(th);
       });
@@ -340,11 +478,9 @@
         const reader = READERS[readerIdx];
         const tr = document.createElement('tr');
         const personCell = document.createElement('td');
-        personCell.className = 'person-name';
+        personCell.className = 'person-name handle';
         personCell.textContent = '👤 ' + reader.name;
-        personCell.draggable = true;
         personCell.dataset.rowPos = i;
-        personCell.title = `${reader.name} — ${reader.archetype}${reader.special ? ' (' + reader.special + ')' : ''}`;
         tr.appendChild(personCell);
 
         colOrder.forEach((bookIdx) => {
@@ -380,80 +516,63 @@
       }
     }
 
-    // --------- Drag and drop ---------
-    let draggedType = null;
-    let draggedPos = null;
+    // --------- Drag to reorder ---------
+    // Pointer events rather than HTML5 drag-and-drop, so the same code works
+    // with a mouse, a finger and a pen. A row is dropped on whichever row the
+    // pointer is over; a column on whichever column the pointer is over.
+    let drag = null;   // { type: 'row' | 'column', from, el, to }
 
-    matrixEl.addEventListener('dragstart', (e) => {
-      const personCell = e.target.closest('.person-name');
-      const headerCell = e.target.closest('.item-header');
-      if (personCell) {
-        draggedType = 'row';
-        draggedPos = parseInt(personCell.dataset.rowPos, 10);
-        personCell.classList.add('dragging');
-        e.dataTransfer.effectAllowed = 'move';
-        try { e.dataTransfer.setData('text/plain', personCell.textContent); } catch (_) {}
-      } else if (headerCell) {
-        draggedType = 'column';
-        draggedPos = parseInt(headerCell.dataset.colPos, 10);
-        headerCell.classList.add('dragging');
-        e.dataTransfer.effectAllowed = 'move';
-        try { e.dataTransfer.setData('text/plain', headerCell.textContent); } catch (_) {}
+    function targetUnder(x, y) {
+      const el = document.elementFromPoint(x, y);
+      if (!el || !matrixEl.contains(el)) return null;
+      if (drag.type === 'row') {
+        const tr = el.closest('tbody tr');
+        return tr ? tr.rowIndex - 1 : null;
       }
-    });
+      const cell = el.closest('td, th');
+      return cell && cell.cellIndex > 0 ? cell.cellIndex - 1 : null;
+    }
+    function handleAt(type, pos) {
+      return type === 'row'
+        ? bodyEl.rows[pos] && bodyEl.rows[pos].cells[0]
+        : headerRowEl.cells[pos + 1];
+    }
 
-    matrixEl.addEventListener('dragover', (e) => {
+    matrixEl.addEventListener('pointerdown', (e) => {
+      const h = e.target.closest('.handle');
+      if (!h || (e.pointerType === 'mouse' && e.button !== 0)) return;
+      const type = h.classList.contains('person-name') ? 'row' : 'column';
+      const from = parseInt(type === 'row' ? h.dataset.rowPos : h.dataset.colPos, 10);
+      drag = { type, from, el: h, to: from };
+      h.classList.add('dragging');
+      h.setPointerCapture(e.pointerId);
       e.preventDefault();
-      e.dataTransfer.dropEffect = 'move';
     });
 
-    matrixEl.addEventListener('dragenter', (e) => {
-      const personCell = e.target.closest('.person-name');
-      const headerCell = e.target.closest('.item-header');
-      if (draggedType === 'row' && personCell) personCell.classList.add('drop-target');
-      else if (draggedType === 'column' && headerCell) headerCell.classList.add('drop-target');
+    matrixEl.addEventListener('pointermove', (e) => {
+      if (!drag) return;
+      const to = targetUnder(e.clientX, e.clientY);
+      if (to === null || to === drag.to) return;
+      const old = handleAt(drag.type, drag.to);
+      if (old) old.classList.remove('drop-target');
+      drag.to = to;
+      const now = handleAt(drag.type, to);
+      if (now && to !== drag.from) now.classList.add('drop-target');
     });
 
-    matrixEl.addEventListener('dragleave', (e) => {
-      const personCell = e.target.closest('.person-name');
-      const headerCell = e.target.closest('.item-header');
-      if (personCell) personCell.classList.remove('drop-target');
-      else if (headerCell) headerCell.classList.remove('drop-target');
-    });
-
-    matrixEl.addEventListener('drop', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      document.querySelectorAll('.drop-target').forEach(el => el.classList.remove('drop-target'));
-
-      const personCell = e.target.closest('.person-name');
-      const headerCell = e.target.closest('.item-header');
-
-      if (draggedType === 'row' && personCell) {
-        const targetPos = parseInt(personCell.dataset.rowPos, 10);
-        if (targetPos !== draggedPos) {
-          const moved = rowOrder.splice(draggedPos, 1)[0];
-          rowOrder.splice(targetPos, 0, moved);
-          render();
-        }
-      } else if (draggedType === 'column' && headerCell) {
-        const targetPos = parseInt(headerCell.dataset.colPos, 10);
-        if (targetPos !== draggedPos) {
-          const moved = colOrder.splice(draggedPos, 1)[0];
-          colOrder.splice(targetPos, 0, moved);
-          render();
-        }
+    function endDrag() {
+      if (!drag) return;
+      const { type, from, to } = drag;
+      drag = null;
+      if (to !== from) {
+        const order = type === 'row' ? rowOrder : colOrder;
+        const moved = order.splice(from, 1)[0];
+        order.splice(to, 0, moved);
       }
-      draggedType = null;
-      draggedPos = null;
-    });
-
-    matrixEl.addEventListener('dragend', () => {
-      document.querySelectorAll('.dragging').forEach(el => el.classList.remove('dragging'));
-      document.querySelectorAll('.drop-target').forEach(el => el.classList.remove('drop-target'));
-      draggedType = null;
-      draggedPos = null;
-    });
+      render();
+    }
+    matrixEl.addEventListener('pointerup', endDrag);
+    matrixEl.addEventListener('pointercancel', endDrag);
 
     // --------- Buttons ---------
     function shuffle(arr) {
@@ -497,6 +616,8 @@
       R.COLORS.fiction, R.COLORS.nonfiction, R.COLORS.light, R.COLORS.demanding,
       R.COLORS.pos, R.COLORS.unknown
     ];
+    const REDUCED_MOTION = window.matchMedia &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     function spawnParticles(n) {
       const cx = window.innerWidth / 2;
@@ -545,10 +666,12 @@
     }
 
     function triggerCelebration() {
-      spawnParticles(120);
-      if (!confettiActive) {
-        confettiActive = true;
-        animateConfetti();
+      if (!REDUCED_MOTION) {
+        spawnParticles(120);
+        if (!confettiActive) {
+          confettiActive = true;
+          animateConfetti();
+        }
       }
       const banner = document.getElementById('solvedBanner');
       banner.classList.add('show');
@@ -562,7 +685,7 @@
     render();
 
     // Expose for quick console-debug / acceptance check.
-    window.__bdPuzzle = { rawScore, normalisedScore, SCORE_OPTIMUM, rowOrder, colOrder };
+    window.__bdPuzzle = { normalisedScore, SCORE_OPTIMUM, get rowOrder() { return rowOrder; }, get colOrder() { return colOrder; } };
   })();
   </script>
 </body>

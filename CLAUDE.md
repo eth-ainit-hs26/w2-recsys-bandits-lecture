@@ -46,8 +46,9 @@ Specifically:
 │   ├── beamer{theme,colortheme,fonttheme,innertheme,outertheme}AINITAcademic.sty
 │   ├── demo.tex                Exercises all six slide templates
 │   └── demo.pdf                Compiled theme demo
-├── visualizations/             18 single-file interactive viz (HTML+D3+KaTeX)
-│   ├── index.html              Section-organized landing page
+├── visualizations/             18 single-file interactive viz (HTML+D3+KaTeX);
+│   │                           own CLAUDE.md (navigation, demo notes, every-screen rules)
+│   ├── index.html              Redirect to the root index.html
 │   ├── shared/data.js          THE data layer — books matrix v2, archetypes, helpers
 │   ├── shared/style.css        ETH chrome, Okabe-Ito CVD-safe palette
 │   └── (18 viz files; see below)
@@ -114,6 +115,9 @@ open visualizations/customer-urns-carousel.html
 ```
 
 All viz are single-file HTML + D3 v7 (CDN) + KaTeX 0.16 (CDN). They open directly via `file://` with no server. Each viz reads from `visualizations/shared/data.js` (`window.RECSYS`).
+
+Demos open in the same tab as the index and always offer a way back; see
+`visualizations/CLAUDE.md` before adding or changing a demo.
 
 URL hash deep-linking is supported on the Customer-Urns Carousel: `customer-urns-carousel.html#stage=2` jumps to Stage 2 of 3.
 

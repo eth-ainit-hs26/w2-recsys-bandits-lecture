@@ -64,13 +64,18 @@ html, body {
   margin-left: 2px;
 }
 .eth-header nav a {
+  display: inline-block;
   color: white;
   text-decoration: none;
-  opacity: 0.85;
-  font-size: 0.9rem;
-  transition: opacity 0.15s;
+  font-size: 0.95rem;
+  font-weight: 600;
+  padding: 8px 14px;
+  border: 1px solid rgba(255,255,255,0.55);
+  border-radius: 8px;
+  transition: background 0.15s;
 }
-.eth-header nav a:hover { opacity: 1; }
+.eth-header nav a:hover,
+.eth-header nav a:focus-visible { background: rgba(255,255,255,0.15); }
 
 /* ---------- Main container ---------- */
 .viz-container {

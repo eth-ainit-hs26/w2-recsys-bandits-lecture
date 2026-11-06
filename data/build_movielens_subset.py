@@ -6,13 +6,19 @@ The toy 21x16 matrix in the slides is rank-2 by construction.  This is real
 ratings; the same trick (sort users and movies by SVD latent embedding)
 reveals the same blocks.
 
-We hand-curate four genre clusters (Children's & Family, Action & Adventure,
-Drama, Comedy), each with 7 popular and reasonably polarising movies.  We
-pick 50 users with the highest overlap on these 28 movies and adequate rating
-variance.  After SVD on the centred matrix we cluster users and movies with
-k-means (k=4) and order them by cluster-then-angle.
+We hand-curate four genre clusters (Family, Action, Drama, Comedy), 7 well-known
+movies each (>= 150 ratings), all with a MovieLens average between 3.65 and
+3.95, so every genre averages about 3.8.  Quality-matching matters: the first
+version used acclaimed dramas (Schindler's List, 4.47) against weak comedies
+(Liar Liar, 3.16), and every user group then "preferred drama", which was
+quality, not taste.  Users: those who rated at least 18 of the 28 movies, then
+the 40 whose four genre averages differ most (people with clear genre tastes;
+the page says so).  After SVD on the centred matrix we cluster users with
+k-means (k=4); data/seriate_movielens_subset.js then replaces that order.
 
-Output: visualizations/shared/movielens_subset.json
+Output: visualizations/shared/movielens_subset.json, and the same data as
+visualizations/shared/movielens_subset.js (window.MOVIELENS = ...), which is
+what the page loads: a <script> tag works from file://, fetch() of JSON does not.
 """
 import json
 import math
@@ -25,17 +31,18 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
 DATA = os.path.join(HERE, "movielens", "ml-100k")
 OUT  = os.path.join(ROOT, "visualizations", "shared", "movielens_subset.json")
+OUT_JS = OUT[:-len(".json")] + ".js"
 
 N_USERS  = 40
 N_USER_CLUSTERS = 4
-USER_MIN_OVERLAP = 22  # tighter: users who rated nearly every selected movie
+USER_MIN_OVERLAP = 18  # users who rated most of the 28 movies (22 leaves only 27 users)
 
 # Hand-curated genre clusters.  Movie ids from MovieLens 100K's u.item.
 CLUSTERS = {
-    "Family":  [1, 132, 71, 95, 8, 588, 419],     # Toy Story, Wizard of Oz, Lion King, Aladdin, Babe, Beauty & Beast, Mary Poppins
-    "Action":  [50, 174, 117, 172, 79, 210, 222], # Star Wars, Raiders, The Rock, Empire, Fugitive, Indy 3, ST: First Contact
-    "Drama":   [100, 56, 98, 318, 64, 357, 191],  # Fargo, Pulp Fiction, Silence of the Lambs, Schindler's, Shawshank, Cuckoo's Nest, Amadeus
-    "Comedy":  [294, 168, 269, 25, 238, 153, 194],# Liar Liar, Monty Python, Full Monty, Birdcage, Raising Arizona, Fish Called Wanda, The Sting
+    "Family":  [1, 423, 71, 95, 588, 432, 99],     # Toy Story, E.T., Lion King, Aladdin, Beauty & Beast, Fantasia, Snow White
+    "Action":  [195, 144, 82, 210, 234, 265, 568], # Terminator, Die Hard, Jurassic Park, Indy 3, Jaws, Hunt for Red October, Speed
+    "Drama":   [196, 97, 237, 133, 15, 9, 276],    # Dead Poets Society, Dances with Wolves, Jerry Maguire, Gone with the Wind, Mr. Holland's Opus, Dead Man Walking, Leaving Las Vegas
+    "Comedy":  [202, 216, 153, 269, 238, 154, 70], # Groundhog Day, When Harry Met Sally, Fish Called Wanda, Full Monty, Raising Arizona, Life of Brian, Four Weddings
 }
 CLUSTER_NAMES = list(CLUSTERS.keys())
 N_MOVIES = sum(len(v) for v in CLUSTERS.values())  # 28
@@ -120,14 +127,19 @@ def svd_embed(Rm):
     U_, S_, Vt_ = np.linalg.svd(Rfilled, full_matrices=False)
     return U_[:, :2] * S_[:2], Vt_[:2, :].T * S_[:2], S_
 
-# Pass 1 -- big shortlist; pick the most opinionated by latent magnitude
+# Pass 1 -- big shortlist; keep the users whose taste differs most between
+# genres: the spread of their four genre averages, after removing their own mean.
 R_big = build_R(SHORTLIST)
-U2_big, _V2_big, _S = svd_embed(R_big)
-mags = np.linalg.norm(U2_big, axis=1)
-top_idx = np.argsort(-mags)[:N_USERS]
+def genre_spread(row):
+    centred = row - np.nanmean(row)
+    means = [np.nanmean(centred[[j for j, m in enumerate(selected_mids)
+                                 if movie_curated_cluster[m] == c]]) for c in CLUSTER_NAMES]
+    return float(np.nanstd(means))
+spread = np.array([genre_spread(R_big[i]) for i in range(len(SHORTLIST))])
+top_idx = np.argsort(-spread)[:N_USERS]
 selected_users = [SHORTLIST[i] for i in top_idx]
 selected_users.sort(key=lambda u: (-user_overlap[u], u))
-print(f"Final: {len(selected_users)} users (top-{N_USERS} by latent magnitude)")
+print(f"Final: {len(selected_users)} users (top-{N_USERS} by genre-taste spread)")
 
 # ---- build the chosen-users matrix ---------------------------------
 R = build_R(selected_users)
@@ -309,6 +321,11 @@ os.makedirs(os.path.dirname(OUT), exist_ok=True)
 with open(OUT, "w") as f:
     json.dump(out, f, separators=(",", ":"))
 print(f"\nWrote {OUT}  ({os.path.getsize(OUT)} bytes)")
+with open(OUT_JS, "w") as f:
+    f.write("window.MOVIELENS = ")
+    json.dump(out, f, separators=(",", ":"))
+    f.write(";\n")
+print(f"Wrote {OUT_JS}  ({os.path.getsize(OUT_JS)} bytes)")
 
 # ---- ASCII reveal sanity-check --------------------------------------
 def render(matrix, urs, mrs):

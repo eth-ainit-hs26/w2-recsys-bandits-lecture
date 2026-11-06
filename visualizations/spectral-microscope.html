@@ -5,690 +5,637 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Spectral microscope · W2 Recsys</title>
   <link rel="stylesheet" href="shared/style.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
   <style>
-    .stage {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) 280px;
-      gap: 18px;
-      align-items: start;
+    .viz-container .lede { font-size: clamp(1rem, 0.95rem + 0.3vw, 1.12rem); }
+
+    /* ── what is a dimension ── */
+    .dimbox {
+      background: var(--color-neu-bg);
+      border: 1px solid var(--color-border);
+      border-radius: 10px;
+      padding: 14px 16px;
+      margin-bottom: 20px;
     }
-    @media (max-width: 980px) {
-      .stage { grid-template-columns: 1fr; }
+    .dimbox h2 { font-size: 1.1rem; font-weight: 600; margin: 0 0 6px; color: var(--color-header-start); }
+    .dimbox p { margin: 0 0 10px; }
+    .dimbox .def { font-size: 1.05rem; margin-bottom: 12px; }
+    .dim-cols {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr));
+      gap: 14px;
+    }
+    .dim-col {
+      background: #fff; border: 1px solid var(--color-border); border-radius: 8px;
+      padding: 12px 14px;
+    }
+    .dim-col h3 {
+      font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em;
+      color: var(--color-text-muted); margin: 0 0 8px;
+    }
+    .dim-col .small { font-size: 0.88rem; color: var(--color-text-muted); margin: 12px 0 0; }
+    .qlist { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+    .qlist li { display: grid; grid-template-columns: 2.6em 1fr; align-items: start; gap: 8px; }
+    .qn {
+      justify-self: start; min-width: 1.9em; padding: 1px 6px; text-align: center;
+      background: var(--color-header-end); color: #fff; border-radius: 6px;
+      font-size: 0.85rem; font-weight: 600; font-variant-numeric: tabular-nums;
+    }
+    .qlist .who { display: block; font-size: 0.88rem; color: var(--color-text-muted); }
+    .ex { display: grid; gap: 8px; }
+    .ex-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; }
+    .chip {
+      background: #fff; border: 1px solid var(--color-border); border-radius: 999px;
+      padding: 2px 10px; white-space: nowrap;
+    }
+    .chip b { font-weight: 600; }
+    .op { color: var(--color-text-muted); }
+    .res { display: inline-flex; align-items: center; gap: 6px; font-weight: 600; white-space: nowrap; }
+    .sq { display: inline-block; width: 16px; height: 16px; border: 1px solid #adb5bd; border-radius: 2px; }
+    .sq.pos { background: var(--color-pos); }
+    .sq.neg { background: var(--color-neg); }
+    .sq.zero { background: #fff; }
+
+    /* ── slider row ── */
+    .k-row {
+      display: flex; flex-wrap: wrap; align-items: center;
+      gap: 12px 20px;
+    }
+    .k-label {
+      font-size: 1.15rem; color: var(--color-text);
+      white-space: nowrap;
+    }
+    .k-label strong {
+      display: inline-block; min-width: 1.2ch;
+      font-size: 1.6rem; color: var(--color-header-start);
+      font-variant-numeric: tabular-nums;
+    }
+    .k-slider { flex: 1 1 260px; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+    .k-slider input[type="range"] { width: 100%; margin: 0; height: 32px; cursor: pointer; }
+    .k-ticks {
+      display: flex; justify-content: space-between;
+      padding: 0 6px;
+      font-size: 0.8rem; color: var(--color-text-muted);
+      font-variant-numeric: tabular-nums;
+    }
+    .play-btn {
+      background: var(--color-header-end); color: #fff;
+      border: none; border-radius: 8px;
+      padding: 10px 18px; min-height: 42px;
+      font: inherit; font-size: 0.95rem; cursor: pointer;
+    }
+    .play-btn:disabled { background: #adb5bd; cursor: default; }
+    @media (hover: hover) { .play-btn:not(:disabled):hover { background: var(--color-header-start); } }
+    .play-btn:focus-visible, .bar-hit:focus-visible { outline: 3px solid var(--color-pos); outline-offset: 2px; }
+
+    /* ── readout ── */
+    .readout {
+      margin: 16px 0 4px;
+      padding: 12px 16px;
+      border-left: 4px solid var(--color-pos);
+      background: var(--color-pos-bg);
+      border-radius: 6px;
+    }
+    .readout .score { font-size: 1.15rem; font-weight: 600; color: var(--color-header-start); }
+    .readout .score span { font-variant-numeric: tabular-nums; }
+    .readout .note { margin: 4px 0 0; font-size: 0.98rem; color: var(--color-text); }
+
+    /* ── the two tables ── */
+    .tables {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
+      gap: 18px;
+      margin-top: 18px;
     }
     .panel {
       background: var(--color-neu-bg);
       border: 1px solid var(--color-border);
       border-radius: 10px;
-      padding: 14px;
+      padding: 12px 14px 10px;
+      min-width: 0;
     }
     .panel h3 {
-      font-weight: 500;
-      font-size: 1rem;
-      margin: 0 0 8px;
-      color: var(--color-header-start);
+      font-size: 1rem; font-weight: 600;
+      margin: 0 0 6px; color: var(--color-header-start);
     }
-    .panel .sub {
-      font-size: 0.85rem;
-      color: var(--color-text-muted);
-      margin: 0 0 10px;
+    .panel svg { display: block; width: 100%; max-width: 440px; height: auto; margin: 0 auto; }
+    .panel svg text { font-family: inherit; fill: var(--color-text); }
+    .panel svg .rlab, .panel svg .clab { font-size: 10.5px; }
+
+    .legend {
+      display: flex; flex-wrap: wrap; align-items: center; justify-content: center;
+      gap: 6px 18px; margin-top: 12px;
+      font-size: 0.85rem; color: var(--color-text-muted);
     }
-    .heatmap-wrap {
-      display: flex; flex-direction: column; align-items: center;
-      gap: 6px;
-    }
-    .heatmap-wrap canvas {
-      background: white;
-      border: 1px solid var(--color-border);
-      border-radius: 6px;
-      image-rendering: pixelated;
-    }
-    .legend-bar {
-      display: flex; align-items: center; gap: 10px;
-      margin-top: 6px;
-      font-size: 0.82rem;
-      color: var(--color-text-muted);
-    }
-    .legend-bar .grad {
-      width: 180px; height: 10px;
+    .legend .grad {
+      display: inline-block; width: 120px; height: 10px; vertical-align: middle;
+      margin: 0 6px;
       background: linear-gradient(to right, var(--color-neg), #fff, var(--color-pos));
-      border: 1px solid var(--color-border);
-      border-radius: 3px;
+      border: 1px solid var(--color-border); border-radius: 3px;
     }
-    .controls {
-      display: flex; flex-wrap: wrap; gap: 16px; align-items: center;
-      margin-top: 14px;
-    }
-    .controls .meta {
-      font-size: 0.95rem;
-      color: var(--color-text);
-      font-variant-numeric: tabular-nums;
-      min-width: 110px;
-    }
-    .controls .meta strong { color: var(--color-header-start); }
 
-    .sigma-list {
+    /* ── bar chart ── */
+    .bars-panel { margin-top: 18px; }
+    .bars-panel .sub { font-size: 0.88rem; color: var(--color-text-muted); margin: 0 0 6px; }
+    .bars-panel svg { max-width: 560px; }
+    .bar { transition: fill 0.25s; }
+    .bar.on  { fill: var(--color-header-end); }
+    .bar.off { fill: #cfd4da; }
+    .bar-hit { fill: transparent; cursor: pointer; }
+    .bar-val { font-size: 15px; font-weight: 600; font-variant-numeric: tabular-nums; }
+    .bar-x   { font-size: 15px; fill: var(--color-text-muted) !important; }
+
+    /* ── show the math ── */
+    details.math { margin-top: 20px; }
+    details.math > summary {
       list-style: none;
-      padding: 0;
-      margin: 0;
-      font-variant-numeric: tabular-nums;
+      display: inline-flex; align-items: center; gap: 8px;
+      min-height: 42px; padding: 8px 18px;
+      background: #fff; color: var(--color-header-end);
+      border: 1px solid #ced4da; border-radius: 8px;
+      font-size: 0.95rem; font-weight: 600; cursor: pointer;
+      user-select: none;
     }
-    .sigma-list li {
-      display: flex;
-      justify-content: space-between;
-      padding: 4px 0;
-      border-bottom: 1px dashed var(--color-border);
-      font-size: 0.9rem;
+    details.math > summary::-webkit-details-marker { display: none; }
+    details.math > summary:focus-visible { outline: 3px solid var(--color-pos); outline-offset: 2px; }
+    @media (hover: hover) { details.math > summary:hover { background: var(--color-neu-bg); } }
+    details.math .when-open { display: none; }
+    details.math[open] .when-open { display: inline; }
+    details.math[open] .when-closed { display: none; }
+    .math-body {
+      margin-top: 14px; padding: 18px 20px;
+      background: var(--color-neu-bg); border: 1px solid var(--color-border); border-radius: 10px;
+      font-size: 0.95rem;
     }
-    .sigma-list li.cur {
-      background: var(--color-pos-bg);
-      border-radius: 4px;
-      padding-left: 6px;
-      padding-right: 6px;
-      border-bottom: 1px solid var(--color-pos);
+    .math-body > p { margin: 0 0 10px; max-width: 80ch; }
+    .formula {
+      font-family: "Cambria Math", "STIX Two Math", "Latin Modern Math", Georgia, serif;
+      font-size: 1.12rem; text-align: center; max-width: none !important;
+      margin: 12px 0 14px !important; overflow-x: auto; white-space: nowrap;
     }
-    .sigma-list li.dim {
-      color: var(--color-text-muted);
+    .formula .t { white-space: nowrap; }
+    .math-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(min(260px, 100%), 1fr));
+      gap: 16px; margin: 14px 0;
     }
-    .sigma-list .name { font-weight: 500; }
-    .sigma-list .name .sub { color: var(--color-text-muted); font-weight: 400; }
-    .sigma-list .val { font-feature-settings: "tnum"; }
+    .math-grid .panel { background: #fff; }
+    .math-grid .panel.err { grid-column: span 2; }
+    @media (max-width: 700px) { .math-grid .panel.err { grid-column: auto; } }
+    .math-grid .sub { font-size: 0.85rem; color: var(--color-text-muted); margin: 6px 0 0; }
+    table.sig { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; font-size: 0.92rem; }
+    table.sig th, table.sig td { padding: 4px 8px; text-align: right; border-bottom: 1px dashed var(--color-border); }
+    table.sig th:first-child, table.sig td:first-child { text-align: left; }
+    table.sig th { font-weight: 600; color: var(--color-text-muted); font-size: 0.82rem; }
+    table.sig tr.on td { background: var(--color-pos-bg); }
+    #svg-err { max-width: 520px; }
+    #svg-err text { font-size: 15px; fill: var(--color-text-muted); }
+    #svg-err .err-line { fill: none; stroke: var(--color-header-end); stroke-width: 2; }
+    #svg-err .err-dot { fill: #adb5bd; }
+    #svg-err .err-cur { fill: var(--color-pos); stroke: #fff; stroke-width: 2; }
+    #svg-err .err-val { fill: var(--color-pos); font-weight: 600; font-size: 16px; }
+    #svg-err .elbow { stroke: var(--color-neg); stroke-dasharray: 3 3; }
+    #svg-err .elbow-lab { fill: #B34E00; font-weight: 600; }
+    .theorem {
+      background: #fff; border: 1px solid var(--color-border);
+      border-left: 4px solid var(--color-header-end); border-radius: 8px;
+      padding: 14px 18px; margin-top: 16px;
+    }
+    .theorem h3 { font-size: 1rem; font-weight: 600; margin: 0 0 6px; color: var(--color-header-start); }
+    .theorem p { margin: 0 0 10px; max-width: 80ch; }
+    .theorem .formula { margin: 10px 0 14px; }
+    .formula math { font-size: 1.15em; }
+    .ey-nums { display: flex; flex-wrap: wrap; gap: 12px; margin: 0 0 12px; }
+    .ey-nums > div {
+      flex: 1 1 150px; max-width: 220px;
+      background: var(--color-neu-bg); border-radius: 8px; padding: 8px 12px;
+      display: grid; grid-template-columns: 1fr auto; align-items: baseline; gap: 0 10px;
+    }
+    .ey-nums .lab { font-size: 0.85rem; color: var(--color-text-muted); }
+    .ey-nums .num {
+      grid-row: span 2; font-size: 1.5rem; font-weight: 600; color: var(--color-header-start);
+      font-variant-numeric: tabular-nums; align-self: center;
+    }
+    .ey-nums .what { font-size: 0.85rem; }
+    .math-body .citation {
+      font-size: 0.85rem; color: var(--color-text-muted);
+      border-top: 1px solid var(--color-border); padding-top: 8px; margin: 12px 0 0;
+    }
 
-    .error-panel { margin-top: 18px; }
-    .error-panel svg {
-      display: block;
-      width: 100%;
-      height: 220px;
+    @media (max-width: 600px) {
+      .viz-card { padding: 16px 12px; }
+      .dimbox { padding: 12px; }
+      .math-body { padding: 14px 12px; }
+      .formula { font-size: 1rem; white-space: normal; line-height: 1.9; }
+      .ex-row { font-size: 0.86rem; gap: 4px 5px; }
+      .chip { padding: 2px 7px; }
+      .sq { width: 13px; height: 13px; }
+      .panel { padding: 10px 8px 8px; }
     }
-    .error-panel .axis text { fill: var(--color-text-muted); font-size: 11px; }
-    .error-panel .axis path,
-    .error-panel .axis line { stroke: var(--color-border); }
-    .error-panel .err-line {
-      fill: none;
-      stroke: var(--color-header-end);
-      stroke-width: 2;
-    }
-    .error-panel .err-dot {
-      fill: var(--color-pos);
-      stroke: white;
-      stroke-width: 2;
-    }
-    .error-panel .err-dot-bg {
-      fill: var(--color-text-muted);
-      opacity: 0.4;
-    }
-    .error-panel .elbow {
-      fill: none;
-      stroke: var(--color-neg);
-      stroke-width: 1;
-      stroke-dasharray: 3 3;
-    }
-    .error-panel .elbow-label {
-      fill: var(--color-neg);
-      font-size: 11px;
-      font-weight: 500;
-    }
-    .error-panel .axis-label {
-      fill: var(--color-text);
-      font-size: 12px;
-    }
-
-    .citation {
-      font-size: 0.88rem;
-      color: var(--color-text-muted);
-      border-left: 3px solid var(--color-pos);
-      padding: 4px 10px;
-      margin-top: 10px;
-      background: var(--color-pos-bg);
-      border-radius: 3px;
-    }
+    @media (prefers-reduced-motion: reduce) { .bar { transition: none; } }
   </style>
 </head>
 <body>
   <header class="eth-header">
     <div class="eth-logo">ETH<em>zürich</em></div>
-    <nav><a href="../">← Companion site</a></nav>
+    <nav><a href="../index.html">← All demos</a></nav>
   </header>
   <main class="viz-container">
     <h1>Spectral microscope</h1>
     <p class="lede">
-      The 21×16 ratings matrix looks busy, but its singular values tell a quieter story.
-      Slide <em>k</em> from 1 to 16 and watch the rank-<em>k</em> SVD reconstruction
-      <em>A<sub>k</sub> = U<sub>k</sub> Σ<sub>k</sub> V<sub>k</sub><sup>⊤</sup></em>
-      sharpen back into the original. The error curve below shows where the matrix
-      stops being interesting.
+      The table from Demo 1 has 336 cells: 181 likes and dislikes, the rest no clear opinion.
+      Behind them sit a few hidden taste dimensions.
+      How many does the computer need to redraw the whole table? Move the slider and watch the
+      copy on the right fill in.
     </p>
 
     <div class="viz-card">
-      <div class="stage">
-        <div>
-          <div class="panel">
-            <h3>Rank-<em>k</em> reconstruction A<sub>k</sub></h3>
-            <p class="sub">21 readers (rows) × 16 books (cols). Cells colored by reconstructed value.</p>
-            <div class="heatmap-wrap">
-              <canvas id="heatmap"></canvas>
-              <div class="legend-bar">
-                <span>−1</span>
-                <span class="grad"></span>
-                <span>+1</span>
-                <span style="margin-left:14px;" id="caption-fro">‖A − A<sub>k</sub>‖<sub>F</sub> = ?</span>
-              </div>
+      <section class="dimbox" aria-labelledby="dim-h">
+        <h2 id="dim-h">What is a dimension?</h2>
+        <p class="def">One hidden <strong>taste question</strong> that the computer finds by itself
+          in the ratings.</p>
+        <div class="dim-cols">
+          <div class="dim-col">
+            <h3>How the copy uses it</h3>
+            <p>Every reader and every book gets a score on the question. The copy multiplies the
+              two. For dimension 1:</p>
+            <div class="ex">
+              <div class="ex-row"><span class="chip">Alice <b>high</b></span><span class="op">×</span>
+                <span class="chip">Potter <b>high</b></span><span class="op">→</span>
+                <span class="res"><span class="sq pos"></span>liked</span></div>
+              <div class="ex-row"><span class="chip">Alice <b>high</b></span><span class="op">×</span>
+                <span class="chip">Kant <b>low</b></span><span class="op">→</span>
+                <span class="res"><span class="sq neg"></span>disliked</span></div>
+              <div class="ex-row"><span class="chip">Eleni <b>zero</b></span><span class="op">×</span>
+                <span class="chip">any book</span><span class="op">→</span>
+                <span class="res"><span class="sq zero"></span>blank</span></div>
             </div>
+            <p class="small">With more dimensions, their products are added together.</p>
           </div>
-
-          <div class="controls">
-            <label>k = <span id="k-val" class="meta"><strong>2</strong></span></label>
-            <input type="range" id="k-slider" min="0" max="16" value="2" step="1" style="min-width:340px">
-            <button id="btn-play" class="play-btn">▶ Sweep 0 → 16</button>
-            <span class="meta" id="caption-explained"></span>
-          </div>
-
-          <div class="panel error-panel">
-            <h3>Frobenius error ‖A − A<sub>k</sub>‖<sub>F</sub> vs k</h3>
-            <p class="sub">A clear elbow at k = 2 is the empirical fingerprint of a rank-2 signal.</p>
-            <svg id="err-svg" viewBox="0 0 640 220" preserveAspectRatio="xMidYMid meet"></svg>
+          <div class="dim-col">
+            <h3>The questions it finds</h3>
+            <ol class="qlist">
+              <li><span class="qn">1</span><span><strong>Light fiction or demanding nonfiction?</strong>
+                <span class="who">Commuters vs Scholars</span></span></li>
+              <li><span class="qn">2</span><span><strong>Demanding fiction or light nonfiction?</strong>
+                <span class="who">Literary vs Practical readers</span></span></li>
+              <li><span class="qn">3–4</span><span>Small fixes
+                <span class="who">for two unusual readers, Samir and Ursula</span></span></li>
+            </ol>
+            <p class="small">The most informative question comes first. Together, 1 and 2 carry
+              the same information as “fiction or nonfiction?” and “light or demanding?” from the
+              slides.</p>
           </div>
         </div>
+      </section>
 
+      <div class="k-row">
+        <label class="k-label" for="k-slider">Dimensions used: <strong id="k-val">1</strong></label>
+        <div class="k-slider">
+          <input type="range" id="k-slider" min="0" max="6" value="1" step="1"
+                 aria-describedby="readout-note">
+          <div class="k-ticks" aria-hidden="true">
+            <span>0</span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span>
+          </div>
+        </div>
+        <button id="btn-play" class="play-btn">▶ Play 0 → 6</button>
+      </div>
+
+      <div class="readout" aria-live="polite">
+        <div class="score">Ratings redrawn correctly: <span id="n-right">–</span></div>
+        <p class="note" id="readout-note"></p>
+      </div>
+
+      <div class="tables">
         <div class="panel">
-          <h3>Singular values</h3>
-          <p class="sub">σ<sub>r</sub> sorted largest to smallest. The top two carry the signal.</p>
-          <ul class="sigma-list" id="sigma-list"></ul>
+          <h3>The real ratings</h3>
+          <svg id="svg-real" role="img" aria-label="The real ratings table, 21 readers by 16 books"></svg>
         </div>
+        <div class="panel">
+          <h3 id="copy-title">The copy, from 1 dimension</h3>
+          <svg id="svg-copy" role="img" aria-label="The copy redrawn from the hidden dimensions"></svg>
+        </div>
+      </div>
+      <div class="legend">
+        <span>disliked<span class="grad"></span>liked</span>
+        <span>white: no clear opinion</span>
+      </div>
+
+      <div class="panel bars-panel">
+        <h3>How much each dimension adds</h3>
+        <p class="sub">Two tall bars, then almost nothing. Click a bar to use dimensions up to it.</p>
+        <svg id="svg-bars" viewBox="0 0 420 172" role="img"
+             aria-label="Share of the table explained by each dimension"></svg>
       </div>
     </div>
 
     <aside class="explainer">
-      <h2>Why this works</h2>
+      <h2>What's happening?</h2>
       <p>
-        The Eckart-Young-Mirsky theorem (1936) makes a strong promise:
-        among <em>all</em> matrices of rank ≤ k, the truncated SVD
-        <em>A<sub>k</sub> = Σ<sub>r=1..k</sub> σ<sub>r</sub> u<sub>r</sub> v<sub>r</sub><sup>⊤</sup></em>
-        minimises ‖A − B‖<sub>F</sub>. No other rank-k approximation can do
-        better in squared error — and the leftover error is exactly
-        <em>√(σ<sub>k+1</sub>² + σ<sub>k+2</sub>² + …)</em>.
+        The computer looks for the taste dimensions that explain the most ratings, biggest first.
+        <strong>Dimension 1</strong> separates Commuters (light fiction) from Scholars (demanding
+        nonfiction). <strong>Dimension 2</strong> separates Literary readers from Practical ones.
+        With these two, the copy gets 180 of the 181 ratings right. Dimensions 3 and 4 only add
+        details about two unusual readers, Samir and Ursula.
       </p>
       <p>
-        So when the curve above flattens after k = 2, it is not bad luck: it means
-        σ<sub>3</sub>, σ<sub>4</sub>, … are tiny. Two latent factors really are enough.
-      </p>
-      <p class="citation">
-        Eckart, C. &amp; Young, G. (1936). <em>The approximation of one matrix by another of lower rank.</em>
-        Psychometrika, 1, 211–218.
+        Why this matters: a recommender does not need to keep the whole table, only each
+        reader's and each book's scores. Two scores each make 21 × 2 + 16 × 2 = 74 numbers
+        instead of 336 cells, and already get 180 of the 181 ratings right. The exact table needs
+        all four dimensions, 148 numbers. Keeping only the big dimensions is the trade a
+        recommender makes: far less to store, almost nothing lost.
       </p>
     </aside>
+
+    <details class="math" id="math">
+      <summary><span aria-hidden="true">Σ</span><span class="when-closed">Show the math</span><span class="when-open">Hide the math</span></summary>
+      <div class="math-body">
+        <p>The method is the <strong>singular value decomposition</strong> (SVD). It writes the
+          ratings table <strong>A</strong> as a sum of layers, one per dimension, biggest first.
+          The copy from k dimensions keeps the first k layers:</p>
+        <p class="formula"><span class="t"><math display="inline"><mrow><msub><mi>A</mi><mi>k</mi></msub><mo>=</mo><msub><mi>σ</mi><mn>1</mn></msub><msub><mi>u</mi><mn>1</mn></msub><msubsup><mi>v</mi><mn>1</mn><mi>⊤</mi></msubsup><mo>+</mo><msub><mi>σ</mi><mn>2</mn></msub><msub><mi>u</mi><mn>2</mn></msub><msubsup><mi>v</mi><mn>2</mn><mi>⊤</mi></msubsup></mrow></math></span> <span class="t"><math display="inline"><mrow><mo>+</mo><mo>…</mo><mo>+</mo><msub><mi>σ</mi><mi>k</mi></msub><msub><mi>u</mi><mi>k</mi></msub><msubsup><mi>v</mi><mi>k</mi><mi>⊤</mi></msubsup></mrow></math></span> <span class="t"><math display="inline"><mrow><mo>=</mo><msub><mi>U</mi><mi>k</mi></msub><msub><mi mathvariant="normal">Σ</mi><mi>k</mi></msub><msubsup><mi>V</mi><mi>k</mi><mi>⊤</mi></msubsup></mrow></math></span></p>
+        <p>u<sub>r</sub> holds the 21 reader scores on dimension r and v<sub>r</sub> the 16 book
+          scores; the singular value σ<sub>r</sub> says how much that dimension matters. The bars
+          above show σ<sub>r</sub><sup>2</sup> as a share of the total.</p>
+
+        <div class="math-grid">
+          <div class="panel">
+            <h3>Singular values</h3>
+            <table class="sig">
+              <thead><tr><th>r</th><th>σ<sub>r</sub></th><th>share σ<sub>r</sub><sup>2</sup></th></tr></thead>
+              <tbody id="sig-body"></tbody>
+            </table>
+            <p class="sub">σ<sub>5</sub> to σ<sub>16</sub> are all 0: the table has rank 4.</p>
+          </div>
+          <div class="panel err">
+            <h3>Error of the copy, ‖A − A<sub>k</sub>‖<sub>F</sub></h3>
+            <svg id="svg-err" viewBox="0 0 440 230" role="img"
+                 aria-label="Error of the copy for k from 0 to 6, with an elbow at k equals 2"></svg>
+            <p class="sub" id="err-caption"></p>
+          </div>
+        </div>
+
+        <section class="theorem" aria-labelledby="ey-h">
+          <h3 id="ey-h">Eckart–Young (1936)</h3>
+          <p>For every k, no table of rank k comes closer to A than A<sub>k</sub>: the truncated
+            SVD is the best possible copy from k dimensions. Its leftover error is exactly</p>
+          <p class="formula"><span class="t"><math display="inline"><mrow><msub><mrow><mo>‖</mo><mi>A</mi><mo>−</mo><msub><mi>A</mi><mi>k</mi></msub><mo>‖</mo></mrow><mi>F</mi></msub><mo>=</mo></mrow></math></span> <span class="t"><math display="inline"><mrow><msqrt><msubsup><mi>σ</mi><mrow><mi>k</mi><mo>+</mo><mn>1</mn></mrow><mn>2</mn></msubsup><mo>+</mo><msubsup><mi>σ</mi><mrow><mi>k</mi><mo>+</mo><mn>2</mn></mrow><mn>2</mn></msubsup><mo>+</mo><mo>…</mo><mo>+</mo><msubsup><mi>σ</mi><mrow><mn>16</mn></mrow><mn>2</mn></msubsup></msqrt></mrow></math></span></p>
+          <div class="ey-nums">
+            <div><span class="lab">At k = 2</span><span class="num" id="ey-k2"></span>
+              <span class="what">‖A − A<sub>2</sub>‖<sub>F</sub></span></div>
+            <div><span class="lab">Whole table</span><span class="num" id="ey-total"></span>
+              <span class="what">‖A‖<sub>F</sub></span></div>
+          </div>
+          <p>Two dimensions take the error from 13.45 down to 1.66: that drop is the bend in the
+            curve above.</p>
+          <p class="citation">Eckart, C. &amp; Young, G. (1936). The approximation of one matrix by
+            another of lower rank. Psychometrika, 1, 211–218.</p>
+        </section>
+      </div>
+    </details>
   </main>
-  <footer class="eth-footer">CAS AINIT FS26 · W2 Recsys</footer>
+  <footer class="eth-footer">CAS AINIT HS26 · W2 Recsys</footer>
 
   <script src="shared/data.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
   <script>
   (function () {
-    const A = RECSYS.ratingsForFactorization(); // 21 x 16, dense
-    const m = A.length;
-    const n = A[0].length;
+    const { BOOKS, READERS } = RECSYS;
+    const A = RECSYS.ratingsForFactorization();     // 21 × 16, values −1 / 0 / +1
+    const m = A.length, n = A[0].length;
+    const K_MAX = 6;
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    // ============================================================
-    // Linear algebra primitives
-    // ============================================================
-    function zeros(r, c) {
-      const M = new Array(r);
-      for (let i = 0; i < r; i++) M[i] = new Float64Array(c);
-      return M;
-    }
-    function identity(n) {
-      const I = zeros(n, n);
-      for (let i = 0; i < n; i++) I[i][i] = 1;
-      return I;
-    }
-    function transpose(M) {
-      const r = M.length, c = M[0].length;
-      const T = zeros(c, r);
-      for (let i = 0; i < r; i++) for (let j = 0; j < c; j++) T[j][i] = M[i][j];
-      return T;
-    }
-    function matMul(A, B) {
-      const r = A.length, c = B[0].length, k = B.length;
-      const C = zeros(r, c);
-      for (let i = 0; i < r; i++) {
-        const Ai = A[i], Ci = C[i];
-        for (let p = 0; p < k; p++) {
-          const aip = Ai[p];
-          if (aip === 0) continue;
-          const Bp = B[p];
-          for (let j = 0; j < c; j++) Ci[j] += aip * Bp[j];
-        }
-      }
-      return C;
-    }
-    function frobenius(M) {
-      const r = M.length, c = M[0].length;
-      let s = 0;
-      for (let i = 0; i < r; i++) for (let j = 0; j < c; j++) s += M[i][j] * M[i][j];
-      return Math.sqrt(s);
-    }
-
-    // ============================================================
-    // Jacobi eigendecomposition of a symmetric n×n matrix.
-    // Returns { eigs: array of {value, vector} } sorted descending by value.
-    // ============================================================
-    function jacobiEigen(Sin, maxSweeps = 100, tol = 1e-12) {
-      const n = Sin.length;
-      // copy
-      const S = zeros(n, n);
-      for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) S[i][j] = Sin[i][j];
-      const V = identity(n);
-
-      for (let sweep = 0; sweep < maxSweeps; sweep++) {
-        // off-diagonal Frobenius norm
-        let off = 0;
-        for (let p = 0; p < n; p++)
-          for (let q = p + 1; q < n; q++)
-            off += S[p][q] * S[p][q];
-        if (off < tol) break;
-
-        for (let p = 0; p < n - 1; p++) {
-          for (let q = p + 1; q < n; q++) {
-            const Spq = S[p][q];
-            if (Math.abs(Spq) < 1e-14) continue;
-            const Spp = S[p][p];
-            const Sqq = S[q][q];
-            const theta = (Sqq - Spp) / (2 * Spq);
-            let t;
-            if (Math.abs(theta) > 1e15) {
-              t = 1 / (2 * theta);
-            } else {
-              const sgn = theta >= 0 ? 1 : -1;
-              t = sgn / (Math.abs(theta) + Math.sqrt(theta * theta + 1));
-            }
-            const c = 1 / Math.sqrt(t * t + 1);
-            const s = t * c;
-
-            // Update S: rotate rows/cols p and q
-            S[p][p] = Spp - t * Spq;
-            S[q][q] = Sqq + t * Spq;
-            S[p][q] = 0;
-            S[q][p] = 0;
-            for (let i = 0; i < n; i++) {
-              if (i !== p && i !== q) {
-                const Sip = S[i][p];
-                const Siq = S[i][q];
-                S[i][p] = c * Sip - s * Siq;
-                S[p][i] = S[i][p];
-                S[i][q] = s * Sip + c * Siq;
-                S[q][i] = S[i][q];
-              }
-            }
-            // Update V: V = V * R(p,q,c,s)
-            for (let i = 0; i < n; i++) {
-              const Vip = V[i][p];
-              const Viq = V[i][q];
-              V[i][p] = c * Vip - s * Viq;
-              V[i][q] = s * Vip + c * Viq;
-            }
-          }
-        }
-      }
-      // Pull out (value, column-vector)
-      const eigs = [];
-      for (let i = 0; i < n; i++) {
-        const vec = new Float64Array(n);
-        for (let j = 0; j < n; j++) vec[j] = V[j][i];
-        eigs.push({ value: S[i][i], vector: vec });
-      }
-      eigs.sort((a, b) => b.value - a.value);
-      return eigs;
-    }
-
-    // ============================================================
-    // SVD of A (m×n). Strategy: A^T A is n×n symmetric (n=16, smaller).
-    // Eigendecompose to get V and singular values; then U = A V Σ^{-1}.
-    // ============================================================
+    // ── SVD: eigen-decompose AᵀA (16 × 16) with Jacobi rotations, then u = A v / σ ──
     function svd(A) {
-      const m = A.length, n = A[0].length;
-      // Build A^T A (n x n)
-      const AT = transpose(A);
-      const ATA = matMul(AT, A);
-
-      const eigs = jacobiEigen(ATA);
-      const k = Math.min(m, n);
-      const sigmas = new Array(k);
-      const V = zeros(n, k); // columns are right singular vectors
-      const U = zeros(m, k);
-
-      for (let r = 0; r < k; r++) {
-        const lambda = Math.max(eigs[r].value, 0);
-        const sig = Math.sqrt(lambda);
-        sigmas[r] = sig;
-        const vr = eigs[r].vector;
-        // store v_r as column r of V
-        for (let i = 0; i < n; i++) V[i][r] = vr[i];
-
-        // u_r = A v_r / sigma  (when sigma > 0)
-        const Avr = new Float64Array(m);
-        for (let i = 0; i < m; i++) {
-          let s = 0;
-          for (let j = 0; j < n; j++) s += A[i][j] * vr[j];
-          Avr[i] = s;
-        }
-        if (sig > 1e-12) {
-          for (let i = 0; i < m; i++) U[i][r] = Avr[i] / sig;
-        } else {
-          // For zero singular value, leave column zero (won't contribute).
-          for (let i = 0; i < m; i++) U[i][r] = 0;
-        }
-      }
-      return { U, sigmas, V, k };
-    }
-
-    // ============================================================
-    // Compute SVD once.
-    // ============================================================
-    const { U, sigmas, V, k: K } = svd(A);
-
-    // Self-test
-    (function selfTest() {
-      // reconstruct full and compare
-      const Afull = zeros(m, n);
-      for (let r = 0; r < K; r++) {
-        const sr = sigmas[r];
-        for (let i = 0; i < m; i++) {
-          const uir = U[i][r] * sr;
-          if (uir === 0) continue;
-          for (let j = 0; j < n; j++) Afull[i][j] += uir * V[j][r];
-        }
-      }
-      let diff = 0, fnA = 0;
-      for (let i = 0; i < m; i++) for (let j = 0; j < n; j++) {
-        const d = A[i][j] - Afull[i][j];
-        diff += d * d;
-        fnA += A[i][j] * A[i][j];
-      }
-      const ratio = Math.sqrt(diff) / Math.max(1e-12, Math.sqrt(fnA));
-      console.log('[spectral-microscope] full-rank reconstruction error (relative):', ratio.toExponential(3));
-      console.log('[spectral-microscope] singular values:', sigmas.map(s => s.toFixed(4)));
-      console.log('[spectral-microscope] σ2/σ3 ratio:', (sigmas[1] / Math.max(sigmas[2], 1e-12)).toFixed(2));
-    })();
-
-    // Precompute reconstructions and Frobenius errors for each k = 0..K
-    const recons = new Array(K + 1);
-    const errs = new Array(K + 1);
-    {
-      // start from zeros; cumulatively add rank-1 outer products
-      let cur = zeros(m, n);
-      recons[0] = zeros(m, n);
-      errs[0] = frobenius(A);
-      for (let r = 0; r < K; r++) {
-        const sr = sigmas[r];
-        for (let i = 0; i < m; i++) {
-          const uir = U[i][r] * sr;
-          if (uir === 0) continue;
-          for (let j = 0; j < n; j++) cur[i][j] += uir * V[j][r];
-        }
-        // copy snapshot
-        const snap = zeros(m, n);
-        for (let i = 0; i < m; i++) for (let j = 0; j < n; j++) snap[i][j] = cur[i][j];
-        recons[r + 1] = snap;
-        // residual norm
-        let s = 0;
-        for (let i = 0; i < m; i++) for (let j = 0; j < n; j++) {
-          const d = A[i][j] - cur[i][j];
-          s += d * d;
-        }
-        errs[r + 1] = Math.sqrt(s);
-      }
-    }
-
-    // ============================================================
-    // Heatmap rendering
-    // ============================================================
-    const cellPx = 26;
-    const heatCanvas = document.getElementById('heatmap');
-    function drawHeatmap(M) {
-      const r = M.length, c = M[0].length;
-      const w = c * cellPx, h = r * cellPx;
-      const dpr = window.devicePixelRatio || 1;
-      heatCanvas.width = w * dpr;
-      heatCanvas.height = h * dpr;
-      heatCanvas.style.width = w + 'px';
-      heatCanvas.style.height = h + 'px';
-      const ctx = heatCanvas.getContext('2d');
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      ctx.imageSmoothingEnabled = false;
-
-      // Fixed scale = 1 so the original (values ±1) hits saturation.
-      const scale = 1.0;
-      // Vermillion #D55E00 ↔ blue #0072B2.
-      const negR = 213, negG = 94, negB = 0;
-      const posR = 0, posG = 114, posB = 178;
-
-      for (let i = 0; i < r; i++) {
-        for (let j = 0; j < c; j++) {
-          const v = M[i][j];
-          let R, G, B;
-          const t = Math.max(-1, Math.min(1, v / scale));
-          if (t >= 0) {
-            R = Math.round(255 + (posR - 255) * t);
-            G = Math.round(255 + (posG - 255) * t);
-            B = Math.round(255 + (posB - 255) * t);
-          } else {
-            const a = -t;
-            R = Math.round(255 + (negR - 255) * a);
-            G = Math.round(255 + (negG - 255) * a);
-            B = Math.round(255 + (negB - 255) * a);
+      const S = Array.from({ length: n }, (_, i) =>
+        Array.from({ length: n }, (_, j) => A.reduce((s, r) => s + r[i] * r[j], 0)));
+      const V = Array.from({ length: n }, (_, i) => Array.from({ length: n }, (_, j) => +(i === j)));
+      for (let sweep = 0; sweep < 100; sweep++) {
+        let off = 0;
+        for (let p = 0; p < n; p++) for (let q = p + 1; q < n; q++) off += S[p][q] ** 2;
+        if (off < 1e-20) break;
+        for (let p = 0; p < n - 1; p++) for (let q = p + 1; q < n; q++) {
+          if (Math.abs(S[p][q]) < 1e-15) continue;
+          const th = (S[q][q] - S[p][p]) / (2 * S[p][q]);
+          const t = (th >= 0 ? 1 : -1) / (Math.abs(th) + Math.sqrt(th * th + 1));
+          const c = 1 / Math.sqrt(t * t + 1), s = t * c;
+          for (let k = 0; k < n; k++) {
+            const a = S[k][p], b = S[k][q];
+            S[k][p] = c * a - s * b; S[k][q] = s * a + c * b;
           }
-          ctx.fillStyle = `rgb(${R},${G},${B})`;
-          ctx.fillRect(j * cellPx, i * cellPx, cellPx, cellPx);
+          for (let k = 0; k < n; k++) {
+            const a = S[p][k], b = S[q][k];
+            S[p][k] = c * a - s * b; S[q][k] = s * a + c * b;
+          }
+          for (let k = 0; k < n; k++) {
+            const a = V[k][p], b = V[k][q];
+            V[k][p] = c * a - s * b; V[k][q] = s * a + c * b;
+          }
         }
       }
-      // grid
-      ctx.strokeStyle = 'rgba(0,0,0,0.08)';
-      ctx.lineWidth = 1;
-      for (let i = 0; i <= r; i++) {
-        ctx.beginPath();
-        ctx.moveTo(0, i * cellPx + 0.5);
-        ctx.lineTo(w, i * cellPx + 0.5);
-        ctx.stroke();
-      }
-      for (let j = 0; j <= c; j++) {
-        ctx.beginPath();
-        ctx.moveTo(j * cellPx + 0.5, 0);
-        ctx.lineTo(j * cellPx + 0.5, h);
-        ctx.stroke();
-      }
+      return [...Array(n).keys()]
+        .map(r => ({ sigma: Math.sqrt(Math.max(0, S[r][r])), v: V.map(row => row[r]) }))
+        .sort((a, b) => b.sigma - a.sigma)
+        .map(({ sigma, v }) => ({
+          sigma, v,
+          u: A.map(row => (sigma > 1e-9 ? row.reduce((s, x, j) => s + x * v[j], 0) / sigma : 0)),
+        }));
+    }
+    const comps = svd(A);
+
+    // copies[k] = the table redrawn from the first k dimensions
+    const copies = [A.map(r => r.map(() => 0))];
+    for (let k = 1; k <= K_MAX; k++) {
+      const { sigma, u, v } = comps[k - 1];
+      copies.push(copies[k - 1].map((row, i) => row.map((x, j) => x + sigma * u[i] * v[j])));
+    }
+    const total = comps.reduce((s, c) => s + c.sigma ** 2, 0);
+    const share = comps.slice(0, K_MAX).map(c => c.sigma ** 2 / total);
+
+    // A rating counts as redrawn correctly when the copy, read like a rating, gives it back.
+    const nRated = A.flat().filter(v => v !== 0).length;
+    const wrongCells = copies.map(M => {
+      const out = [];
+      A.forEach((row, i) => row.forEach((v, j) => {
+        if (v !== 0 && RECSYS.ratingSign(M[i][j]) !== v) out.push([i, j]);
+      }));
+      return out;
+    });
+
+    const NOTES = [
+      'Nothing drawn yet. Move the slider to give the computer one dimension.',
+      'One dimension separates Commuters (light fiction) from Scholars (demanding nonfiction). '
+        + 'Literary and Practical readers are still blank.',
+      'A second dimension separates Literary from Practical readers. The copy is almost '
+        + 'perfect: only Ursula’s liking for Borges is missing.',
+      'Dimension 3 is a small fix for one reader, Samir, who has an opinion on only some books.',
+      'Dimension 4 adds Ursula’s surprise liking for Borges. The copy is now exact.',
+      'Nothing changes: this table holds only four dimensions in total.',
+      'Nothing changes: this table holds only four dimensions in total.',
+    ];
+
+    // ── tables ──
+    const SVGNS = 'http://www.w3.org/2000/svg';
+    const el = (tag, attrs, parent) => {
+      const e = document.createElementNS(SVGNS, tag);
+      for (const k in attrs) e.setAttribute(k, attrs[k]);
+      if (parent) parent.appendChild(e);
+      return e;
+    };
+    const CELL = 16, LEFT = 54, TOP = 64;
+    const W = LEFT + n * CELL + 34, H = TOP + m * CELL + 2;
+    const GROUP_ROWS = [4, 8, 12, 16], GROUP_COLS = [4, 8, 12];
+
+    function colour(v) {
+      const t = Math.max(-1, Math.min(1, v));
+      const [r, g, b] = t >= 0 ? [0, 114, 178] : [213, 94, 0];
+      const a = Math.abs(t);
+      return `rgb(${Math.round(255 + (r - 255) * a)},${Math.round(255 + (g - 255) * a)},${Math.round(255 + (b - 255) * a)})`;
     }
 
-    // Smooth transition: interpolate between previous & current reconstruction
-    let lastK = -1;
-    let animFrame = null;
-    function transitionTo(k, durationMs = 250) {
-      if (animFrame) cancelAnimationFrame(animFrame);
-      const fromM = (lastK >= 0) ? recons[lastK] : recons[k];
-      const toM = recons[k];
-      const start = performance.now();
-      const interpM = zeros(m, n);
-      function step(now) {
-        const t = Math.min(1, (now - start) / durationMs);
-        // easeInOutQuad
-        const e = t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
-        for (let i = 0; i < m; i++) for (let j = 0; j < n; j++) {
-          interpM[i][j] = fromM[i][j] * (1 - e) + toM[i][j] * e;
-        }
-        drawHeatmap(interpM);
-        if (t < 1) animFrame = requestAnimationFrame(step);
-        else { animFrame = null; lastK = k; }
-      }
-      animFrame = requestAnimationFrame(step);
+    function buildTable(svg) {
+      svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+      READERS.forEach((r, i) => {
+        const t = el('text', { class: 'rlab', x: LEFT - 5, y: TOP + i * CELL + CELL / 2 + 3.5, 'text-anchor': 'end' }, svg);
+        t.textContent = r.name;
+      });
+      BOOKS.forEach((b, j) => {
+        const x = LEFT + j * CELL + CELL / 2 + 3, y = TOP - 5;
+        const t = el('text', { class: 'clab', x, y, transform: `rotate(-60 ${x} ${y})` }, svg);
+        t.textContent = b.label;
+      });
+      const cells = A.map((row, i) => row.map((_, j) =>
+        el('rect', { x: LEFT + j * CELL, y: TOP + i * CELL, width: CELL, height: CELL }, svg)));
+      el('rect', { x: LEFT, y: TOP, width: n * CELL, height: m * CELL, fill: 'none', stroke: '#adb5bd' }, svg);
+      GROUP_ROWS.forEach(r => el('line', { x1: LEFT, x2: LEFT + n * CELL, y1: TOP + r * CELL, y2: TOP + r * CELL, stroke: '#adb5bd' }, svg));
+      GROUP_COLS.forEach(c => el('line', { y1: TOP, y2: TOP + m * CELL, x1: LEFT + c * CELL, x2: LEFT + c * CELL, stroke: '#adb5bd' }, svg));
+      return { cells };
+    }
+    function paint(table, M) {
+      M.forEach((row, i) => row.forEach((v, j) => table.cells[i][j].setAttribute('fill', colour(v))));
     }
 
-    // ============================================================
-    // Error curve
-    // ============================================================
-    const errSvg = d3.select('#err-svg');
-    function drawErrorCurve(currentK) {
-      errSvg.selectAll('*').remove();
-      const W = 640, H = 220;
-      const pad = { l: 50, r: 16, t: 12, b: 36 };
+    const real = buildTable(document.getElementById('svg-real'));
+    const copy = buildTable(document.getElementById('svg-copy'));
+    paint(real, A);
 
-      const x = d3.scaleLinear().domain([0, K]).range([pad.l, W - pad.r]);
-      const yMax = errs[0] * 1.05;
-      const y = d3.scaleLinear().domain([0, yMax]).range([H - pad.b, pad.t]);
+    // ── bars ──
+    const barsSvg = document.getElementById('svg-bars');
+    const BX = 14, BW = 400 / K_MAX, BH = 120, BBASE = 140;
+    const bars = share.map((s, r) => {
+      const h = Math.max(1.5, s * BH / share[0]);
+      const x = BX + r * BW + 10, w = BW - 20;
+      const bar = el('rect', { class: 'bar off', x, y: BBASE - h, width: w, height: h, rx: 3 }, barsSvg);
+      const pct = s * 100;
+      const label = pct >= 1 ? Math.round(pct) + '%' : pct >= 0.05 ? pct.toFixed(1) + '%' : '0%';
+      el('text', { class: 'bar-val', x: x + w / 2, y: BBASE - h - 6, 'text-anchor': 'middle' }, barsSvg)
+        .textContent = label;
+      el('text', { class: 'bar-x', x: x + w / 2, y: BBASE + 21, 'text-anchor': 'middle' }, barsSvg)
+        .textContent = 'Dim ' + (r + 1);
+      const hit = el('rect', { class: 'bar-hit', x: BX + r * BW, y: 0, width: BW, height: 170,
+        tabindex: 0, role: 'button', 'aria-label': `Use dimensions 1 to ${r + 1}` }, barsSvg);
+      hit.addEventListener('click', () => setK(r + 1));
+      hit.addEventListener('keydown', e => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setK(r + 1); }
+      });
+      return bar;
+    });
+    el('line', { x1: BX, x2: BX + 400, y1: BBASE, y2: BBASE, stroke: '#adb5bd' }, barsSvg);
 
-      // Axes
-      const xAxis = d3.axisBottom(x).ticks(K).tickFormat(d3.format('d'));
-      const yAxis = d3.axisLeft(y).ticks(5).tickFormat(d => d.toFixed(1));
-      errSvg.append('g')
-        .attr('class', 'axis')
-        .attr('transform', `translate(0,${H - pad.b})`)
-        .call(xAxis);
-      errSvg.append('g')
-        .attr('class', 'axis')
-        .attr('transform', `translate(${pad.l},0)`)
-        .call(yAxis);
-      // axis labels
-      errSvg.append('text')
-        .attr('class', 'axis-label')
-        .attr('x', (W - pad.r + pad.l) / 2)
-        .attr('y', H - 4)
-        .attr('text-anchor', 'middle')
-        .text('k (rank of approximation)');
-      errSvg.append('text')
-        .attr('class', 'axis-label')
-        .attr('transform', `translate(14,${(H - pad.b + pad.t) / 2}) rotate(-90)`)
-        .attr('text-anchor', 'middle')
-        .text('‖A − Aₖ‖_F');
+    // ── the math section ──
+    const errs = copies.map(M =>
+      Math.sqrt(M.reduce((s, row, i) => s + row.reduce((t, x, j) => t + (A[i][j] - x) ** 2, 0), 0)));
+    const fmtPct = s => { const p = s * 100; return p >= 1 ? Math.round(p) + '%' : p >= 0.05 ? p.toFixed(1) + '%' : '0%'; };
+    const sigRows = share.map((s, r) => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td>${r + 1}</td><td>${comps[r].sigma < 5e-3 ? '0.00' : comps[r].sigma.toFixed(2)}</td><td>${fmtPct(s)}</td>`;
+      document.getElementById('sig-body').appendChild(tr);
+      return tr;
+    });
+    document.getElementById('ey-k2').textContent = errs[2].toFixed(2);
+    document.getElementById('ey-total').textContent = errs[0].toFixed(2);
 
-      // Elbow line at k=2
-      errSvg.append('line')
-        .attr('class', 'elbow')
-        .attr('x1', x(2)).attr('x2', x(2))
-        .attr('y1', pad.t).attr('y2', H - pad.b);
-      errSvg.append('text')
-        .attr('class', 'elbow-label')
-        .attr('x', x(2) + 4).attr('y', pad.t + 12)
-        .text('elbow @ k=2');
+    const errSvg = document.getElementById('svg-err');
+    const EL = 48, ER = 18, ET = 22, EB = 50, EW = 440, EH = 230;
+    const ex = k => EL + k * (EW - EL - ER) / K_MAX;
+    const yMax = Math.ceil(errs[0] / 5) * 5;
+    const ey = v => EH - EB - v * (EH - EB - ET) / yMax;
+    for (let v = 0; v <= yMax; v += 5) {
+      el('line', { x1: EL, x2: EW - ER, y1: ey(v), y2: ey(v), stroke: v ? '#e9ecef' : '#adb5bd' }, errSvg);
+      el('text', { x: EL - 8, y: ey(v) + 4, 'text-anchor': 'end' }, errSvg).textContent = v;
+    }
+    for (let k = 0; k <= K_MAX; k++)
+      el('text', { x: ex(k), y: EH - EB + 22, 'text-anchor': 'middle' }, errSvg).textContent = k;
+    el('text', { x: (EL + EW - ER) / 2, y: EH - 6, 'text-anchor': 'middle' }, errSvg)
+      .textContent = 'k (dimensions used)';
+    el('line', { class: 'elbow', x1: ex(2), x2: ex(2), y1: ET, y2: EH - EB }, errSvg);
+    el('text', { class: 'elbow-lab', x: ex(2) + 6, y: ET + 4 }, errSvg).textContent = 'elbow at k = 2';
+    el('polyline', { class: 'err-line', points: errs.map((v, k) => `${ex(k)},${ey(v)}`).join(' ') }, errSvg);
+    errs.forEach((v, k) => el('circle', { class: 'err-dot', cx: ex(k), cy: ey(v), r: 3 }, errSvg));
+    const errCur = el('circle', { class: 'err-cur', r: 6.5 }, errSvg);
+    const errVal = el('text', { class: 'err-val', 'text-anchor': 'middle' }, errSvg);
 
-      // Curve
-      const line = d3.line()
-        .x((d, i) => x(i))
-        .y(d => y(d))
-        .curve(d3.curveMonotoneX);
-      errSvg.append('path')
-        .datum(errs)
-        .attr('class', 'err-line')
-        .attr('d', line);
-
-      // dots for every k (faint)
-      errSvg.selectAll('.err-dot-bg')
-        .data(errs)
-        .enter().append('circle')
-        .attr('class', 'err-dot-bg')
-        .attr('r', 2.5)
-        .attr('cx', (d, i) => x(i))
-        .attr('cy', d => y(d));
-
-      // current k highlighted
-      errSvg.append('circle')
-        .attr('class', 'err-dot')
-        .attr('r', 6)
-        .attr('cx', x(currentK))
-        .attr('cy', y(errs[currentK]));
-
-      // current value text
-      errSvg.append('text')
-        .attr('class', 'axis-label')
-        .attr('x', x(currentK))
-        .attr('y', y(errs[currentK]) - 12)
-        .attr('text-anchor', 'middle')
-        .style('fill', 'var(--color-pos)')
-        .style('font-weight', '600')
-        .text(`${errs[currentK].toFixed(2)}`);
+    function updateMath(k) {
+      sigRows.forEach((tr, r) => tr.classList.toggle('on', r < k));
+      errCur.setAttribute('cx', ex(k)); errCur.setAttribute('cy', ey(errs[k]));
+      errVal.setAttribute('x', ex(k) + (k === 0 ? 14 : 0)); errVal.setAttribute('y', ey(errs[k]) - 12);
+      errVal.textContent = errs[k].toFixed(2);
+      document.getElementById('err-caption').innerHTML =
+        `At k = ${k}: ‖A − A<sub>k</sub>‖<sub>F</sub> = ${errs[k].toFixed(2)}. ` +
+        '‖·‖<sub>F</sub> is the square root of the summed squared differences, cell by cell.';
     }
 
-    // ============================================================
-    // Singular value list
-    // ============================================================
-    function fmtSig3(x) {
-      if (x === 0) return '0.00';
-      if (!isFinite(x)) return '—';
-      // 3 significant figures
-      const exp = Math.floor(Math.log10(Math.abs(x)));
-      const factor = Math.pow(10, 2 - exp);
-      const rounded = Math.round(x * factor) / factor;
-      // Render with at least 3 sig figs visible
-      const decimals = Math.max(0, 2 - exp);
-      return rounded.toFixed(Math.min(decimals, 6));
-    }
-    function drawSigmaList(currentK) {
-      const list = document.getElementById('sigma-list');
-      list.innerHTML = '';
-      for (let r = 0; r < sigmas.length; r++) {
-        const li = document.createElement('li');
-        if (r < currentK) li.classList.add('cur');
-        else li.classList.add('dim');
-        const name = document.createElement('span');
-        name.className = 'name';
-        name.innerHTML = `σ<span class="sub">${r + 1}</span>`;
-        const val = document.createElement('span');
-        val.className = 'val';
-        val.textContent = fmtSig3(sigmas[r]);
-        li.appendChild(name);
-        li.appendChild(val);
-        list.appendChild(li);
-      }
-    }
-
-    // ============================================================
-    // Captions
-    // ============================================================
-    function updateCaptions(k) {
-      const fro = errs[0];
-      const froD = errs[k];
-      const explained = fro > 1e-12 ? Math.max(0, 1 - (froD * froD) / (fro * fro)) : 1;
-      document.getElementById('caption-fro').innerHTML =
-        `‖A − A<sub>k</sub>‖<sub>F</sub> = <strong>${froD.toFixed(2)}</strong> &nbsp; (‖A‖<sub>F</sub> = ${fro.toFixed(2)})`;
-      document.getElementById('caption-explained').innerHTML =
-        `<strong>${(explained * 100).toFixed(1)}%</strong> of squared energy captured by k = ${k} factor${k === 1 ? '' : 's'}.`;
-    }
-
-    // ============================================================
-    // Wire up
-    // ============================================================
+    // ── state ──
     const slider = document.getElementById('k-slider');
-    const kValEl = document.getElementById('k-val');
+    let shown = copies[0].map(r => r.slice());
+    let anim = null;
 
-    function setK(k, animate = true) {
-      kValEl.innerHTML = `<strong>${k}</strong>`;
-      if (animate) transitionTo(k, 250);
-      else {
-        if (animFrame) { cancelAnimationFrame(animFrame); animFrame = null; }
-        drawHeatmap(recons[k]);
-        lastK = k;
-      }
-      drawErrorCurve(k);
-      drawSigmaList(k);
-      updateCaptions(k);
+    function drawCopy(target) {
+      if (anim) cancelAnimationFrame(anim);
+      const from = shown.map(r => r.slice());
+      const done = () => {
+        shown = target.map(r => r.slice());
+        paint(copy, shown);
+      };
+      if (reduceMotion) return done();
+      const t0 = performance.now(), DUR = 350;
+      const step = now => {
+        const t = Math.min(1, (now - t0) / DUR), e = t < 0.5 ? 2 * t * t : 1 - 2 * (1 - t) ** 2;
+        shown = from.map((row, i) => row.map((x, j) => x + (target[i][j] - x) * e));
+        paint(copy, shown);
+        if (t < 1) anim = requestAnimationFrame(step); else { anim = null; done(); }
+      };
+      anim = requestAnimationFrame(step);
     }
 
-    slider.addEventListener('input', () => {
-      setK(+slider.value, true);
-    });
+    function setK(k) {
+      slider.value = k;
+      document.getElementById('k-val').textContent = k;
+      document.getElementById('copy-title').textContent =
+        k === 0 ? 'The copy, from no dimensions' : `The copy, from ${k} dimension${k === 1 ? '' : 's'}`;
+      document.getElementById('n-right').textContent = `${nRated - wrongCells[k].length} of ${nRated}`;
+      document.getElementById('readout-note').textContent = NOTES[k];
+      bars.forEach((b, r) => b.setAttribute('class', 'bar ' + (r < k ? 'on' : 'off')));
+      updateMath(k);
+      drawCopy(copies[k]);
+    }
 
-    let playing = false;
-    document.getElementById('btn-play').addEventListener('click', async () => {
-      if (playing) return;
-      playing = true;
+    slider.addEventListener('input', () => setK(+slider.value));
+
+    const playBtn = document.getElementById('btn-play');
+    playBtn.addEventListener('click', async () => {
+      playBtn.disabled = true;
       try {
-        for (let kk = 0; kk <= K; kk++) {
-          slider.value = kk;
-          setK(kk, true);
-          await new Promise(r => setTimeout(r, 320));
+        for (let k = 0; k <= K_MAX; k++) {
+          setK(k);
+          await new Promise(r => setTimeout(r, k === 0 ? 700 : 1500));
         }
-      } finally { playing = false; }
+      } finally { playBtn.disabled = false; }
     });
 
-    // Initial draw at k=2 (the "right" answer for this matrix)
-    setK(2, false);
+    // Deep link: #k=2 opens with two dimensions.
+    const hashK = /^#k=(\d)$/.exec(location.hash);
+    setK(hashK ? Math.min(K_MAX, +hashK[1]) : 1);
+    if (location.hash === '#math') document.getElementById('math').open = true;
   })();
   </script>
 </body>
