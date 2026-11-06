@@ -194,8 +194,9 @@ case is a result published in 2021 or later: Carlos rejected version 1 (Airbnb 2
 Netflix 2012) the same day as old. Every case frame is the same two by two card: what was built, the result
 and how it was measured, what it cost, what the company decided. Every number comes from `cases-deck/tools/cases_numbers.py`, next to its source sentence; the
 README grades every source. Same style and build as the opener: Codex plates from `style/`, built with
-`../style/tools/build.sh cases.tex` from inside `cases-deck/`. Nothing links to it yet; the course site
-links it only after Carlos approves it.
+`../style/tools/build.sh cases.tex` from inside `cases-deck/`. Since 2026-11-06 the course site has the six case
+PDFs and the weekend deck `weekend2-cases.pdf` (`cases-deck/README.md`, section "On the course site"); `cases.pdf`
+is linked from nowhere.
 
 Since 2026-11-06 the folder also holds one short deck per case, its text dictated by Carlos slide by slide, with
 diagrams: `etsy.tex` (5 frames, the search by inner product built over four pages with invented numbers from the

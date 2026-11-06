@@ -271,6 +271,28 @@ Kept as they are, with the reason:
 
 The sections below describe `cases.tex`, version 2 of 2026-11-04.
 
+## On the course site, 2026-11-06
+
+Carlos, 2026-11-06: "the slides with the business cases are not up. Publish them." The course site (`AINIT-PAGE`,
+commit `70fcdd4`) serves copies from `public/slides/we2/`: one PDF per case on the row of the block it follows,
+and the weekend deck with its handout in the Materials list, group "Business cases".
+
+| Site file | Source here | Where |
+|---|---|---|
+| `ainit-hs26-case-etsy.pdf` | `etsy.pdf` | Friday 08:15, "Case: Etsy" |
+| `ainit-hs26-case-airbnb.pdf` | `airbnb.pdf` | Friday 08:15, "Case: Airbnb" |
+| `ainit-hs26-case-spotify.pdf` | `spotify.pdf` | Friday 11:00, "Case: Spotify" |
+| `ainit-hs26-case-spotify-home-page.pdf` | `spotify-home.pdf` | Friday 14:00, "Case: Spotify's home page" |
+| `ainit-hs26-case-amazon-payments.pdf` | `amazon.pdf` | Friday 14:00, "Case: Amazon Payments" |
+| `ainit-hs26-case-linkedin-ads.pdf` | `linkedin.pdf` | Friday 16:00, "Case: LinkedIn's ads" |
+| `ainit-hs26-business-cases.pdf`, `ainit-hs26-business-cases-handout.pdf` | `weekend2-cases.pdf`, `weekend2-cases-handout.pdf` | Materials list |
+
+The rows are the blocks of `PRINCIPLES.md` on the agenda of 2026-11-06; LinkedIn's ads (gradient descent at scale)
+went to 16:00, "Parallelized matrix factorization", a choice Carlos can swap to 11:00. A live file is
+https://eth-ainit-hs26.github.io/AINIT-PAGE/slides/we2/<file>
+After a rebuild, copy the PDF over the same site file name, run `npm ci && npm run build` in `AINIT-PAGE`, push to
+`main`, then curl the live file and `cmp` it with the one here. The per-case handouts are not published.
+
 ## Frames
 
 | # | Slot | Title | Technique | On the slide |
@@ -432,7 +454,8 @@ whether Personalizer is offline (Microsoft's pages give the retirement date only
 
 ## Open items
 
-1. The deck is linked from nowhere. The course site gets it only after Carlos's yes.
+1. `cases.pdf` (version 2) is linked from nowhere. The weekend deck and the six case decks are on the course site
+   since 2026-11-06 (section "On the course site").
 2. It has not been projected in HG D 7.2.
 3. No bank or insurer was found with nearest neighbours or matrix factorization and an online result published
    from 2021 on. Finance is Adyen's frame and two names on the map (Amazon Payments, Dream11).

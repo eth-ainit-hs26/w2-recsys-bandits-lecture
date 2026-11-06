@@ -29,6 +29,9 @@ matrix factorization part", so these were built without dictation on the pattern
 `amazon.tex` (Amazon Payments, one UCB score per step of an application, AWS blog of October 2026) and
 `linkedin.tex` (LinkedIn's ads model, lists of numbers learned by gradient descent, KDD 2024), 3 frames each,
 sections 4 to 6 of the weekend deck (README.md, section "The bandit and advertising decks").
+Since 2026-11-06 (Carlos: "the slides with the business cases are not up. Publish them") the course site has the six
+case PDFs, each on the row of the block it follows, and the weekend deck with its handout in its Materials list
+(README.md, section "On the course site", has the file table). `cases.pdf` stays unpublished.
 
 ## Files
 
@@ -105,7 +108,8 @@ Build and check, from this folder: the commands in README.md, section "Build and
   the old sub-headings of `tools/cases_numbers.py`: two or more hyphens between spaces count as a dash, and the old
   headings pass only because they were already there. The blocks added on 2026-11-06 use `# == name ==`.
 - **This repository is public and every push to main publishes it on GitHub Pages**, the deck included. The
-  course site (AINIT-PAGE) links it only after Carlos approves it.
+  course site (AINIT-PAGE) serves its own copies of the six case PDFs and the weekend deck since 2026-11-06: after
+  a rebuild, copy them there again (README.md, section "On the course site").
 
 ## Maintenance contract
 

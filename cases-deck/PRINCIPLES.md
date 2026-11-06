@@ -117,18 +117,21 @@ Details cut from a slide go into the `% Say:` talk track above its frame.
 
 ## The blocks and their games
 
-| Block, Friday 13 November 2026 | Game (`w2-cx-private`) | Case decks |
+| Block, Friday 13 November 2026 (agenda of 2026-11-06) | Game (`w2-cx-private`) | Case decks |
 |---|---|---|
-| 08:00 inner product, nearest neighbours | Once Upon a Video Store, `01_nearest_neighbours/` | Etsy, Airbnb |
-| 10:00 matrix factorization | Once Upon a Matchmaker, `02_matrix_factorization/` | Spotify |
-| 12:00 bandits | Once Upon a Mirror, `03_bandits/`: mirrors show one ad each morning, a tap is a click | Spotify's home page, Amazon Payments |
-| 14:00 matrix factorization by gradient descent | the Matchmaker, optional part | LinkedIn's ads (advertising; or after 16:00, open) |
-| 16:00 large-scale AI | | open |
+| 08:15 the inner product and nearest neighbors | Once Upon a Video Store, `01_nearest_neighbours/` | Etsy, Airbnb |
+| 10:00 and 11:00 matrix product and matrix factorization | Once Upon a Matchmaker, `02_matrix_factorization/`: part one at 10:00; parts two and three and the optional part at 11:00 | Spotify |
+| 14:00 bandits | Once Upon a Mirror, `03_bandits/`: mirrors show one ad each morning, a tap is a click | Spotify's home page, Amazon Payments |
+| 16:00 parallelized matrix factorization | Matchmaker on a Grid, `02_matrix_factorization/grid-sketch/` | LinkedIn's ads (gradient descent at scale) |
+| Saturday 08:15 computing clusters | | open |
+
+The course site carries each case on its block's row since 2026-11-06 (README.md, section "On the course site").
+Before that day the blocks were 08:00, 10:00, 12:00, 14:00 (matrix factorization by gradient descent) and 16:00.
 
 ## Files and commands
 
 - Folder `2026hs/w2-recsys-bandits-lecture/cases-deck/`, a public repository: a push publishes it on GitHub Pages;
-  the course site links a deck only after Carlos's yes.
+  the course site links a deck only after Carlos's yes (the six cases and the weekend deck have it since 2026-11-06).
 - A case is `<case>-frames.tex` (frames and talk track) and `<case>.tex` (the wrapper that builds it alone).
   `weekend2-cases.tex` inputs every frames file, one `\section` per case.
 - Shared: `cases-kit.tex` (styles and macros), `numbers.tex` (generated), `tools/cases_numbers.py`.
