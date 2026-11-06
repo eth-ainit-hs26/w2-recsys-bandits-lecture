@@ -1,0 +1,40 @@
+% ===== weekend2-cases.tex: the business cases of weekend 2 in one deck, asked for by Carlos on 2026-11-06 =====
+% His words: "Finally merge all this decks into a new deck for the weekend". One \section per case, in the order he
+% dictated them; each section inputs the case's frames file, so this deck and the case decks share one source. The
+% style turns every \section into a divider page; a section is named by the company alone, which fits one line.
+% Which case follows which Friday block is still open (README.md).
+% To add a case: PRINCIPLES.md, section "Adding a case".
+% Build and check from this folder:
+%   python3 tools/cases_numbers.py
+%   ../style/tools/build.sh weekend2-cases.tex
+%   python3 tools/check_numbers.py weekend2-cases.pdf tools/expected-weekend2-cases.txt
+\documentclass[aspectratio=169]{beamer}
+\input{../style/ainit-preamble}
+\input{../style/ainit-course}
+\input{cases-kit}
+\input{numbers}
+\renewcommand{\deckslug}{AI in Industry, weekend 2}
+\renewcommand{\currentweekend}{b}
+\title{Business cases}
+\subtitle{Weekend 2: Representation learning}
+\author{Carlos Cotrini}
+\institute{AI in Industry, ETH Zurich}
+\date{Friday 13 November 2026}
+\hypersetup{pdftitle={Business cases, weekend 2}, pdfauthor={Carlos Cotrini}}
+
+\begin{document}
+
+\begin{frame}[plain,noframenumbering]
+  \titlepage
+\end{frame}
+
+\section{Etsy}
+\input{etsy-frames}
+
+\section{Spotify}
+\input{spotify-frames}
+
+\section{Airbnb}
+\input{airbnb-frames}
+
+\end{document}

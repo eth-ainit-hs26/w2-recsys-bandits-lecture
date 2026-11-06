@@ -65,7 +65,8 @@ Specifically:
 │                               2024, Adyen 2025, LinkedIn 2024) and a closing map; cases.pdf,
 │                               a handout and one PDF per lecture; own CLAUDE.md and README.md
 │                               Since 2026-11-06 also one deck per case, dictated by
-│                               Carlos: etsy.tex (5 frames), spotify.tex (3), airbnb.tex (3)
+│                               Carlos: etsy.tex (5 frames), spotify.tex (3), airbnb.tex (3),
+│                               merged in weekend2-cases.tex; rules in PRINCIPLES.md
 ├── original-decks/             Original PDFs from before the rebuild
 │   ├── w2_bandits.pdf
 │   └── w2_recsys.pdf
@@ -199,7 +200,9 @@ diagrams: `etsy.tex` (5 frames, the search by inner product built over four page
 generator), `spotify.tex` (3 frames) and `airbnb.tex` (3 frames, Airbnb's embedding-based retrieval, preprint of
 January 2026 and blog of April 2025). He asked that day for five 10-minute cases, one after each Friday block,
 none older than five years; which deck goes after which block is open. The same day he asked for them "25%
-simpler", and the words on their slides went down by 25%, 31% and 36% (`cases-deck/README.md`). Same build and checks, with
+simpler", and the words on their slides went down by 25%, 31% and 36% (`cases-deck/README.md`). The same evening
+they became one deck for the weekend, `weekend2-cases.tex` (28 pages, a divider per case), built from the same
+frames files, and `cases-deck/PRINCIPLES.md` collected the lessons and the rules for the next case decks. Same build and checks, with
 `tools/check_numbers.py <deck>.pdf tools/expected-<deck>.txt`.
 
 ## When in doubt

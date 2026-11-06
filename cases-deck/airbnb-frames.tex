@@ -1,0 +1,112 @@
+% ===== airbnb-frames.tex: the Airbnb case in three frames, asked for by Carlos on 2026-11-06 =====
+% The frames of the case and their talk track. airbnb.tex builds them alone; weekend2-cases.tex inputs
+% this file as one section of the weekend deck, so both decks share one source.
+% His dictated text: (1) the first stage of the search evaluates tens of thousands of homes and passes a shortlist
+% to the ranking model; it used to be a simple linear model that scored every home once a day; (2) one network
+% turns the search into a list of numbers, a second turns each home into a list of numbers in a daily batch job, and
+% the homes nearest to the search join the shortlist; (3) each version A/B tested, +0.31% conversion together, "a
+% large portion of the team's annual goal", on par with the largest gains of two years (blog), +2.3% bookings from
+% promotional emails, about 16% less compute with the clustered index. Diagrams as for the other case decks.
+% Simplified the same day after his "This is too complicated for me ... Make them 25% simpler": shorter text and
+% labels, fewer points in frame 2, one quote in frame 3 (the blog's comparison is in the talk track). README.md,
+% section "One deck per case", has the counts.
+% No number is typed here: numbers.tex is written by tools/cases_numbers.py (block Airbnb), which keeps the sentence
+% of each source. The points of frame 2 are a drawing, not data. A "Say" comment above each frame is the talk
+% track. Build and check from this folder:
+%   python3 tools/cases_numbers.py
+%   ../style/tools/build.sh airbnb.tex
+%   python3 tools/check_numbers.py airbnb.pdf tools/expected-airbnb.txt
+\newcommand{\absource}{Abdool and others (Airbnb), arXiv preprint 2026; Airbnb's blog 2025.}
+
+% ===== Frame 1. The first stage of Airbnb's search =====
+% Say: Airbnb, the online marketplace for places to stay. A popular location can have around a hundred
+% thousand available homes. The first stage of its search evaluates tens of thousands of them and passes a
+% shortlist to the ranking model, which orders it. [click] That first stage used to be only a simple linear model
+% that scored every home once a day. One score per home, whatever you searched: among the homes that fit both
+% searches, the couple and the family of six got the same order.
+\begin{frame}{Airbnb: the first stage of search}
+  \begin{tikzpicture}[x=1mm, y=1mm]
+    \path[use as bounding box] (0,1) rectangle (130,-54);
+    \node[body, anchor=north west, text width=64mm] at (0,0) {The first stage evaluates tens of thousands of homes.};
+    \node[body, anchor=north west, text width=64mm, visible on=<2->] at (0,-11)
+      {It used to be only a simple linear model that scored every home once a day, whatever the search.};
+    \node[stage, minimum width=59mm, text width=55mm, align=center] (all) at (99.5,-5.6)
+      {In a popular place, about\\ a hundred thousand homes};
+    \node[stage, minimum width=59mm] (short) at (99.5,-21) {A shortlist};
+    \node[stage, minimum width=59mm] (ranked) at (99.5,-35) {Ranked results};
+    \draw[flow] (all) to node[elab, inner sep=0.4pt, anchor=west, xshift=1.2mm] {first stage} (short);
+    \draw[flow] (short) to node[elab, inner sep=0.4pt, anchor=west, xshift=1.2mm] {ranking model} (ranked);
+    \node[src, anchor=north west, text width=130mm] at (0,-50.6) {\absource};
+  \end{tikzpicture}
+\end{frame}
+
+% ===== Frame 2. Two networks and the nearest homes =====
+% Say: What Airbnb added to the first stage. One network turns the search, its location, the number of guests
+% and the size of the area, into a list of numbers, at the moment of the search. A second network turns each
+% home, its amenities, location and capacity, its past views, wishlists and reviews, into a list of numbers of the
+% same length, in a batch job once a day for every home. [click] Picture every home as a point and the search as
+% a point: the homes nearest to the search join the shortlist. In the first version "nearest" meant the highest
+% inner product, as in our video store; the latest one uses the distance.
+\begin{frame}{Two networks and the nearest homes}
+  \begin{tikzpicture}[x=1mm, y=1mm]
+    \path[use as bounding box] (0,1) rectangle (130,-54);
+    \node[anchor=north, inner sep=0, font=\small, align=center] at (19,-2) {Location,\\ number of guests};
+    \node[anchor=north, inner sep=0, font=\small, align=center] at (63,-2) {Amenities,\\ location, reviews};
+    \node[net] (snet) at (19,-19) {Search network};
+    \node[net] (hnet) at (63,-19) {Home network};
+    \draw[flow] (19,-10.4) to (snet.north);
+    \draw[flow] (63,-10.4) to (hnet.north);
+    \draw[flow] (snet.south) to (19,-27.3);
+    \draw[flow] (hnet.south) to (63,-27.3);
+    \hatchcells{1-}{12.1}{-29.5}{4}
+    \hatchcells{1-}{56.1}{-29.5}{4}
+    \node[lbl, anchor=north] at (19,-32.4) {at each search};
+    \node[lbl, anchor=north] at (63,-32.4) {once a day};
+    % the homes as points and the search (click 2); a drawing, the coordinates are not data
+    \node[lbl, anchor=north west, text width=40mm, visible on=<2->] at (90,-2) {The nearest homes join the shortlist};
+    \foreach \hx/\hy in {94/-14, 118/-15, 126/-23, 92/-27, 97/-40, 116/-42, 125/-36, 101/-17, 120/-30}
+      {\draw[draw=nib, line width=0.6pt, fill=paper, visible on=<2->] (\hx,\hy) circle (1.05);}
+    \foreach \hx/\hy in {104.6/-25.2, 112.2/-26.6, 108/-32.4}
+      {\fill[hatch fine, visible on=<2->] (\hx,\hy) circle (1.05);
+       \draw[draw=brand, line width=0.7pt, visible on=<2->] (\hx,\hy) circle (1.05);}
+    \draw[draw=brand, line width=0.8pt, visible on=<2->] (108.4,-28.3) circle (7.2);
+    \fill[brand, visible on=<2->] (108.4,-28.3) circle (1.25);
+    \node[elab, anchor=south, inner sep=0.6pt, visible on=<2->] at (108.4,-18.6) {search};
+    \node[lbl, anchor=west, visible on=<2->] at (99,-40) {a home};
+    \node[src, anchor=north west, text width=130mm] at (0,-50.6) {\absource};
+  \end{tikzpicture}
+\end{frame}
+
+% ===== Frame 3. The value =====
+% Say: Airbnb built it in three versions and A/B tested each one: first the two networks with the inner product;
+% then the same with a clustered index, where the homes are grouped every day and only the groups nearest to the
+% search are searched; then a larger network that uses the distance. [click] Together the three raised conversion
+% by 0.31 percent, a relative change. That sounds small. Airbnb's paper calls it "a large portion of the team's
+% annual goal", and its blog of April 2025 put the bookings lift of the new system on par with some of its
+% largest machine learning improvements to search ranking in the past two years. [click] The same system now also
+% picks the homes for promotional emails, where bookings rose by 2.3 percent, and the clustered index used about
+% 16 percent less compute than the old system. The source is a preprint of January 2026 and Airbnb's blog of
+% April 2025.
+\begin{frame}{The value: three A/B tests}
+  \begin{tikzpicture}[x=1mm, y=1mm]
+    \path[use as bounding box] (0,1) rectangle (130,-54);
+    \foreach \vx/\vname/\vtext in {20/v1/{Two networks}, 65/v2/{A clustered index}, 110/v3/{A larger network}}
+      {\node[chip, font=\small, minimum width=38mm, minimum height=7.6mm, inner sep=1.5pt] (\vname) at (\vx,-4) {\vtext};}
+    \draw[flow] (v1) to (v2);
+    \draw[flow] (v2) to (v3);
+    \draw[draw=ruledark, line width=0.6pt, line join=miter, visible on=<2->] (1,-9.4) to (1,-10.8) to (129,-10.8) to (129,-9.4);
+    \draw[draw=ruledark, line width=0.6pt, visible on=<2->] (22,-10.8) to (22,-12.2);
+    \node[big, anchor=north west, visible on=<2->] at (0,-14.6) {+\abConv\%};
+    \node[measure, anchor=north west, text width=60mm, visible on=<2->] at (0,-22.4)
+      {conversion, all three, relative change};
+    \node[body, anchor=north west, text width=60mm, visible on=<2->] at (70,-14.6)
+      {Airbnb: \textquotedblleft a large portion of the team's annual goal\textquotedblright.};
+    \draw[draw=ruling, line width=0.4pt, visible on=<3->] (0,-33) to (130,-33);
+    \node[big, anchor=north west, visible on=<3->] at (0,-36.6) {+\abEmail\%};
+    \node[measure, anchor=north west, text width=36mm, visible on=<3->] at (24,-37.2) {bookings from promotional emails};
+    \node[big, anchor=north west, visible on=<3->] at (70,-36.6) {\textminus\abCompute\%};
+    \node[measure, anchor=north west, text width=38mm, visible on=<3->] at (91,-37.2) {compute with the clustered index};
+    \node[src, anchor=north west, text width=130mm] at (0,-50.6) {\absource};
+  \end{tikzpicture}
+\end{frame}
+

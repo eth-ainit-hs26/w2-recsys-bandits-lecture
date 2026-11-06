@@ -19,7 +19,9 @@ nearest homes, three A/B tests; arXiv preprint of January 2026 and Airbnb's blog
 day for five 10-minute cases, one after each Friday block, none older than five years. Which deck goes after
 which block, and whether they replace `cases.tex`, is still open (README.md, section "One deck per case").
 The same day he found them "too complicated" and asked for them "25% simpler": the words on the slides went down
-by 25%, 31% and 36% (README.md, subsection "Simplified"). Keep them at that level of detail.
+by 25%, 31% and 36% (README.md, subsection "Simplified"). Keep them at that level of detail. The same evening
+the three became one deck for the weekend, `weekend2-cases.tex`, which inputs each case's frames file, and
+`PRINCIPLES.md` collected the lessons and the rules for the next case decks (bandits, advertising).
 
 ## Files
 
@@ -32,9 +34,12 @@ by 25%, 31% and 36% (README.md, subsection "Simplified"). Keep them at that leve
 | `tools/check_numbers.py` | `python3 tools/check_numbers.py cases.pdf`: reads every expected string back from the rendered PDF |
 | `tools/split_parts.py` | `python3 tools/split_parts.py cases.pdf`: one PDF per lecture (`case1-nearest-neighbours.pdf` to `case4-gradient-descent.pdf`), pages copied from the deck. Its `PARTS` table says which frames go where: frames 1, 2, 3, then 4 and 5 together |
 | `cases.pdf`, `cases-handout.pdf`, `case1-...pdf` to `case4-...pdf` | The outputs, committed. LaTeX intermediates are ignored by `../.gitignore` |
-| `etsy.tex`, `spotify.tex`, `airbnb.tex` | The case decks of 2026-11-06, each with its `% Say:` talk track; they load `cases-kit.tex` and `numbers.tex` like `cases.tex` |
-| `etsy.pdf`, `spotify.pdf`, `airbnb.pdf` and their `-handout.pdf` | Their outputs, committed |
-| `tools/expected-etsy.txt`, `-spotify.txt`, `-airbnb.txt` | Written by `tools/cases_numbers.py`: the strings each case deck must show; `python3 tools/check_numbers.py etsy.pdf tools/expected-etsy.txt` |
+| `etsy-frames.tex`, `spotify-frames.tex`, `airbnb-frames.tex` | The frames of the case decks of 2026-11-06 with their `% Say:` talk track and the source macro (`\etsysource`, `\spsource`, `\absource`). Edit a case here |
+| `etsy.tex`, `spotify.tex`, `airbnb.tex` | Wrappers: the preamble (`cases-kit.tex`, `numbers.tex`), then `\input{<case>-frames}`; each builds one case alone |
+| `weekend2-cases.tex` | The deck for the weekend: title page, one `\section` per case (the style draws the divider), each case's frames file |
+| `PRINCIPLES.md` | The lessons of the case decks and the rules for the next ones; the file to hand a new conversation |
+| `etsy.pdf`, `spotify.pdf`, `airbnb.pdf`, `weekend2-cases.pdf` and their `-handout.pdf` | Their outputs, committed |
+| `tools/expected-etsy.txt`, `-spotify.txt`, `-airbnb.txt`, `-weekend2-cases.txt` | Written by `tools/cases_numbers.py`: the strings each deck must show (the weekend deck: those of the cases in `WEEKEND_CASES`); `python3 tools/check_numbers.py etsy.pdf tools/expected-etsy.txt` |
 
 Build and check, from this folder: the commands in README.md, section "Build and checks".
 
@@ -49,6 +54,8 @@ Build and check, from this folder: the commands in README.md, section "Build and
   the search's list and the four items' lists, three numbers each, computes the products, the sums and the order
   (macros `\etQa` to `\etQc`, `\etNa`, `\etNpa`, `\etNsum`, `\etRankAname` and so on) and asserts that the
   necklace comes first and the gift wrap falls out of the top two. Change them there, never in the deck.
+- **A case lives in its frames file.** Change `<case>-frames.tex`, then rebuild both `<case>.tex` and
+  `weekend2-cases.tex`. A frames file defines its source macro, so each deck inputs it once.
 - **`\ncell` tints a number by its sign**, as the video store does (`w2-cx-private`, `01_nearest_neighbours`,
   NOTATION.md): blue above 0, orange below, grey for 0, the stronger tint from 2 and from -2 on. It takes an
   integer or a macro that expands to one, and prints a true minus sign.

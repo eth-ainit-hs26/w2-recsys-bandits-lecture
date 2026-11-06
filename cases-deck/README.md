@@ -12,6 +12,9 @@ all) the same day. The same evening he rejected the cases of version 1 as old: "
 - `case1-nearest-neighbours.pdf`, `case2-matrix-factorization.pdf`, `case3-bandits.pdf`,
   `case4-gradient-descent.pdf`: the deck cut into the four slots, clicks included. The fourth holds frames 4
   and 5.
+- `weekend2-cases.pdf`: since 2026-11-06 the deck for the weekend, the case decks of Etsy, Spotify and Airbnb in
+  one deck, 28 pages; `weekend2-cases-handout.pdf`, 15 pages. Section "The weekend deck" below.
+- `PRINCIPLES.md`: the lessons of the case decks and the rules for the next ones (bandits, advertising).
 
 ## One deck per case, 2026-11-06
 
@@ -23,9 +26,9 @@ slide. They are separate from `cases.tex`, whose cards are version 2 of 2026-11-
 
 | File | Frames (pages) | His plan |
 |---|---|---|
-| `etsy.tex`, `etsy.pdf`, `etsy-handout.pdf` | 5 (11) | Etsy and its shortlist, why keyword matching fails; the training data; a list of numbers for every search and every item; the new search, sorting by inner product step by step; cost and value |
-| `spotify.tex`, `spotify.pdf`, `spotify-handout.pdf` | 3 (6) | Little data at launch; 128 numbers per listener and audiobook from two networks and a graph; the A/B test |
-| `airbnb.tex`, `airbnb.pdf`, `airbnb-handout.pdf` | 3 (7) | The first stage of search; two networks and the nearest homes; three A/B tests and their value |
+| `etsy.tex`, `etsy-frames.tex`, `etsy.pdf`, `etsy-handout.pdf` | 5 (11) | Etsy and its shortlist, why keyword matching fails; the training data; a list of numbers for every search and every item; the new search, sorting by inner product step by step; cost and value |
+| `spotify.tex`, `spotify-frames.tex`, `spotify.pdf`, `spotify-handout.pdf` | 3 (6) | Little data at launch; 128 numbers per listener and audiobook from two networks and a graph; the A/B test |
+| `airbnb.tex`, `airbnb-frames.tex`, `airbnb.pdf`, `airbnb-handout.pdf` | 3 (7) | The first stage of search; two networks and the nearest homes; three A/B tests and their value |
 
 Build and checks, from this folder, for each of `etsy`, `spotify`, `airbnb`:
 
@@ -46,6 +49,27 @@ Abdool and 12 others, "Applying Embedding-Based Retrieval to Airbnb Search", arX
 preprint (https://arxiv.org/abs/2601.06873), and their post "Embedding-Based Retrieval for Airbnb Search" on
 Airbnb's engineering blog, April 2025 (https://airbnb.tech/ai-ml/embedding-based-retrieval-for-airbnb-search/).
 Grade READ for both; the source sentences are in `tools/cases_numbers.py`.
+
+### The weekend deck
+
+Carlos, 2026-11-06: "Finally merge all this decks into a new deck for the weekend". `weekend2-cases.tex` has a
+title page, then one `\section` per case, which the style draws as a divider with a Ge'ez numeral (Etsy, Spotify,
+Airbnb, in the order he dictated them), and inputs each case's frames file. Since that evening a case is two
+files: `<case>-frames.tex`, the frames with their talk track, and `<case>.tex`, a wrapper that builds the case
+alone. The weekend deck and the case decks share one source; after the split the three case PDFs printed the same
+text as before. 28 pages, handout 15 pages, all 19 strings of `tools/expected-weekend2-cases.txt` found.
+
+```bash
+python3 tools/cases_numbers.py
+../style/tools/build.sh weekend2-cases.tex
+../style/tools/check.sh weekend2-cases.pdf
+python3 ../style/tools/check_overlays.py weekend2-cases.pdf
+python3 tools/check_numbers.py weekend2-cases.pdf tools/expected-weekend2-cases.txt
+python3 ../style/tools/make_handout.py weekend2-cases.pdf weekend2-cases-handout.pdf
+```
+
+A new case: `PRINCIPLES.md`, section "Adding a case". `WEEKEND_CASES` in `tools/cases_numbers.py` lists the cases
+of the weekend deck in its order.
 
 ### Simplified, 2026-11-06
 

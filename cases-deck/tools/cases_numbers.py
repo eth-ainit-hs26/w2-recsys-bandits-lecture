@@ -351,6 +351,12 @@ for s in ["+%.2f%%" % AIRBNB["conv_pct"], "+%.1f%%" % AIRBNB["email_pct"], "%d%%
     show("airbnb", s)
 
 
+# ----- The weekend deck, weekend2-cases.tex (Carlos, 2026-11-06: "merge all this decks into a new deck for the
+# weekend"): one section per case deck, in this order, so its PDF must show every string of every case deck.
+WEEKEND_CASES = ["etsy", "spotify", "airbnb"]
+deck_expect["weekend2-cases"] = [s for d in WEEKEND_CASES for s in deck_expect[d]]
+
+
 # ===== write =====
 Path("numbers.tex").write_text(
     "% numbers.tex: WRITTEN BY tools/cases_numbers.py. Do not edit by hand; rerun the script.\n"
