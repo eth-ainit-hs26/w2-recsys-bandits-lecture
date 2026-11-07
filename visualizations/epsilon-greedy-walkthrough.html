@@ -5,15 +5,10 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>ε-greedy walkthrough · W2 Bandits</title>
   <link rel="stylesheet" href="shared/style.css">
+  <link rel="stylesheet" href="shared/reveal.css">
   <style>
     /* ------- Layout ------- */
-    .eg-grid {
-      display: grid;
-      grid-template-columns: 320px 1fr;
-      gap: 22px;
-      align-items: start;
-    }
-    @media (max-width: 980px) { .eg-grid { grid-template-columns: 1fr; } }
+    .eg-scene-wrap { max-width: 920px; margin: 0 auto; }
 
     .eg-controls {
       display: flex;
@@ -93,12 +88,7 @@
     .eg-status .branch-exploit { color: #785EF0; font-weight: 700; }
 
     /* ------- Pseudocode ------- */
-    .eg-pseudo {
-      background: white;
-      border: 1px solid var(--color-border);
-      border-radius: 8px;
-      padding: 14px 16px;
-    }
+    .eg-pseudo { padding: 0 0 4px; }
     .eg-pseudo h3 {
       font-size: 0.92rem;
       font-weight: 600;
@@ -109,7 +99,7 @@
       list-style: none;
       padding-left: 0;
       margin: 0;
-      font-size: 0.86rem;
+      font-size: 0.98rem;
       line-height: 1.55;
       color: var(--color-text);
     }
@@ -119,8 +109,8 @@
       transition: background 0.18s;
       border-left: 3px solid transparent;
     }
-    .eg-pseudo li.indent { padding-left: 24px; }
-    .eg-pseudo li.indent2 { padding-left: 40px; }
+    .eg-pseudo li.indent { margin-left: 26px; }
+    .eg-pseudo li.indent2 { margin-left: 52px; }
     .eg-pseudo li.active {
       background: rgba(204, 121, 167, 0.12);
       border-left-color: var(--color-fiction);
@@ -159,7 +149,7 @@
       stroke: #2c3e50; stroke-width: 1.4; fill: white;
     }
     .roulette-label {
-      font-size: 13px;
+      font-size: 16px;
       font-weight: 600;
       text-anchor: middle;
       fill: white;
@@ -168,7 +158,7 @@
       stroke-width: 0.6;
     }
     .roulette-readout {
-      font-size: 12px;
+      font-size: 16px;
       fill: var(--color-text-muted);
       text-anchor: middle;
     }
@@ -195,7 +185,7 @@
       text-anchor: middle;
     }
     .urn-bias {
-      font-size: 13px;
+      font-size: 16px;
       fill: var(--color-text-muted);
       text-anchor: middle;
       font-style: italic;
@@ -219,14 +209,14 @@
 
     /* observations strip */
     .obs-label {
-      font-size: 14px;
+      font-size: 16px;
       font-weight: 600;
       fill: var(--color-text);
       text-anchor: start;
     }
     .obs-formula {
       font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
-      font-size: 13px;
+      font-size: 17px;
       fill: var(--color-text-muted);
     }
     .obs-formula .num {
@@ -238,7 +228,7 @@
     }
     .estimate-best-marker {
       fill: var(--color-pos);
-      font-size: 10px;
+      font-size: 15px;
       font-weight: 700;
     }
 
@@ -267,7 +257,7 @@
     .decision-banner-text.explore { fill: #0891B2; }
     .decision-banner-text.exploit { fill: #785EF0; }
     .decision-banner-sub {
-      font-size: 14px;
+      font-size: 17px;
       text-anchor: middle;
       fill: var(--color-text-muted);
     }
@@ -298,17 +288,17 @@
       stroke-width: 1;
     }
     .history-label {
-      font-size: 11px;
+      font-size: 15px;
       fill: var(--color-text-muted);
       font-weight: 600;
     }
     .history-tick {
-      font-size: 9px;
+      font-size: 13px;
       fill: var(--color-text-muted);
       font-variant-numeric: tabular-nums;
     }
     .history-urn-label {
-      font-size: 10px;
+      font-size: 14px;
       fill: var(--color-text);
       text-anchor: middle;
       font-weight: 600;
@@ -324,17 +314,23 @@
   </header>
 
   <main class="viz-container">
-    <h1>ε-greedy: a step-by-step walkthrough</h1>
-    <p class="lede">
-      One click per micro-step.  Watch the roulette decide whether to
-      <span style="color:#785EF0;font-weight:600;">exploit</span> (probability 1−ε) or
-      <span style="color:#0891B2;font-weight:600;">explore</span> (probability ε), then
-      a ball is pulled from the chosen urn and the corresponding
-      estimate p̂<sub>k</sub> is updated.  The three urns have hidden
-      biases p<sub>1</sub> &gt; p<sub>2</sub> &gt; p<sub>3</sub>; the
-      orange-vs-white mix inside each urn is the truth the algorithm
-      is trying to discover.
-    </p>
+    <h1>ε-greedy, step by step</h1>
+    <ol class="howto">
+      <li>Pick a value for ε.</li>
+      <li>Press <strong>Next</strong> (or <strong>Play</strong>).</li>
+      <li>Watch which urn gets picked and how its score changes.</li>
+    </ol>
+
+    <div class="params">
+      <dl>
+        <dt>The urns</dt>
+        <dd>Urn 1 has the most orange balls, urn 3 the fewest. The algorithm does not know this; it has to find out by drawing.</dd>
+        <dt>ε</dt>
+        <dd>How often the algorithm <span style="color:#0891B2;font-weight:600;">explores</span> (tries a random urn) instead of <span style="color:#785EF0;font-weight:600;">exploiting</span> (picks the urn with the best score so far). ε = 0.20 means about 1 round in 5.</dd>
+        <dt>Decaying ε</dt>
+        <dd>Explore a bit less every round.</dd>
+      </dl>
+    </div>
 
     <div class="viz-card">
       <div class="eg-controls">
@@ -345,75 +341,62 @@
         </label>
         <label>
           <input type="checkbox" id="decay-input">
-          decaying ε  (ε ← ε · 0.95 each round)
+          decaying ε
         </label>
         <button id="next-btn" class="primary">Next ▶</button>
         <button id="play-btn">▶ Play</button>
         <button id="reset-btn">Reset</button>
-        <span class="round-counter">round <strong id="round-num">0</strong> &nbsp;·&nbsp; phase <strong id="phase-name">init</strong></span>
+        <span class="round-counter">round <strong id="round-num">0</strong></span>
       </div>
 
       <div class="eg-status" id="status-line">
-        Set ε with the slider, then press <strong>Next</strong> to spin the roulette.
+        Press <strong>Next</strong> to spin the wheel.
       </div>
 
-      <div class="eg-grid">
-        <div class="eg-pseudo">
-          <h3>Algorithm</h3>
+      <div class="eg-scene-wrap">
+        <svg id="scene" class="eg-scene" viewBox="0 0 1080 880"
+             preserveAspectRatio="xMidYMin meet" aria-label="ε-greedy walkthrough"></svg>
+      </div>
+
+      <details class="more" id="algo-box">
+        <summary>Show the algorithm</summary>
+        <div class="more-body eg-pseudo">
           <ol id="pseudo">
             <li data-step="init">
-              <span class="keyword">Initialise.</span>  For each urn k = 1, 2, 3, set
-              the observation list to empty.  Choose ε ∈ (0, 1).
+              <span class="keyword">Start:</span> no draws yet, so no urn has a score.
             </li>
             <li data-step="round">
-              <span class="keyword">For</span> round t = 1, 2, 3, &hellip;
+              <span class="keyword">Every round:</span>
             </li>
             <li class="indent" data-step="spin">
-              Sample u ~ Uniform[0, 1].
+              1. Spin the wheel.
             </li>
-            <li class="indent" data-step="branch-explore">
-              <span class="keyword">If</span> u &lt; ε &nbsp;<span class="branch-c">[ explore ]</span>: pick urn k uniformly at random.
+            <li class="indent2" data-step="branch-explore">
+              Lands on <span class="branch-c">explore</span> (chance ε): pick any urn at random.
             </li>
-            <li class="indent" data-step="branch-exploit">
-              <span class="keyword">Else</span> &nbsp;<span class="branch-p">[ exploit ]</span>: pick urn k = arg max<sub>i</sub> p̂<sub>i</sub>.
+            <li class="indent2" data-step="branch-exploit">
+              Lands on <span class="branch-p">exploit</span>: pick the urn with the best score.
             </li>
             <li class="indent" data-step="pull">
-              Pull a ball from urn k.  Observe x ∈ {0, 1}.
+              2. Draw a ball from that urn.
             </li>
             <li class="indent" data-step="update">
-              Append x to urn k's observation list.  Recompute p̂<sub>k</sub> = mean of that list.
+              3. Update its score: the share of orange balls drawn from it so far.
             </li>
           </ol>
         </div>
-
-        <div class="eg-scene-wrap">
-          <svg id="scene" class="eg-scene" viewBox="0 0 1080 880"
-               preserveAspectRatio="xMidYMin meet" aria-label="ε-greedy walkthrough"></svg>
-        </div>
-      </div>
+      </details>
     </div>
 
-    <aside class="explainer" style="font-size:0.94rem; color:var(--color-text); max-width:75ch;">
-      <h2 style="font-weight:600; margin-bottom:6px;">What you are watching</h2>
-      <p>
-        The cyan slice of the roulette has angular size ε·360°; the
-        violet slice fills the rest.  The pointer on the rim shows
-        where a uniform draw u ∈ [0, 1] falls; that draw decides
-        whether the round is an exploration step (cyan) or an
-        exploitation step (violet).
-      </p>
-      <p style="margin-top:8px;">
-        Under exploitation, the algorithm picks the urn with the
-        highest current empirical mean p̂<sub>i</sub>.  Under
-        exploration, all three urns are equally likely.
-      </p>
-      <p style="margin-top:8px;">
-        Try ε = 0.05 vs ε = 0.50 across many rounds.  Small ε
-        commits to whichever urn looked best early; large ε keeps
-        wasting pulls on losers.  The decaying-ε option (ε ← ε·0.95
-        per round) lowers the explore tax over time, a common fix.
-      </p>
-    </aside>
+    <details class="more">
+      <summary>What to look for</summary>
+      <div class="more-body">
+        <p>Compare ε = 0.05 with ε = 0.50 over many rounds.</p>
+        <p><strong>Small ε:</strong> the algorithm sticks with whichever urn looked good early, even if it is the wrong one.</p>
+        <p><strong>Large ε:</strong> it keeps wasting draws on urns it already knows are bad.</p>
+        <p><strong>Decaying ε:</strong> explore a lot at the start, then less and less. A common fix.</p>
+      </div>
+    </details>
   </main>
 
   <footer class="eth-footer">CAS AINIT FS26 · W2 Bandits</footer>
@@ -453,7 +436,6 @@
     const playBtn = document.getElementById('play-btn');
     const resetBtn = document.getElementById('reset-btn');
     const roundNumEl = document.getElementById('round-num');
-    const phaseNameEl = document.getElementById('phase-name');
     const statusEl = document.getElementById('status-line');
     const pseudoLis = document.querySelectorAll('#pseudo li');
 
@@ -483,7 +465,7 @@
     const W = 1080, H = 880;
     const ROUL_CX = 540, ROUL_CY = 138, ROUL_R = 100;
     const BANNER_Y = 270, BANNER_H = 70;
-    const URN_Y  = 410;
+    const URN_Y  = 420;
     const URN_W  = 130, URN_H = 160, URN_NECK = 36;
     const URN_X = [165, 475, 785];
     const STRIP_Y = 605;
@@ -537,7 +519,7 @@
       .text('ε');
     const exploitLabel = gRoulette.append('text')
       .attr('class', 'roulette-label')
-      .text('1 − ε');
+      .text('exploit');
 
     // Roulette caption
     gRoulette.append('text')
@@ -546,14 +528,14 @@
       .style('font-size', '15px')
       .style('font-weight', 600)
       .style('fill', 'var(--color-text)')
-      .text('Roulette');
+      .text('Wheel');
 
     // u readout below the roulette
     const uReadout = gRoulette.append('text')
       .attr('x', ROUL_CX).attr('y', ROUL_CY + ROUL_R + 22)
       .attr('class', 'roulette-readout')
       .style('font-size', '14px')
-      .text('u = —');
+      .text('');
 
     // Pointer (the ball that lands at angle u)
     const pointerLine = gRoulette.append('line')
@@ -607,6 +589,7 @@
       exploreLabel
         .attr('x', ROUL_CX + Math.sin(angE) * labelR)
         .attr('y', ROUL_CY - Math.cos(angE) * labelR + 4)
+        .text(eps < 0.2 ? 'ε' : 'explore')
         .style('opacity', eps > 0.04 ? 1 : 0);
       exploitLabel
         .attr('x', ROUL_CX + Math.sin(angX) * labelR)
@@ -679,13 +662,13 @@
       g.append('text')
         .attr('class', 'urn-label')
         .attr('x', xL + URN_W / 2)
-        .attr('y', yT - 18)
+        .attr('y', yT - 32)
         .text(`urn ${k + 1}`);
       g.append('text')
         .attr('class', 'urn-bias')
         .attr('x', xL + URN_W / 2)
-        .attr('y', yT - 4)
-        .text(`(true bias p${'₁₂₃'.charAt(k)} = ${TRUE_P[k].toFixed(2)})`);
+        .attr('y', yT - 13)
+        .text(`${Math.round(TRUE_P[k] * 100)}% orange (hidden)`);
 
       urnGroups.push(g);
     }
@@ -731,7 +714,7 @@
         .attr('class', 'obs-label')
         .attr('x', x0)
         .attr('y', y0 - 6)
-        .text(`obs ${VAR_NAMES[k]}`);
+        .text(`draws from urn ${k + 1}`);
 
       // Frame for the strip
       g.append('rect')
@@ -752,14 +735,14 @@
         .attr('x', x0)
         .attr('y', y0 + 50)
         .attr('id', `formula-${k}`)
-        .text(`p̂${'₁₂₃'.charAt(k)} = — / —`);
+        .text(`score p̂${'₁₂₃'.charAt(k)}`);
       formulaG.append('text')
         .attr('class', 'obs-formula')
         .attr('x', x0 + STRIP_W)
         .attr('y', y0 + 50)
         .attr('text-anchor', 'end')
         .attr('id', `value-${k}`)
-        .text('p̂ = —');
+        .text('—');
       formulaG.append('text')
         .attr('class', 'estimate-best-marker')
         .attr('x', x0 + STRIP_W / 2)
@@ -782,7 +765,7 @@
     gHistory.append('text')
       .attr('class', 'history-label')
       .attr('x', HISTORY_X + 8).attr('y', HISTORY_Y - 6)
-      .text('Round history (each column = one round, top→bottom = urn 1, 2, 3)');
+      .text('History: one column per round');
     // Three lane labels on the left of the strip
     const HIST_LANE_H = (HISTORY_H - 14) / 3;
     for (let k = 0; k < 3; k++) {
@@ -851,13 +834,13 @@
     const bannerSub = gBanner.append('text')
       .attr('class', 'decision-banner-sub')
       .attr('x', 540).attr('y', BANNER_Y + 56)
-      .text('Press Next to spin the roulette.');
+      .text('Press Next to spin the wheel.');
 
     // Single arrow from banner to the chosen urn
     const chosenArrow = gPaths.append('line')
       .attr('class', 'chosen-arrow')
       .attr('x1', 540).attr('y1', BANNER_Y + BANNER_H)
-      .attr('x2', 540).attr('y2', URN_Y - 4);
+      .attr('x2', 540).attr('y2', URN_Y - 60);
 
     function updateBanner() {
       const phase = state.phase;
@@ -871,27 +854,27 @@
 
       if (phase === 'init' || branch == null) {
         bannerText.text('—');
-        bannerSub.text('Press Next to spin the roulette.');
+        bannerSub.text('Press Next to spin the wheel.');
         return;
       }
       if (branch === 'explore') {
         bannerBg.attr('class', 'decision-banner-bg explore');
         bannerText.attr('class', 'decision-banner-text explore').text('EXPLORE');
         bannerSub.attr('class', 'decision-banner-sub active')
-          .text(`u = ${state.lastU.toFixed(3)} < ε = ${state.epsilon.toFixed(2)}.   Pick urn ${k+1} uniformly at random.`);
+          .text(`Random pick: urn ${k+1}`);
         chosenArrow.attr('class', 'chosen-arrow explore visible')
           .attr('marker-end', 'url(#arrow-explore)');
       } else {
         bannerBg.attr('class', 'decision-banner-bg exploit');
         bannerText.attr('class', 'decision-banner-text exploit').text('EXPLOIT');
         bannerSub.attr('class', 'decision-banner-sub active')
-          .text(`u = ${state.lastU.toFixed(3)} ≥ ε = ${state.epsilon.toFixed(2)}.   Pick urn ${k+1} = arg max p̂.`);
+          .text(`Best score so far: urn ${k+1}`);
         chosenArrow.attr('class', 'chosen-arrow exploit visible')
           .attr('marker-end', 'url(#arrow-exploit)');
       }
       // Aim arrow at chosen urn
       const targetX = URN_X[k] + URN_W / 2;
-      chosenArrow.attr('x2', targetX).attr('y2', URN_Y - 4);
+      chosenArrow.attr('x2', targetX).attr('y2', URN_Y - 60);
     }
 
     // ============================================================
@@ -987,8 +970,8 @@
         const phat = n === 0 ? null : w / n;
         const fEl = document.querySelector(`#formula-${k}`);
         const vEl = document.querySelector(`#value-${k}`);
-        fEl.innerHTML = `p̂${'₁₂₃'.charAt(k)} = ${w} / ${n}`;
-        vEl.innerHTML = phat == null ? '= —' : `= ${phat.toFixed(3)}`;
+        fEl.innerHTML = n === 0 ? `score p̂${'₁₂₃'.charAt(k)}` : `p̂${'₁₂₃'.charAt(k)} = ${w} orange / ${n}`;
+        vEl.innerHTML = phat == null ? '—' : `= ${phat.toFixed(2)}`;
       }
       // Recompute argmax marker
       const phats = state.draws.map(arr => arr.length === 0 ? -1 : arr.reduce((a, b) => a + b, 0) / arr.length);
@@ -1000,12 +983,11 @@
       }
       for (let k = 0; k < 3; k++) {
         const bestEl = document.querySelector(`#best-${k}`);
-        bestEl.textContent = (k === best) ? '★ best estimate so far' : '';
+        bestEl.textContent = (k === best) ? '★ best score so far' : '';
       }
     }
     function renderRound() {
       roundNumEl.textContent = state.round;
-      phaseNameEl.textContent = state.phase;
       epsValue.textContent = state.epsilon.toFixed(2);
     }
     function renderPaths() {
@@ -1028,15 +1010,13 @@
       if (state.lastU == null) {
         pointerBall.style('opacity', 0);
         pointerLine.style('opacity', 0);
-        uReadout.text('u = —');
+        uReadout.text('');
       } else {
         pointerBall.style('opacity', 1);
         pointerLine.style('opacity', 1);
-        const cmp = state.lastU < state.epsilon
-          ? `< ε  →  EXPLORE`
-          : `≥ ε  →  EXPLOIT`;
+        const cmp = state.lastU < state.epsilon ? 'EXPLORE' : 'EXPLOIT';
         uReadout.html('');
-        uReadout.append('tspan').text(`u = ${state.lastU.toFixed(3)}  `);
+        uReadout.append('tspan').text('landed on ');
         uReadout.append('tspan').attr('class', 'roulette-readout-strong')
           .style('font-weight', 700)
           .style('fill', state.lastU < state.epsilon ? '#0891B2' : '#785EF0')
@@ -1121,7 +1101,7 @@
       // Animate the spin
       renderRound();
       renderPseudoHighlight();
-      setStatus(`Round <strong>${state.round}</strong>: spinning roulette&hellip;`);
+      setStatus(`Round <strong>${state.round}</strong>: spinning the wheel&hellip;`);
       pointerBall.style('opacity', 1);
       pointerLine.style('opacity', 1);
       await spinRouletteTo(u);
@@ -1130,9 +1110,9 @@
       renderRoulettePointer();
       renderPseudoHighlight();
       const branchHTML = state.lastBranch === 'explore'
-        ? `<span class="branch-explore">EXPLORE</span>: pick urn <strong>${state.lastChoice + 1}</strong> uniformly at random.`
-        : `<span class="branch-exploit">EXPLOIT</span>: arg max p̂ ⇒ urn <strong>${state.lastChoice + 1}</strong>.`;
-      setStatus(`Round <strong>${state.round}</strong>: u = ${u.toFixed(3)} ${u < state.epsilon ? '<' : '≥'} ε = ${state.epsilon.toFixed(2)} → ${branchHTML}`);
+        ? `<span class="branch-explore">EXPLORE</span>: random urn, urn <strong>${state.lastChoice + 1}</strong>.`
+        : `<span class="branch-exploit">EXPLOIT</span>: best score so far, urn <strong>${state.lastChoice + 1}</strong>.`;
+      setStatus(`Round <strong>${state.round}</strong>: ${branchHTML} Press Next to draw a ball.`);
     }
 
     async function doPullPhase() {
@@ -1142,7 +1122,7 @@
       renderPseudoHighlight();
       const slot = state.draws[state.lastChoice].length;  // index where this draw will sit
       const colour = state.lastDraw === 1 ? 'orange' : 'white';
-      setStatus(`Round <strong>${state.round}</strong>: pulled a <strong style="color:${state.lastDraw === 1 ? '#E69F00' : '#666'}">${colour}</strong> ball from urn <strong>${state.lastChoice + 1}</strong>.`);
+      setStatus(`Round <strong>${state.round}</strong>: pulled a <strong style="color:${state.lastDraw === 1 ? '#E69F00' : '#666'}">${colour}</strong> ball from urn <strong>${state.lastChoice + 1}</strong>. Press Next to update its score.`);
       await flyBallToStrip(state.lastChoice, state.lastDraw === 1, slot);
       // Persist the ball in the strip after fly-in (renderObservations will draw it
       // once we advance to update phase, so for now show it manually).
@@ -1179,8 +1159,8 @@
       const k = state.lastChoice;
       const arr = state.draws[k];
       const w = arr.reduce((a, b) => a + b, 0), n = arr.length;
-      const ph = (w / n).toFixed(3);
-      setStatus(`Round <strong>${state.round}</strong>: appended ${state.lastDraw} to urn ${k + 1}.  p̂${'₁₂₃'.charAt(k)} = ${w}/${n} = <strong>${ph}</strong>${state.decay ? ` &nbsp;·&nbsp; ε ← ${state.epsilon.toFixed(3)}` : ''}.`);
+      const ph = (w / n).toFixed(2);
+      setStatus(`Round <strong>${state.round}</strong>: urn ${k + 1} score is now ${w}/${n} = <strong>${ph}</strong>${state.decay ? ` &nbsp;·&nbsp; ε is now ${state.epsilon.toFixed(2)}` : ''}.`);
     }
 
     // ============================================================
@@ -1200,7 +1180,7 @@
       // Keep RNG seed continuity? Reset to make Reset reproducible
       rngSeed = 0x9E3779B9;
       renderAll();
-      setStatus(`ε set to <strong>${state.epsilon.toFixed(2)}</strong>.  Press <strong>Next</strong> to spin the roulette.`);
+      setStatus(`Press <strong>Next</strong> to spin the wheel.`);
     }
 
     function startPlay() {
@@ -1278,7 +1258,7 @@
       const k = state.lastChoice;
       const arr = state.draws[k] || [];
       const w = arr.reduce((a, b) => a + b, 0), nn = arr.length;
-      setStatus(`After <strong>${state.round}</strong> rounds.  Last: round ${state.round}, ${state.lastBranch === 'explore' ? '<span class="branch-explore">EXPLORE</span>' : '<span class="branch-exploit">EXPLOIT</span>'} → urn ${k+1} → drew ${state.lastDraw} → p̂${'₁₂₃'.charAt(k)} = ${w}/${nn}.`);
+      setStatus(`After <strong>${state.round}</strong> rounds. Last: ${state.lastBranch === 'explore' ? '<span class="branch-explore">EXPLORE</span>' : '<span class="branch-exploit">EXPLOIT</span>'} → urn ${k+1} → score ${w}/${nn}.`);
     }
   })();
   </script>

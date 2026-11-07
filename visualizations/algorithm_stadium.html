@@ -3,9 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Algorithm Stadium — Five Strategies, One Bandit</title>
+<title>Algorithm Stadium</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
 <script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<link rel="stylesheet" href="shared/reveal.css">
 <style>
   :root {
     --cream: #fdf6ee;
@@ -46,6 +47,14 @@
     --arm-4: #E69F00;   /* orange */
     --arm-5: #CC79A7;   /* reddish purple */
     --arm-6: #56B4E9;   /* sky blue */
+
+    /* Variables used by shared/reveal.css (this page does not load style.css) */
+    --color-text: var(--ink);
+    --color-header-start: var(--terra-dark);
+    --color-header-end: var(--terra);
+    --color-neu-bg: var(--warm-white);
+    --color-border: var(--sand-dark);
+    --color-tech: var(--terra);
   }
 
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -82,7 +91,7 @@
     margin-bottom: 10px;
   }
   .page-subtitle {
-    font-size: 15px;
+    font-size: 16px;
     color: var(--ink-muted);
     line-height: 1.6;
     max-width: 740px;
@@ -106,7 +115,7 @@
   }
 
   p.prose {
-    font-size: 14.5px;
+    font-size: 15px;
     line-height: 1.7;
     color: var(--ink-light);
     margin-bottom: 12px;
@@ -153,7 +162,7 @@
   .btn {
     padding: 8px 16px;
     border-radius: 8px;
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 500;
     cursor: pointer;
     border: none;
@@ -191,7 +200,7 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    font-size: 13px;
+    font-size: 14px;
     color: var(--ink-muted);
   }
   .ctrl-group label { font-weight: 500; color: var(--ink-light); white-space: nowrap; }
@@ -201,11 +210,12 @@
   }
   .ctrl-group .val {
     font-family: 'Courier New', Courier, monospace;
-    font-size: 12px;
+    font-size: 14px;
     min-width: 44px;
     color: var(--terra-dark);
   }
   .ctrl-divider { width: 1px; height: 24px; background: var(--border); margin: 0 4px; }
+  .race-buttons { margin: 16px 0 0; justify-content: center; }
 
   /* ── RACE TRACK ───────────────────────────────────── */
   .stadium-wrap {
@@ -226,7 +236,7 @@
   }
   .stadium-title {
     font-family: Georgia, serif;
-    font-size: 14px;
+    font-size: 15px;
     font-weight: 600;
     color: var(--ink);
     letter-spacing: 0.02em;
@@ -246,7 +256,7 @@
     margin: 7px 0;
   }
   .lane-label {
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 600;
     color: var(--ink);
     display: flex;
@@ -260,9 +270,9 @@
   }
   .lane-track {
     position: relative;
-    height: 28px;
+    height: 34px;
     background: var(--warm-white);
-    border-radius: 14px;
+    border-radius: 17px;
     border: 1px solid var(--sand-dark);
     overflow: hidden;
   }
@@ -284,8 +294,8 @@
     position: absolute;
     top: 50%;
     transform: translate(-50%, -50%);
-    width: 24px;
-    height: 24px;
+    width: 30px;
+    height: 30px;
     border-radius: 50%;
     /* Default: warm-white outer ring + thin ink outline for non-color shape cue.
        Per-algorithm modifier classes override the outline pattern below. */
@@ -298,7 +308,7 @@
     align-items: center;
     justify-content: center;
     color: var(--warm-white);
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 800;
     font-family: 'Courier New', monospace;
     text-shadow: 0 1px 1px rgba(0,0,0,0.45);
@@ -327,7 +337,7 @@
   }
   .lane-stat {
     font-family: 'Courier New', Courier, monospace;
-    font-size: 12px;
+    font-size: 15px;
     color: var(--ink-light);
     text-align: right;
   }
@@ -340,7 +350,7 @@
     gap: 12px;
     margin-top: 6px;
     font-family: 'Courier New', monospace;
-    font-size: 10px;
+    font-size: 12px;
     color: var(--ink-muted);
   }
   .axis-track {
@@ -363,7 +373,7 @@
     background: var(--warm-white);
     border-radius: 10px;
     width: 100%;
-    height: 320px;
+    height: 340px;
   }
   .chart-legend {
     display: flex;
@@ -378,7 +388,7 @@
     display: flex;
     align-items: center;
     gap: 6px;
-    font-size: 12px;
+    font-size: 14px;
     color: var(--ink-light);
   }
   /* Legend swatch is a tiny canvas so it can render the *exact* dash pattern
@@ -388,8 +398,8 @@
   /* ── ALGORITHM STATS GRID ─────────────────────────── */
   .stats-grid {
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 10px;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
     margin-top: 8px;
   }
   .stat-card {
@@ -413,7 +423,7 @@
   .stat-card.style-ridge    { border-top: 5px ridge  currentColor; }
   .stat-card-title {
     font-family: Georgia, serif;
-    font-size: 12px;
+    font-size: 15px;
     font-weight: 700;
     color: currentColor;
     margin-bottom: 6px;
@@ -422,8 +432,7 @@
   .stat-row {
     display: flex;
     justify-content: space-between;
-    font-family: 'Courier New', monospace;
-    font-size: 11px;
+    font-size: 14px;
     color: var(--ink-light);
     padding: 1px 0;
   }
@@ -432,7 +441,7 @@
     display: flex;
     gap: 3px;
     margin-top: 8px;
-    height: 22px;
+    height: 36px;
     align-items: flex-end;
   }
   .arm-bar {
@@ -442,6 +451,7 @@
     position: relative;
     overflow: hidden;
     min-height: 2px;
+    height: 100%;
   }
   .arm-bar-fill {
     position: absolute;
@@ -465,7 +475,7 @@
     gap: 3px;
     margin-top: 2px;
     font-family: 'Courier New', monospace;
-    font-size: 9.5px;
+    font-size: 12px;
     color: var(--ink-muted);
     text-align: center;
   }
@@ -486,13 +496,12 @@
     background: var(--warm-white);
     border: 1px solid var(--sand-dark);
     border-radius: 20px;
-    padding: 4px 10px 4px 8px;
-    font-size: 12px;
+    padding: 5px 12px 5px 10px;
+    font-size: 14px;
     color: var(--ink-light);
   }
   .mean-chip .arm-id {
-    font-family: 'Courier New', monospace;
-    font-size: 11px;
+    font-size: 14px;
     color: var(--ink-muted);
   }
   .mean-chip .mean-val {
@@ -501,7 +510,7 @@
     color: var(--terra-dark);
   }
   .mean-chip input[type=range] {
-    width: 70px;
+    width: 80px;
     accent-color: var(--terra);
   }
   .mean-chip.best {
@@ -513,7 +522,7 @@
   /* ── FORMULA STRIP ────────────────────────────────── */
   .formula-strip {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
     gap: 12px;
     margin: 12px 0 6px;
   }
@@ -524,14 +533,14 @@
     padding: 12px 14px;
   }
   .formula-card .label {
-    font-size: 10.5px;
+    font-size: 13px;
     color: var(--ink-muted);
     text-transform: uppercase;
     letter-spacing: 0.08em;
     margin-bottom: 6px;
     font-weight: 600;
   }
-  .formula-card .body { font-size: 14px; color: var(--ink); text-align: center; min-height: 28px; }
+  .formula-card .body { font-size: 15px; color: var(--ink); text-align: center; min-height: 28px; }
 
   /* ── DIVIDER ──────────────────────────────────────── */
   .divider { height: 1px; background: var(--border); margin: 22px 0; }
@@ -541,9 +550,9 @@
     .main { padding: 24px 20px; }
     .stats-grid { grid-template-columns: repeat(2, 1fr); }
     .formula-strip { grid-template-columns: 1fr; }
-    .lane { grid-template-columns: 140px 1fr 90px; gap: 8px; }
-    .stadium-axis { grid-template-columns: 140px 1fr 90px; gap: 8px; }
-    .lane-label { font-size: 12px; }
+    .lane { grid-template-columns: 130px 1fr 50px; gap: 8px; }
+    .stadium-axis { grid-template-columns: 130px 1fr 50px; gap: 8px; }
+    .lane-label { font-size: 13px; }
   }
 </style>
 </head>
@@ -555,38 +564,42 @@
 <div class="page-header">
   <a class="back-link" href="../">← Companion site</a>
   <h1 class="page-title">Algorithm Stadium</h1>
-  <p class="page-subtitle">Same urns. Same rounds. Six strategies running side by side: naive estimate-then-exploit, three flavours of &epsilon;-greedy, UCB, and pure random. The race tracks <em>cumulative reward</em>; the chart below tracks <em>cumulative regret</em>. They are different metrics — reward goes <em>up</em> as you collect, regret goes <em>up</em> as you waste — and each lives in its own panel.</p>
+  <p class="page-subtitle">Six strategies play the same slot machines at the same time. Who collects the most?</p>
 </div>
 
-<!-- ══════════════ TRUE BIASES + GLOBAL CONTROLS ══════════════ -->
-<div class="card">
-  <div class="card-title">The hidden urns</div>
-  <p class="prose">Several Bernoulli urns with hidden success probabilities. Every algorithm sees the same urns and the same bandit RNG; their internal random draws (for &epsilon;-flips, tie-breaks) come from independent streams.</p>
-  <div class="means-row" id="means-row"></div>
+<ol class="howto">
+  <li>Press <strong>Play</strong> under the race.</li>
+  <li>Watch who pulls ahead, and whose regret line keeps climbing.</li>
+  <li>Press <strong>Shuffle machines</strong> and race again.</li>
+</ol>
 
+<div class="params"><dl>
+  <dt>Machines</dt><dd>Each machine pays out with a hidden chance. The highlighted one is the best.</dd>
+  <dt>Rounds</dt><dd>How many pulls each strategy gets.</dd>
+  <dt>Naive tries</dt><dd>How many test pulls the naive strategy makes before it picks one machine for good.</dd>
+  <dt>Speed</dt><dd>Rounds shown per animation frame.</dd>
+</dl></div>
+
+<!-- ══════════════ SETTINGS (sliders only) ══════════════ -->
+<div class="card">
+  <div class="card-title">Settings</div>
+  <div class="means-row" id="means-row"></div>
   <div class="control-row">
-    <button class="btn btn-primary" id="btn-play">Play</button>
-    <button class="btn btn-secondary" id="btn-step">Step</button>
-    <button class="btn btn-secondary" id="btn-reset">Reset</button>
-    <div class="ctrl-divider"></div>
     <div class="ctrl-group">
-      <label>Speed</label>
-      <input type="range" id="r-speed" min="1" max="500" step="1" value="10">
-      <span class="val" id="v-speed">10/f</span>
-    </div>
-    <div class="ctrl-group">
-      <label>T</label>
+      <label for="r-T">Rounds</label>
       <input type="range" id="r-T" min="100" max="5000" step="100" value="500">
       <span class="val" id="v-T">500</span>
     </div>
     <div class="ctrl-group">
-      <label>naive n</label>
+      <label for="r-naiveN">Naive tries</label>
       <input type="range" id="r-naiveN" min="3" max="60" step="1" value="10">
       <span class="val" id="v-naiveN">10</span>
     </div>
-    <div class="ctrl-divider"></div>
-    <button class="btn btn-ghost" id="btn-reseed-rng">Reseed RNG</button>
-    <button class="btn btn-ghost" id="btn-reseed-all">Reseed everything</button>
+    <div class="ctrl-group">
+      <label for="r-speed">Speed</label>
+      <input type="range" id="r-speed" min="1" max="500" step="1" value="10">
+      <span class="val" id="v-speed">10</span>
+    </div>
   </div>
 </div>
 
@@ -595,8 +608,8 @@
 
 <div class="stadium-wrap">
   <div class="stadium-header">
-    <div class="stadium-title">Cumulative reward — distance from the gate</div>
-    <div class="stadium-clock">round <strong id="clock-t">0</strong> / <span id="clock-T">500</span> &nbsp;&middot;&nbsp; ideal pace <strong id="clock-pstar">0.85</strong> per round</div>
+    <div class="stadium-title">Total reward collected (further right = better)</div>
+    <div class="stadium-clock">round <strong id="clock-t">0</strong> / <span id="clock-T">500</span></div>
   </div>
   <div id="lanes"></div>
   <div class="stadium-axis">
@@ -604,50 +617,62 @@
     <div class="axis-track"><span>0</span><span id="axis-mid">212</span><span id="axis-max">425</span></div>
     <div></div>
   </div>
+  <div class="control-row race-buttons">
+    <button class="btn btn-primary" id="btn-play">Play</button>
+    <button class="btn btn-secondary" id="btn-step">Step</button>
+    <button class="btn btn-secondary" id="btn-reset">Reset</button>
+    <div class="ctrl-divider"></div>
+    <button class="btn btn-ghost" id="btn-reseed-rng">New luck</button>
+    <button class="btn btn-ghost" id="btn-reseed-all">Shuffle machines</button>
+  </div>
 </div>
 
 <!-- ══════════════ REGRET CHART ══════════════ -->
-<h2 class="section-title">Cumulative regret</h2>
-<p class="prose">Different view, different metric. Regret is what you couldn't see in the reward race: the reward you'd have gotten always pulling the best urn, minus what you actually got. A flat slope means the algorithm has stopped paying tuition. A steep slope means it's still bleeding. Pure random and &epsilon; = 0.50 grow linearly. Naive and &epsilon; = 0.05 grow linearly <em>if</em> they commit to the wrong urn. &epsilon; = 0.20 and UCB typically grow sublinearly &mdash; UCB's bound is the tightest of the lot.</p>
+<h2 class="section-title">Regret: reward lost vs. always using the best machine</h2>
+<p class="prose">Lower is better. A line that flattens means the strategy has found the best machine.</p>
 
 <div class="chart-wrap">
-  <canvas class="regret-chart" id="regret-canvas" width="1040" height="320"></canvas>
+  <canvas class="regret-chart" id="regret-canvas" width="1040" height="340"></canvas>
   <div class="chart-legend" id="chart-legend"></div>
 </div>
 
 <!-- ══════════════ STATS PER ALGORITHM ══════════════ -->
-<h2 class="section-title">What each algorithm is doing</h2>
-<p class="prose">Arm-pull bars show the fraction of pulls each algorithm has spent on each urn. Naive locks onto whichever urn looked best after its 10 exploration rounds. &epsilon;-greedy keeps a steady tax on losers — the size of the tax is exactly &epsilon;. Pure random taxes everyone equally.</p>
+<h2 class="section-title">Which machines each strategy pulled</h2>
 <div class="stats-grid" id="stats-grid"></div>
 
-<!-- ══════════════ FORMULAS ══════════════ -->
-<h2 class="section-title">The rules they play by</h2>
-<div class="formula-strip">
-  <div class="formula-card">
-    <div class="label">Naive estimate-then-exploit</div>
-    <div class="body" id="f-naive"></div>
+<!-- ══════════════ FORMULAS (collapsed) ══════════════ -->
+<details class="more">
+  <summary>Show the rules each strategy follows</summary>
+  <div class="more-body">
+    <ol class="steps">
+      <li><strong>&epsilon;-greedy</strong> (the one from the lecture). Every round:
+        <ol>
+          <li>With chance &epsilon;: pull a random machine (explore).</li>
+          <li>Otherwise: pull the machine with the best average so far (exploit).</li>
+        </ol>
+      </li>
+      <li><strong>Naive</strong>: try each machine in turn for a few pulls, then stick with the best-looking one forever.</li>
+      <li><strong>UCB</strong>: pick the machine whose average plus an "unsure bonus" is highest. Rarely tried machines get a bigger bonus.</li>
+      <li><strong>Random</strong>: always pull a random machine.</li>
+    </ol>
+    <div class="formula-strip">
+      <div class="formula-card"><div class="label">&epsilon;-greedy</div><div class="body" id="f-eps"></div></div>
+      <div class="formula-card"><div class="label">Naive</div><div class="body" id="f-naive"></div></div>
+      <div class="formula-card"><div class="label">UCB</div><div class="body" id="f-ucb"></div></div>
+      <div class="formula-card"><div class="label">Regret</div><div class="body" id="f-regret"></div></div>
+    </div>
   </div>
-  <div class="formula-card">
-    <div class="label">&epsilon;-greedy</div>
-    <div class="body" id="f-eps"></div>
-  </div>
-  <div class="formula-card">
-    <div class="label">UCB</div>
-    <div class="body" id="f-ucb"></div>
-  </div>
-  <div class="formula-card">
-    <div class="label">Cumulative regret</div>
-    <div class="body" id="f-regret"></div>
-  </div>
-</div>
+</details>
 
-<div class="callout">
-  <p><strong>The punchline.</strong> &epsilon; too small (or zero, as in naive estimate-then-exploit) means: if you commit to the wrong urn, regret grows linearly forever. &epsilon; too large means: you keep paying full exploration cost, regret again grows linearly. A middling &epsilon; — here 0.20 — produces sublinear regret on average. The take-away: the explore/exploit dial is real, and tuning it matters.</p>
-</div>
-
-<div class="info-box">
-  <p>Tip: hit "Reseed everything" a few times. On some seeds the naive learner gets lucky and locks onto the best urn — its regret then flattens completely. On other seeds it locks onto a near-best urn and you can see the linear-regret slope. &epsilon; = 0.20 stays sublinear across almost all seeds.</p>
-</div>
+<!-- ══════════════ TAKEAWAY (collapsed) ══════════════ -->
+<details class="more">
+  <summary>What's the takeaway?</summary>
+  <div class="more-body">
+    <p><strong>&epsilon; too small</strong> (or naive): if you lock onto the wrong machine, you keep losing forever.</p>
+    <p><strong>&epsilon; too large</strong>: you keep wasting pulls on bad machines.</p>
+    <p><strong>A middle &epsilon;</strong> (here 0.20) usually does best. Shuffle a few times: sometimes naive gets lucky, but &epsilon; = 0.20 is good almost every time.</p>
+  </div>
+</details>
 
 </main>
 </div>
@@ -675,12 +700,12 @@ function mulberry32(seed) {
 // only one of three redundant cues; line-style and dash-pattern carry the
 // same information for any viewer with a color-vision deficiency.
 const ALGOS = [
-  { id: 'naive',  name: 'Naive (n=10)',     hex: '#D55E00', short: 'N',   dash: [8, 4],         styleClass: 'style-dashed'  },
+  { id: 'naive',  name: 'Naive',            hex: '#D55E00', short: 'N',   dash: [8, 4],         styleClass: 'style-dashed'  },
   { id: 'eps05',  name: 'ε-greedy 0.05',    hex: '#0072B2', short: '.05', dash: [],             styleClass: 'style-solid'   },
   { id: 'eps20',  name: 'ε-greedy 0.20',    hex: '#009E73', short: '.20', dash: [12, 6],        styleClass: 'style-double'  },
   { id: 'eps50',  name: 'ε-greedy 0.50',    hex: '#CC79A7', short: '.50', dash: [10, 3, 2, 3],  styleClass: 'style-dashdot' },
-  { id: 'ucb',    name: 'UCB (c=√2)',       hex: '#785EF0', short: 'U',   dash: [4, 2, 1, 2],   styleClass: 'style-ridge'   },
-  { id: 'random', name: 'Pure random',      hex: '#2c2416', short: 'R',   dash: [2, 4],         styleClass: 'style-dotted'  },
+  { id: 'ucb',    name: 'UCB',              hex: '#785EF0', short: 'U',   dash: [4, 2, 1, 2],   styleClass: 'style-ridge'   },
+  { id: 'random', name: 'Random',           hex: '#2c2416', short: 'R',   dash: [2, 4],         styleClass: 'style-dotted'  },
 ];
 
 // Bandit: 5 urns by default. Biases drawn from the suggested set so the gap
@@ -933,7 +958,6 @@ function renderAll() {
 function renderClock() {
   document.getElementById('clock-t').textContent = state.t;
   document.getElementById('clock-T').textContent = state.T;
-  document.getElementById('clock-pstar').textContent = state.pStar.toFixed(2);
   const maxR = state.T * state.pStar;
   document.getElementById('axis-mid').textContent = (maxR / 2).toFixed(0);
   document.getElementById('axis-max').textContent = maxR.toFixed(0);
@@ -947,7 +971,7 @@ function renderMeansRow() {
     const chip = document.createElement('div');
     chip.className = 'mean-chip' + (isBest ? ' best' : '');
     chip.innerHTML = `
-      <span class="arm-id">urn ${i+1}</span>
+      <span class="arm-id">Machine ${i+1}</span>
       <input type="range" min="0" max="100" step="1" value="${Math.round(state.trueMeans[i]*100)}" data-arm="${i}">
       <span class="mean-val">${state.trueMeans[i].toFixed(2)}</span>
     `;
@@ -1028,9 +1052,8 @@ function renderStats() {
       }
       card.innerHTML = `
         <div class="stat-card-title">${algo.name}</div>
-        <div class="stat-row"><span>reward</span><span class="v" data-r></span></div>
-        <div class="stat-row"><span>regret</span><span class="v" data-rg></span></div>
-        <div class="stat-row"><span>mean R/t</span><span class="v" data-rt></span></div>
+        <div class="stat-row"><span>Reward</span><span class="v" data-r></span></div>
+        <div class="stat-row"><span>Regret</span><span class="v" data-rg></span></div>
         <div class="arm-bars" data-bars></div>
         <div class="arm-labels">${armLabels.join('')}</div>
       `;
@@ -1042,8 +1065,6 @@ function renderStats() {
     const card = grid.children[k];
     card.querySelector('[data-r]').textContent = s.cumReward.toFixed(0);
     card.querySelector('[data-rg]').textContent = s.cumRegret.toFixed(1);
-    const meanRt = state.t > 0 ? (s.cumReward / state.t).toFixed(3) : '—';
-    card.querySelector('[data-rt]').textContent = meanRt;
     const bars = card.querySelector('[data-bars]');
     const totalPulls = s.n.reduce((a,b) => a+b, 0) || 1;
     let html = '';
@@ -1061,10 +1082,16 @@ function renderStats() {
 function renderRegretChart() {
   const c = document.getElementById('regret-canvas');
   const ctx = c.getContext('2d');
-  const W = c.width, H = c.height;
+  // Draw in CSS pixels so text keeps its real size at any window width.
+  const dpr = window.devicePixelRatio || 1;
+  const W = Math.max(300, c.clientWidth || 1040), H = 340;
+  if (c.width !== Math.round(W * dpr) || c.height !== Math.round(H * dpr)) {
+    c.width = Math.round(W * dpr); c.height = Math.round(H * dpr);
+  }
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   ctx.clearRect(0, 0, W, H);
 
-  const ML = 56, MR = 24, MT = 18, MB = 36;
+  const ML = 64, MR = 150, MT = 18, MB = 46;
   const PW = W - ML - MR;
   const PH = H - MT - MB;
 
@@ -1080,7 +1107,7 @@ function renderRegretChart() {
 
   ctx.strokeStyle = 'rgba(193,127,78,0.13)';
   ctx.lineWidth = 1;
-  ctx.font = "11px 'Courier New', monospace";
+  ctx.font = "14px 'Courier New', monospace";
   ctx.fillStyle = '#8a7660';
 
   const yTicks = 5;
@@ -1107,14 +1134,14 @@ function renderRegretChart() {
   }
 
   ctx.fillStyle = '#5a4a36';
-  ctx.font = "12px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+  ctx.font = "15px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
   ctx.textAlign = 'center'; ctx.textBaseline = 'top';
-  ctx.fillText('round t', ML + PW / 2, MT + PH + 20);
+  ctx.fillText('round', ML + PW / 2, MT + PH + 26);
   ctx.save();
-  ctx.translate(14, MT + PH / 2);
+  ctx.translate(16, MT + PH / 2);
   ctx.rotate(-Math.PI / 2);
   ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-  ctx.fillText('cumulative regret', 0, 0);
+  ctx.fillText('regret (lower = better)', 0, 0);
   ctx.restore();
 
   // Lines — per-algorithm dash pattern is the *primary* non-color encoding.
@@ -1146,9 +1173,9 @@ function renderRegretChart() {
   ctx.setLineDash([]);
 
   // Endpoint dots + labels for current state
-  ctx.font = "11px 'Courier New', monospace";
+  ctx.font = "bold 14px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
   ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
-  if (state.history.length > 0) {
+  if (state.history.length > 1) {
     const last = state.history[state.history.length - 1];
     const x = ML + (last.t / tMax) * PW;
     const ends = ALGOS.map((a, k) => ({
@@ -1156,15 +1183,24 @@ function renderRegretChart() {
       y: MT + PH - (last.regrets[k] / regMax) * PH
     })).sort((a,b) => a.y - b.y);
     let prevY = -1e9;
-    const minGap = 14;
+    const minGap = 18;
     for (const e of ends) {
       if (e.y - prevY < minGap) e.y = prevY + minGap;
       prevY = e.y;
+    }
+    // If the stack runs below the plot, push it back up so labels never
+    // collide with the x-axis numbers.
+    let maxY = MT + PH - 6;
+    for (let i = ends.length - 1; i >= 0; i--) {
+      if (ends[i].y > maxY) ends[i].y = maxY;
+      maxY = ends[i].y - minGap;
+    }
+    for (const e of ends) {
       ctx.fillStyle = e.hex;
       const realY = MT + PH - (e.val / regMax) * PH;
       ctx.beginPath(); ctx.arc(x, realY, 3, 0, 2*Math.PI); ctx.fill();
       ctx.fillStyle = e.hex;
-      ctx.fillText(e.name + ' ' + e.val.toFixed(1), Math.min(x + 6, ML + PW - 110), e.y);
+      ctx.fillText(e.name, x + 8, e.y);
     }
   }
 }
@@ -1233,7 +1269,7 @@ document.getElementById('btn-reseed-all').addEventListener('click', () => reset(
 
 document.getElementById('r-speed').addEventListener('input', (e) => {
   state.speed = parseInt(e.target.value, 10);
-  document.getElementById('v-speed').textContent = state.speed + '/f';
+  document.getElementById('v-speed').textContent = state.speed;
 });
 document.getElementById('r-T').addEventListener('input', (e) => {
   state.T = parseInt(e.target.value, 10);
@@ -1274,6 +1310,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   renderLegend();
   reset({ newRng: false });
+  window.addEventListener('resize', renderRegretChart);
 });
 </script>
 </body>

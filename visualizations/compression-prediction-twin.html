@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Compression-prediction twin · W2</title>
   <link rel="stylesheet" href="shared/style.css">
+  <link rel="stylesheet" href="shared/reveal.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
@@ -50,44 +51,48 @@
       cursor: not-allowed;
       opacity: 0.45;
     }
-    .mode-tabs .spacer { flex: 1; }
-    .mode-tabs .play-controls {
+    /* ---------- Run buttons (below the visualization) ---------- */
+    .play-controls {
       display: flex;
-      gap: 6px;
-      padding-bottom: 6px;
+      gap: 8px;
+      justify-content: center;
+      margin-top: 16px;
     }
-    .mode-tabs .play-controls button {
+    .play-controls button {
       background: var(--color-header-end);
       color: white;
       border: none;
       border-radius: 6px;
-      padding: 6px 12px;
-      font-size: 0.88rem;
+      padding: 8px 18px;
+      font-size: 0.95rem;
       cursor: pointer;
       transition: background 0.15s;
     }
-    .mode-tabs .play-controls button:hover { background: var(--color-header-start); }
-    .mode-tabs .play-controls button.secondary {
+    .play-controls button:hover { background: var(--color-header-start); }
+    .play-controls button.secondary {
       background: white;
       color: var(--color-header-end);
       border: 1px solid var(--color-border);
     }
-    .mode-tabs .play-controls button.secondary:hover { background: var(--color-neu-bg); }
+    .play-controls button.secondary:hover { background: var(--color-neu-bg); }
 
-    /* ---------- Sub-tabs (forecaster style) ---------- */
+    /* ---------- Settings box (forecaster style + slider) ---------- */
     .substyle-row {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 12px 18px;
       margin-bottom: 14px;
       flex-wrap: wrap;
-      font-size: 0.9rem;
+      font-size: 0.95rem;
+      padding: 10px 14px;
+      border: 1px solid var(--color-border);
+      border-radius: 10px;
+      background: white;
     }
     .substyle-row .label {
       color: var(--color-text-muted);
-      letter-spacing: 0.04em;
-      text-transform: uppercase;
-      font-size: 0.78rem;
+      font-weight: 600;
+      font-size: 0.9rem;
     }
     .substyle-row .style-tabs {
       display: inline-flex;
@@ -142,7 +147,7 @@
       overflow: hidden;
     }
     .history-strip .strip-label {
-      font-size: 0.76rem;
+      font-size: 0.88rem;
       color: var(--color-text-muted);
       letter-spacing: 0.04em;
       text-transform: uppercase;
@@ -164,7 +169,6 @@
     }
     .ball.pos { background: white; }
     .ball.neg { background: var(--color-neg); border-color: var(--color-neg); }
-    .ball.enter { transform: translateY(-12px) scale(0.4); opacity: 0; }
 
     /* ---------- Twin layout ---------- */
     .twin-layout {
@@ -194,7 +198,7 @@
       gap: 8px;
     }
     .panel h3 .pill {
-      font-size: 0.7rem;
+      font-size: 0.8rem;
       font-weight: 600;
       letter-spacing: 0.05em;
       text-transform: uppercase;
@@ -213,7 +217,7 @@
     }
     .prob-row {
       display: grid;
-      grid-template-columns: 90px 1fr 60px;
+      grid-template-columns: 130px 1fr 60px;
       align-items: center;
       gap: 10px;
     }
@@ -239,6 +243,7 @@
       position: relative;
     }
     .prob-row .bar-fill {
+      display: block;
       height: 100%;
       transition: width 0.35s cubic-bezier(.4,.2,.2,1);
     }
@@ -285,7 +290,7 @@
     }
     .metric-line .lbl {
       color: var(--color-text-muted);
-      font-size: 0.85rem;
+      font-size: 0.92rem;
       letter-spacing: 0.04em;
       text-transform: uppercase;
     }
@@ -308,7 +313,7 @@
     }
     .huffman-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(112px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(132px, 1fr));
       gap: 4px;
       max-height: 240px;
       overflow-y: auto;
@@ -329,7 +334,7 @@
       background: white;
       border-radius: 4px;
       border-left: 3px solid var(--color-pos);
-      font-size: 0.78rem;
+      font-size: 0.9rem;
     }
     .huffman-cell.binary-pos { border-left-color: var(--color-pos); }
     .huffman-cell.binary-neg { border-left-color: var(--color-neg); }
@@ -352,11 +357,11 @@
     .huffman-cell.binary-neg .huffman-code { color: var(--color-neg); }
     .huffman-bits {
       color: var(--color-text-muted);
-      font-size: 0.72rem;
+      font-size: 0.85rem;
       font-variant-numeric: tabular-nums;
     }
     .huffman-note {
-      font-size: 0.78rem;
+      font-size: 0.9rem;
       color: var(--color-text-muted);
       font-style: italic;
       margin-top: 4px;
@@ -367,14 +372,14 @@
       margin-bottom: 12px;
     }
     .codebook-block .cb-label {
-      font-size: 0.82rem;
+      font-size: 0.92rem;
       color: var(--color-text-muted);
       margin-bottom: 4px;
     }
     .codebook-bar {
       display: flex;
       width: 100%;
-      height: 38px;
+      height: 46px;
       border-radius: 6px;
       overflow: hidden;
       border: 1px solid var(--color-border);
@@ -386,7 +391,7 @@
       justify-content: center;
       flex-direction: column;
       color: white;
-      font-size: 0.78rem;
+      font-size: 0.9rem;
       text-shadow: 0 1px 1px rgba(0, 0, 0, 0.45);
       overflow: hidden;
       transition: width 0.25s ease;
@@ -394,14 +399,14 @@
       min-width: 0;
     }
     .codebook-seg .seg-name { font-weight: 700; }
-    .codebook-seg .seg-bits { font-size: 0.7rem; opacity: 0.95; }
+    .codebook-seg .seg-bits { font-size: 0.85rem; opacity: 0.95; }
     .codebook-seg.too-narrow .seg-name,
     .codebook-seg.too-narrow .seg-bits { display: none; }
     .codebook-axis {
       display: flex;
       justify-content: space-between;
       margin-top: 2px;
-      font-size: 0.7rem;
+      font-size: 0.85rem;
       color: var(--color-text-muted);
       font-variant-numeric: tabular-nums;
     }
@@ -409,7 +414,7 @@
     /* ---------- Encoder panel ---------- */
     .bitstream {
       font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
-      font-size: 0.78rem;
+      font-size: 0.9rem;
       letter-spacing: 0.5px;
       line-height: 1.45;
       background: var(--color-neu-bg);
@@ -433,7 +438,7 @@
       display: flex;
       gap: 18px;
       flex-wrap: wrap;
-      font-size: 0.88rem;
+      font-size: 0.92rem;
       color: var(--color-text-muted);
       margin-bottom: 8px;
     }
@@ -470,7 +475,7 @@
       color: var(--color-header-start);
     }
     .identity-strip .floor {
-      font-size: 0.92rem;
+      font-size: 0.95rem;
       color: var(--color-text-muted);
     }
     .identity-strip .floor .num {
@@ -481,7 +486,7 @@
     .identity-strip .check-mark {
       display: inline-block;
       margin-left: 8px;
-      font-size: 0.85rem;
+      font-size: 0.95rem;
       color: var(--color-demanding);
       font-weight: 600;
     }
@@ -515,15 +520,15 @@
       grid-template-columns: repeat(2, 1fr);
       gap: 4px 14px;
       margin-bottom: 12px;
-      max-height: 320px;
+      max-height: 440px;
       overflow-y: auto;
     }
     .prob-grid .row {
       display: grid;
-      grid-template-columns: 24px 1fr 50px;
+      grid-template-columns: 24px 1fr 56px;
       align-items: center;
       gap: 6px;
-      font-size: 0.82rem;
+      font-size: 0.92rem;
       font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
     }
     .prob-grid .row .sym {
@@ -537,12 +542,14 @@
       border-radius: 3px;
     }
     .prob-grid .row .track {
+      display: block;
       height: 12px;
       background: var(--color-neu-bg);
       border-radius: 3px;
       overflow: hidden;
     }
     .prob-grid .row .fill {
+      display: block;
       height: 100%;
       background: linear-gradient(90deg, #aac4d8, #5d8ba6);
       transition: width 0.25s cubic-bezier(.4,.2,.2,1);
@@ -553,7 +560,7 @@
     .prob-grid .row .pp {
       font-variant-numeric: tabular-nums;
       color: var(--color-text-muted);
-      font-size: 0.78rem;
+      font-size: 0.88rem;
       text-align: right;
     }
 
@@ -579,25 +586,19 @@
       font-weight: 300;
     }
 
-    /* ---------- Citation caption (LLM mode) ---------- */
-    .citation-caption {
-      margin-top: 12px;
-      font-size: 0.82rem;
-      color: var(--color-text-muted);
-      font-style: italic;
-      line-height: 1.5;
-      padding: 10px 14px;
-      border-left: 3px solid var(--color-header-end);
-      background: var(--color-neu-bg);
-      border-radius: 0 6px 6px 0;
-    }
     .llm-notice {
       display: inline-block;
       margin-left: 10px;
-      font-size: 0.78rem;
+      font-size: 0.9rem;
       color: var(--color-neg);
       font-style: italic;
     }
+  
+    /* ---------- Collapsibles inside panels ---------- */
+    .panel details.more { margin: 4px 0 12px; max-width: none; }
+    .panel details.more > .more-body { padding: 0 12px 10px 12px; }
+    .huffman-note { font-style: normal; }
+    .run-hint { text-align:center; font-size:0.92rem; color:var(--color-text-muted); margin-top:6px; }
   </style>
 </head>
 <body>
@@ -608,60 +609,72 @@
   <main class="viz-container">
     <h1>The compression-prediction twin</h1>
     <p class="lede">
-      A perfect predictor <em>is</em> a perfect compressor. The forecaster outputs a probability
-      for each next symbol; an arithmetic coder uses those exact probabilities to write bits.
-      Watch the forecaster's per-symbol cross-entropy and the encoder's per-symbol bit rate
-      track each other exactly — both bounded below by Shannon's entropy
-      <span style="white-space:nowrap"><em>H</em></span>.
+      A good predictor is a good compressor. Left: a forecaster guesses the next symbol.
+      Right: an encoder uses the same guess to write bits. The two scores are always the same number.
     </p>
 
+    <ol class="howto">
+      <li>Pick a tab (start with <strong>Binary urn</strong>).</li>
+      <li>Choose a forecaster, then press <strong>▶ Play</strong> below.</li>
+      <li>Compare <strong>Loss</strong> (left) and <strong>Rate</strong> (right).</li>
+    </ol>
+
     <div class="viz-card">
-      <!-- Mode tabs + play controls -->
+      <!-- Mode tabs -->
       <div class="mode-tabs" id="mode-tabs">
         <button class="tab active" data-mode="binary">Binary urn</button>
         <button class="tab" data-mode="text">English text</button>
         <button class="tab" data-mode="llm" title="Higher-order Markov LM">Markov LM</button>
-        <div class="spacer"></div>
-        <div class="play-controls">
-          <button id="btn-play">▶ Play</button>
-          <button id="btn-step" class="secondary">Step</button>
-          <button id="btn-reset" class="secondary">Reset</button>
-        </div>
       </div>
 
-      <!-- Mode body -->
+      <!-- Mode body (settings explained, settings box, visualization) -->
       <div id="mode-body"></div>
+
+      <!-- Run buttons, below the visualization -->
+      <div class="play-controls">
+        <button id="btn-play">▶ Play</button>
+        <button id="btn-step" class="secondary">Step</button>
+        <button id="btn-reset" class="secondary">Reset</button>
+      </div>
 
       <!-- Identity strip (always visible) -->
       <div class="identity-strip">
         <div class="equation">
-          Forecaster loss <span style="color:var(--color-text-muted)">≡</span> Encoder rate
-          <span style="color:var(--color-text-muted)">≡</span>
+          Loss <span style="color:var(--color-text-muted)">=</span> Rate
+          <span style="color:var(--color-text-muted)">=</span>
           <span class="num" id="ident-val">—</span>
-          <span style="color:var(--color-text-muted)">bits / symbol</span>
+          <span style="color:var(--color-text-muted)">bits per symbol</span>
           <span class="check-mark" id="ident-check"></span>
         </div>
         <div class="floor">
-          Shannon's floor <em>H</em> = <span class="num" id="floor-val">—</span> bits
-          ·  gap above floor = KL(p ‖ p̂) = <span class="num" id="kl-val">—</span>
+          <span id="floor-lbl">Best possible (Shannon's <em>H</em>)</span> = <span class="num" id="floor-val">—</span> bits
+          ·  gap = <span class="num" id="kl-val">—</span>
         </div>
       </div>
     </div>
 
-    <aside class="explainer">
-      <h2>Why are these numbers literally equal?</h2>
-      <p>
-        The forecaster outputs <em>p̂</em> over the alphabet. The arithmetic coder uses
-        <em>p̂</em> to allocate <em>−log₂ p̂(x)</em> bits to each actual symbol <em>x</em>.
-        That is also exactly the cross-entropy term for that step. Sum, divide by <em>n</em>:
-        same number on both sides, by construction.
-      </p>
-      <p>
-        Both quantities converge to Shannon's entropy <em>H(p)</em> from above as the forecaster
-        learns. The excess above <em>H</em> is the Kullback–Leibler divergence KL(<em>p</em> ‖ <em>p̂</em>) —
-        the price of imperfect prediction, paid in bits.
-      </p>
-    </aside>
+    <details class="more">
+      <summary>Why are the two numbers always equal?</summary>
+      <div class="more-body">
+        <p>
+          The forecaster gives each symbol a probability <em>p̂</em>. The encoder spends
+          <em>−log₂ p̂</em> bits on the symbol that actually comes. That is exactly the
+          forecaster's loss for that step. Same number on both sides, by construction.
+        </p>
+        <p>
+          Better predictions mean fewer bits. Nobody can go below Shannon's entropy <em>H</em>.
+          The gap above <em>H</em> (the KL divergence) is the price of imperfect prediction, paid in bits.
+        </p>
+      </div>
+    </details>
+    <details class="more">
+      <summary>In the real world</summary>
+      <div class="more-body">
+        <p>Delétang et al. (2023): a 7-billion-parameter language model compresses
+        ImageNet pixels better than PNG. The Hutter Prize pays up to €500&#8239;000 for the
+        best compression of Wikipedia. Same idea as here: a stronger predictor is a better compressor.</p>
+      </div>
+    </details>
   </main>
   <footer class="eth-footer">CAS AINIT FS26 · W2 · Compression ⇄ Prediction</footer>
 
@@ -681,6 +694,8 @@
 
   // ---- Identity strip helpers (shared across modes) ----
   function setIdentity(loss, rate, H, kl) {
+    const flbl = document.getElementById('floor-lbl');
+    if (flbl) flbl.innerHTML = "Best possible (Shannon's <em>H</em>)";
     const id = document.getElementById('ident-val');
     const fl = document.getElementById('floor-val');
     const kv = document.getElementById('kl-val');
@@ -813,22 +828,27 @@
 
     const body = document.getElementById('mode-body');
     body.innerHTML = `
+      <div class="params"><dl>
+        <dt>Forecaster</dt><dd><b>Naive</b> always says 50/50. <b>Learning</b> counts the balls seen so far. <b>Oracle</b> knows the true mix.</dd>
+        <dt>True p (white)</dt><dd>Share of white balls in the urn. Changing it restarts the run.</dd>
+      </dl></div>
+
       <div class="substyle-row">
-        <span class="label">Forecaster style</span>
+        <span class="label">Forecaster</span>
         <span class="style-tabs" id="style-tabs">
           <button data-style="naive">Naive 50/50</button>
           <button data-style="learning" class="active">Learning</button>
           <button data-style="oracle">Oracle</button>
         </span>
         <span class="slider-group">
-          <label for="p-slider">true p (white) =</label>
+          <label for="p-slider">True p (white)</label>
           <input id="p-slider" type="range" min="0.05" max="0.95" step="0.01" value="${BIN.p}">
           <span class="pval" id="p-readout">${BIN.p.toFixed(2)}</span>
         </span>
       </div>
 
       <div class="history-strip">
-        <span class="strip-label">Last symbols</span>
+        <span class="strip-label">Last draws</span>
         <div class="symbols" id="history-symbols"></div>
       </div>
 
@@ -847,37 +867,36 @@
               <span class="pct" id="pct-neg">0.500</span>
             </div>
           </div>
-          <div class="recent-row" id="recent-row">
-            <span class="recent-label">last 20</span>
-          </div>
           <div class="metric-line">
             <span class="lbl">Loss</span>
             <span class="val" id="loss-val">—</span>
-            <span style="color:var(--color-text-muted);font-size:0.85rem">bits / symbol</span>
+            <span style="color:var(--color-text-muted);font-size:0.92rem">bits / symbol</span>
           </div>
         </div>
 
         <div class="panel encoder">
-          <h3>Arithmetic encoder <span class="pill">−log₂ p̂(x)</span></h3>
+          <h3>Encoder</h3>
           <div class="codebook-block">
-            <div class="cb-label">Probability split: forecaster's [0, 1) divided into one sub-interval per symbol. Width = p̂; ideal bit cost = −log₂(width).</div>
+            <div class="cb-label">Each colour gets a slice as wide as its probability. Wider slice = fewer bits.</div>
             <div class="codebook-bar" id="cb-bar-binary">
               <div class="codebook-seg" id="cb-seg-pos" style="background:var(--color-pos);width:50%">
                 <span class="seg-name">white</span>
                 <span class="seg-bits">1.00 bits</span>
               </div>
               <div class="codebook-seg" id="cb-seg-neg" style="background:var(--color-neg);width:50%">
-                <span class="seg-name">yellow</span>
+                <span class="seg-name">vermillion</span>
                 <span class="seg-bits">1.00 bits</span>
               </div>
             </div>
             <div class="codebook-axis"><span>0</span><span>1</span></div>
           </div>
-          <div class="huffman-block">
-            <div class="hf-label">Huffman codebook: a literal binary string for each symbol.</div>
-            <div class="huffman-grid binary" id="hf-grid-binary"></div>
-            <div class="huffman-note">For two symbols, Huffman uses one bit per draw &mdash; arithmetic coding spends fractional bits and beats this when the bias is uneven.</div>
-          </div>
+          <details class="more huffman-block">
+            <summary>Show the actual codes (Huffman)</summary>
+            <div class="more-body">
+              <div class="huffman-grid binary" id="hf-grid-binary"></div>
+              <div class="huffman-note">With two colours Huffman needs 1 full bit per draw. The encoder above can spend fractions of a bit, so it wins when one colour is more common.</div>
+            </div>
+          </details>
           <div class="bitstream" id="bitstream">
             <span style="color:var(--color-text-muted)">(bits will appear as symbols arrive)</span>
           </div>
@@ -888,7 +907,7 @@
           <div class="metric-line">
             <span class="lbl">Rate</span>
             <span class="val" id="rate-val">—</span>
-            <span style="color:var(--color-text-muted);font-size:0.85rem">bits / symbol</span>
+            <span style="color:var(--color-text-muted);font-size:0.92rem">bits / symbol</span>
           </div>
         </div>
       </div>
@@ -986,16 +1005,8 @@
     const sym = document.getElementById('history-symbols');
     if (sym) {
       const data = BIN.history;
-      const sel = d3.select(sym).selectAll('div.ball')
-        .data(data, (d, i) => `${BIN.n - data.length + i}`);
-      sel.enter()
-        .append('div')
-        .attr('class', d => `ball ${d.x === 1 ? 'pos' : 'neg'} enter`)
-        .transition().duration(220)
-        .style('opacity', 1)
-        .style('transform', 'translateY(0) scale(1)')
-        .on('start', function () { this.classList.remove('enter'); });
-      sel.exit().remove();
+      // Plain redraw (the old enter animation left balls half-hidden).
+      sym.innerHTML = data.map(d => `<div class="ball ${d.x === 1 ? 'pos' : 'neg'}"></div>`).join('');
     }
 
     // Recent-20 row in the forecaster panel
@@ -1222,14 +1233,16 @@
 
     const body = document.getElementById('mode-body');
     body.innerHTML = `
+      <div class="params"><dl>
+        <dt>Forecaster</dt><dd><b>Uniform</b> treats all 27 symbols (a–z and space) as equally likely. <b>Frequency</b> gives common letters like e and space more probability.</dd>
+        <dt>Text</dt><dd>A short English paragraph, read one letter at a time.</dd>
+      </dl></div>
+
       <div class="substyle-row">
-        <span class="label">Forecaster style</span>
+        <span class="label">Forecaster</span>
         <span class="style-tabs" id="text-style-tabs">
           <button data-style="uniform">Uniform (1/27)</button>
           <button data-style="frequency" class="active">Frequency</button>
-        </span>
-        <span class="slider-group" style="font-size:0.82rem">
-          <span>27-symbol alphabet · a–z + space</span>
         </span>
       </div>
 
@@ -1247,22 +1260,24 @@
           <div class="metric-line">
             <span class="lbl">Loss</span>
             <span class="val" id="text-loss-val">—</span>
-            <span style="color:var(--color-text-muted);font-size:0.85rem">bits / char</span>
+            <span style="color:var(--color-text-muted);font-size:0.92rem">bits / char</span>
           </div>
         </div>
 
         <div class="panel encoder">
-          <h3>Arithmetic encoder <span class="pill">−log₂ p̂(c)</span></h3>
+          <h3>Encoder</h3>
           <div class="codebook-block">
-            <div class="cb-label">Probability split: 27 sub-intervals of [0, 1), one per letter. Width = p̂(c). Wider letter = fewer bits.</div>
+            <div class="cb-label">Each letter gets a slice as wide as its probability. Wider slice = fewer bits.</div>
             <div class="codebook-bar" id="cb-bar-text"></div>
             <div class="codebook-axis"><span>0</span><span>1</span></div>
           </div>
-          <div class="huffman-block">
-            <div class="hf-label">Huffman codebook: a literal binary string for each letter, sorted by frequency. Common letters get short codes; rare letters get long ones.</div>
-            <div class="huffman-grid" id="hf-grid-text"></div>
-            <div class="huffman-note">Huffman rounds each cost up to a whole bit; arithmetic coding does better by spending fractional bits per letter.</div>
-          </div>
+          <details class="more huffman-block">
+            <summary>Show the actual codes (Huffman)</summary>
+            <div class="more-body">
+              <div class="huffman-note" style="margin:0 0 6px">Common letters get short codes, rare letters long ones.</div>
+              <div class="huffman-grid" id="hf-grid-text"></div>
+            </div>
+          </details>
           <div class="bitstream" id="text-bitstream">
             <span style="color:var(--color-text-muted)">(bits will appear as characters arrive)</span>
           </div>
@@ -1273,7 +1288,7 @@
           <div class="metric-line">
             <span class="lbl">Rate</span>
             <span class="val" id="text-rate-val">—</span>
-            <span style="color:var(--color-text-muted);font-size:0.85rem">bits / char</span>
+            <span style="color:var(--color-text-muted);font-size:0.92rem">bits / char</span>
           </div>
         </div>
       </div>
@@ -1694,16 +1709,17 @@
 
     const body = document.getElementById('mode-body');
     body.innerHTML = `
+      <div class="params"><dl>
+        <dt>Forecaster</dt><dd><b>Bigram</b> looks at the last letter. <b>Trigram</b> looks at the last two letters. Both learned from a short excerpt of <em>Pride and Prejudice</em>.</dd>
+      </dl></div>
+
       <div class="substyle-row">
-        <span class="label">Forecaster style</span>
+        <span class="label">Forecaster</span>
         <span class="style-tabs" id="llm-style-tabs">
           <button data-style="bigram">Bigram</button>
           <button data-style="trigram" class="active">Trigram + backoff</button>
         </span>
-        <span class="slider-group" style="font-size:0.82rem">
-          <span>Trained on Pride and Prejudice (~6 KB) · 27-symbol alphabet</span>
-          ${noticeHTML}
-        </span>
+        ${noticeHTML}
       </div>
 
       <div class="history-strip">
@@ -1720,22 +1736,24 @@
           <div class="metric-line">
             <span class="lbl">Loss</span>
             <span class="val" id="llm-loss-val">—</span>
-            <span style="color:var(--color-text-muted);font-size:0.85rem">bits / char</span>
+            <span style="color:var(--color-text-muted);font-size:0.92rem">bits / char</span>
           </div>
         </div>
 
         <div class="panel encoder">
-          <h3>Arithmetic encoder <span class="pill">−log₂ p̂(c | ctx)</span></h3>
+          <h3>Encoder</h3>
           <div class="codebook-block">
-            <div class="cb-label">Probability split: 27 sub-intervals of [0, 1), conditioned on the last two characters. Widths are p̂(c | ctx) and shift with every new character.</div>
+            <div class="cb-label">Slices now depend on the previous letters, so they change at every step.</div>
             <div class="codebook-bar" id="cb-bar-llm"></div>
             <div class="codebook-axis"><span>0</span><span>1</span></div>
           </div>
-          <div class="huffman-block">
-            <div class="hf-label">Huffman codebook: a literal binary string for each letter, recomputed at every step from p̂(c | ctx).</div>
-            <div class="huffman-grid" id="hf-grid-llm"></div>
-            <div class="huffman-note">As the context shifts, the codebook reshuffles: a letter that is &ldquo;cheap&rdquo; after &ldquo;th&rdquo; (next is &ldquo;e&rdquo; very often) becomes expensive after a different prefix.</div>
-          </div>
+          <details class="more huffman-block">
+            <summary>Show the actual codes (Huffman)</summary>
+            <div class="more-body">
+              <div class="huffman-note" style="margin:0 0 6px">The codes change with context: &ldquo;e&rdquo; is cheap after &ldquo;th&rdquo;, expensive elsewhere.</div>
+              <div class="huffman-grid" id="hf-grid-llm"></div>
+            </div>
+          </details>
           <div class="bitstream" id="llm-bitstream">
             <span style="color:var(--color-text-muted)">(bits will appear as characters arrive)</span>
           </div>
@@ -1746,17 +1764,11 @@
           <div class="metric-line">
             <span class="lbl">Rate</span>
             <span class="val" id="llm-rate-val">—</span>
-            <span style="color:var(--color-text-muted);font-size:0.85rem">bits / char</span>
+            <span style="color:var(--color-text-muted);font-size:0.92rem">bits / char</span>
           </div>
         </div>
       </div>
 
-      <div class="citation-caption">
-        Delétang et al. (2023): a 7-billion-parameter language model compresses
-        ImageNet pixels better than PNG. Hutter (2005) is paying €500&#8239;000 to
-        whoever does it best on Wikipedia. The trick is the same one in front of
-        you — a stronger predictor is a better compressor.
-      </div>
     `;
 
     // Build the LLM codebook bar (27 segments).
@@ -1914,7 +1926,6 @@
     // unigram reference, which is exactly the pedagogical message). KL is not
     // well-defined against the unigram H once we condition, so we display the
     // gap (loss − H_unigram) as an informal "bits saved" measure when negative.
-    const modeLabel = LLM.style === 'bigram' ? 'Mode 3 · Bigram LM' : 'Mode 3 · Trigram LM';
     // Re-purpose the floor strip subtly: still show unigram H so users can see
     // that the LM has crossed below it.
     const H = textEntropySource();
@@ -1925,11 +1936,9 @@
     }
     setIdentity(lossPerSym, ratePerSym, H, klDisplay);
     // Tag mode in identity area via the check-mark string (keeps existing layout)
-    const ck = document.getElementById('ident-check');
-    if (ck && lossPerSym != null && ratePerSym != null) {
-      const eq = Math.abs(lossPerSym - ratePerSym) < 1e-6;
-      ck.textContent = eq ? `✓ equal · ${modeLabel}` : `Δ=${(lossPerSym-ratePerSym).toExponential(1)} · ${modeLabel}`;
-    }
+    // In this mode H is the letter-frequency entropy; context lets the model go below it.
+    const fl = document.getElementById('floor-lbl');
+    if (fl) fl.innerHTML = 'Letter-frequency floor <em>H</em>';
   }
 
   // =============================================================

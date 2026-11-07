@@ -1,0 +1,88 @@
+/* reveal.css: shared pattern for demos 5-10.
+   - .howto     short "what to do" steps at the top
+   - .params    explains each setting before the demo starts
+   - details.more   click-to-open box (algorithm, "why it works", extra notes)
+   Kept apart from style.css so it never collides with edits there. */
+
+.howto {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 22px;
+  margin: 4px 0 14px;
+  padding: 0;
+  list-style: none;
+  counter-reset: step;
+  font-size: 1.02rem;
+  color: var(--color-text);
+}
+.howto li {
+  counter-increment: step;
+  display: block;
+}
+.howto li::before {
+  content: counter(step);
+  margin-right: 8px;
+  vertical-align: 1px;
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  background: var(--color-header-end);
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.params {
+  margin: 0 0 16px;
+  padding: 10px 14px;
+  background: var(--color-neu-bg);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+.params dl { margin: 0; display: grid; grid-template-columns: max-content 1fr; gap: 4px 14px; }
+.params dt { font-weight: 700; color: var(--color-header-start); }
+.params dd { margin: 0; }
+
+details.more {
+  margin: 14px 0;
+  background: var(--color-neu-bg);
+  border: 1px solid var(--color-border);
+  border-left: 4px solid var(--color-tech);
+  border-radius: 6px;
+  font-size: 0.98rem;
+  line-height: 1.55;
+  max-width: 80ch;
+}
+details.more > summary {
+  cursor: pointer;
+  padding: 10px 14px;
+  font-weight: 600;
+  color: var(--color-header-start);
+  list-style: none;
+  user-select: none;
+}
+details.more > summary::-webkit-details-marker { display: none; }
+details.more > summary::before {
+  content: "▸";
+  display: inline-block;
+  width: 1.1em;
+  transition: transform 0.15s;
+}
+details.more[open] > summary::before { transform: rotate(90deg); }
+details.more > summary:hover { background: rgba(0, 0, 0, 0.03); }
+details.more > .more-body { padding: 0 16px 12px 34px; }
+details.more > .more-body p { margin: 0 0 8px; }
+details.more > .more-body p:last-child { margin-bottom: 0; }
+
+/* Indented algorithm steps inside a details.more */
+ol.steps {
+  margin: 0;
+  padding-left: 1.4em;
+  line-height: 1.6;
+}
+ol.steps ol, ol.steps ul { margin: 4px 0; padding-left: 1.4em; }
+ol.steps li { margin: 3px 0; }
