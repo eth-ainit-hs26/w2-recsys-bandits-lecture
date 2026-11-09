@@ -10,6 +10,9 @@
 % Simplified the same day after his "This is too complicated for me ... Make them 25% simpler": shorter text and
 % labels, fewer points in frame 2, one quote in frame 3 (the blog's comparison is in the talk track). README.md,
 % section "One deck per case", has the counts.
+% Since 2026-11-09 frame 3 names its measure by what it counts, "visits that end in a booking", at Carlos's request
+% ("Please relabel as you suggest"); the paper says "booking conversion" and does not define it. Etsy's frame 5
+% quotes this frame's words on the 0.31% for scale.
 % No number is typed here: numbers.tex is written by tools/cases_numbers.py (block Airbnb), which keeps the sentence
 % of each source. The points of frame 2 are a drawing, not data. A "Say" comment above each frame is the talk
 % track. Build and check from this folder:
@@ -80,8 +83,8 @@
 % ===== Frame 3. The value =====
 % Say: Airbnb built it in three versions and A/B tested each one: first the two networks with the inner product;
 % then the same with a clustered index, where the homes are grouped every day and only the groups nearest to the
-% search are searched; then a larger network that uses the distance. [click] Together the three raised conversion
-% by 0.31 percent, a relative change. That sounds small. Airbnb's paper calls it "a large portion of the team's
+% search are searched; then a larger network that uses the distance. [click] Together the three raised the share
+% of visits that end in a booking by 0.31 percent, a relative change. That sounds small. Airbnb's paper calls it "a large portion of the team's
 % annual goal", and its blog of April 2025 put the bookings lift of the new system on par with some of its
 % largest machine learning improvements to search ranking in the past two years. [click] The same system now also
 % picks the homes for promotional emails, where bookings rose by 2.3 percent, and the clustered index used about
@@ -98,7 +101,7 @@
     \draw[draw=ruledark, line width=0.6pt, visible on=<2->] (22,-10.8) to (22,-12.2);
     \node[big, anchor=north west, visible on=<2->] at (0,-14.6) {+\abConv\%};
     \node[measure, anchor=north west, text width=60mm, visible on=<2->] at (0,-22.4)
-      {conversion, all three, relative change};
+      {visits that end in a booking, all three, relative change};
     \node[body, anchor=north west, text width=60mm, visible on=<2->] at (70,-14.6)
       {Airbnb: \textquotedblleft a large portion of the team's annual goal\textquotedblright.};
     \draw[draw=ruling, line width=0.4pt, visible on=<3->] (0,-33) to (130,-33);

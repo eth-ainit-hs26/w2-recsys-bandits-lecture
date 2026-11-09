@@ -157,36 +157,46 @@
 \end{frame}
 
 % ===== Frame 5. Cost and value =====
+% Since 2026-11-09 (Carlos asked what a site conversion is, then: "Please relabel as you suggest") the two
+% measures are named by what they count. The paper calls them site-wide conversion rate (CVR) and organic search
+% purchase rate (OSPR) and defines neither; the labels give the usual meanings. The same day he asked for Airbnb's
+% words on its 0.31% (the next case, block Airbnb of tools/cases_numbers.py) on this slide, for scale: second
+% click; the recall bars moved to the third.
 % Say: The cost: training takes about 72 hours on 4 GPUs, from one month of cart adds and purchases; the item
 % side also draws on a year of past searches. The value, measured in A/B tests on live traffic and aggregated
-% over several tests: the conversion rate of the whole site rose by 2.63 percent, and the purchase rate of
-% searches by 5.58 percent, both relative changes. [click] Was it easy? No. An offline measure: of the products
-% people bought after a popular search, how many were among a version's top 100? A plain version that read only
-% the search words and the item text found 32 percent; keyword search found 63 percent; the final model, with
-% the person's context and the quality numbers among other things, found 72 percent.
+% over several tests: the share of visits to Etsy that end in a purchase rose by 2.63 percent, and the share of
+% searches that end in a purchase from the unpaid results by 5.58 percent, both relative changes. [click] Small
+% numbers? Airbnb, our next case, calls its gain of 0.31 percent "a large portion of the team's annual goal".
+% [click] Was it easy? No. An offline measure: of the products people bought after a popular search, how many
+% were among a version's top 100? A plain version that read only the search words and the item text found 32
+% percent; keyword search found 63 percent; the final model, with the person's context and the quality numbers
+% among other things, found 72 percent.
 \begin{frame}{Cost and value}
   \begin{tikzpicture}[x=1mm, y=1mm]
     \path[use as bounding box] (0,1) rectangle (130,-54);
     \node[lbl, anchor=north west] at (0,0) {Cost};
-    \node[big, anchor=north west] at (0,-5) {\etHours{} hours};
-    \node[measure, anchor=north west, text width=29mm] at (32,-5.6) {on~\etGpus{}~GPUs};
-    \node[big, anchor=north west] at (0,-14.6) {\etMonths{} month};
-    \node[measure, anchor=north west, text width=29mm] at (32,-15.2) {of search logs};
-    \draw[draw=ruling, line width=0.4pt] (63,1) to (63,-24.4);
-    \node[lbl, anchor=north west] at (67,0) {Value: A/B tests, relative change};
-    \node[big, anchor=north west] at (67,-5) {+\etCvr\%};
-    \node[measure, anchor=north west, text width=33mm] at (97,-5.6) {site conversion rate};
-    \node[big, anchor=north west] at (67,-14.6) {+\etOspr\%};
-    \node[measure, anchor=north west, text width=33mm] at (97,-15.2) {search purchase rate};
-    \draw[draw=ruledark, line width=0.6pt, visible on=<2->] (0,-26.4) to (130,-26.4);
-    \node[lbl, anchor=north west, visible on=<2->] at (0,-28.6)
+    \node[big, anchor=north west] at (0,-4.8) {\etHours{} hours};
+    \node[measure, anchor=north west, text width=23mm] at (27,-5.4) {on~\etGpus{}~GPUs};
+    \node[big, anchor=north west] at (0,-12.8) {\etMonths{} month};
+    \node[measure, anchor=north west, text width=23mm] at (27,-13.4) {of search logs};
+    \draw[draw=ruling, line width=0.4pt] (51,1) to (51,-19);
+    \node[lbl, anchor=north west] at (55,0) {Value: A/B tests, relative change};
+    \node[big, anchor=north west] at (55,-4.8) {+\etCvr\%};
+    \node[measure, anchor=north west, text width=52mm] at (78,-5.4) {visits that end in a purchase};
+    \node[big, anchor=north west] at (55,-12.8) {+\etOspr\%};
+    \node[measure, anchor=north west, text width=52mm] at (78,-13.4) {searches that end in a purchase};
+    % Airbnb's words on its gain, for scale (click 2)
+    \node[body, anchor=north west, text width=130mm, visible on=<2->] at (0,-20.2)
+      {Airbnb calls its +\abConv\% gain \textquotedblleft a large portion of the team's annual goal\textquotedblright.};
+    \draw[draw=ruledark, line width=0.6pt, visible on=<3->] (0,-26.8) to (130,-26.8);
+    \node[lbl, anchor=north west, visible on=<3->] at (0,-29)
       {Popular searches: share of the bought products found in the top 100};
-    \foreach \ry/\lab/\v in {-35.2/{Plain version}/\etHeadBase,
-                             -40.8/{Keyword search}/\etHeadBM, -46.4/{Final model}/\etHeadFinal} {
-      \node[anchor=east, inner sep=0, font=\small, visible on=<2->] at (66,\ry) {\lab};
-      \sharebox{2-}{69}{\ry}{44}{4.2}{\v}
-      \node[anchor=west, inner sep=0, font=\large, visible on=<2->] at (115.5,\ry) {\v\%};}
-    \node[src, anchor=north west, text width=130mm] at (0,-50.6) {\etsysource};
+    \foreach \ry/\lab/\v in {-35.4/{Plain version}/\etHeadBase,
+                             -40.9/{Keyword search}/\etHeadBM, -46.4/{Final model}/\etHeadFinal} {
+      \node[anchor=east, inner sep=0, font=\small, visible on=<3->] at (66,\ry) {\lab};
+      \sharebox{3-}{69}{\ry}{44}{4.2}{\v}
+      \node[anchor=west, inner sep=0, font=\large, visible on=<3->] at (115.5,\ry) {\v\%};}
+    \node[src, anchor=north west, text width=130mm] at (0,-50.6) {\etsysource{} Airbnb: arXiv preprint 2026.};
   \end{tikzpicture}
 \end{frame}
 

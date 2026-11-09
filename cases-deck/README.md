@@ -15,7 +15,7 @@ all) the same day. The same evening he rejected the cases of version 1 as old: "
 - `block1-nearest-neighbors.pdf`, `block2-matrix-factorization.pdf`, `block3-bandits.pdf`,
   `block4-parallelized-mf.pdf` and their handouts: since 2026-11-09 one deck per Friday block with the cases that
   follow it. Section "One deck per block" below.
-- `weekend2-cases.pdf`: the deck for the weekend, all six cases in the order of the blocks, 52 pages;
+- `weekend2-cases.pdf`: the deck for the weekend, all six cases in the order of the blocks, 53 pages;
   `weekend2-cases-handout.pdf`, 27 pages. Section "The weekend deck" below.
 - `PRINCIPLES.md`: the lessons of the case decks and the rules for the next ones (bandits, advertising).
 
@@ -29,7 +29,7 @@ cases of each deck and writes `tools/expected-<deck>.txt`.
 
 | Deck | Friday block | Cases | Pages (handout) |
 |---|---|---|---|
-| `block1-nearest-neighbors.tex` | 08:15 the inner product and nearest neighbors | Etsy, Airbnb | 21 (11) |
+| `block1-nearest-neighbors.tex` | 08:15 the inner product and nearest neighbors | Etsy, Airbnb | 22 (11) |
 | `block2-matrix-factorization.tex` | 10:00 and 11:00 matrix product and matrix factorization | Spotify | 8 (5) |
 | `block3-bandits.tex` | 14:00 bandits | Spotify's home page, Amazon Payments | 17 (9) |
 | `block4-parallelized-mf.tex` | 16:00 parallelized matrix factorization | LinkedIn's ads | 9 (5) |
@@ -58,6 +58,17 @@ Later on 2026-11-09, after Carlos reviewed the facts of the matrix factorization
 Spotify frame 3 says "relative change" beside its two percentages, as the other cases do, and its talk track says the
 full model was in production as of the paper, 2024. The paper's abstract gives +23% for the stream rate, where its
 Table 5 gives +25.82% (full model) and "Neutral" (networks alone); the slide shows only Table 5's start rates.
+
+The same evening Carlos asked what a site conversion is, then: "add in the slide this quotation that Airbnb ... calls
+its plus 0.31% conversion gain a large portion of the team's annual goal ... Please relabel as you suggest". The
+measures are now named by what they count: on Etsy frame 5 "visits that end in a purchase" and "searches that end in
+a purchase" (the paper's site-wide conversion rate and organic search purchase rate), on Airbnb frame 3 "visits that
+end in a booking" (the paper's "booking conversion"). Neither paper defines its measure; the labels give the usual
+meanings. Etsy frame 5 shows at a new second click "Airbnb calls its +0.31% gain" with the paper's words (Sec. 6.3,
+the preprint; "in the same blog" in his message read as "in the same block"), and its source line adds "Airbnb: arXiv
+preprint 2026."; the recall bars moved to the third click. Block 1 has 22 pages and the weekend deck 53. Etsy frame 5
+has 78 words on its handout page (55 before), over the 70 of PRINCIPLES.md; Etsy frames 1 and 4 have 76 and 75.
+Checks: 0 log errors, 0 em and en dashes, no build metadata, nothing moves between clicks, 14 and 31 strings found.
 
 ## One deck per case, 2026-11-06
 

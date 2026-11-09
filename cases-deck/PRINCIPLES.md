@@ -24,6 +24,10 @@ advertising). Audience of the decks: managers with little formal math, 10 minute
   label touching a box.
 - **Jargon left the slides:** list of numbers (embedding), two networks (two towers), shortlist (candidate set),
   clustered index (IVF), "share of the bought products found in the top 100" (recall@100).
+- **A measure is named by what it counts.** On 2026-11-09 Carlos asked what a "site conversion" is. Etsy's
+  measures became "visits that end in a purchase" and "searches that end in a purchase", Airbnb's "visits that end
+  in a booking"; the papers' names (site-wide conversion rate, organic search purchase rate) stay in the talk track
+  and README.md.
 - **"Follow the style of the slides for X" means: build without dictation, on the pattern of that deck.** For the
   bandit and advertising decks he chose the cases, then wrote "Produce the slides, follow the style from the slides
   for the matrix factorization part": they follow the Spotify case (`spotify-frames.tex`; the problem with a big number at the second click,
@@ -75,6 +79,7 @@ Details cut from a slide go into the `% Say:` talk track above its frame.
 - A title never repeats a number shown large on the slide.
 - Short source line: "Jha and others (Etsy), IEEE FMLDS 2024."
 - "relative change" beside every percentage from a test.
+- A measure says what it counts ("visits that end in a purchase"); a metric's name ("conversion rate") stays off the slide.
 - Body text at `\normalsize` holds about 70 characters on the full 130 mm line and 40 in a 64 mm column.
 
 ### Pictures
