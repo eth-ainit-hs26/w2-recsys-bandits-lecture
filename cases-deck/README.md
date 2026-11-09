@@ -54,6 +54,11 @@ State on 2026-11-09: 0 log errors, 0 em and en dashes, no build metadata, nothin
 3 strings found in the four block PDFs, 31 in the weekend deck. The title pages and dividers were rendered and read;
 the frames are those of 2026-11-06, unchanged.
 
+Later on 2026-11-09, after Carlos reviewed the facts of the matrix factorization block ("Apply the two wording fixes"):
+Spotify frame 3 says "relative change" beside its two percentages, as the other cases do, and its talk track says the
+full model was in production as of the paper, 2024. The paper's abstract gives +23% for the stream rate, where its
+Table 5 gives +25.82% (full model) and "Neutral" (networks alone); the slide shows only Table 5's start rates.
+
 ## One deck per case, 2026-11-06
 
 On 2026-11-06 Carlos asked again for business cases, now five of 10 minutes each, one after each block of the
