@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Distinguishability dial · W2 Bandits</title>
   <link rel="stylesheet" href="shared/style.css">
+  <link rel="stylesheet" href="shared/reveal.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
   <style>
     .dial-grid {
@@ -60,8 +61,9 @@
       margin-top: 8px;
     }
     .slider-row label {
-      font-size: 0.9rem;
-      color: var(--color-text-muted);
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--color-text);
       white-space: nowrap;
     }
     .slider-row input[type="range"] { flex: 1; }
@@ -104,7 +106,7 @@
     }
     .plot-wrap svg { width: 100%; height: 100%; display: block; }
 
-    .axis text { font-size: 11px; fill: var(--color-text-muted); }
+    .axis text { font-size: 15px; fill: var(--color-text-muted); }
     .axis path, .axis line { stroke: #adb5bd; }
     .grid line { stroke: #e9ecef; stroke-dasharray: 2 3; }
     .grid path { stroke: none; }
@@ -125,7 +127,7 @@
       stroke-width: 1.5;
     }
     .ref-label {
-      font-size: 11px;
+      font-size: 15px;
       fill: var(--color-text);
       paint-order: stroke;
       stroke: white;
@@ -133,18 +135,14 @@
       stroke-linejoin: round;
     }
     .axis-title {
-      font-size: 12px;
+      font-size: 16px;
       fill: var(--color-text);
       font-weight: 500;
     }
 
     .formula-box {
-      background: white;
-      border: 1px solid var(--color-border);
-      border-radius: 8px;
-      padding: 12px 14px;
-      margin-top: 14px;
-      font-size: 0.92rem;
+      padding: 4px 0;
+      font-size: 1.05rem;
       color: var(--color-text);
     }
     .formula-box .katex { font-size: 1em; }
@@ -157,7 +155,16 @@
   </header>
   <main class="viz-container">
     <h1>Distinguishability dial</h1>
-    <p class="lede">Two urns, two hidden biases. How many draws do you need to be 95% sure which is bigger?</p>
+    <ol class="howto">
+      <li>Drag the <strong>gap</strong> slider.</li>
+      <li>Read how many draws per urn you need.</li>
+      <li>Try halving the gap: the draws go up four times.</li>
+    </ol>
+
+    <div class="params"><dl>
+      <dt>Gap Δ</dt><dd>Difference in win rate between urn A and urn B (0.10 = 10 points).</dd>
+      <dt>Draws needed</dt><dd>How many balls to draw from each urn to be 95% sure which urn is better.</dd>
+    </dl></div>
 
     <div class="viz-card">
       <div class="dial-grid">
@@ -176,25 +183,22 @@
             </div>
           </div>
 
-          <div class="gap-readout">
-            Gap <strong>Δ = |p<sub>A</sub> − p<sub>B</sub>| = <span id="delta-readout">0.100</span></strong>
-          </div>
-
           <div class="slider-row">
-            <label for="delta-slider">Δ</label>
+            <label for="delta-slider">Gap Δ</label>
             <input type="range" id="delta-slider" min="0.01" max="0.50" step="0.005" value="0.10">
-            <span style="font-family: ui-monospace, monospace; font-size: 0.9rem; min-width: 3.2em; text-align: right;" id="delta-num">0.100</span>
+            <span style="font-family: ui-monospace, monospace; font-size: 0.95rem; font-weight: 600; min-width: 3.2em; text-align: right;" id="delta-num">0.100</span>
           </div>
 
           <div class="bignum-card">
-            <div class="bignum-label">Samples needed (per urn)</div>
+            <div class="bignum-label">Draws needed per urn</div>
             <div class="bignum-value" id="n-per-urn">191</div>
-            <div class="bignum-sub">total trials: <span id="n-total">382</span></div>
+            <div class="bignum-sub">both urns: <span id="n-total">382</span></div>
           </div>
 
-          <div class="formula-box">
-            <div id="formula-display"></div>
-          </div>
+          <details class="more">
+            <summary>Show the formula</summary>
+            <div class="more-body"><div class="formula-box"><div id="formula-display"></div></div></div>
+          </details>
         </div>
 
         <!-- Right column: log-scale plot -->
@@ -206,11 +210,13 @@
       </div>
     </div>
 
-    <aside class="explainer">
-      <h2>The cost of distinguishability is quadratic in 1/Δ</h2>
-      <p>When the audience's statistician says <em>"we need a million users to A/B-test this,"</em> she means: the gap is small. Halve Δ and the sample count quadruples; shrink it tenfold and the cost goes up a hundredfold.</p>
-      <p>Lai &amp; Robbins (1985) proved this is unavoidable for any algorithm — clever or not. The Shannon-flavored quantity sitting behind the bound is <strong>KL divergence</strong>: distributions that are close in KL are expensive to tell apart, no matter how you sample. The next slide makes that precise.</p>
-    </aside>
+    <details class="more">
+      <summary>Takeaway: small gaps are expensive</summary>
+      <div class="more-body">
+        <p>"We need a million users for this A/B test" means: the gap is small. Halve the gap and you need 4× the draws; make it 10× smaller and you need 100×.</p>
+        <p>Lai &amp; Robbins (1985): no algorithm, however clever, can beat this. The quantity behind it is <strong>KL divergence</strong>: urns that are close in KL are expensive to tell apart. The next slide makes that precise.</p>
+      </div>
+    </details>
   </main>
   <footer class="eth-footer">CAS AINIT HS26 · W2 Bandits · Scene 23</footer>
 
@@ -313,7 +319,7 @@
     // Plot: log-scale n-vs-Δ curve over [0.01, 0.50].
     // ------------------------------------------------------------------
     const PW = 560, PH = 420;
-    const M = { top: 24, right: 24, bottom: 50, left: 70 };
+    const M = { top: 34, right: 24, bottom: 58, left: 80 };
     const plotW = PW - M.left - M.right;
     const plotH = PH - M.top - M.bottom;
     const plot = d3.select('#plot');
@@ -344,14 +350,14 @@
 
     // Axis titles
     gPlot.append('text').attr('class', 'axis-title')
-      .attr('x', plotW / 2).attr('y', plotH + 38)
+      .attr('x', plotW / 2).attr('y', plotH + 46)
       .attr('text-anchor', 'middle')
-      .text('gap Δ = |p_A − p_B|');
+      .text('gap Δ between the urns');
 
     gPlot.append('text').attr('class', 'axis-title')
-      .attr('transform', `translate(-50, ${plotH / 2}) rotate(-90)`)
+      .attr('transform', `translate(-58, ${plotH / 2}) rotate(-90)`)
       .attr('text-anchor', 'middle')
-      .text('samples per urn (log scale)');
+      .text('draws per urn (log scale)');
 
     // Curve data — sample densely
     const curveData = d3.range(DELTA_MIN, DELTA_MAX + 1e-9, 0.002).map(d => ({
@@ -384,7 +390,7 @@
         .attr('class', 'ref-label')
         .attr('x', lx).attr('y', ly)
         .attr('text-anchor', 'start')
-        .text(`Δ=${d.toFixed(2)} → n=${fmt(n)}`);
+        .text(`Δ = ${d.toFixed(2)} → ${fmt(n)}`);
     });
 
     // Current-Δ marker (animated on slider change)
@@ -401,13 +407,15 @@
       .attr('stroke-dasharray', '3 3')
       .attr('opacity', 0.5)
       .attr('y1', 0).attr('y2', plotH);
+    // Keep reference labels and the current dot above the guide line.
+    refG.raise();
+    currentMarker.raise();
 
     // ------------------------------------------------------------------
     // Update loop
     // ------------------------------------------------------------------
     const slider = document.getElementById('delta-slider');
     const deltaNum = document.getElementById('delta-num');
-    const deltaReadout = document.getElementById('delta-readout');
     const paReadout = document.getElementById('pa-readout');
     const pbReadout = document.getElementById('pb-readout');
     const nPerUrnEl = document.getElementById('n-per-urn');
@@ -428,7 +436,6 @@
 
       paReadout.textContent = pA.toFixed(3);
       pbReadout.textContent = pB.toFixed(3);
-      deltaReadout.textContent = delta.toFixed(3);
       deltaNum.textContent = delta.toFixed(3);
       nPerUrnEl.textContent = fmt(n);
       nTotalEl.textContent = fmt(2 * n);
@@ -449,7 +456,7 @@
     // KaTeX formula
     // ------------------------------------------------------------------
     document.getElementById('formula-display').innerHTML =
-      '$n_{\\text{per urn}} = \\left\\lceil \\frac{z_{0.975}^{2}\\,\\bigl(p_A(1-p_A) + p_B(1-p_B)\\bigr)}{\\Delta^{2}} \\right\\rceil,\\quad z_{0.975} \\approx 1.96$';
+      '$$n_{\\text{per urn}} = \\left\\lceil \\frac{z_{0.975}^{2}\\,\\bigl(p_A(1-p_A) + p_B(1-p_B)\\bigr)}{\\Delta^{2}} \\right\\rceil,\\quad z_{0.975} \\approx 1.96$$';
 
     // First paint
     update(parseFloat(slider.value));

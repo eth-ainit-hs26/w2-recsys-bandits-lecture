@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Entropy Mountain · W2 Bandits</title>
   <link rel="stylesheet" href="shared/style.css">
+  <link rel="stylesheet" href="shared/reveal.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
   <style>
     .em-grid {
@@ -42,7 +43,7 @@
     }
     .control-panel p.hint {
       margin: 0;
-      font-size: 0.82rem;
+      font-size: 0.92rem;
       color: var(--color-text-muted);
     }
     .control-panel .ctrl-group {
@@ -56,7 +57,7 @@
     .control-panel .row {
       display: flex;
       justify-content: space-between;
-      font-size: 0.82rem;
+      font-size: 0.9rem;
       color: var(--color-text-muted);
     }
 
@@ -75,11 +76,7 @@
     }
 
     .formula-card {
-      background: var(--color-neu-bg);
-      border: 1px solid var(--color-border);
-      border-radius: 8px;
-      padding: 14px 16px;
-      margin: 12px 0 18px;
+      margin: 4px 0 4px;
       text-align: center;
       font-size: 1.05rem;
     }
@@ -91,11 +88,11 @@
     }
     .axis text {
       fill: var(--color-text-muted);
-      font-size: 11px;
+      font-size: 14px;
     }
     .axis-label {
       fill: var(--color-text);
-      font-size: 12px;
+      font-size: 15px;
       font-weight: 500;
     }
     .h-curve {
@@ -125,7 +122,7 @@
     }
     .max-label {
       fill: var(--color-text-muted);
-      font-size: 11px;
+      font-size: 14px;
     }
 
     /* Realization strip */
@@ -137,7 +134,7 @@
       justify-content: space-between;
       align-items: baseline;
       margin-bottom: 6px;
-      font-size: 0.85rem;
+      font-size: 0.92rem;
       color: var(--color-text-muted);
     }
     .realization-wrap .label-row strong {
@@ -155,7 +152,7 @@
       flex-wrap: wrap;
       gap: 10px 16px;
       margin-top: 10px;
-      font-size: 0.85rem;
+      font-size: 0.92rem;
       color: var(--color-text);
     }
     .legend .swatch {
@@ -179,10 +176,14 @@
     .mc-bar-svg { width: 100%; height: 260px; display: block; }
     .mc-bar-svg .bar { stroke: white; stroke-width: 1; }
     .mc-bar-svg .bar-label {
-      font-size: 11px;
+      font-size: 14px;
       fill: var(--color-text);
       text-anchor: middle;
       font-variant-numeric: tabular-nums;
+      paint-order: stroke;
+      stroke: white;
+      stroke-width: 4px;
+      stroke-linejoin: round;
     }
     .mc-bar-svg .axis-line {
       stroke: var(--color-text-muted);
@@ -190,16 +191,18 @@
     }
     .mc-bar-svg .max-label {
       fill: var(--color-text-muted);
-      font-size: 11px;
+      font-size: 14px;
     }
 
     .h-readout-block {
       display: flex; flex-direction: column; gap: 4px;
     }
     .h-readout-block .max-line {
-      font-size: 0.85rem; color: var(--color-text-muted);
+      font-size: 0.92rem; color: var(--color-text-muted);
       font-variant-numeric: tabular-nums;
     }
+    h2.section { margin: 32px 0 8px; font-weight: 500; font-size: 1.25rem; }
+    details.more.inline { max-width: none; margin: 14px 0 0; }
     .h-readout-block .max-line strong {
       color: var(--color-text); font-weight: 500;
     }
@@ -232,7 +235,7 @@
 
     .enc-bitstream {
       font-family: ui-monospace, "SF Mono", Menlo, monospace;
-      font-size: 0.78rem;
+      font-size: 0.9rem;
       letter-spacing: 0.5px;
       line-height: 1.45;
       background: var(--color-neu-bg);
@@ -251,7 +254,7 @@
 
     .enc-stats {
       display: flex; flex-wrap: wrap; gap: 16px;
-      margin-top: 10px; font-size: 0.88rem; color: var(--color-text-muted);
+      margin-top: 10px; font-size: 0.95rem; color: var(--color-text-muted);
     }
     .enc-stats .stat .num {
       font-variant-numeric: tabular-nums;
@@ -289,11 +292,16 @@
   </header>
   <main class="viz-container">
     <h1>Entropy Mountain</h1>
-    <p class="lede">Drag the urn's bias. The curve below is Shannon's entropy — the floor for compressing draws from this urn.</p>
+    <ol class="howto">
+      <li>Drag the <strong>urn bias</strong> slider.</li>
+      <li>Watch the dot move on the curve.</li>
+      <li>Scroll down: try more colours, then press <strong>Sample</strong>.</li>
+    </ol>
 
-    <div class="formula-card">
-      <span id="formula"></span>
-    </div>
+    <div class="params"><dl>
+      <dt>Urn bias p</dt><dd>Share of blue balls in the urn. p = 0.5 means half blue, half vermillion.</dd>
+      <dt>H(p), entropy</dt><dd>How surprising one draw is, in bits. Highest when you cannot guess the colour.</dd>
+    </dl></div>
 
     <div class="viz-card">
       <div class="em-grid">
@@ -304,7 +312,7 @@
 
           <div class="realization-wrap">
             <div class="label-row">
-              <span>One realization of 100 draws (visual aid — not a sample, just <em>round(100·p)</em> blue balls)</span>
+              <span>The urn as 100 balls</span>
               <span><strong id="count-blue">50</strong> blue · <strong id="count-red">50</strong> vermillion</span>
             </div>
             <svg id="realization" class="realization-svg" viewBox="0 0 720 36" preserveAspectRatio="xMidYMid meet"></svg>
@@ -318,8 +326,7 @@
 
         <div>
           <div class="control-panel">
-            <h3>Urn bias</h3>
-            <p class="hint">Move the slider to change p, the probability of drawing a blue ball.</p>
+            <h3>Urn bias p</h3>
 
             <div class="ctrl-group">
               <input type="range" id="p-slider" min="0" max="1" step="0.01" value="0.5">
@@ -334,22 +341,25 @@
               <div class="readout">
                 H(p) = <span id="h-value">1.000</span><span class="small">bits</span>
               </div>
-              <p class="hint" id="h-interp">Maximum uncertainty — a fair coin.</p>
+              <p class="hint" id="h-interp"></p>
             </div>
           </div>
         </div>
       </div>
+      <details class="more inline">
+        <summary>Show the formula</summary>
+        <div class="more-body"><div class="formula-card"><span id="formula"></span></div></div>
+      </details>
     </div>
 
     <!-- ====================================================== -->
     <!-- Multi-colour urn                                         -->
     <!-- ====================================================== -->
-    <h2 style="margin:32px 0 6px;font-weight:500;font-size:1.25rem;">More than two colours</h2>
-    <p class="lede">
-      Same idea, larger alphabet.  An urn with K colours has
-      <em>H = − Σ p<sub>k</sub> log<sub>2</sub> p<sub>k</sub></em>; the maximum
-      <em>log<sub>2</sub> K</em> is reached only when the distribution is uniform.
-    </p>
+    <h2 class="section">More than two colours</h2>
+    <div class="params"><dl>
+      <dt>Colours K</dt><dd>How many colours are in the urn (2 to 8).</dd>
+      <dt>Concentration α</dt><dd>0 = all colours equally common. 1 = only one colour left.</dd>
+    </dl></div>
 
     <div class="viz-card">
       <div class="mc-grid">
@@ -358,8 +368,7 @@
         </div>
         <div>
           <div class="control-panel">
-            <h3>Number of colours K</h3>
-            <p class="hint">Slide K from 2 up to 8.</p>
+            <h3>Colours K</h3>
             <div class="ctrl-group">
               <input type="range" id="mc-K" min="2" max="8" step="1" value="4">
               <div class="row">
@@ -370,7 +379,6 @@
             </div>
 
             <h3 style="margin-top:6px;">Concentration α</h3>
-            <p class="hint">α = 0 is uniform (max entropy).  α = 1 puts all mass on one colour (no entropy).</p>
             <div class="ctrl-group">
               <input type="range" id="mc-alpha" min="0" max="1" step="0.01" value="0">
               <div class="row">
@@ -384,45 +392,48 @@
               <div class="readout">
                 H = <span id="mc-h-value">2.000</span><span class="small">bits</span>
               </div>
-              <div class="max-line">max possible at K = <strong id="mc-K-show">4</strong>: log<sub>2</sub> K = <strong id="mc-max">2.000</strong> bits</div>
-              <p class="hint" id="mc-interp">All four colours equally likely — every draw is maximally surprising.</p>
+              <div class="max-line">max for K = <strong id="mc-K-show">4</strong>: <strong id="mc-max">2.000</strong> bits</div>
+              <p class="hint" id="mc-interp"></p>
             </div>
           </div>
         </div>
       </div>
+      <details class="more inline">
+        <summary>Show the formula</summary>
+        <div class="more-body"><p>H = − Σ p<sub>k</sub> log<sub>2</sub> p<sub>k</sub>. The maximum, log<sub>2</sub> K bits, is reached only when all colours are equally common.</p></div>
+      </details>
     </div>
 
     <!-- ====================================================== -->
     <!-- Encoding a sequence                                      -->
     <!-- ====================================================== -->
-    <h2 style="margin:32px 0 6px;font-weight:500;font-size:1.25rem;">Encoding a sequence: bits per ball</h2>
-    <p class="lede">
-      H is not a metaphor.  It is the <em>floor</em> on the average number
-      of bits per ball any encoder can use.  Sample N draws from the
-      binary urn above; an ideal arithmetic coder spends
-      <em>−log<sub>2</sub> p̂(x)</em> bits per draw.  Watch the running
-      average converge to H(p) as N grows.
-    </p>
+    <h2 class="section">Bits per ball: H is the floor</h2>
+    <div class="params"><dl>
+      <dt>Draws N</dt><dd>How many balls to draw from the urn above (same bias p).</dd>
+      <dt>Bits per ball</dt><dd>Cost of writing each draw down. Common colours are cheap, rare ones expensive.</dd>
+    </dl></div>
 
     <div class="viz-card">
       <div class="enc-grid">
         <div>
           <svg id="enc-strip" class="enc-strip-svg" viewBox="0 0 720 110" preserveAspectRatio="xMidYMid meet"></svg>
-          <div class="enc-bitstream" id="enc-bitstream">
-            <span style="color:var(--color-text-muted)">(press Sample to draw a sequence)</span>
-          </div>
+          <details class="more inline">
+            <summary>Show the cost of each ball</summary>
+            <div class="enc-bitstream" id="enc-bitstream">
+              <span style="color:var(--color-text-muted)">(press Sample to draw a sequence)</span>
+            </div>
+          </details>
           <div class="enc-stats">
             <span class="stat">N = <span class="num" id="enc-n">0</span></span>
-            <span class="stat">total bits used <span class="num" id="enc-bits">0.00</span></span>
-            <span class="stat">average bits/ball <span class="num" id="enc-avg">&mdash;</span></span>
+            <span class="stat">total bits <span class="num" id="enc-bits">0.00</span></span>
+            <span class="stat">average per ball <span class="num" id="enc-avg">&mdash;</span></span>
             <span class="stat target">H(p) floor <span class="num" id="enc-target">&mdash;</span></span>
           </div>
           <svg id="enc-converge" class="enc-converge-svg" viewBox="0 0 720 220" preserveAspectRatio="xMidYMid meet"></svg>
         </div>
         <div>
           <div class="control-panel">
-            <h3>Sequence length</h3>
-            <p class="hint">Each draw uses the bias <em>p</em> from the slider above.</p>
+            <h3>Draws N</h3>
             <div class="ctrl-group">
               <input type="range" id="enc-N" min="10" max="500" step="10" value="60">
               <div class="row">
@@ -437,20 +448,20 @@
                 padding: 8px 12px; font-size: 0.92rem; cursor: pointer;
                 margin-top: 4px;
               ">Sample N draws</button>
-            <p class="hint" style="margin-top:8px;">
-              Code: blue ball = <em>−log<sub>2</sub> p</em> bits, vermillion = <em>−log<sub>2</sub>(1 − p)</em> bits.
-              When p = ½ both cost 1 bit; otherwise the more likely colour costs less.
-            </p>
+            <p class="hint" style="margin-top:8px;">The blue line settles on the dashed H(p) floor.</p>
           </div>
         </div>
       </div>
     </div>
 
-    <aside class="explainer">
-      <h2>Why the bell curve is a floor, not a hill</h2>
-      <p>Shannon (1948) proved that no compression scheme can describe an urn's draws in fewer than <strong>H(p)</strong> bits per ball, on average. At <strong>p = 0.5</strong> you need a full bit per draw — every flip is genuinely surprising. At <strong>p = 0.99</strong> the urn is almost all blue, and you need only ≈ 0.08 bits per draw: long runs of blues compress away.</p>
-      <p>Entropy will reappear next as the <em>information gain</em> in a Bayesian bandit: the more uncertain the arm (the closer its posterior is to the top of this mountain), the more we learn from pulling it. The mountain is the budget for curiosity.</p>
-    </aside>
+    <details class="more">
+      <summary>Takeaway: why the curve is a floor</summary>
+      <div class="more-body">
+        <p>Shannon (1948): no code can store an urn's draws in fewer than <strong>H(p)</strong> bits per ball, on average.</p>
+        <p>p = 0.5: a full bit per ball, every draw is a surprise. p = 0.99: about 0.08 bits per ball, because long blue runs compress away.</p>
+        <p>Coming next: in a bandit, the more uncertain an urn (higher on this mountain), the more we learn by pulling it.</p>
+      </div>
+    </details>
   </main>
   <footer class="eth-footer">CAS AINIT HS26 · W2 Bandits</footer>
 
@@ -479,7 +490,7 @@
     // Plot setup
     // ------------------------------------------------------------------
     const W = 720, H_ = 420;
-    const M = { top: 24, right: 28, bottom: 56, left: 56 };
+    const M = { top: 28, right: 28, bottom: 60, left: 70 };
     const innerW = W - M.left - M.right;
     const innerH = H_ - M.top - M.bottom;
 
@@ -526,8 +537,8 @@
       .attr('class', 'axis-label')
       .attr('text-anchor', 'middle')
       .attr('x', innerW / 2)
-      .attr('y', innerH + 42)
-      .text('p  (probability of a blue ball)');
+      .attr('y', innerH + 46)
+      .text('urn bias p  (share of blue balls)');
 
     // Y-axis
     const yAxis = d3.axisLeft(yScale)
@@ -539,8 +550,8 @@
     gAxes.append('text')
       .attr('class', 'axis-label')
       .attr('text-anchor', 'middle')
-      .attr('transform', `translate(${-40},${innerH / 2}) rotate(-90)`)
-      .text('H(p)  (bits)');
+      .attr('transform', `translate(${-54},${innerH / 2}) rotate(-90)`)
+      .text('H(p)  (bits per draw)');
 
     // Max line at H=1
     gMaxLine.append('line')
@@ -550,7 +561,7 @@
     gMaxLine.append('text')
       .attr('class', 'max-label')
       .attr('x', innerW - 4)
-      .attr('y', yScale(1) - 4)
+      .attr('y', yScale(1) - 8)
       .attr('text-anchor', 'end')
       .text('1 bit (max)');
 
@@ -613,11 +624,11 @@
     }
 
     function interpFor(p, h) {
-      if (p <= 0 || p >= 1) return 'No uncertainty — every draw is the same color. Compresses to 0 bits.';
-      if (Math.abs(p - 0.5) < 0.02) return 'Maximum uncertainty — a fair coin. 1 bit per draw is unbeatable.';
-      if (h < 0.2) return 'Almost certain — long runs of one color, very compressible.';
-      if (h < 0.7) return 'Mildly biased — some compression possible, but every draw still informative.';
-      return 'Close to fair — almost a full bit of surprise per draw.';
+      if (p <= 0 || p >= 1) return 'No surprise: every ball is the same colour.';
+      if (Math.abs(p - 0.5) < 0.02) return 'Maximum surprise: like a fair coin.';
+      if (h < 0.2) return 'Almost no surprise: you can nearly always guess.';
+      if (h < 0.7) return 'Some surprise: one colour is more common.';
+      return 'Nearly a coin flip: lots of surprise.';
     }
 
     function update(p) {
@@ -682,7 +693,7 @@
     (function buildMulticolour() {
       const svg = d3.select('#mc-bars');
       const W = 720, H = 260;
-      const M = { top: 24, right: 24, bottom: 64, left: 56 };
+      const M = { top: 28, right: 110, bottom: 16, left: 70 };
       const innerW = W - M.left - M.right;
       const innerH = H - M.top - M.bottom;
       const g = svg.append('g').attr('transform', `translate(${M.left},${M.top})`);
@@ -692,9 +703,8 @@
       g.append('g').attr('class', 'axis').call(yAxis);
       g.append('text').attr('class', 'axis-label')
         .attr('text-anchor', 'middle')
-        .attr('transform', `translate(${-40},${innerH / 2}) rotate(-90)`)
-        .attr('fill', 'currentColor').attr('font-size', 12)
-        .text('p_k');
+        .attr('transform', `translate(${-54},${innerH / 2}) rotate(-90)`)
+        .text('share of balls');
 
       // Reference horizontal lines at 1/K levels (drawn each update)
       const gRef = g.append('g');
@@ -726,11 +736,11 @@
         Max_show.textContent = fmt3(hMax);
 
         if (a < 0.02) {
-          interpEl.textContent = 'Uniform — H is at its maximum, log₂ K. Every draw is maximally surprising.';
+          interpEl.textContent = 'All colours equally common: maximum surprise.';
         } else if (a > 0.98) {
-          interpEl.textContent = 'All mass on one colour. H = 0. Draws are predictable, encoder uses 0 bits.';
+          interpEl.textContent = 'Only one colour: no surprise, H = 0.';
         } else {
-          interpEl.textContent = `One colour dominates; H ≈ ${fmt3(h)} of the maximum ${fmt3(hMax)} bits.`;
+          interpEl.textContent = 'One colour dominates: less surprise.';
         }
 
         // Bars
@@ -760,9 +770,9 @@
           .attr('x1', 0).attr('x2', innerW)
           .attr('y1', yScale(1 / K)).attr('y2', yScale(1 / K));
         gRef.append('text').attr('class', 'max-label')
-          .attr('x', innerW - 4).attr('y', yScale(1 / K) - 4)
-          .attr('text-anchor', 'end')
-          .text(`uniform = 1/${K}`);
+          .attr('x', innerW + 8).attr('y', yScale(1 / K)).attr('dy', '0.35em')
+          .attr('text-anchor', 'start')
+          .text(`equal = 1/${K}`);
       }
 
       K_input.addEventListener('input', updateMC);
@@ -822,8 +832,10 @@
         const N = seq.length;
         const innerW = STRIP_W - STRIP_PAD.left - STRIP_PAD.right;
         const stride = innerW / Math.max(N, 1);
-        const cell = Math.min(stride - 1, 14);
-        const y = (STRIP_H - STRIP_PAD.top - STRIP_PAD.bottom) / 2 - cell / 2;
+        const thin = stride < 4;  // many draws: drop the gap so cells stay visible
+        const cell = Math.min(thin ? stride : stride - 1, 14);
+        const cellH = thin ? 28 : cell;
+        const y = (STRIP_H - STRIP_PAD.top - STRIP_PAD.bottom) / 2 - cellH / 2;
 
         seq.forEach((x, i) => {
           stripG.append('rect')
@@ -831,7 +843,8 @@
             .attr('x', i * stride)
             .attr('y', y)
             .attr('width', cell)
-            .attr('height', cell)
+            .attr('height', cellH)
+            .attr('stroke-width', thin ? 0 : null)
             .attr('fill', x === 1 ? blueColor : redColor);
         });
         // Axis label
@@ -839,9 +852,9 @@
           .attr('x', innerW / 2)
           .attr('y', STRIP_H - STRIP_PAD.top - STRIP_PAD.bottom + 16)
           .attr('text-anchor', 'middle')
-          .attr('font-size', 11)
+          .attr('font-size', 14)
           .attr('fill', 'currentColor')
-          .attr('opacity', 0.6)
+          .attr('opacity', 0.7)
           .text(`${N} draws (left → right)`);
       }
 
@@ -866,7 +879,7 @@
         const cs = d3.select('#enc-converge');
         cs.selectAll('*').remove();
         const W = 720, H = 220;
-        const M = { top: 18, right: 24, bottom: 36, left: 56 };
+        const M = { top: 22, right: 24, bottom: 46, left: 70 };
         const innerW = W - M.left - M.right;
         const innerH = H - M.top - M.bottom;
         const g = cs.append('g').attr('transform', `translate(${M.left},${M.top})`);
@@ -897,14 +910,12 @@
         g.append('g').attr('class', 'axis').call(d3.axisLeft(yScale).ticks(4));
         g.append('text').attr('class', 'axis-label')
           .attr('text-anchor', 'middle')
-          .attr('x', innerW / 2).attr('y', innerH + 28)
-          .attr('fill', 'currentColor').attr('font-size', 11)
+          .attr('x', innerW / 2).attr('y', innerH + 40)
           .text('number of draws');
         g.append('text').attr('class', 'axis-label')
           .attr('text-anchor', 'middle')
-          .attr('transform', `translate(${-40},${innerH / 2}) rotate(-90)`)
-          .attr('fill', 'currentColor').attr('font-size', 11)
-          .text('average bits / ball');
+          .attr('transform', `translate(${-50},${innerH / 2}) rotate(-90)`)
+          .text('avg bits / ball');
 
         // H(p) floor line
         g.append('line').attr('class', 'h-line')
@@ -914,8 +925,8 @@
           .attr('x', innerW - 6).attr('y', yScale(Hp) - 6)
           .attr('text-anchor', 'end')
           .attr('fill', 'var(--color-fiction)')
-          .attr('font-size', 11).attr('font-weight', 600)
-          .text(`H(p) = ${Hp.toFixed(3)}`);
+          .attr('font-size', 14).attr('font-weight', 600)
+          .text(`H(p) floor = ${Hp.toFixed(3)}`);
 
         // Running average curve
         const lineGen = d3.line()

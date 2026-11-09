@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Three-urn casino · W2 Recsys</title>
   <link rel="stylesheet" href="shared/style.css">
+  <link rel="stylesheet" href="shared/reveal.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
   <style>
@@ -77,7 +78,7 @@
       flex-direction: column;
       align-items: center;
       gap: 2px;
-      font-size: 0.78rem;
+      font-size: 0.9rem;
       font-variant-numeric: tabular-nums;
       color: var(--color-text-muted);
     }
@@ -101,7 +102,7 @@
     .urn-stats .est-line strong { color: var(--color-header-start); }
 
     .urn-bias {
-      font-size: 0.82rem;
+      font-size: 0.95rem;
       color: var(--color-neg);
       font-variant-numeric: tabular-nums;
       font-weight: 600;
@@ -143,7 +144,7 @@
       letter-spacing: 0.02em;
     }
     .round-display .sub {
-      font-size: 0.78rem;
+      font-size: 0.9rem;
       color: var(--color-text-muted);
       margin-top: 2px;
     }
@@ -161,7 +162,7 @@
       font-variant-numeric: tabular-nums;
     }
     .total-display .sub {
-      font-size: 0.78rem;
+      font-size: 0.9rem;
       color: var(--color-text-muted);
     }
 
@@ -189,7 +190,7 @@
     }
 
     .last-draw {
-      font-size: 0.85rem;
+      font-size: 0.95rem;
       text-align: center;
       color: var(--color-text-muted);
       min-height: 1.4em;
@@ -237,10 +238,48 @@
     }
     .toolbar button.secondary:hover:not(:disabled) { background: var(--color-neu-bg); }
     .toolbar .seed-line {
-      font-size: 0.82rem;
+      font-size: 0.9rem;
       color: var(--color-text-muted);
       font-variant-numeric: tabular-nums;
       margin-left: auto;
+    }
+
+    /* ---------- New urns box ---------- */
+    .urns-box {
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+      flex-wrap: wrap;
+      margin-top: 14px;
+      padding: 12px 14px;
+      background: var(--color-neu-bg);
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+      font-size: 0.95rem;
+      line-height: 1.5;
+    }
+    .urns-box button {
+      flex: none;
+      background: white;
+      color: var(--color-header-end);
+      border: 1px solid var(--color-header-end);
+      border-radius: 8px;
+      padding: 9px 16px;
+      font-size: 0.92rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .urns-box button:hover { background: #eef1f4; }
+    .urns-box .urns-text { flex: 1 1 320px; }
+    .urns-box .urns-rates {
+      margin-top: 4px;
+      font-variant-numeric: tabular-nums;
+    }
+    .urns-box .urns-rates strong { color: var(--color-text); }
+    .urns-box .urns-change {
+      margin-top: 4px;
+      color: var(--color-pos);
+      font-weight: 600;
     }
 
     /* ---------- Chart ---------- */
@@ -259,7 +298,7 @@
     }
     .chart-axis text {
       fill: var(--color-text-muted);
-      font-size: 11px;
+      font-size: 13px;
     }
     .chart-grid line {
       stroke: var(--color-border);
@@ -271,7 +310,7 @@
       display: flex; gap: 16px; flex-wrap: wrap;
       justify-content: center;
       margin-top: 6px;
-      font-size: 0.85rem;
+      font-size: 0.95rem;
       color: var(--color-text);
     }
     .legend-swatch {
@@ -284,7 +323,8 @@
     .legend-final {
       font-variant-numeric: tabular-nums;
       color: var(--color-text-muted);
-      font-size: 0.78rem;
+      font-size: 0.95rem;
+      font-weight: 600;
       margin-left: 4px;
     }
   </style>
@@ -297,9 +337,17 @@
 
   <main class="viz-container">
     <h1>Three-urn casino</h1>
-    <p class="lede">
-      Three campaigns, three hidden conversion rates. You have 30 chances. Maximize total wins.
-    </p>
+    <ol class="howto">
+      <li>Click an urn (or <strong>Pick A/B/C</strong>) to draw one ball. Blue = win.</li>
+      <li>Play 30 rounds. Collect as many wins as you can.</li>
+      <li>Click <strong>Reveal &amp; Replay</strong> to see the true odds and how three algorithms did. Then try <strong>New urns</strong>.</li>
+    </ol>
+
+    <div class="params"><dl>
+      <dt>Urn</dt><dd>A campaign. Each has a hidden win rate p.</dd>
+      <dt>p̂</dt><dd>Your estimate so far: wins ÷ picks.</dd>
+      <dt>Chart</dt><dd>Total wins collected, round by round.</dd>
+    </dl></div>
 
     <div class="viz-card">
       <div class="casino-top">
@@ -308,11 +356,11 @@
           <h3>Round</h3>
           <div class="round-display">
             <div class="big" id="round-big">1 / 30</div>
-            <div class="sub">vote, then click an urn (or use a button)</div>
+            <div class="sub">current round</div>
           </div>
           <div class="total-display">
             <div class="big" id="total-big">0</div>
-            <div class="sub">total wins so far</div>
+            <div class="sub">wins so far</div>
           </div>
           <div class="pick-buttons" id="pick-buttons">
             <button data-pick="0">Pick A</button>
@@ -325,34 +373,50 @@
 
       <div class="toolbar">
         <button id="reveal-btn" disabled>Reveal &amp; Replay</button>
-        <button class="secondary" id="reset-btn">New session</button>
-        <button class="secondary" id="randomize-btn">Randomize biases</button>
-        <span class="seed-line" id="seed-line">seed —</span>
+        <button class="secondary" id="reset-btn">Play again</button>
+        <span class="seed-line" id="seed-line" hidden></span>
       </div>
 
       <div class="chart-wrap">
         <svg id="chart" viewBox="0 0 720 320" preserveAspectRatio="xMidYMid meet"></svg>
         <div class="legend-row">
-          <span><span class="legend-swatch" style="background:var(--color-pos)"></span>Audience<span class="legend-final" id="leg-aud"></span></span>
-          <span><span class="legend-swatch" style="background:var(--color-neg)"></span>Naive (5×3 explore, then exploit)<span class="legend-final" id="leg-nai"></span></span>
-          <span><span class="legend-swatch" style="background:var(--color-demanding)"></span>ε-greedy (ε = 0.10)<span class="legend-final" id="leg-eps"></span></span>
-          <span><span class="legend-swatch" style="background:var(--color-fiction)"></span>UCB (c = 1)<span class="legend-final" id="leg-ucb"></span></span>
-          <span><span class="legend-swatch" style="background:#6C757D"></span>Optimal (always best)<span class="legend-final" id="leg-opt"></span></span>
+          <span><span class="legend-swatch" style="background:var(--color-pos)"></span>You<span class="legend-final" id="leg-aud"></span></span>
+          <span><span class="legend-swatch" style="background:var(--color-neg)"></span>Naive<span class="legend-final" id="leg-nai"></span></span>
+          <span><span class="legend-swatch" style="background:var(--color-demanding)"></span>ε-greedy<span class="legend-final" id="leg-eps"></span></span>
+          <span><span class="legend-swatch" style="background:var(--color-fiction)"></span>UCB<span class="legend-final" id="leg-ucb"></span></span>
+          <span><span class="legend-swatch" style="background:#6C757D"></span>Best possible<span class="legend-final" id="leg-opt"></span></span>
+        </div>
+      </div>
+
+      <div class="urns-box">
+        <button id="randomize-btn">New urns</button>
+        <div class="urns-text">
+          <div><strong>Play again</strong> keeps the same three urns. <strong>New urns</strong> gives every urn a new hidden win rate, so you cannot know in advance which one is best.</div>
+          <div class="urns-rates" id="urns-rates"></div>
+          <div class="urns-change" id="urns-change"></div>
         </div>
       </div>
     </div>
 
-    <aside class="explainer">
-      <h2>What's happening?</h2>
-      <p>
-        Each urn has a <em>hidden</em> Bernoulli bias — the chance that a single draw is a "win".
-        On every round, the audience votes which urn to sample; that decision uses only the running
-        empirical means <em>p̂ = wins / picks</em>. After 30 rounds, click <strong>Reveal &amp; Replay</strong>
-        to expose the biases and re-run three algorithms — naive explore-then-exploit, ε-greedy, and
-        UCB — on the <em>same</em> hidden draws. The cumulative-reward curves show how each strategy
-        spent its 30 chances.
-      </p>
-    </aside>
+    <details class="more">
+      <summary>The three algorithms</summary>
+      <div class="more-body">
+        <ol class="steps">
+          <li><strong>Naive:</strong> try each urn 5 times, then stick with the best one.</li>
+          <li><strong>ε-greedy:</strong> pick the best urn so far, but 10% of the time pick at random.</li>
+          <li><strong>UCB:</strong> pick the best urn so far, plus a bonus for urns tried only a few times.</li>
+          <li><strong>Best possible:</strong> always picks the truly best urn (needs to know the answer).</li>
+        </ol>
+      </div>
+    </details>
+
+    <details class="more">
+      <summary>What happened?</summary>
+      <div class="more-body">
+        <p>Each urn has a hidden win rate. You only saw wins ÷ picks, just like a real campaign.</p>
+        <p>The replay runs the algorithms on the <em>same</em> hidden draws, so the comparison is fair. The curves show how each one spent its 30 chances.</p>
+      </div>
+    </details>
   </main>
   <footer class="eth-footer">CAS AINIT HS26 · W2 Recsys</footer>
 
@@ -415,6 +479,16 @@
     // STATE
     // ============================================================
     let state;
+    function fmtRates(b) {
+      return b.map((x, i) => `${URN_NAMES[i]} <strong>${Math.round(x * 100)}%</strong>`).join(' &nbsp;·&nbsp; ');
+    }
+    function renderRatesLine() {
+      const el = document.getElementById('urns-rates');
+      if (!el) return;
+      el.innerHTML = state.revealed
+        ? `Win rates of these urns: ${fmtRates(state.biases)}`
+        : `Win rates of these urns: A ? &nbsp;·&nbsp; B ? &nbsp;·&nbsp; C ? &nbsp;(shown after <em>Reveal</em>)`;
+    }
     function freshState(opts = {}) {
       const seed = (opts.seed != null)
         ? (opts.seed >>> 0)
@@ -778,7 +852,7 @@
     // ============================================================
     // CHART  —  cumulative reward curves.
     // ============================================================
-    const CHART = { w: 720, h: 320, m: { l: 44, r: 14, t: 12, b: 30 } };
+    const CHART = { w: 720, h: 320, m: { l: 54, r: 14, t: 12, b: 44 } };
 
     function chartScales() {
       const innerW = CHART.w - CHART.m.l - CHART.m.r;
@@ -808,17 +882,17 @@
 
       // Axis labels
       g.append('text')
-        .attr('x', innerW / 2).attr('y', innerH + 25)
+        .attr('x', innerW / 2).attr('y', innerH + 38)
         .attr('text-anchor', 'middle')
         .attr('fill', 'var(--color-text-muted)')
-        .attr('font-size', 11)
+        .attr('font-size', 13)
         .text('round');
       g.append('text')
-        .attr('transform', `translate(-32,${innerH / 2}) rotate(-90)`)
+        .attr('transform', `translate(-40,${innerH / 2}) rotate(-90)`)
         .attr('text-anchor', 'middle')
         .attr('fill', 'var(--color-text-muted)')
-        .attr('font-size', 11)
-        .text('cumulative reward');
+        .attr('font-size', 13)
+        .text('total wins');
 
       return { g, x, y, innerW, innerH };
     }
@@ -888,6 +962,8 @@
     function reveal() {
       if (state.revealed) return;
       state.revealed = true;
+      renderRatesLine();
+      document.getElementById('urns-change').innerHTML = '';
 
       // Show biases above each urn.
       for (let i = 0; i < 3; i++) {
@@ -928,6 +1004,8 @@
       document.getElementById('reveal-btn').addEventListener('click', reveal);
       document.getElementById('reset-btn').addEventListener('click', () => {
         state = freshState({ biases: state.biases }); // keep current biases
+        renderRatesLine();
+        document.getElementById('urns-change').innerHTML = '';
         renderUrns();
         setUrnsDisabled(false);
         document.getElementById('last-draw').innerHTML = '&nbsp;';
@@ -935,10 +1013,20 @@
         drawChart({ animate: false });
       });
       document.getElementById('randomize-btn').addEventListener('click', () => {
-        // Random biases in [0.10, 0.90], spread out a bit.
+        // Random rates in [0.10, 0.90], at least 0.15 apart, so the best
+        // urn can actually be found in 30 rounds.
         const rng = mulberry32(Date.now() & 0xffffffff);
-        const b = [0, 1, 2].map(() => +(0.10 + rng() * 0.80).toFixed(2));
+        let b;
+        do {
+          b = [0, 1, 2].map(() => +(0.10 + rng() * 0.80).toFixed(2));
+          const srt = b.slice().sort((x, y) => x - y);
+          if (srt[1] - srt[0] >= 0.15 && srt[2] - srt[1] >= 0.15) break;
+        } while (true);
+        const old = state.biases.slice();
         state = freshState({ biases: b });
+        renderRatesLine();
+        document.getElementById('urns-change').innerHTML =
+          `New urns are in. The old ones were ${fmtRates(old)}. The new rates stay hidden until you reveal.`;
         renderUrns();
         setUrnsDisabled(false);
         document.getElementById('last-draw').innerHTML = '&nbsp;';
@@ -951,6 +1039,7 @@
     // INIT
     // ============================================================
     state = freshState();
+    renderRatesLine();
     renderUrns();
     bindControls();
     refreshStats();
