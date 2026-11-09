@@ -1,8 +1,8 @@
 % ===== spotify-home-frames.tex: Spotify's home page, the epsilon-greedy case in three frames, 2026-11-06 =====
-% The frames of the case and their talk track. spotify-home.tex builds them alone; weekend2-cases.tex inputs this
-% file as one section of the weekend deck, so both decks share one source.
+% The frames of the case and their talk track. Since 2026-11-09 two decks input this file, each as one section:
+% block3-bandits.tex, the deck of its Friday block, and weekend2-cases.tex, the weekend deck.
 % Carlos chose the case on 2026-11-06 ("Spotify, Amazon Payments, and LinkedIn Lirank") and asked: "Produce the
-% slides, follow the style from the slides for the matrix factorization part". Read as spotify.tex, the audiobooks
+% slides, follow the style from the slides for the matrix factorization part". Read as the Spotify deck, the audiobooks
 % case after the 10:00 matrix factorization block: (1) the problem, a big number on click 2; (2) the method as a
 % diagram whose top line ties it to the block's game, here the mirror of "Once Upon a Mirror" (w2-cx-private,
 % 03_bandits: a mirror shows one product each morning, a tap is a click, epsilon-greedy spins a roulette), click 2
@@ -11,8 +11,8 @@
 % keeps the sentence of each source. The three mixes of frame 2 and their estimates are INVENTED (the paper does not
 % list its mixes), and the slide says so. A "Say" comment above each frame is the talk track. Build and check:
 %   python3 tools/cases_numbers.py
-%   ../style/tools/build.sh spotify-home.tex
-%   python3 tools/check_numbers.py spotify-home.pdf tools/expected-spotify-home.txt
+%   ../style/tools/build.sh block3-bandits.tex
+%   python3 tools/check_numbers.py block3-bandits.pdf tools/expected-block3-bandits.txt
 \newcommand{\shsource}{Feijer and others (Spotify), CONSEQUENCES workshop at RecSys 2025.}
 
 % ===== Frame 1. Music or podcasts =====

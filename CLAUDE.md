@@ -65,11 +65,12 @@ Specifically:
 │                               case at the end of each Friday lecture (Etsy 2024, Spotify
 │                               2024, Adyen 2025, LinkedIn 2024) and a closing map; cases.pdf,
 │                               a handout and one PDF per lecture; own CLAUDE.md and README.md
-│                               Since 2026-11-06 also one deck per case, dictated by
-│                               Carlos: etsy.tex (5 frames), spotify.tex (3), airbnb.tex (3),
-│                               and, built in his model's style, spotify-home.tex,
-│                               amazon.tex, linkedin.tex (3 each, bandits and advertising),
-│                               merged in weekend2-cases.tex; rules in PRINCIPLES.md
+│                               Since 2026-11-06 also six cases, one frames file each:
+│                               Etsy (5 frames), Spotify (3), Airbnb (3), dictated by Carlos,
+│                               and, built in his model's style, Spotify's home page, Amazon
+│                               Payments, LinkedIn's ads (3 each); since 2026-11-09 one deck
+│                               per Friday block (block1-*.tex to block4-*.tex), all six in
+│                               weekend2-cases.tex; rules in PRINCIPLES.md
 ├── original-decks/             Original PDFs from before the rebuild
 │   ├── w2_bandits.pdf
 │   └── w2_recsys.pdf
@@ -198,23 +199,28 @@ case is a result published in 2021 or later: Carlos rejected version 1 (Airbnb 2
 Netflix 2012) the same day as old. Every case frame is the same two by two card: what was built, the result
 and how it was measured, what it cost, what the company decided. Every number comes from `cases-deck/tools/cases_numbers.py`, next to its source sentence; the
 README grades every source. Same style and build as the opener: Codex plates from `style/`, built with
-`../style/tools/build.sh cases.tex` from inside `cases-deck/`. Since 2026-11-06 the course site has the six case
-PDFs and the weekend deck `weekend2-cases.pdf` (`cases-deck/README.md`, section "On the course site"); `cases.pdf`
-is linked from nowhere.
+`../style/tools/build.sh cases.tex` from inside `cases-deck/`. The course site has the weekend deck
+`weekend2-cases.pdf` since 2026-11-06 and the four block decks since 2026-11-09 (`cases-deck/README.md`, section "On
+the course site"); `cases.pdf` is linked from nowhere.
 
 Since 2026-11-06 the folder also holds one short deck per case, its text dictated by Carlos slide by slide, with
-diagrams: `etsy.tex` (5 frames, the search by inner product built over four pages with invented numbers from the
-generator), `spotify.tex` (3 frames) and `airbnb.tex` (3 frames, Airbnb's embedding-based retrieval, preprint of
-January 2026 and blog of April 2025). He asked that day for five 10-minute cases, one after each Friday block,
-none older than five years; which deck goes after which block is open. The same day he asked for them "25%
+diagrams: Etsy (5 frames, the search by inner product built over four pages with invented numbers from the
+generator), Spotify (3 frames) and Airbnb (3 frames, Airbnb's embedding-based retrieval, preprint of January 2026
+and blog of April 2025). He asked that day for five 10-minute cases, one after each Friday block, none older than
+five years. The same day he asked for them "25%
 simpler", and the words on their slides went down by 25%, 31% and 36% (`cases-deck/README.md`). The same evening
 they became one deck for the weekend, `weekend2-cases.tex` (28 pages, a divider per case), built from the same
 frames files, and `cases-deck/PRINCIPLES.md` collected the lessons and the rules for the next case decks. Same build and checks, with
 `tools/check_numbers.py <deck>.pdf tools/expected-<deck>.txt`. Later that evening Carlos chose the cases of the
-bandit block and of advertising and asked for them in the style of the matrix factorization case: `spotify-home.tex`
-(Spotify's home page, epsilon-greedy), `amazon.tex` (Amazon Payments, one UCB score per step of an application) and
-`linkedin.tex` (LinkedIn's ads model, lists of numbers learned by gradient descent), 3 frames each, built on the
-pattern of `spotify.tex` without dictation; the weekend deck has 6 sections and 52 pages since.
+bandit block and of advertising and asked for them in the style of the matrix factorization case: Spotify's home
+page (epsilon-greedy), Amazon Payments (one UCB score per step of an application) and LinkedIn's ads model (lists
+of numbers learned by gradient descent), 3 frames each, built on the pattern of the Spotify case without dictation;
+the weekend deck has 6 sections and 52 pages since. On 2026-11-09 Carlos asked for one deck per block ("for each
+block, put in one single deck all the slides with all the business cases"): a case is its frames file
+`<case>-frames.tex`, the four block decks input them (`block1-nearest-neighbors.tex`: Etsy, Airbnb;
+`block2-matrix-factorization.tex`: Spotify; `block3-bandits.tex`: Spotify's home page, Amazon Payments;
+`block4-parallelized-mf.tex`: LinkedIn's ads), the six one-case decks were removed, and the weekend deck follows the
+order of the blocks.
 
 ## When in doubt
 

@@ -12,9 +12,47 @@ all) the same day. The same evening he rejected the cases of version 1 as old: "
 - `case1-nearest-neighbours.pdf`, `case2-matrix-factorization.pdf`, `case3-bandits.pdf`,
   `case4-gradient-descent.pdf`: the deck cut into the four slots, clicks included. The fourth holds frames 4
   and 5.
-- `weekend2-cases.pdf`: since 2026-11-06 the deck for the weekend, the case decks of Etsy, Spotify and Airbnb in
-  one deck, 28 pages; `weekend2-cases-handout.pdf`, 15 pages. Section "The weekend deck" below.
+- `block1-nearest-neighbors.pdf`, `block2-matrix-factorization.pdf`, `block3-bandits.pdf`,
+  `block4-parallelized-mf.pdf` and their handouts: since 2026-11-09 one deck per Friday block with the cases that
+  follow it. Section "One deck per block" below.
+- `weekend2-cases.pdf`: the deck for the weekend, all six cases in the order of the blocks, 52 pages;
+  `weekend2-cases-handout.pdf`, 27 pages. Section "The weekend deck" below.
 - `PRINCIPLES.md`: the lessons of the case decks and the rules for the next ones (bandits, advertising).
+
+## One deck per block, 2026-11-09
+
+Carlos, 2026-11-09: "Please reorganize the slides. I want that you don't make like each case a separate slide deck.
+Simply for each block, put in one single deck all the slides with all the business cases." A block deck has a title
+page ("Business cases", or "Business case" for one case, with the block's name below), then one `\section` per case,
+which the style draws as a divider, and the case's frames file. `BLOCK_DECKS` in `tools/cases_numbers.py` lists the
+cases of each deck and writes `tools/expected-<deck>.txt`.
+
+| Deck | Friday block | Cases | Pages (handout) |
+|---|---|---|---|
+| `block1-nearest-neighbors.tex` | 08:15 the inner product and nearest neighbors | Etsy, Airbnb | 21 (11) |
+| `block2-matrix-factorization.tex` | 10:00 and 11:00 matrix product and matrix factorization | Spotify | 8 (5) |
+| `block3-bandits.tex` | 14:00 bandits | Spotify's home page, Amazon Payments | 17 (9) |
+| `block4-parallelized-mf.tex` | 16:00 parallelized matrix factorization | LinkedIn's ads | 9 (5) |
+
+The same day the six one-case decks (`etsy.tex`, `spotify.tex`, `airbnb.tex`, `spotify-home.tex`, `amazon.tex`,
+`linkedin.tex`, their PDFs, handouts and expected files) were removed; commit `43e6adb` has them. The weekend deck
+follows the order of the blocks since: Airbnb moved from section 3 to section 2, before Spotify. Choices made without
+asking: a title page in every block deck, a divider also when a block has one case, the singular "Business case".
+
+Build and checks, from this folder, for each block deck and for `weekend2-cases`:
+
+```bash
+python3 tools/cases_numbers.py
+../style/tools/build.sh block1-nearest-neighbors.tex
+../style/tools/check.sh block1-nearest-neighbors.pdf
+python3 ../style/tools/check_overlays.py block1-nearest-neighbors.pdf
+python3 tools/check_numbers.py block1-nearest-neighbors.pdf tools/expected-block1-nearest-neighbors.txt
+python3 ../style/tools/make_handout.py block1-nearest-neighbors.pdf block1-nearest-neighbors-handout.pdf
+```
+
+State on 2026-11-09: 0 log errors, 0 em and en dashes, no build metadata, nothing moves between clicks; 14, 5, 9 and
+3 strings found in the four block PDFs, 31 in the weekend deck. The title pages and dividers were rendered and read;
+the frames are those of 2026-11-06, unchanged.
 
 ## One deck per case, 2026-11-06
 
@@ -22,24 +60,14 @@ On 2026-11-06 Carlos asked again for business cases, now five of 10 minutes each
 Friday (08:00 inner product and nearest neighbours, 10:00 matrix factorization, 12:00 bandits, 14:00 matrix
 factorization by gradient descent, 16:00 large-scale AI), every case at most five years old. He first wanted
 ideas only ("Don't build anything show me ideas and then we shape them"), then dictated three decks slide by
-slide. They are separate from `cases.tex`, whose cards are version 2 of 2026-11-04.
+slide. They are separate from `cases.tex`, whose cards are version 2 of 2026-11-04. Since 2026-11-09 they are built
+in the block decks (section "One deck per block"); the one-case wrappers and PDFs of this section were removed.
 
 | File | Frames (pages) | His plan |
 |---|---|---|
-| `etsy.tex`, `etsy-frames.tex`, `etsy.pdf`, `etsy-handout.pdf` | 5 (11) | Etsy and its shortlist, why keyword matching fails; the training data; a list of numbers for every search and every item; the new search, sorting by inner product step by step; cost and value |
-| `spotify.tex`, `spotify-frames.tex`, `spotify.pdf`, `spotify-handout.pdf` | 3 (6) | Little data at launch; 128 numbers per listener and audiobook from two networks and a graph; the A/B test |
-| `airbnb.tex`, `airbnb-frames.tex`, `airbnb.pdf`, `airbnb-handout.pdf` | 3 (7) | The first stage of search; two networks and the nearest homes; three A/B tests and their value |
-
-Build and checks, from this folder, for each of `etsy`, `spotify`, `airbnb`:
-
-```bash
-python3 tools/cases_numbers.py
-../style/tools/build.sh etsy.tex
-../style/tools/check.sh etsy.pdf
-python3 ../style/tools/check_overlays.py etsy.pdf
-python3 tools/check_numbers.py etsy.pdf tools/expected-etsy.txt
-python3 ../style/tools/make_handout.py etsy.pdf etsy-handout.pdf
-```
+| `etsy-frames.tex` | 5 (11) | Etsy and its shortlist, why keyword matching fails; the training data; a list of numbers for every search and every item; the new search, sorting by inner product step by step; cost and value |
+| `spotify-frames.tex` | 3 (6) | Little data at launch; 128 numbers per listener and audiobook from two networks and a graph; the A/B test |
+| `airbnb-frames.tex` | 3 (7) | The first stage of search; two networks and the nearest homes; three A/B tests and their value |
 
 State on 2026-11-06, after the simplification: 0 log errors, 0 em and en dashes, no build metadata, nothing moves
 between clicks; 11, 5 and 3 numbers found in the PDFs. Every page of the three decks was rendered and read.
@@ -54,9 +82,9 @@ Grade READ for both; the source sentences are in `tools/cases_numbers.py`.
 
 Carlos, 2026-11-06: "Finally merge all this decks into a new deck for the weekend". `weekend2-cases.tex` has a
 title page, then one `\section` per case, which the style draws as a divider with a Ge'ez numeral (Etsy, Spotify,
-Airbnb, in the order he dictated them), and inputs each case's frames file. Since that evening a case is two
-files: `<case>-frames.tex`, the frames with their talk track, and `<case>.tex`, a wrapper that builds the case
-alone. The weekend deck and the case decks share one source; after the split the three case PDFs printed the same
+Airbnb, in the order he dictated them; since 2026-11-09 in the order of the blocks), and inputs each case's frames file. Since that evening a case is two
+files: `<case>-frames.tex`, the frames with their talk track, and `<case>.tex`, a wrapper that built the case
+alone until 2026-11-09. The weekend deck and the case decks share one source; after the split the three case PDFs printed the same
 text as before. 28 pages, handout 15 pages, all 19 strings of `tools/expected-weekend2-cases.txt` found.
 
 ```bash
@@ -68,8 +96,8 @@ python3 tools/check_numbers.py weekend2-cases.pdf tools/expected-weekend2-cases.
 python3 ../style/tools/make_handout.py weekend2-cases.pdf weekend2-cases-handout.pdf
 ```
 
-A new case: `PRINCIPLES.md`, section "Adding a case". `WEEKEND_CASES` in `tools/cases_numbers.py` lists the cases
-of the weekend deck in its order.
+A new case: `PRINCIPLES.md`, section "Adding a case". `BLOCK_DECKS` in `tools/cases_numbers.py` lists the cases of
+each block deck; the weekend deck takes them in that order (`WEEKEND_CASES`).
 
 ### Simplified, 2026-11-06
 
@@ -157,15 +185,15 @@ Open items of these decks:
 Carlos asked for "the business-case decks for the bandit block and for advertising ... the same way as the Etsy,
 Spotify and Airbnb decks", candidates first. Eight candidates went to him in chat, two paragraphs each; he chose
 "Spotify, Amazon Payments, and LinkedIn Lirank", then wrote "Produce the slides, follow the style from the slides
-for the matrix factorization part". He dictated none of these three: they follow `spotify.tex`, the case after the
+for the matrix factorization part". He dictated none of these three: they follow the Spotify deck (`spotify-frames.tex`), the case after the
 10:00 matrix factorization block, in three frames: the problem, with a big number or a funnel at the second click;
 the method as a diagram whose top line ties it to the block's game; the value of an A/B test.
 
 | File | Frames (pages) | Content |
 |---|---|---|
-| `spotify-home.tex`, `spotify-home-frames.tex`, `spotify-home.pdf`, `spotify-home-handout.pdf` | 3 (7) | Music or podcasts on the home page, a common rule of past listening, over 600 million users; epsilon-greedy with a network for the estimates (three invented mixes as bars), 98.5% and 1.5%; the A/B test against the mix of the last 90 days: +36.6% streams per podcast shelf shown, +1.28% minutes listened, in production as of March 2025 |
-| `amazon.tex`, `amazon-frames.tex`, `amazon.pdf`, `amazon-handout.pdf` | 3 (7) | One image and one tagline per page, the steps started, submitted, approved, a page that wins the first step can lose the last; one UCB score per step, added up (an invented table: the first step alone picks pair A, the sum pair B); the A/B test of 7 weeks: approvals up by a high single-digit percentage in one group (so far, not reported as significant), no pair the bandit tried beat the fixed page in the other, Amazon's sentence on exploration |
-| `linkedin.tex`, `linkedin-frames.tex`, `linkedin.pdf`, `linkedin-handout.pdf` | 3 (7) | The chance of a click enters the auction and the price, which clicks advertisers pay for, over 1 billion members; a list of numbers for every advertiser, campaign and ad, learned from clicks by gradient descent; +4.3% click rate on ads in A/B tests, 96% less training time in an offline test of incremental training |
+| `spotify-home-frames.tex` | 3 (7) | Music or podcasts on the home page, a common rule of past listening, over 600 million users; epsilon-greedy with a network for the estimates (three invented mixes as bars), 98.5% and 1.5%; the A/B test against the mix of the last 90 days: +36.6% streams per podcast shelf shown, +1.28% minutes listened, in production as of March 2025 |
+| `amazon-frames.tex` | 3 (7) | One image and one tagline per page, the steps started, submitted, approved, a page that wins the first step can lose the last; one UCB score per step, added up (an invented table: the first step alone picks pair A, the sum pair B); the A/B test of 7 weeks: approvals up by a high single-digit percentage in one group (so far, not reported as significant), no pair the bandit tried beat the fixed page in the other, Amazon's sentence on exploration |
+| `linkedin-frames.tex` | 3 (7) | The chance of a click enters the auction and the price, which clicks advertisers pay for, over 1 billion members; a list of numbers for every advertiser, campaign and ad, learned from clicks by gradient descent; +4.3% click rate on ads in A/B tests, 96% less training time in an offline test of incremental training |
 
 The game of each: Spotify's home page and Amazon tie to "Once Upon a Mirror" (`w2-cx-private/03_bandits`: the
 mirror counts taps, epsilon-greedy spins a roulette, UCB adds a bonus to the estimate, "the fewer dots, the bigger
@@ -177,7 +205,7 @@ Spotify's home page 175 (59, 65, 51 a slide), Amazon 196 (57, 70, 69), LinkedIn 
 read below. Amazon's 70 include the 12 numbers of its table. The audiobooks deck has 152.
 
 State on 2026-11-06: 0 log errors, 0 em and en dashes, no build metadata, nothing moves between clicks; 7, 2 and 3
-strings found in the PDFs (`tools/expected-spotify-home.txt`, `-amazon.txt`, `-linkedin.txt`). The weekend deck has
+strings found in the PDFs of the one-case decks of that day (removed on 2026-11-09). The weekend deck has
 52 pages, a handout of 27 pages, and all 31 strings found. Every page of the three decks was rendered and read.
 
 Sources, grade READ; the sentences are in `tools/cases_numbers.py` and in
@@ -196,7 +224,8 @@ Sources, grade READ; the sentences are in `tools/cases_numbers.py` and in
 
 Choices made without asking:
 
-- "The slides for the matrix factorization part" read as `spotify.tex`, the case deck after the 10:00 block.
+- "The slides for the matrix factorization part" read as the Spotify deck (`spotify-frames.tex`), the case after the
+  10:00 block.
 - Spotify frame 1: "A common rule gives users the mix of their past listening". The paper calls this rule,
   calibration, "a widely used approach in industry" and does not say which rule ran before the bandit; the control
   of its A/B test was the mix of the last 90 days.
@@ -273,25 +302,25 @@ The sections below describe `cases.tex`, version 2 of 2026-11-04.
 
 ## On the course site, 2026-11-06
 
-Carlos, 2026-11-06: "the slides with the business cases are not up. Publish them." The course site (`AINIT-PAGE`,
-commit `70fcdd4`) serves copies from `public/slides/we2/`: one PDF per case on the row of the block it follows,
-and the weekend deck with its handout in the Materials list, group "Business cases".
+Carlos, 2026-11-06: "the slides with the business cases are not up. Publish them." The course site (`AINIT-PAGE`)
+serves copies from `public/slides/we2/`. Until 2026-11-09 (commit `70fcdd4`) it had one PDF per case; since that day
+(commit `2b27782`, "for each block, put in one single deck all the slides with all the business cases") one deck per
+block on its Friday row, and the weekend deck with its handout in the Materials list, group "Business cases".
 
 | Site file | Source here | Where |
 |---|---|---|
-| `ainit-hs26-case-etsy.pdf` | `etsy.pdf` | Friday 08:15, "Case: Etsy" |
-| `ainit-hs26-case-airbnb.pdf` | `airbnb.pdf` | Friday 08:15, "Case: Airbnb" |
-| `ainit-hs26-case-spotify.pdf` | `spotify.pdf` | Friday 11:00, "Case: Spotify" |
-| `ainit-hs26-case-spotify-home-page.pdf` | `spotify-home.pdf` | Friday 14:00, "Case: Spotify's home page" |
-| `ainit-hs26-case-amazon-payments.pdf` | `amazon.pdf` | Friday 14:00, "Case: Amazon Payments" |
-| `ainit-hs26-case-linkedin-ads.pdf` | `linkedin.pdf` | Friday 16:00, "Case: LinkedIn's ads" |
+| `ainit-hs26-business-cases-nearest-neighbors.pdf` | `block1-nearest-neighbors.pdf` | Friday 08:15, "Cases: Etsy, Airbnb" |
+| `ainit-hs26-business-cases-matrix-factorization.pdf` | `block2-matrix-factorization.pdf` | Friday 11:00, "Case: Spotify" |
+| `ainit-hs26-business-cases-bandits.pdf` | `block3-bandits.pdf` | Friday 14:00, "Cases: Spotify's home page, Amazon Payments" |
+| `ainit-hs26-business-cases-parallelized-mf.pdf` | `block4-parallelized-mf.pdf` | Friday 16:00, "Case: LinkedIn's ads" |
 | `ainit-hs26-business-cases.pdf`, `ainit-hs26-business-cases-handout.pdf` | `weekend2-cases.pdf`, `weekend2-cases-handout.pdf` | Materials list |
 
-The rows are the blocks of `PRINCIPLES.md` on the agenda of 2026-11-06; LinkedIn's ads (gradient descent at scale)
-went to 16:00, "Parallelized matrix factorization", a choice Carlos can swap to 11:00. A live file is
+The four block decks are also in the Materials list, under the names of their blocks. The six one-case site files
+(`ainit-hs26-case-etsy.pdf` and the others) were removed on 2026-11-09. LinkedIn's ads (gradient descent at scale)
+is on the 16:00 row, "Parallelized matrix factorization", a choice Carlos can swap to 11:00. A live file is
 https://eth-ainit-hs26.github.io/AINIT-PAGE/slides/we2/<file>
 After a rebuild, copy the PDF over the same site file name, run `npm ci && npm run build` in `AINIT-PAGE`, push to
-`main`, then curl the live file and `cmp` it with the one here. The per-case handouts are not published.
+`main`, then curl the live file and `cmp` it with the one here. The block handouts are not published.
 
 ## Frames
 
@@ -454,8 +483,8 @@ whether Personalizer is offline (Microsoft's pages give the retirement date only
 
 ## Open items
 
-1. `cases.pdf` (version 2) is linked from nowhere. The weekend deck and the six case decks are on the course site
-   since 2026-11-06 (section "On the course site").
+1. `cases.pdf` (version 2) is linked from nowhere. The weekend deck (since 2026-11-06) and the four block decks (since
+   2026-11-09) are on the course site (section "On the course site").
 2. It has not been projected in HG D 7.2.
 3. No bank or insurer was found with nearest neighbours or matrix factorization and an online result published
    from 2021 on. Finance is Adyen's frame and two names on the map (Amazon Payments, Dream11).

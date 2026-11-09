@@ -1,9 +1,9 @@
 % ===== amazon-frames.tex: Amazon Payments, the UCB case in three frames, 2026-11-06 =====
-% The frames of the case and their talk track. amazon.tex builds them alone; weekend2-cases.tex inputs this file as
-% one section of the weekend deck, so both decks share one source.
+% The frames of the case and their talk track. Since 2026-11-09 two decks input this file, each as one section:
+% block3-bandits.tex, the deck of its Friday block, and weekend2-cases.tex, the weekend deck.
 % Carlos chose the case on 2026-11-06 ("Spotify, Amazon Payments, and LinkedIn Lirank") and asked: "Produce the
-% slides, follow the style from the slides for the matrix factorization part". Read as spotify.tex: (1) the problem,
-% here with the steps of an application drawn as a funnel, as airbnb.tex draws its search; (2) the method, its top
+% slides, follow the style from the slides for the matrix factorization part". Read as the Spotify deck: (1) the problem,
+% here with the steps of an application drawn as a funnel, as the Airbnb case draws its search; (2) the method, its top
 % line tied to UCB in "Once Upon a Mirror" (w2-cx-private, 03_bandits: the estimate plus an exploration bonus, "the
 % fewer dots, the bigger the bonus"), click 2 adding a part; (3) the value, the A/B test. He did not dictate these
 % slides. The source is a blog post of Amazon on the AWS Machine Learning Blog, 1 October 2026.
@@ -11,8 +11,8 @@
 % the sentence of each source. The scores of frame 2 are INVENTED (the post gives none), and the slide says so.
 % A "Say" comment above each frame is the talk track. Build and check from this folder:
 %   python3 tools/cases_numbers.py
-%   ../style/tools/build.sh amazon.tex
-%   python3 tools/check_numbers.py amazon.pdf tools/expected-amazon.txt
+%   ../style/tools/build.sh block3-bandits.tex
+%   python3 tools/check_numbers.py block3-bandits.pdf tools/expected-block3-bandits.txt
 \newcommand{\amsource}{John and Gozluklu (Amazon), AWS Machine Learning Blog, 2026.}
 
 % ===== Frame 1. Which page for which visitor =====

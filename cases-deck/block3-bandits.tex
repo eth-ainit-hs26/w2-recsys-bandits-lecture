@@ -1,0 +1,31 @@
+% ===== block3-bandits.tex: the business cases of the Friday block "Bandits" =====
+% Carlos, 2026-11-09: "for each block, put in one single deck all the slides with all the business cases".
+% One \section per case (Spotify's home page and Amazon Payments), which the style draws as a divider page;
+% each section inputs the case's frames file, which weekend2-cases.tex also inputs, so both decks share one source.
+% Build and check from this folder:
+%   python3 tools/cases_numbers.py
+%   ../style/tools/build.sh block3-bandits.tex
+%   python3 tools/check_numbers.py block3-bandits.pdf tools/expected-block3-bandits.txt
+\documentclass[aspectratio=169]{beamer}
+\input{../style/ainit-preamble}
+\input{../style/ainit-course}
+\input{cases-kit}
+\input{numbers}
+\renewcommand{\deckslug}{AI in Industry, weekend 2}
+\renewcommand{\currentweekend}{b}
+\title{Business cases}
+\subtitle{Bandits}
+\author{Carlos Cotrini}
+\institute{AI in Industry, ETH Zurich}
+\date{Friday 13 November 2026}
+\hypersetup{pdftitle={Business cases: Spotify's home page and Amazon Payments}, pdfauthor={Carlos Cotrini}}
+
+\begin{document}
+\begin{frame}[plain,noframenumbering]
+  \titlepage
+\end{frame}
+\section{Spotify's home page}
+\input{spotify-home-frames}
+\section{Amazon Payments}
+\input{amazon-frames}
+\end{document}

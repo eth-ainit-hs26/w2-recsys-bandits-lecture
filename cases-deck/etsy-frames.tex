@@ -1,6 +1,6 @@
 % ===== etsy-frames.tex: the Etsy case in five frames, asked for by Carlos on 2026-11-06 =====
-% The frames of the case and their talk track. etsy.tex builds them alone; weekend2-cases.tex inputs
-% this file as one section of the weekend deck, so both decks share one source.
+% The frames of the case and their talk track. Since 2026-11-09 two decks input this file, each as one section:
+% block1-nearest-neighbors.tex, the deck of its Friday block, and weekend2-cases.tex, the weekend deck.
 % His dictated plan: (1) Etsy, its 100 million items, the shortlist of several thousand and the ranking, and why
 % keyword matching fails ("mothers day gift"); (2) the data the model was trained on; (3) a list of numbers for
 % every search and every item; (4) a search arrives: the search becomes numbers, the items are sorted by inner
@@ -13,8 +13,8 @@
 % source. The numbers of frames 3 and 4 are INVENTED (small integers for the room), and the slides say so.
 % A "Say" comment above each frame is the talk track. Build and check from this folder:
 %   python3 tools/cases_numbers.py
-%   ../style/tools/build.sh etsy.tex
-%   python3 tools/check_numbers.py etsy.pdf tools/expected-etsy.txt
+%   ../style/tools/build.sh block1-nearest-neighbors.tex
+%   python3 tools/check_numbers.py block1-nearest-neighbors.pdf tools/expected-block1-nearest-neighbors.txt
 \newcommand{\etsysource}{Jha and others (Etsy), IEEE FMLDS 2024.}
 
 % ===== Frame 1. Etsy, the shortlist, and the words that do not match =====

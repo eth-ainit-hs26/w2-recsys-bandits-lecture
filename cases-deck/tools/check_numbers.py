@@ -7,7 +7,7 @@ so the check runs on the PDF, never on the source. Run from cases-deck/ after th
 Copied on 2026-11-04 from ../opener-deck/tools/check_numbers.py. Changed: the default file, and the text is
 read twice, in layout mode and in reading order, because a phrase that wraps inside one column of a case card
 is split by the other column in layout mode. A string passes when either reading holds it. Since 2026-11-06 an
-optional second argument names the expected file, for the case decks: tools/expected-etsy.txt and the like."""
+optional second argument names the expected file, for the block decks: tools/expected-block1-nearest-neighbors.txt and the like."""
 import subprocess
 import sys
 from pathlib import Path

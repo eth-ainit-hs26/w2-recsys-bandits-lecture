@@ -1,0 +1,31 @@
+% ===== block1-nearest-neighbors.tex: the business cases of the Friday block "The inner product and nearest neighbors" =====
+% Carlos, 2026-11-09: "for each block, put in one single deck all the slides with all the business cases".
+% One \section per case (Etsy and Airbnb), which the style draws as a divider page;
+% each section inputs the case's frames file, which weekend2-cases.tex also inputs, so both decks share one source.
+% Build and check from this folder:
+%   python3 tools/cases_numbers.py
+%   ../style/tools/build.sh block1-nearest-neighbors.tex
+%   python3 tools/check_numbers.py block1-nearest-neighbors.pdf tools/expected-block1-nearest-neighbors.txt
+\documentclass[aspectratio=169]{beamer}
+\input{../style/ainit-preamble}
+\input{../style/ainit-course}
+\input{cases-kit}
+\input{numbers}
+\renewcommand{\deckslug}{AI in Industry, weekend 2}
+\renewcommand{\currentweekend}{b}
+\title{Business cases}
+\subtitle{The inner product and nearest neighbors}
+\author{Carlos Cotrini}
+\institute{AI in Industry, ETH Zurich}
+\date{Friday 13 November 2026}
+\hypersetup{pdftitle={Business cases: Etsy and Airbnb}, pdfauthor={Carlos Cotrini}}
+
+\begin{document}
+\begin{frame}[plain,noframenumbering]
+  \titlepage
+\end{frame}
+\section{Etsy}
+\input{etsy-frames}
+\section{Airbnb}
+\input{airbnb-frames}
+\end{document}

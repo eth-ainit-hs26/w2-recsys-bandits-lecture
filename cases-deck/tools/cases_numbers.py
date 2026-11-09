@@ -221,20 +221,21 @@ assert abs(LIRANK["jobs_search_pct"] + LIRANK["jobs_suggest_pct"] - LIRANK["jobs
 assert round(LIRANK["jobs_search_pct"], 1) == round(LIRANK["jobs_suggest_pct"], 1) == 0.9
 num("liJobs", "%.1f" % LIRANK["jobs_search_pct"])                          # Say only, "about 0.9" in both products
 num("liAdsCtr", "%.1f" % LIRANK["ads_ctr_pct"], "+%.1f%%" % LIRANK["ads_ctr_pct"])
-num("liMembers", "%d" % LIRANK["members_billion"])                         # Say only in cases.tex; slide of linkedin.tex
+num("liMembers", "%d" % LIRANK["members_billion"])                         # Say only in cases.tex; slide of linkedin-frames.tex
 num("liHoursBefore", "%d" % LIRANK["hours_before"], "%d hours" % LIRANK["hours_before"])
 num("liHoursAfter", "%d" % LIRANK["hours_after"], "%d hours" % LIRANK["hours_after"])
 num("liSessFrom", "%d" % LIRANK["sessions_from_pct"])                      # Say only
 num("liSessTo", "%d" % LIRANK["sessions_to_pct"])                          # Say only
 num("liWarmFrom", "%d" % LIRANK["warmup_from_pct"])                        # Say only
 num("liWarmTo", "%d" % LIRANK["warmup_to_pct"])                            # Say only
-num("liIncCut", "%d" % LIRANK["incremental_cut_pct"])                      # Say only in cases.tex; slide of linkedin.tex
+num("liIncCut", "%d" % LIRANK["incremental_cut_pct"])                      # Say only in cases.tex; slide of linkedin-frames.tex
 num("liRetrain", "%d" % LIRANK["retrain_hours"])                           # Say only
 
 
-# ===== THE CASE DECKS OF 2026-11-06: etsy.tex (5 frames), spotify.tex (3), airbnb.tex (3) =====
+# ===== THE CASES OF 2026-11-06: Etsy (5 frames), Spotify (3), Airbnb (3), each in <case>-frames.tex =====
 # Carlos asked on 2026-11-06 for one short deck per case, the text of each slide dictated by him, with diagrams.
-# Their macros join numbers.tex; the strings each PDF must show go to tools/expected-<deck>.txt.
+# Their macros join numbers.tex. show() collects the strings each case must show; the decks that input the cases
+# (end of this file) get them in tools/expected-<deck>.txt.
 deck_expect = {"etsy": [], "spotify": [], "airbnb": [], "spotify-home": [], "amazon": [], "linkedin": []}
 
 
@@ -269,7 +270,7 @@ for s in ["%d million items" % ETSY["items_million"],
 
 # INVENTED toy numbers for frames 3 and 4 (no source): the search "mothers day gift" and four items, three numbers
 # each, small integers so that the room can multiply in its head. The script computes every product, sum and the
-# order; nothing is typed in etsy.tex. Chosen so that the item with the word "gift" (gift wrap) ranks last and the
+# order; nothing is typed in etsy-frames.tex. Chosen so that the item with the word "gift" (gift wrap) ranks last and the
 # necklace, which shares no word with the search, ranks first. Until the simplification of 2026-11-06 (Carlos:
 # "too complicated", "25% simpler") there were five items of four numbers each, with a bridge print.
 ET_QUERY = (2, 1, -1)
@@ -351,10 +352,10 @@ for s in ["+%.2f%%" % AIRBNB["conv_pct"], "+%.1f%%" % AIRBNB["email_pct"], "%d%%
     show("airbnb", s)
 
 
-# ===== THE BANDIT AND ADVERTISING CASE DECKS, 2026-11-06 (evening): spotify-home.tex, amazon.tex, linkedin.tex =====
+# ===== THE BANDIT AND ADVERTISING CASES, 2026-11-06 (evening): spotify-home, amazon, linkedin (<case>-frames.tex) =====
 # Carlos chose three of eight candidates ("Spotify, Amazon Payments, and LinkedIn Lirank") and asked: "Produce the
 # slides, follow the style from the slides for the matrix factorization part". Read as the Spotify audiobooks deck
-# (spotify.tex, the case after the 10:00 matrix factorization block): three frames, the problem, the method as a
+# (spotify-frames.tex, the case after the 10:00 matrix factorization block): three frames, the problem, the method as a
 # diagram tied to the block's game, the value as an A/B test. The quotes and locators of all three are also in
 # git_ainit/research_notes/Business cases of the weekend 2 techniques/chosen_bandit_and_ads_cases.md.
 
@@ -517,10 +518,21 @@ for s in ["Over %d billion" % LIRANK["members_billion"], "+%.1f%%" % LIRANK["ads
     show("linkedin", s)
 
 
-# ----- The weekend deck, weekend2-cases.tex (Carlos, 2026-11-06: "merge all this decks into a new deck for the
-# weekend"): one section per case deck, in this order, so its PDF must show every string of every case deck.
-WEEKEND_CASES = ["etsy", "spotify", "airbnb", "spotify-home", "amazon", "linkedin"]
-deck_expect["weekend2-cases"] = [s for d in WEEKEND_CASES for s in deck_expect[d]]
+# == The decks: one per Friday block, and the weekend deck ==
+# Carlos, 2026-11-09: "for each block, put in one single deck all the slides with all the business cases". A block
+# deck has one section per case of its block. The weekend deck, weekend2-cases.tex (2026-11-06: "merge all this
+# decks into a new deck for the weekend"), has all six in the order of the blocks. A deck's PDF must show every
+# string of its cases. The six one-case decks of 2026-11-06 (etsy.tex to linkedin.tex) were removed on 2026-11-09.
+BLOCK_DECKS = {
+    "block1-nearest-neighbors": ["etsy", "airbnb"],          # Friday 08:15
+    "block2-matrix-factorization": ["spotify"],              # Friday 10:00 and 11:00
+    "block3-bandits": ["spotify-home", "amazon"],            # Friday 14:00
+    "block4-parallelized-mf": ["linkedin"],                  # Friday 16:00
+}
+WEEKEND_CASES = [c for cases in BLOCK_DECKS.values() for c in cases]
+assert sorted(WEEKEND_CASES) == sorted(deck_expect), "every case belongs to exactly one block"
+DECKS = dict(BLOCK_DECKS, **{"weekend2-cases": WEEKEND_CASES})
+deck_strings = {deck: [s for c in cases for s in deck_expect[c]] for deck, cases in DECKS.items()}
 
 
 # ===== write =====
@@ -528,7 +540,7 @@ Path("numbers.tex").write_text(
     "% numbers.tex: WRITTEN BY tools/cases_numbers.py. Do not edit by hand; rerun the script.\n"
     + "\n".join("\\newcommand{\\%s}{%s}" % (n, t) for n, t in macros) + "\n", encoding="utf-8")
 Path("tools/expected.txt").write_text("\n".join(expect) + "\n", encoding="utf-8")
-for deck, strings in deck_expect.items():
+for deck, strings in deck_strings.items():
     Path("tools/expected-%s.txt" % deck).write_text("\n".join(strings) + "\n", encoding="utf-8")
 print("numbers.tex written: %d macros; tools/expected.txt: %d strings; %s" % (len(macros), len(expect),
-      ", ".join("expected-%s.txt: %d" % (d, len(s)) for d, s in deck_expect.items())))
+      ", ".join("expected-%s.txt: %d" % (d, len(s)) for d, s in deck_strings.items())))

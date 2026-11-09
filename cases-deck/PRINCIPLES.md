@@ -26,12 +26,16 @@ advertising). Audience of the decks: managers with little formal math, 10 minute
   clustered index (IVF), "share of the bought products found in the top 100" (recall@100).
 - **"Follow the style of the slides for X" means: build without dictation, on the pattern of that deck.** For the
   bandit and advertising decks he chose the cases, then wrote "Produce the slides, follow the style from the slides
-  for the matrix factorization part": they follow `spotify.tex` (the problem with a big number at the second click,
+  for the matrix factorization part": they follow the Spotify case (`spotify-frames.tex`; the problem with a big number at the second click,
   the method as a diagram tied to the block's game, the value of an A/B test), and README.md says which deck was
   read as "the slides for X".
 - **The second read of those decks found the same kind of claim:** "No pair beat the fixed page" (the post: it
   explored "most" of its pairs), a lift reported "currently" and "directionally" shown as a plain rise, a blog's
   advice ("train separately") told as what the company did, "accuracy" for a test AUC, "may vary" told as "change".
+
+- **One deck per block.** On 2026-11-09 he asked for the cases of each block in one deck: "I want that you don't make
+  like each case a separate slide deck. Simply for each block, put in one single deck all the slides with all the
+  business cases." The six one-case decks were removed that day.
 
 ## Principles
 
@@ -117,42 +121,45 @@ Details cut from a slide go into the `% Say:` talk track above its frame.
 
 ## The blocks and their games
 
-| Block, Friday 13 November 2026 (agenda of 2026-11-06) | Game (`w2-cx-private`) | Case decks |
+| Block, Friday 13 November 2026 (agenda of 2026-11-06) | Game (`w2-cx-private`) | Cases, in its block deck |
 |---|---|---|
-| 08:15 the inner product and nearest neighbors | Once Upon a Video Store, `01_nearest_neighbours/` | Etsy, Airbnb |
-| 10:00 and 11:00 matrix product and matrix factorization | Once Upon a Matchmaker, `02_matrix_factorization/`: part one at 10:00; parts two and three and the optional part at 11:00 | Spotify |
-| 14:00 bandits | Once Upon a Mirror, `03_bandits/`: mirrors show one ad each morning, a tap is a click | Spotify's home page, Amazon Payments |
-| 16:00 parallelized matrix factorization | Matchmaker on a Grid, `02_matrix_factorization/grid-sketch/` | LinkedIn's ads (gradient descent at scale) |
+| 08:15 the inner product and nearest neighbors | Once Upon a Video Store, `01_nearest_neighbours/` | Etsy, Airbnb: `block1-nearest-neighbors.tex` |
+| 10:00 and 11:00 matrix product and matrix factorization | Once Upon a Matchmaker, `02_matrix_factorization/`: part one at 10:00; parts two and three and the optional part at 11:00 | Spotify: `block2-matrix-factorization.tex` |
+| 14:00 bandits | Once Upon a Mirror, `03_bandits/`: mirrors show one ad each morning, a tap is a click | Spotify's home page, Amazon Payments: `block3-bandits.tex` |
+| 16:00 parallelized matrix factorization | Matchmaker on a Grid, `02_matrix_factorization/grid-sketch/` | LinkedIn's ads (gradient descent at scale): `block4-parallelized-mf.tex` |
 | Saturday 08:15 computing clusters | | open |
 
-The course site carries each case on its block's row since 2026-11-06 (README.md, section "On the course site").
+The course site carries each block deck on its block's row since 2026-11-09, and before that each case since
+2026-11-06 (README.md, section "On the course site").
 Before that day the blocks were 08:00, 10:00, 12:00, 14:00 (matrix factorization by gradient descent) and 16:00.
 
 ## Files and commands
 
 - Folder `2026hs/w2-recsys-bandits-lecture/cases-deck/`, a public repository: a push publishes it on GitHub Pages;
-  the course site links a deck only after Carlos's yes (the six cases and the weekend deck have it since 2026-11-06).
-- A case is `<case>-frames.tex` (frames and talk track) and `<case>.tex` (the wrapper that builds it alone).
-  `weekend2-cases.tex` inputs every frames file, one `\section` per case.
+  the course site links a deck only after Carlos's yes (the block decks and the weekend deck have it).
+- A case is `<case>-frames.tex` (frames and talk track). Its block deck (`block1-nearest-neighbors.tex` to
+  `block4-parallelized-mf.tex`) and `weekend2-cases.tex` input it, one `\section` per case.
 - Shared: `cases-kit.tex` (styles and macros), `numbers.tex` (generated), `tools/cases_numbers.py`.
 
 ```bash
 python3 tools/cases_numbers.py
-../style/tools/build.sh airbnb.tex
-../style/tools/check.sh airbnb.pdf
-python3 ../style/tools/check_overlays.py airbnb.pdf
-python3 tools/check_numbers.py airbnb.pdf tools/expected-airbnb.txt
-python3 ../style/tools/make_handout.py airbnb.pdf airbnb-handout.pdf
+../style/tools/build.sh block1-nearest-neighbors.tex
+../style/tools/check.sh block1-nearest-neighbors.pdf
+python3 ../style/tools/check_overlays.py block1-nearest-neighbors.pdf
+python3 tools/check_numbers.py block1-nearest-neighbors.pdf tools/expected-block1-nearest-neighbors.txt
+python3 ../style/tools/make_handout.py block1-nearest-neighbors.pdf block1-nearest-neighbors-handout.pdf
 ```
 
 ## Adding a case
 
-1. Copy `airbnb-frames.tex` and `airbnb.tex` to `<case>-frames.tex` and `<case>.tex`, then write the frames.
+1. Copy `airbnb-frames.tex` to `<case>-frames.tex`, then write the frames.
 2. In `tools/cases_numbers.py`: a block with the numbers and their source sentences, `show("<case>", ...)` for
-   every string the PDF must show, `"<case>"` in `deck_expect` and in `WEEKEND_CASES`.
-3. In `weekend2-cases.tex`: `\section{<title>}` and `\input{<case>-frames}`, in the order of the blocks.
-4. Build and check `<case>.tex` and `weekend2-cases.tex`; update README.md and CLAUDE.md; `git pull --rebase`,
-   commit, push.
+   every string the PDF must show, `"<case>"` in `deck_expect` and in its block's list in `BLOCK_DECKS`.
+3. In the block deck and in `weekend2-cases.tex`: `\section{<title>}` and `\input{<case>-frames}`, in the order of
+   `BLOCK_DECKS`. A case for a block without a deck: copy `block4-parallelized-mf.tex` to `block<N>-<name>.tex` and
+   add it to `BLOCK_DECKS`.
+4. Build and check the block deck and `weekend2-cases.tex`; update README.md and CLAUDE.md; `git pull --rebase`,
+   commit, push; copy the PDFs to the course site (README.md, section "On the course site").
 
 ## Candidates for further decks
 

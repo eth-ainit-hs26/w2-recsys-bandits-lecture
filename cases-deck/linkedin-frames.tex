@@ -1,18 +1,18 @@
 % ===== linkedin-frames.tex: LinkedIn's ads, the advertising case in three frames, 2026-11-06 =====
-% The frames of the case and their talk track. linkedin.tex builds them alone; weekend2-cases.tex inputs this file as
-% one section of the weekend deck, so both decks share one source.
+% The frames of the case and their talk track. Since 2026-11-09 two decks input this file, each as one section:
+% block4-parallelized-mf.tex, the deck of its Friday block, and weekend2-cases.tex, the weekend deck.
 % Carlos chose the case on 2026-11-06 ("Spotify, Amazon Payments, and LinkedIn Lirank") and asked: "Produce the
-% slides, follow the style from the slides for the matrix factorization part". Read as spotify.tex: (1) the problem,
+% slides, follow the style from the slides for the matrix factorization part". Read as the Spotify deck: (1) the problem,
 % a big number on click 2; (2) the method as a diagram whose top line ties it to "Once Upon a Matchmaker"
 % (w2-cx-private, 02_matrix_factorization: a list of numbers for every customer and film, improved by gradient
-% descent), click 2 adding the loop of learning; (3) the value, as airbnb.tex shows it: big numbers, a rule, a cost.
+% descent), click 2 adding the loop of learning; (3) the value, as the Airbnb case shows it: big numbers, a rule, a cost.
 % He did not dictate these slides. The paper is the one of card 4 of cases.tex (LiRank, KDD 2024); this deck uses
 % only what it says of the ads model (tools/cases_numbers.py, block "LinkedIn's ads", lists the scope traps).
 % No number is typed here: numbers.tex is written by tools/cases_numbers.py, which keeps the sentence of each source.
 % A "Say" comment above each frame is the talk track. Build and check from this folder:
 %   python3 tools/cases_numbers.py
-%   ../style/tools/build.sh linkedin.tex
-%   python3 tools/check_numbers.py linkedin.pdf tools/expected-linkedin.txt
+%   ../style/tools/build.sh block4-parallelized-mf.tex
+%   python3 tools/check_numbers.py block4-parallelized-mf.pdf tools/expected-block4-parallelized-mf.txt
 \newcommand{\lasource}{Borisyuk and others (LinkedIn), KDD 2024.}
 
 % ===== Frame 1. The chance of a click =====

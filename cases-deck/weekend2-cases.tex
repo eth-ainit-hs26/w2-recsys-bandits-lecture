@@ -1,10 +1,9 @@
 % ===== weekend2-cases.tex: the business cases of weekend 2 in one deck, asked for by Carlos on 2026-11-06 =====
-% His words: "Finally merge all this decks into a new deck for the weekend". One \section per case, in the order he
-% dictated them, then the three cases of the bandit block and of advertising (Spotify's home page, Amazon Payments,
-% LinkedIn's ads, added the same evening after the first three, which kept their order); each section inputs the
-% case's frames file, so this deck and the case decks share one source. The
-% style turns every \section into a divider page; a section is named by the company alone, which fits one line.
-% Which case follows which Friday block is still open (README.md).
+% His words: "Finally merge all this decks into a new deck for the weekend". One \section per case; each section
+% inputs the case's frames file, so this deck and the block decks share one source. Since 2026-11-09 the sections
+% follow the Friday blocks, the order of block1-nearest-neighbors.tex to block4-parallelized-mf.tex (until then
+% Airbnb came after Spotify, in the order Carlos dictated the cases). The style turns every \section into a
+% divider page; a section is named by the company alone, which fits one line.
 % To add a case: PRINCIPLES.md, section "Adding a case".
 % Build and check from this folder:
 %   python3 tools/cases_numbers.py
@@ -33,11 +32,11 @@
 \section{Etsy}
 \input{etsy-frames}
 
-\section{Spotify}
-\input{spotify-frames}
-
 \section{Airbnb}
 \input{airbnb-frames}
+
+\section{Spotify}
+\input{spotify-frames}
 
 \section{Spotify's home page}
 \input{spotify-home-frames}
