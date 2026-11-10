@@ -71,10 +71,10 @@ Specifically:
 │                               Payments, LinkedIn's ads (3 each); since 2026-11-09 one deck
 │                               per Friday block (block1-*.tex to block4-*.tex), all six in
 │                               weekend2-cases.tex; rules in PRINCIPLES.md
-├── cold-intro-deck/            The cold intros of the Friday blocks (2026-11-10), in the dark
-│                               Title sequence of the course cold intro: block 1, "Birds with
-│                               the same wings" (Chunyu Kun, Zhanguo ce), 5 frames, pictures cut
-│                               from Huizong's Auspicious Cranes; own CLAUDE.md and README.md
+├── cold-intro-deck/            The cold intro of weekend 2 (2026-11-10), in the dark Title
+│                               sequence of the course cold intro: "Birds with the same wings"
+│                               (Chunyu Kun, Zhanguo ce), 5 frames dictated by Carlos, pictures
+│                               cut from Huizong's Auspicious Cranes; own CLAUDE.md and README.md
 ├── original-decks/             Original PDFs from before the rebuild
 │   ├── w2_bandits.pdf
 │   └── w2_recsys.pdf
@@ -228,11 +228,13 @@ order of the blocks.
 
 ## The cold intro deck (added 2026-11-10)
 
-`cold-intro-deck/block1-nearest-neighbors.tex` is the cold intro of the Friday 08:15 block, the inner product and
-nearest neighbors: Chunyu Kun answers King Xuan of Qi, "birds with the same wings live together" (*Zhanguo ce*, Qi 3),
-5 frames over 10 pages, the Chinese with our English under it, and a last frame that maps the story's words to the
-block (birds to customers, the same wings to similar ratings, living together to nearest neighbors, seeking scholars
-from Kun to a prediction). Carlos chose the story on 2026-11-10 from four rounds of candidates (`git_ainit/research_notes/Weekend 2 cold intros/`).
+`cold-intro-deck/block1-nearest-neighbors.tex` is the cold intro of weekend 2, shown before the Friday 08:15 block,
+the inner product and nearest neighbors: Chunyu Kun answers King Xuan of Qi, "birds with the same wings live
+together" (*Zhanguo ce*, Qi 3), 5 frames over 8 pages. Carlos chose the story on 2026-11-10 from four rounds of
+candidates (`git_ainit/research_notes/Weekend 2 cold intros/`) and dictated the frames the same day: the title frame,
+a context frame, the king's question and Kun's answer in his English with the key sentence highlighted, and a closing
+frame on representation learning. The first build (commit `0beb06a`: the Chinese on every frame and a mapping of the
+story's words to the block) is replaced.
 The look is the dark Title sequence of the course cold intro (`w1-lecture-material/cold-intro/intro-slides/`), the
 one exception to Codex plates. Every picture is cut by `make_images.py` from Emperor Huizong's *Auspicious Cranes*
 (1112, public domain). Build from inside the folder with `../style/tools/build.sh block1-nearest-neighbors.tex`;

@@ -1,12 +1,15 @@
 % =====================================================================
-%  AI in Industry, HS26, weekend 2. THE COLD INTRO OF BLOCK 1, the inner product and nearest neighbors
+%  AI in Industry, HS26, weekend 2. THE COLD INTRO, before block 1, the inner product and nearest neighbors
 %  (Friday 13 November 2026, 08:15): "Birds with the same wings", Chunyu Kun at the court of King Xuan of Qi,
 %  Zhanguo ce, Qi 3. Carlos chose the story on 2026-11-10 from the fourth round of candidates
-%  (research_notes/Weekend 2 cold intros/lookalikes.md, L5).
+%  (research_notes/Weekend 2 cold intros/lookalikes.md, L5) and dictated the frames the same day: the title, the
+%  context, the king's question and Kun's answer in English, one paragraph each, the birds and the beasts
+%  highlighted, and a closing frame on representation learning.
 %  The look is the Title sequence of the course cold intro (w1-lecture-material, cold-intro/intro-slides): every
-%  frame a picture, a line or two of type, the words in their own language with the English under them like
-%  subtitles. Every picture is cut from one painting, Emperor Huizong's Auspicious Cranes (1112), by make_images.py.
-%  The Chinese is the text of zh.wikisource, 戰國策/卷10, with its notes removed. The English is ours.
+%  frame a picture and a few lines of type. Every picture is cut from one painting, Emperor Huizong's Auspicious
+%  Cranes (1112), by make_images.py.
+%  The Chinese of frame 0 is the text of zh.wikisource, 戰國策/卷10, with its notes removed. The English is ours:
+%  the gloss of lookalikes.md, the words Carlos chose.
 %  Build FROM THIS DIRECTORY, three passes:  ../style/tools/build.sh block1-nearest-neighbors.tex
 % =====================================================================
 \documentclass[aspectratio=169]{beamer}
@@ -25,9 +28,8 @@
 
 \begin{document}
 
-% ===== 0. The court of Qi =====
-% Say: The state of Qi, in the fourth century BC. Chunyu Kun, a scholar of Qi known for his wit and often its envoy
-% to the other states, presents seven men to King Xuan in one day.
+% ===== 0. The title =====
+% Say: The state of Qi, in the fourth century BC. In one day, Chunyu Kun presents seven men to King Xuan.
 % The pictures are details of one painting. Emperor Huizong of Song painted the red-crowned cranes that circled over
 % the gate of his palace in Bianliang, today Kaifeng, on 22 February 1112: twenty cranes, two of them standing on the
 % roof.
@@ -41,69 +43,72 @@
   \tscredit{84}{87.6}{70}{\srcpaint}
 \end{frame}
 
-% ===== 1. The king =====
-% Say: King Xuan, king of Qi from 319 to 301 BC, doubts. Scholars are rare: one in a thousand li already counts as a
-% crowd, one sage in a hundred generations as a queue. And Kun brings seven in one morning.
+% ===== 1. The context =====
+% Say: The Zhanguo ce, Strategies of the Warring States: anecdotes of the politics and wars of the Chinese states from
+% 490 to 221 BC, edited by Liu Xiang (77 to 6 BC) from the manuscripts of the imperial library. King Xuan of Qi,
+% king from 319 to 301 BC, gave 76 scholars, Chunyu Kun among them, houses and the rank of senior officers, to debate
+% rather than govern; the scholars of Jixia, at his capital, numbered in the hundreds (Shiji 46). Kun was known for
+% his wit and was sent several times as an envoy (Shiji 126).
+\begin{frame}[plain,noframenumbering]
+  \tsbg{img/bg-pair.jpg}
+  \tstext{8}{47}{144}{\fontsize{16}{19}\selectfont\color{titlewhite}}{Strategies of the Warring States}
+  \tstext{8}{54.6}{144}{\fontsize{9.6}{11.5}\selectfont\color{quiet}}
+    {\emph{Zhanguo ce} \cjk{戰國策}, edited by Liu Xiang in the 1st century BC}
+  \tstext{8}{62.4}{144}{\fontsize{11.5}{15}\selectfont\color{pale}}
+    {Stories of the politics and wars of the Chinese states, 5th to 3rd century BC.\par\vspace{2.2mm}
+     King Xuan of Qi gathered hundreds of scholars in his capital. One of them, Chunyu Kun, known for his wit,
+     presented new scholars to the king.}
+  \tscredit{84}{87.6}{70}{\srcpaint}
+\end{frame}
+
+% ===== 2. The king =====
+% Say: King Xuan doubts. Scholars are rare: one in a thousand li already counts as a crowd, one sage in a hundred
+% generations as a queue. A li is a Chinese measure of distance.
 \begin{frame}[plain,noframenumbering]
   \tshalf{0}{img/half-court.jpg}
   \tstext{88}{8}{64}{\fontsize{18}{21}\selectfont\color{titlewhite}}{King Xuan of Qi}
-  \tstext{88}{16.6}{64}{\fontsize{10}{12}\selectfont\color{lav}}{reigned 319 to 301 BC}
-  \tstext{88}{26}{66}{\cjkfont\fontsize{14}{19.5}\selectfont\color{titlewhite}}
-    {千里而一士，是比肩而立；\\ 百世而一聖，若隨踵而至也。\\ 今子一朝而見七士，\\ 則士不亦眾乎？}
-  \tstext{88}{55}{62}{\fontsize{9.8}{13}\selectfont\itshape\color{pale}}
-    {One scholar in a thousand li counts as shoulder to shoulder; one sage in a hundred generations, as heel on
-     heel. You present seven scholars in one morning. Are scholars so many, then?}
+  \tstext{88}{16.6}{64}{\fontsize{10}{12}\selectfont\color{quiet}}{reigned 319 to 301 BC}
+  \tstext{88}{27}{64}{\fontsize{12}{16}\selectfont\color{pale}}
+    {``Come. I have heard that one scholar in a thousand li is as if they stood shoulder to shoulder, and one sage
+     in a hundred generations as if they came heel after heel. Now you present seven scholars in one morning: are
+     scholars not plentiful, then?''}
   \tscredit{88}{87.6}{64}{\srctext}
   \tscredit{6}{87.6}{72}{\srcpaint}
 \end{frame}
 
-% ===== 2. The answer =====
-% Say: Chunyu Kun, about 386 to 310 BC, a scholar of the Jixia academy of Qi. Not so, he says. Birds with the same
-% wings live together, beasts with the same feet walk together. Then come the herbs: look for chaihu and jiegeng in
-% a marsh and you will not find one in generations; on the north slopes of two mountains you load them by the cartful.
+% ===== 3. The answer =====
+% Say: Not so. Birds with the same wings live together, beasts with the same feet walk together. Chaihu and jiegeng
+% are two plants whose roots are used in traditional Chinese medicine: in the marshes you will not find one in
+% generations, on the north slopes of two mountains you load them by the cartful.
 \begin{frame}[plain,noframenumbering]
   \tshalf{80}{img/half-flock.jpg}
   \tstext{8}{8}{64}{\fontsize{18}{21}\selectfont\color{titlewhite}}{Chunyu Kun}
-  \tstext{8}{16.6}{64}{\fontsize{10}{12}\selectfont\color{lav}}{c.\,386 to 310 BC}
-  \tstext{8}{27}{68}{\fontsize{11}{13}\selectfont\color{titlewhite}}
-    {\cjk{\fontsize{14}{16}\selectfont 不然。}\quad{\itshape\color{pale}Not so.}}
-  \tstext{8}{38}{70}{\cjkfont\fontsize{22}{26}\selectfont\color{titlewhite}}{夫鳥同翼者而聚居，}
-  \tstext{8}{48.6}{70}{\fontsize{10.5}{12.8}\selectfont\itshape\color{titlewhite}}{Birds with the same wings live together.}
-  \tstext[2-]{8}{59}{70}{\cjkfont\fontsize{22}{26}\selectfont\color{titlewhite}}{獸同足者而俱行。}
-  \tstext[2-]{8}{69.6}{70}{\fontsize{10.5}{12.8}\selectfont\itshape\color{titlewhite}}{Beasts with the same feet walk together.}
+  \tstext{8}{16.6}{64}{\fontsize{10}{12}\selectfont\color{quiet}}{c.\,386 to 310 BC}
+  \tstext{8}{27}{68}{\fontsize{12}{16}\selectfont\color{pale}}
+    {``Not so. {\color{lav}Birds with the same wings live together; beasts with the same feet walk together.} Look
+     for chaihu and jiegeng in the marshes, and in generations you will not find one; go to the north slopes of the
+     mountains \cjk{睪黍} and \cjk{梁父}, and you load them by the cartful.''}
   \tscredit{8}{87.6}{70}{\srctext}
   \tscredit{84}{87.6}{70}{\srcpaint}
 \end{frame}
 
-% ===== 3. The kind =====
-% Say: Things each have their kind, and I am of the kind of the worthy. Seeking scholars from me is like drawing
-% water from a river. Then: I will present more, why only seven? In the painting, two cranes stand on the two ends of
-% the ridge, facing each other.
-\begin{frame}[plain,noframenumbering]
-  \tsbg{img/bg-pair.jpg}
-  \tstext{8}{46.4}{144}{\cjkfont\fontsize{14}{18.5}\selectfont\color{titlewhite}}
-    {夫物各有疇，今髡賢者之疇也。\\ 王求士於髡，譬若挹水於河，而取火於燧也。}
-  \tstext{8}{60.4}{140}{\fontsize{9.8}{12.6}\selectfont\itshape\color{pale}}
-    {Things each have their kind, and I, Kun, am of the kind of the worthy. Your Majesty seeking scholars from me
-     is like drawing water from a river, or taking fire from a fire-drill.}
-  \tstext[2-]{8}{71.6}{144}{\cjkfont\fontsize{14}{18.5}\selectfont\color{titlewhite}}{髡將復見之，豈特七士也。}
-  \tstext[2-]{8}{78.6}{74}{\fontsize{9.8}{12.6}\selectfont\itshape\color{pale}}{I will present more. Why only seven scholars?}
-  \tscredit{84}{87.6}{70}{\srcpaint}
-\end{frame}
-
-% ===== 4. The block =====
-% Say: Birds with the same wings live together. Customers with similar ratings are nearest neighbors, and the inner
-% product measures how similar the ratings of two customers are. To predict a newcomer's rating of a film, we copy
-% the rating of the nearest neighbor, as the king found scholars through Kun.
+% ===== 4. Representation learning =====
+% Say: Birds with the same wings live together. Representation learning organizes data the same way. Carlos, on
+% 2026-11-10: embeddings are "one of the main drivers for AI technologies nowadays".
 \begin{frame}[plain,noframenumbering]
   \tsbg{img/bg-map.jpg}
-  \tstext{8}{8}{120}{\fontsize{8.6}{10.4}\selectfont\color{pale}}{\tssp{Weekend 2, block 1}}
-  \tstext{8}{13.4}{144}{\fontsize{17}{20}\selectfont\color{titlewhite}}{The inner product and nearest neighbors}
-  \tsrow[1-]{34}{鳥}{birds}{Customers}{}
-  \tsrow[2-]{47.5}{同翼}{the same wings}{Similar ratings}{measured by the inner product}
-  \tsrow[3-]{61}{聚居}{live together}{Nearest neighbors}{}
-  \tsrow[4-]{74.5}{求士於髡}{seeking scholars from Kun}{A prediction}{copy the nearest neighbor's rating}
-  \tscredit{8}{87.6}{70}{\srcpaint}
+  \tstext{8}{8}{120}{\fontsize{8.6}{10.4}\selectfont\color{pale}}{\tssp{Weekend 2}}
+  \tstext{8}{13.4}{144}{\fontsize{17}{20}\selectfont\color{titlewhite}}{Representation learning}
+  \tstext[1-]{8}{31}{140}{\fontsize{12.5}{16.5}\selectfont\color{pale}}
+    {We organize data so that similar data points cluster together.}
+  \tstext[2-]{8}{42.5}{140}{\fontsize{12.5}{16.5}\selectfont\color{pale}}
+    {For each data point, we compute a representation, its {\color{lav}embedding}: a list of numbers that captures its
+     most characteristic features.}
+  \tstext[3-]{8}{59.8}{140}{\fontsize{12.5}{16.5}\selectfont\color{pale}}
+    {Data points that belong together get similar embeddings.}
+  \tstext[4-]{8}{71.3}{140}{\fontsize{12.5}{16.5}\selectfont\color{titlewhite}}
+    {Embeddings are one of the main drivers of AI today.}
+  \tscredit{84}{87.6}{70}{\srcpaint}
 \end{frame}
 
 \end{document}

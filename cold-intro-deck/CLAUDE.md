@@ -1,19 +1,25 @@
 # CLAUDE.md : cold-intro-deck, the cold intros of weekend 2
 
 Beamer, lualatex, three passes, from this folder. One deck so far: `block1-nearest-neighbors.tex`, "Birds with
-the same wings", the cold intro of the Friday 08:15 block (the inner product and nearest neighbors), built on
-2026-11-10. `README.md` has the frames, the mapping, the sources and the open items.
+the same wings", the cold intro of weekend 2, shown before the Friday 08:15 block (the inner product and nearest
+neighbors), built on 2026-11-10. `README.md` has the frames, the sources, the history and the open items.
+
+The frames are the ones Carlos dictated on 2026-11-10, after the first build: the title frame (the Chinese with the
+English under it, the one frame he called beautiful), a context frame (the book, the court, the people), the king's
+question and Kun's answer as his English text, one paragraph per frame, the key sentence in lavender, and a closing
+frame on representation learning, the theme of the weekend. The quotations carry no Chinese and there is no
+mapping of story words to course terms. Change the wording of the quotations only on his say.
 
 The look is the Title sequence of the course cold intro (`w1-lecture-material/cold-intro/intro-slides/`, chosen by
-Carlos on 2026-10-14): a picture on every frame, Futura, the original text with the English under it, the terms in
-lavender. Carlos rejected a Codex plates cold intro as looking "like a technical report", and a struck or muted row
-in a mapping as unaesthetic. Keep both out.
+Carlos on 2026-10-14): a picture on every frame, Futura, lavender only for the highlighted sentence and the term of
+the closing frame. Carlos rejected a Codex plates cold intro as looking "like a technical report", and a struck or
+muted row in a mapping as unaesthetic. Keep both out.
 
 ## Layout
 
 ```
 block1-nearest-neighbors.tex   the deck, 5 frames, a "Say" comment per frame
-cold-intro-kit.tex             the macros (a reduced copy of intro-kit.tex, plus \tshalf and \tsrow)
+cold-intro-kit.tex             the macros (a reduced copy of intro-kit.tex, plus \tshalf, and \tsrow, unused since the rebuild)
 make_images.py                 cuts and grades img/ from the original painting (URL and SHA-1 in its docstring)
 img/                           the five pictures, committed so that a build needs no network
 tools/check_overlays_any.py    the no-jump check for dark pages
