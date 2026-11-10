@@ -1,0 +1,122 @@
+% ===== alps-platform-frame.tex: "Alps is an HPE Cray EX254n" (FDD slide 14), input by block5-computing-clusters.tex
+% Carlos, 2026-11-10: "try to make a diagram that shows how the supercomputer platform looks and then the blade
+% types inside it". Two frames: the platform as a zoom from a cabinet to a chassis to one blade, then the blade
+% types of the platform drawn side by side.
+% Facts, checked on 2026-11-10 against HPE's QuickSpecs (version 22, 21 September 2026, a00094635enw) and CSCS's
+% hardware page (docs.cscs.ch/alps/hardware):
+%   a cabinet holds 8 chassis; a chassis has 8 compute blade slots ("up to 64 compute blade slots across eight
+%   compute chassis"); Alps's GH200 chassis use 7 of the 8 ("underpopulated so that we can increase the amount
+%   of power delivered to each GPU"), so 56 blades, 112 nodes and 448 GH200 a cabinet, 24 cabinets;
+%   EX254n: "Two 4-socket Nvidia GH200 Grace Hopper Superchip nodes", one node per board.
+%   The blades of frame 2, from the same QuickSpecs and its 2021 version 4: EX235n, two nodes of 4 NVIDIA A100 and
+%   1 AMD EPYC; EX235a, two nodes of 4 AMD MI250X and 1 AMD EPYC; EX255a, two nodes of 4 AMD MI300A; EX4252, four
+%   nodes of 2 AMD EPYC. EX425, EX235a and EX235n are discontinued (version 22 change log); Alps still runs EX235a
+%   blades, and CSCS names EX255A as well.
+%   FDD's line "The trailing n marks the NVIDIA accelerated blades" is HPE's pattern, never its stated rule, so
+%   the frame says only what the five names show.
+%   Left out: the cabinet's model (CSCS writes EX3000, HPE defines EX4000), rectifier counts, the number of CDUs.
+
+% ===== Frame 1. The platform, from a cabinet to one blade
+\begin{frame}{Alps is an HPE Cray EX254n}
+  \begin{tikzpicture}[x=1mm, y=1mm]
+    \path[use as bounding box] (0,1) rectangle (130,-54);
+    \node[body, font=\small, anchor=north west, text width=130mm] at (0,0)
+      {The TOP500 entry reads: \emph{Alps, HPE Cray EX254n, NVIDIA Grace 72C 3.1GHz, NVIDIA GH200 Superchip,
+       Slingshot-11, HPE Cray OS}};
+    % the platform: one cabinet, its 8 chassis
+    \begin{scope}[visible on=<2->]
+      \node[font=\small\bfseries, text=ink, anchor=base, inner sep=0] at (37,-13.6) {HPE Cray EX, the platform};
+      \draw[nib, line width=0.7pt, line join=miter] (0,-15.5) rectangle (22,-36.5);
+      \foreach \k in {0,...,7} {
+        \draw[nib, line width=0.45pt, line join=miter] (1.6,{-16.6-\k*2.375}) rectangle (20.4,{-18.4-\k*2.375});}
+      \node[font=\footnotesize\itshape, text=muted, anchor=north, align=center, inner sep=0] at (11,-38.2)
+        {one of 24 cabinets:\\ 8 chassis};
+    \end{scope}
+    % one chassis: 8 blade slots, 7 used at Alps
+    \begin{scope}[visible on=<3->]
+      \draw[brand, line width=1.1pt, line join=miter] (1.6,-21.35) rectangle (20.4,-23.15);
+      \draw[zoom] (20.4,-21.35) to (30,-15.5) (20.4,-23.15) to (30,-36.5);
+      \draw[nib, line width=0.7pt, line join=miter] (30,-15.5) rectangle (74,-36.5);
+      \foreach \k in {0,...,6} {
+        \draw[nib, line width=0.5pt, line join=miter, fill=paper] (32,{-16.6-\k*2.375}) rectangle (72,{-18.3-\k*2.375});}
+      \draw[muted, line width=0.5pt, dash pattern=on 1.6pt off 1.2pt] (32,{-16.6-7*2.375}) rectangle (72,{-18.3-7*2.375});
+      \node[font=\footnotesize\itshape, text=muted, anchor=north, align=center, inner sep=0] at (52,-38.2)
+        {one chassis: 8 blade slots,\\ 7 used at Alps, for more power per GPU};
+    \end{scope}
+    % one EX254n blade: two nodes of four GH200
+    \begin{scope}[visible on=<4->]
+      \draw[brand, line width=1.1pt, line join=miter] (32,-18.975) rectangle (72,-20.675);
+      \draw[zoom] (72,-18.975) to (82,-15.5) (72,-20.675) to (82,-36.5);
+      \node[font=\small\bfseries, text=brand, anchor=base, inner sep=0] at (106,-13.6) {EX254n, the blade};
+      \draw[nib, line width=0.7pt, line join=miter] (82,-15.5) rectangle (130,-36.5);
+      \foreach \bx in {84,107} {
+        \draw[ruledark, line width=0.5pt, line join=miter] (\bx,-17.4) rectangle ({\bx+21},-30.4);
+        \foreach \i in {0,1} {\foreach \j in {0,1} {
+          \fill[hatch] ({\bx+2.5+\i*9},{-19.2-\j*5.6}) rectangle ({\bx+9.5+\i*9},{-23.2-\j*5.6});
+          \draw[brand, line width=0.55pt, line join=miter]
+            ({\bx+2.5+\i*9},{-19.2-\j*5.6}) rectangle ({\bx+9.5+\i*9},{-23.2-\j*5.6});}}
+        \node[font=\footnotesize\itshape, text=muted, anchor=north, inner sep=0] at ({\bx+10.5},-31.4) {node};}
+      \node[font=\footnotesize\itshape, text=muted, anchor=north, align=center, inner sep=0] at (106,-38.2)
+        {2 nodes $\times$ 4 GH200\\ $=$ 8 GH200 a blade};
+    \end{scope}
+    \node[body, font=\small, anchor=north west, text width=130mm, visible on=<5->] at (0,-47.8)
+      {The platform: cabinets, liquid cooling, power and the network.};
+  \end{tikzpicture}
+\end{frame}
+
+% ===== Frame 2. The blade types of the platform. A hatched square is a GPU, or a module that carries one
+% (GH200 and MI300A put a CPU and a GPU on one package); a plain square is a CPU.
+\newcommand{\cxblade}[6]{% overlay, y centre, name, maker, nodes (2 or 4), style: gh (4 GPU modules),
+  % gc (4 GPUs and 1 CPU), cpu (2 CPUs)
+  \begin{scope}[visible on=<#1>]
+    \node[font=\small\bfseries, text=ink, anchor=base west, inner sep=0] at (0,{#2+0.6}) {#3};
+    \node[font=\footnotesize\itshape, text=muted, anchor=north west, inner sep=0] at (0,{#2-0.6}) {#4};
+    \pgfmathsetmacro{\cxbw}{100/#5}%
+    \foreach \nd in {1,...,#5} {
+      \pgfmathsetmacro{\cxbl}{30+(\nd-1)*\cxbw}%
+      \draw[ruledark, line width=0.45pt, line join=miter] ({\cxbl+0.8},{#2+2.2}) rectangle ({\cxbl+\cxbw-0.8},{#2-2.2});
+      \ifx#6g
+        \foreach \q in {0,...,3} {
+          \pgfmathsetmacro{\cxqx}{\cxbl+\cxbw/2-9.2+\q*4.8}%
+          \fill[hatch] (\cxqx,{#2+1.6}) rectangle ({\cxqx+3.6},{#2-1.6});
+          \draw[brand, line width=0.5pt, line join=miter] (\cxqx,{#2+1.6}) rectangle ({\cxqx+3.6},{#2-1.6});}
+      \fi
+      \ifx#6c
+        \foreach \q in {0,...,3} {
+          \pgfmathsetmacro{\cxqx}{\cxbl+\cxbw/2-11.6+\q*4.8}%
+          \fill[hatch] (\cxqx,{#2+1.6}) rectangle ({\cxqx+3.6},{#2-1.6});
+          \draw[brand, line width=0.5pt, line join=miter] (\cxqx,{#2+1.6}) rectangle ({\cxqx+3.6},{#2-1.6});}
+        \pgfmathsetmacro{\cxqx}{\cxbl+\cxbw/2-11.6+4*4.8}%
+        \draw[nib, line width=0.5pt, line join=miter, fill=paper] (\cxqx,{#2+1.6}) rectangle ({\cxqx+3.6},{#2-1.6});
+      \fi
+      \ifx#6u
+        \foreach \q in {0,1} {
+          \pgfmathsetmacro{\cxqx}{\cxbl+\cxbw/2-4.2+\q*4.8}%
+          \draw[nib, line width=0.5pt, line join=miter, fill=paper] (\cxqx,{#2+1.6}) rectangle ({\cxqx+3.6},{#2-1.6});}
+      \fi
+    }
+  \end{scope}}
+
+\begin{frame}{One platform, several blade types}
+  \begin{tikzpicture}[x=1mm, y=1mm]
+    \path[use as bounding box] (0,1) rectangle (130,-54);
+    % the key
+    \fill[hatch] (86,-0.4) rectangle (89.6,-3.6);
+    \draw[brand, line width=0.5pt, line join=miter] (86,-0.4) rectangle (89.6,-3.6);
+    \node[font=\footnotesize, text=ink, anchor=west, inner sep=0] at (90.8,-2) {a GPU};
+    \draw[nib, line width=0.5pt, line join=miter, fill=paper] (106,-0.4) rectangle (109.6,-3.6);
+    \node[font=\footnotesize, text=ink, anchor=west, inner sep=0] at (110.8,-2) {a CPU};
+    \node[font=\footnotesize\itshape, text=muted, anchor=west, inner sep=0] at (30,-2) {each box is one node of a blade};
+    % the blades
+    \cxblade{1-}{-7}{EX254n}{NVIDIA GH200}{2}{g}
+    \draw[brand, line width=1.1pt, line join=miter] (30,-4.2) rectangle (130,-9.8);
+    \cxblade{2-}{-14.2}{EX235n}{NVIDIA A100}{2}{c}
+    \cxblade{2-}{-21.4}{EX235a}{AMD MI250X}{2}{c}
+    \cxblade{2-}{-28.6}{EX255a}{AMD MI300A}{2}{g}
+    \cxblade{3-}{-35.8}{EX4252}{AMD EPYC}{4}{u}
+    \node[font=\small\itshape, text=muted, anchor=north west, inner sep=0, visible on=<4->] at (0,-41.6)
+      {Every name here that ends in n carries NVIDIA GPUs.};
+    \node[body, font=\small, anchor=north west, text width=130mm, visible on=<5->] at (0,-45.8)
+      {The blade choice is what makes Alps a machine for AI\\ rather than a conventional CPU cluster.};
+  \end{tikzpicture}
+\end{frame}

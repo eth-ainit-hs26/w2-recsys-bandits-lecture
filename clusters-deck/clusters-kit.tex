@@ -1,0 +1,95 @@
+% ===== clusters-kit.tex: the drawings of the computing clusters block, Codex plates style =====
+% Load after ../style/ainit-preamble and ../style/ainit-course. Every frame is one picture in mm,
+% bounding box (0,1) rectangle (130,-54), as in ../cases-deck and ../opener-deck.
+% The frames are a port of FDD weekend 7, "The cost of computation and supercomputers"
+% (git_fdd/projects/weekend-07-large-scale/carlos-lectures/slides/w7-cost-slides.tex). The FDD
+% preamble's names map onto Codex plates as in the earlier ports of this family (../../w1-lecture-material/gepa-deck):
+%   flowbox            box          a plain ink box with square corners
+%   flowstrong         box strong   the chip strong of the style: a violet hatched frame inside the border
+%   flowdim            box quiet    a hairline box. Dashed is refused in this style, so it is not dashed
+%   flowarrow          flow         the plain arrow
+%   accent (blue)      brand        the violet rubric
+%   bad (vermillion)   bad          unchanged: a loss
+%   srcline, \litlink  src, \weblink   the source line at the foot of a frame
+%   a table            \cxsheet     a sheet: box, hairlines between rows and columns, hatched header band
+%                                   (the sheet of ../../w1-lecture-material/llm-deck/llm-kit.tex, in mm)
+% Styles copied from ../cases-deck/cases-kit.tex (2026-11-10): src, measure, big, head, lbl, body, flow,
+% bar plain. Nothing is set below \footnotesize except the source line (\scriptsize, as in the cases decks).
+
+\tikzset{
+  src/.style={font=\scriptsize\itshape, text=muted, inner sep=0, align=flush left},
+  measure/.style={font=\small\itshape, text=muted, inner sep=0, align=flush left},
+  big/.style={font=\LARGE\bfseries, text=brand, inner sep=0},
+  head/.style={font=\large\bfseries, text=ink, inner sep=0},
+  lbl/.style={font=\small\itshape, text=muted, inner sep=0, align=flush left},
+  body/.style={font=\normalsize, text=ink, inner sep=0, align=flush left},
+  flow/.style={draw=nib, line width=0.7pt, line join=miter, -{Triangle[length=2.3mm, width=1.7mm]}},
+  flow both/.style={draw=nib, line width=0.7pt, line join=miter,
+    {Triangle[length=2.3mm, width=1.7mm]}-{Triangle[length=2.3mm, width=1.7mm]}},
+  bar plain/.style={draw=nib, line width=0.7pt, line join=miter, fill=paper},
+  % the FDD flow boxes
+  box/.style={draw=nib, line width=0.7pt, line join=miter, fill=paper, text=ink, font=\normalsize,
+    align=center, inner xsep=2.4mm, inner ysep=1.8mm},
+  box strong/.style={chip strong, align=center, font=\normalsize, inner xsep=3.2mm, inner ysep=2.8mm,
+    minimum width=0pt, minimum height=0pt},
+  box quiet/.style={box, draw=ruledark, line width=0.5pt},
+  % a hairline rule between two parts of a frame
+  rule/.style={draw=ruling, line width=0.4pt},
+  % a number set large in ink or in the rubric
+  num/.style={font=\large\bfseries, text=ink, inner sep=0},
+  % a part of a machine: a small plain box; the part a zoom opens is outlined in violet
+  part/.style={draw=nib, line width=0.7pt, line join=miter, fill=paper, text=ink, font=\footnotesize,
+    align=center, inner sep=0.8mm},
+  part open/.style={part, draw=brand, line width=1.1pt},
+  % a link between two parts, and the leader from a speed to its link
+  link/.style={draw=brand, line width=1.8pt},
+  leader/.style={draw=brand, line width=0.5pt},
+  zoom/.style={draw=ruledark, line width=0.45pt},
+  % the sheet
+  sheet box/.style={draw=nib, line width=0.7pt, line join=miter},
+  sheet rule/.style={draw=ruling, line width=0.4pt},
+  sheet head/.style={draw=ruledark, line width=0.8pt},
+  shead/.style={font=\small\bfseries, text=ink, inner sep=0},
+  scell/.style={font=\small, text=ink, inner sep=0, align=center},
+  slab/.style={font=\small, text=ink, inner sep=0, align=flush left},
+}
+
+% \cxsheet[overlay]{left}{top}{first column}{column}{columns}{rows}{row height}{header height}, in mm.
+% top is the top edge of the sheet; the header row is header height tall, then the rows, each row height tall,
+% so that row i (from 1) is centred at top - header - row*(i - 0.5). A hatched band 1.3 mm deep sits on the top
+% edge. The caller places the words. \renewcommand{\cxsheetextra}{3.8} inside a picture makes its last row
+% that much taller (a row of two lines under rows of one).
+\newcommand{\cxsheetextra}{0}
+\newcommand{\cxsheet}[9][1-]{%
+  \pgfmathsetmacro{\shRight}{#2+#4+#6*#5}%
+  \pgfmathsetmacro{\shHead}{#3-#9}%
+  \pgfmathsetmacro{\shBottom}{#3-#9-#7*#8-\cxsheetextra}%
+  \pgfmathsetmacro{\shDiv}{#2+#4}%
+  \ifnum#6>1\relax
+    \pgfmathtruncatemacro{\shNc}{#6-1}%
+    \foreach \shk in {1,...,\shNc} {
+      \draw[sheet rule, visible on=<#1>] ({\shDiv+\shk*#5},#3) to ({\shDiv+\shk*#5},\shBottom);
+    }
+  \fi
+  \ifnum#7>1\relax
+    \pgfmathtruncatemacro{\shNr}{#7-1}%
+    \foreach \shi in {1,...,\shNr} {
+      \draw[sheet rule, visible on=<#1>] (#2,{\shHead-#8*\shi}) to (\shRight,{\shHead-#8*\shi});
+    }
+  \fi
+  \draw[sheet head, visible on=<#1>] (#2,\shHead) to (\shRight,\shHead);
+  \draw[sheet head, visible on=<#1>] (\shDiv,#3) to (\shDiv,\shBottom);
+  \fill[hatch, visible on=<#1>] (#2,#3) rectangle (\shRight,{#3+1.3});
+  \draw[brand, line width=0.4pt, visible on=<#1>] (#2,#3) rectangle (\shRight,{#3+1.3});
+  \draw[sheet box, visible on=<#1>] (#2,#3) rectangle (\shRight,\shBottom);
+}
+
+% \cxsrc{text}: the source line at the foot of a frame, top left at (0,-50.4), up to two lines
+\newcommand{\cxsrc}[2][1-]{%
+  \node[src, anchor=north west, text width=130mm, visible on=<#1>] at (0,-50.4) {#2};}
+% \cxsrctwo{text}: a source line of two lines, top left at (0,-47.6)
+\newcommand{\cxsrctwo}[2][1-]{%
+  \node[src, anchor=north west, text width=130mm, visible on=<#1>] at (0,-47.6) {#2};}
+
+% \arxiv{id}: an arXiv identifier, linked
+\newcommand{\arxiv}[1]{\weblink{https://arxiv.org/abs/#1}{arXiv #1}}

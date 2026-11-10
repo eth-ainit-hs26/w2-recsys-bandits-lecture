@@ -75,6 +75,10 @@ Specifically:
 │                               sequence of the course cold intro: "Birds with the same wings"
 │                               (Chunyu Kun, Zhanguo ce), 5 frames dictated by Carlos, pictures
 │                               cut from Huizong's Auspicious Cranes; own CLAUDE.md and README.md
+├── clusters-deck/              The Saturday 08:15 block "Computing clusters" (2026-11-10): a port
+│                               into Codex plates of the first block of FDD weekend 7, "The cost
+│                               of computation and supercomputers", with Carlos's cuts; 21 frames;
+│                               own CLAUDE.md and README.md
 ├── original-decks/             Original PDFs from before the rebuild
 │   ├── w2_bandits.pdf
 │   └── w2_recsys.pdf
@@ -239,6 +243,18 @@ The look is the dark Title sequence of the course cold intro (`w1-lecture-materi
 one exception to Codex plates. Every picture is cut by `make_images.py` from Emperor Huizong's *Auspicious Cranes*
 (1112, public domain). Build from inside the folder with `../style/tools/build.sh block1-nearest-neighbors.tex`;
 the folder's CLAUDE.md has the traps. Not on the course site; a push makes the PDF public on Pages.
+
+## The computing clusters deck (added 2026-11-10)
+
+`clusters-deck/block5-computing-clusters.tex` is the Saturday 08:15 block, "Computing clusters": a port into Codex
+plates of the first block of FDD weekend 7, "The cost of computation and supercomputers" (git_fdd,
+`w7-cost-slides.tex`, commit `b296f78`), with the cuts and changes Carlos dictated on 2026-11-10. Five sections, 21
+frames: a FLOP and the GH200; Alps, drawn from a cabinet to one blade, and the blade types of its platform; CSCS,
+nodes and sockets; capacity and bandwidth; watts, kilowatt hours and the bill; the four links drawn with their
+speeds; 6ND on Apertus-70B; dollars and gigawatt hours. Every number is FDD's or a platform fact checked against
+HPE and CSCS (`clusters-deck/tools/check_port.py`). Build from inside the folder with
+`../style/tools/build.sh block5-computing-clusters.tex`. Its README.md maps every frame to FDD's slide numbers and
+lists the slides not ported.
 
 ## When in doubt
 
