@@ -1,0 +1,66 @@
+% cold-intro-kit.tex: the macros of the weekend 2 cold intros, in the Title sequence of the course cold intro
+% (w1-lecture-material, cold-intro/intro-slides/intro-kit.tex, the look Carlos chose on 2026-10-14). Input after
+% ../style/ainit-preamble and ../style/ainit-course. Every frame is a picture cut and graded by make_images.py,
+% with the dark where the type sits baked into the file. The type is Futura, the Chinese is Songti TC, and the
+% terms of the block are a light violet, the house violet lifted for a dark screen.
+%
+%   \tsbg{file}                                  the picture that fills the page
+%   \tshalf{x}{file}                             a picture on half the page, 80 by 90 mm, its left edge at x (0 or 80)
+%   \tstext[c]{x}{y}{w}{font}{text}              text at a place, anchored at its top left
+%   \tscredit[c]{x}{y}{w}{text}                  small print, anchored at its bottom left, so a second line grows upwards
+%   \tshi{c}{text}                               violet from click c
+%   \tsrow[c]{y}{chinese}{english}{term}{note}   a row of the mapping, on the baseline y
+% Every position is a plain number in millimetres from the top left (the style's cx page).
+
+\setmainfont{Futura}[Ligatures=TeX]
+% loaded by name: by path, Songti.ttc gives its first face, the simplified one, which lacks some traditional characters
+\newfontfamily\cjkfont{Songti TC}[Scale=0.92]
+\newcommand{\cjk}[1]{{\cjkfont #1}}
+\newcommand{\tssp}[1]{{\addfontfeature{LetterSpace=12}#1}}
+
+\definecolor{screen}{HTML}{0B0A0A}
+\definecolor{titlewhite}{HTML}{F6F3EC}
+\definecolor{pale}{HTML}{DCD3C2}
+\definecolor{quiet}{HTML}{BDB4A5}
+\definecolor{lav}{HTML}{C4B3F5}
+\setbeamercolor{normal text}{fg=titlewhite, bg=screen}
+\setbeamertemplate{background}{%
+  \begin{tikzpicture}[cx page]\fill[screen] (0,0) rectangle (160,90);\end{tikzpicture}}
+
+\newcommand{\tsbg}[1]{%
+  \begin{tikzpicture}[cx page]
+    \node[anchor=north west, inner sep=0] at (0,0) {\includegraphics[width=160mm, height=90mm]{#1}};
+  \end{tikzpicture}}
+
+\newcommand{\tshalf}[2]{%
+  \begin{tikzpicture}[cx page]
+    \node[anchor=north west, inner sep=0] at (#1,0) {\includegraphics[width=80mm, height=90mm]{#2}};
+  \end{tikzpicture}}
+
+\newcommand{\tstext}[6][1-]{%
+  \begin{tikzpicture}[cx page]
+    \node[anchor=north west, inner sep=0, text width=#4 mm, align=flush left, font=#5,
+      visible on=<#1>] at (#2,#3) {#6};
+  \end{tikzpicture}}
+
+\newcommand{\tscredit}[5][1-]{%
+  \begin{tikzpicture}[cx page]
+    \node[anchor=south west, inner sep=0, text width=#4 mm, align=flush left, text=quiet,
+      font=\fontsize{6.6}{8}\selectfont, visible on=<#1>] at (#2,#3) {#5};
+  \end{tikzpicture}}
+
+\newcommand{\tshi}[2]{\textcolor<#1>{lav}{#2}}
+
+% \tsrow[c]{y}{chinese}{english}{term}{note}: one row of the mapping, on the baseline y. The words of the story at
+% x = 8 and their English at x = 36; the term of the block in violet at x = 90, and its note, if any, under it.
+\newcommand{\tsrow}[6][1-]{%
+  \begin{tikzpicture}[cx page]
+    \node[anchor=base west, inner sep=0, font=\cjkfont\fontsize{17}{19}\selectfont, text=titlewhite,
+      visible on=<#1>] at (8,#2) {#3};
+    \node[anchor=base west, inner sep=0, font=\fontsize{10}{12}\selectfont\itshape, text=pale,
+      visible on=<#1>] at (36,#2) {#4};
+    \node[anchor=base west, inner sep=0, font=\fontsize{15}{17}\selectfont, text=lav,
+      visible on=<#1>] at (90,#2) {#5};
+    \node[anchor=base west, inner sep=0, font=\fontsize{9.4}{11}\selectfont, text=pale,
+      visible on=<#1>] at (90,#2+5.6) {#6};
+  \end{tikzpicture}}

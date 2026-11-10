@@ -1,0 +1,109 @@
+% =====================================================================
+%  AI in Industry, HS26, weekend 2. THE COLD INTRO OF BLOCK 1, the inner product and nearest neighbors
+%  (Friday 13 November 2026, 08:15): "Birds with the same wings", Chunyu Kun at the court of King Xuan of Qi,
+%  Zhanguo ce, Qi 3. Carlos chose the story on 2026-11-10 from the fourth round of candidates
+%  (research_notes/Weekend 2 cold intros/lookalikes.md, L5).
+%  The look is the Title sequence of the course cold intro (w1-lecture-material, cold-intro/intro-slides): every
+%  frame a picture, a line or two of type, the words in their own language with the English under them like
+%  subtitles. Every picture is cut from one painting, Emperor Huizong's Auspicious Cranes (1112), by make_images.py.
+%  The Chinese is the text of zh.wikisource, 戰國策/卷10, with its notes removed. The English is ours.
+%  Build FROM THIS DIRECTORY, three passes:  ../style/tools/build.sh block1-nearest-neighbors.tex
+% =====================================================================
+\documentclass[aspectratio=169]{beamer}
+\input{../style/ainit-preamble}
+\input{../style/ainit-course}
+\input{cold-intro-kit}
+
+% beamer takes the PDF title from \title, and there is no title page to print it on
+\title{Birds with the same wings}
+\author{Carlos Cotrini}
+\hypersetup{pdftitle={Birds with the same wings}, pdfauthor={Carlos Cotrini}}
+
+\newcommand{\srctext}{\emph{Zhanguo ce} (Strategies of the Warring States), Qi 3.\\ English: lecturer}
+\newcommand{\srcpaint}{Emperor Huizong of Song, \emph{Auspicious Cranes}, 1112, detail. Liaoning Provincial
+  Museum. Wikimedia Commons, public domain}
+
+\begin{document}
+
+% ===== 0. The court of Qi =====
+% Say: The state of Qi, in the fourth century BC. Chunyu Kun, a scholar of Qi known for his wit and often its envoy
+% to the other states, presents seven men to King Xuan in one day.
+% The pictures are details of one painting. Emperor Huizong of Song painted the red-crowned cranes that circled over
+% the gate of his palace in Bianliang, today Kaifeng, on 22 February 1112: twenty cranes, two of them standing on the
+% roof.
+\begin{frame}[plain,noframenumbering]
+  \tsbg{img/bg-title.jpg}
+  \tstext{8}{8}{120}{\fontsize{8.6}{10.4}\selectfont\color{pale}}{\tssp{The state of Qi, fourth century BC}}
+  \tstext{8}{63}{144}{\cjkfont\fontsize{20}{24}\selectfont\color{titlewhite}}{淳于髡一日而見七人於宣王。}
+  \tstext{8}{73.4}{144}{\fontsize{11}{13}\selectfont\itshape\color{titlewhite}}
+    {In one day, Chunyu Kun presented seven men to King Xuan.}
+  \tscredit{8}{87.6}{72}{\srctext}
+  \tscredit{84}{87.6}{70}{\srcpaint}
+\end{frame}
+
+% ===== 1. The king =====
+% Say: King Xuan, king of Qi from 319 to 301 BC, doubts. Scholars are rare: one in a thousand li already counts as a
+% crowd, one sage in a hundred generations as a queue. And Kun brings seven in one morning.
+\begin{frame}[plain,noframenumbering]
+  \tshalf{0}{img/half-court.jpg}
+  \tstext{88}{8}{64}{\fontsize{18}{21}\selectfont\color{titlewhite}}{King Xuan of Qi}
+  \tstext{88}{16.6}{64}{\fontsize{10}{12}\selectfont\color{lav}}{reigned 319 to 301 BC}
+  \tstext{88}{26}{66}{\cjkfont\fontsize{14}{19.5}\selectfont\color{titlewhite}}
+    {千里而一士，是比肩而立；\\ 百世而一聖，若隨踵而至也。\\ 今子一朝而見七士，\\ 則士不亦眾乎？}
+  \tstext{88}{55}{62}{\fontsize{9.8}{13}\selectfont\itshape\color{pale}}
+    {One scholar in a thousand li counts as shoulder to shoulder; one sage in a hundred generations, as heel on
+     heel. You present seven scholars in one morning. Are scholars so many, then?}
+  \tscredit{88}{87.6}{64}{\srctext}
+  \tscredit{6}{87.6}{72}{\srcpaint}
+\end{frame}
+
+% ===== 2. The answer =====
+% Say: Chunyu Kun, about 386 to 310 BC, a scholar of the Jixia academy of Qi. Not so, he says. Birds with the same
+% wings live together, beasts with the same feet walk together. Then come the herbs: look for chaihu and jiegeng in
+% a marsh and you will not find one in generations; on the north slopes of two mountains you load them by the cartful.
+\begin{frame}[plain,noframenumbering]
+  \tshalf{80}{img/half-flock.jpg}
+  \tstext{8}{8}{64}{\fontsize{18}{21}\selectfont\color{titlewhite}}{Chunyu Kun}
+  \tstext{8}{16.6}{64}{\fontsize{10}{12}\selectfont\color{lav}}{c.\,386 to 310 BC}
+  \tstext{8}{27}{68}{\fontsize{11}{13}\selectfont\color{titlewhite}}
+    {\cjk{\fontsize{14}{16}\selectfont 不然。}\quad{\itshape\color{pale}Not so.}}
+  \tstext{8}{38}{70}{\cjkfont\fontsize{22}{26}\selectfont\color{titlewhite}}{夫鳥同翼者而聚居，}
+  \tstext{8}{48.6}{70}{\fontsize{10.5}{12.8}\selectfont\itshape\color{titlewhite}}{Birds with the same wings live together.}
+  \tstext[2-]{8}{59}{70}{\cjkfont\fontsize{22}{26}\selectfont\color{titlewhite}}{獸同足者而俱行。}
+  \tstext[2-]{8}{69.6}{70}{\fontsize{10.5}{12.8}\selectfont\itshape\color{titlewhite}}{Beasts with the same feet walk together.}
+  \tscredit{8}{87.6}{70}{\srctext}
+  \tscredit{84}{87.6}{70}{\srcpaint}
+\end{frame}
+
+% ===== 3. The kind =====
+% Say: Things each have their kind, and I am of the kind of the worthy. Seeking scholars from me is like drawing
+% water from a river. Then: I will present more, why only seven? In the painting, two cranes stand on the two ends of
+% the ridge, facing each other.
+\begin{frame}[plain,noframenumbering]
+  \tsbg{img/bg-pair.jpg}
+  \tstext{8}{46.4}{144}{\cjkfont\fontsize{14}{18.5}\selectfont\color{titlewhite}}
+    {夫物各有疇，今髡賢者之疇也。\\ 王求士於髡，譬若挹水於河，而取火於燧也。}
+  \tstext{8}{60.4}{140}{\fontsize{9.8}{12.6}\selectfont\itshape\color{pale}}
+    {Things each have their kind, and I, Kun, am of the kind of the worthy. Your Majesty seeking scholars from me
+     is like drawing water from a river, or taking fire from a fire-drill.}
+  \tstext[2-]{8}{71.6}{144}{\cjkfont\fontsize{14}{18.5}\selectfont\color{titlewhite}}{髡將復見之，豈特七士也。}
+  \tstext[2-]{8}{78.6}{74}{\fontsize{9.8}{12.6}\selectfont\itshape\color{pale}}{I will present more. Why only seven scholars?}
+  \tscredit{84}{87.6}{70}{\srcpaint}
+\end{frame}
+
+% ===== 4. The block =====
+% Say: Birds with the same wings live together. Customers with similar ratings are nearest neighbors, and the inner
+% product measures how similar the ratings of two customers are. To predict a newcomer's rating of a film, we copy
+% the rating of the nearest neighbor, as the king found scholars through Kun.
+\begin{frame}[plain,noframenumbering]
+  \tsbg{img/bg-map.jpg}
+  \tstext{8}{8}{120}{\fontsize{8.6}{10.4}\selectfont\color{pale}}{\tssp{Weekend 2, block 1}}
+  \tstext{8}{13.4}{144}{\fontsize{17}{20}\selectfont\color{titlewhite}}{The inner product and nearest neighbors}
+  \tsrow[1-]{34}{鳥}{birds}{Customers}{}
+  \tsrow[2-]{47.5}{同翼}{the same wings}{Similar ratings}{measured by the inner product}
+  \tsrow[3-]{61}{聚居}{live together}{Nearest neighbors}{}
+  \tsrow[4-]{74.5}{求士於髡}{seeking scholars from Kun}{A prediction}{copy the nearest neighbor's rating}
+  \tscredit{8}{87.6}{70}{\srcpaint}
+\end{frame}
+
+\end{document}

@@ -71,6 +71,10 @@ Specifically:
 │                               Payments, LinkedIn's ads (3 each); since 2026-11-09 one deck
 │                               per Friday block (block1-*.tex to block4-*.tex), all six in
 │                               weekend2-cases.tex; rules in PRINCIPLES.md
+├── cold-intro-deck/            The cold intros of the Friday blocks (2026-11-10), in the dark
+│                               Title sequence of the course cold intro: block 1, "Birds with
+│                               the same wings" (Chunyu Kun, Zhanguo ce), 5 frames, pictures cut
+│                               from Huizong's Auspicious Cranes; own CLAUDE.md and README.md
 ├── original-decks/             Original PDFs from before the rebuild
 │   ├── w2_bandits.pdf
 │   └── w2_recsys.pdf
@@ -221,6 +225,18 @@ block, put in one single deck all the slides with all the business cases"): a ca
 `block2-matrix-factorization.tex`: Spotify; `block3-bandits.tex`: Spotify's home page, Amazon Payments;
 `block4-parallelized-mf.tex`: LinkedIn's ads), the six one-case decks were removed, and the weekend deck follows the
 order of the blocks.
+
+## The cold intro deck (added 2026-11-10)
+
+`cold-intro-deck/block1-nearest-neighbors.tex` is the cold intro of the Friday 08:15 block, the inner product and
+nearest neighbors: Chunyu Kun answers King Xuan of Qi, "birds with the same wings live together" (*Zhanguo ce*, Qi 3),
+5 frames over 10 pages, the Chinese with our English under it, and a last frame that maps the story's words to the
+block (birds to customers, the same wings to similar ratings, living together to nearest neighbors, seeking scholars
+from Kun to a prediction). Carlos chose the story on 2026-11-10 from four rounds of candidates (`git_ainit/research_notes/Weekend 2 cold intros/`).
+The look is the dark Title sequence of the course cold intro (`w1-lecture-material/cold-intro/intro-slides/`), the
+one exception to Codex plates. Every picture is cut by `make_images.py` from Emperor Huizong's *Auspicious Cranes*
+(1112, public domain). Build from inside the folder with `../style/tools/build.sh block1-nearest-neighbors.tex`;
+the folder's CLAUDE.md has the traps. Not on the course site; a push makes the PDF public on Pages.
 
 ## When in doubt
 
