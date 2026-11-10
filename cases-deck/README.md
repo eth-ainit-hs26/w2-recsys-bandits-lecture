@@ -15,7 +15,7 @@ all) the same day. The same evening he rejected the cases of version 1 as old: "
 - `block1-nearest-neighbors.pdf`, `block2-matrix-factorization.pdf`, `block3-bandits.pdf`,
   `block4-parallelized-mf.pdf` and their handouts: since 2026-11-09 one deck per Friday block with the cases that
   follow it. Section "One deck per block" below.
-- `weekend2-cases.pdf`: the deck for the weekend, all six cases in the order of the blocks, 53 pages;
+- `weekend2-cases.pdf`: the deck for the weekend, all six cases in the order of the blocks, 52 pages;
   `weekend2-cases-handout.pdf`, 27 pages. Section "The weekend deck" below.
 - `PRINCIPLES.md`: the lessons of the case decks and the rules for the next ones (bandits, advertising).
 
@@ -29,7 +29,7 @@ cases of each deck and writes `tools/expected-<deck>.txt`.
 
 | Deck | Friday block | Cases | Pages (handout) |
 |---|---|---|---|
-| `block1-nearest-neighbors.tex` | 08:15 the inner product and nearest neighbors | Etsy, Airbnb | 22 (11) |
+| `block1-nearest-neighbors.tex` | 08:15 the inner product and nearest neighbors | Etsy, Airbnb | 21 (11) |
 | `block2-matrix-factorization.tex` | 10:00 and 11:00 matrix product and matrix factorization | Spotify | 8 (5) |
 | `block3-bandits.tex` | 14:00 bandits | Spotify's home page, Amazon Payments | 17 (9) |
 | `block4-parallelized-mf.tex` | 16:00 parallelized matrix factorization | LinkedIn's ads | 9 (5) |
@@ -64,11 +64,15 @@ its plus 0.31% conversion gain a large portion of the team's annual goal ... Ple
 measures are now named by what they count: on Etsy frame 5 "visits that end in a purchase" and "searches that end in
 a purchase" (the paper's site-wide conversion rate and organic search purchase rate), on Airbnb frame 3 "visits that
 end in a booking" (the paper's "booking conversion"). Neither paper defines its measure; the labels give the usual
-meanings. Etsy frame 5 shows at a new second click "Airbnb calls its +0.31% gain" with the paper's words (Sec. 6.3,
-the preprint; "in the same blog" in his message read as "in the same block"), and its source line adds "Airbnb: arXiv
-preprint 2026."; the recall bars moved to the third click. Block 1 has 22 pages and the weekend deck 53. Etsy frame 5
-has 78 words on its handout page (55 before), over the 70 of PRINCIPLES.md; Etsy frames 1 and 4 have 76 and 75.
-Checks: 0 log errors, 0 em and en dashes, no build metadata, nothing moves between clicks, 14 and 31 strings found.
+meanings. The quotation went first onto Etsy frame 5, at a new second click (commit `9107e24`). On 2026-11-10 Carlos
+had it moved: "You cannot put Airbnb calls with 0.31% gain on the slides from Etsy. They need to go in the Airbnb
+part." Airbnb frame 3 shows it at its second click, beside +0.31%: Airbnb calls this gain "a large portion of the
+team's annual goal" (the preprint, Sec. 6.3). Etsy frame 5 shows cost and value at its first click and the recall
+bars at its second, with Etsy's source line alone. A read of every Etsy and Airbnb slide and talk track against the
+two papers found no other fact of one case in the other. Block 1 has 21 pages and the weekend deck 52. Words on the
+handout pages: Etsy frame 5 has 61, Airbnb frame 3 has 57; Etsy frames 1 and 4 have 76 and 75, over the 70 of
+PRINCIPLES.md. Checks: 0 log errors, 0 em and en dashes, no build metadata, nothing moves between clicks, 14 and 31
+strings found.
 
 ## One deck per case, 2026-11-06
 

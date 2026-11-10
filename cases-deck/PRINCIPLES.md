@@ -28,6 +28,9 @@ advertising). Audience of the decks: managers with little formal math, 10 minute
   measures became "visits that end in a purchase" and "searches that end in a purchase", Airbnb's "visits that end
   in a booking"; the papers' names (site-wide conversion rate, organic search purchase rate) stay in the talk track
   and README.md.
+- **Each case's facts stay in its own section.** On 2026-11-09 Airbnb's words on its +0.31% gain went onto Etsy's
+  value slide, as a scale for Etsy's +2.63%. On 2026-11-10 Carlos: "You cannot put Airbnb calls with 0.31% gain on
+  the slides from Etsy. They need to go in the Airbnb part." They are on Airbnb frame 3.
 - **"Follow the style of the slides for X" means: build without dictation, on the pattern of that deck.** For the
   bandit and advertising decks he chose the cases, then wrote "Produce the slides, follow the style from the slides
   for the matrix factorization part": they follow the Spotify case (`spotify-frames.tex`; the problem with a big number at the second click,
@@ -103,12 +106,16 @@ Details cut from a slide go into the `% Say:` talk track above its frame.
   every, popular, most), which source says what (paper or blog), how often something runs (daily, at each visit),
   what a test compared, hedges (may, currently, directional: a lift not claimed as significant) and advice that a
   slide or a talk track tells as done.
+- A number, quotation or source goes only on the slides of the company it belongs to, whatever slide the request
+  came up on. A comparison across cases goes on a slide only when Carlos asks for that comparison.
 
 ### Checks before sending
 
 - `build.sh`, `check.sh` (dashes, build words; it rejects "candidate"), `check_overlays.py`, `check_numbers.py`,
   `make_handout.py`.
 - Render every page at 150 dpi and read it: text past the frame, labels touching boxes, borders cut by labels.
+- Grep each `<case>-frames.tex` for the names of the other companies: they may appear in comments, never in the
+  text of a frame.
 
 ### Layout traps
 

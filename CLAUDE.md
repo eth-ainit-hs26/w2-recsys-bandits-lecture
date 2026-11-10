@@ -215,7 +215,7 @@ frames files, and `cases-deck/PRINCIPLES.md` collected the lessons and the rules
 bandit block and of advertising and asked for them in the style of the matrix factorization case: Spotify's home
 page (epsilon-greedy), Amazon Payments (one UCB score per step of an application) and LinkedIn's ads model (lists
 of numbers learned by gradient descent), 3 frames each, built on the pattern of the Spotify case without dictation;
-the weekend deck has 6 sections since (53 pages since 2026-11-09). On 2026-11-09 Carlos asked for one deck per block ("for each
+the weekend deck has 6 sections and 52 pages since. On 2026-11-09 Carlos asked for one deck per block ("for each
 block, put in one single deck all the slides with all the business cases"): a case is its frames file
 `<case>-frames.tex`, the four block decks input them (`block1-nearest-neighbors.tex`: Etsy, Airbnb;
 `block2-matrix-factorization.tex`: Spotify; `block3-bandits.tex`: Spotify's home page, Amazon Payments;
