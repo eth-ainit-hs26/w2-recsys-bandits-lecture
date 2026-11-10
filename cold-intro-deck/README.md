@@ -161,6 +161,10 @@ CSCS as the only capitals, no build metadata, and Futura as the only font.
 ## History of block 5
 
 1. 2026-11-10, first build, ported from FDD as above.
+2. 2026-11-10, committed (`8417c6d`) and published on the course site at Carlos's instruction ("Once you are done,
+   please publish them on the website"): AINIT-PAGE commit `a498851`, the Saturday 08:15 row and the Lecture slides
+   list, as `ainit-hs26-computing-clusters-cold-intro.pdf` and `ainit-hs26-computing-clusters-cold-intro-handout.pdf`.
+   After a rebuild, copy both there again (`../clusters-deck/README.md`, section "On the course site", has the recipe).
 
 ## Open items of block 5
 
@@ -168,4 +172,4 @@ CSCS as the only capitals, no build metadata, and Futura as the only font.
    only by the 1824 print.
 2. The first tier: "five or six" (Prony 1801, Babbage 1832) on the slide; Prony 1824 writes "four or five".
 3. The Harvard photograph stands for Prony's room; the credit names it.
-4. Not tried on the projector of HG D 7.2. Not on the course site.
+4. Not tried on the projector of HG D 7.2.

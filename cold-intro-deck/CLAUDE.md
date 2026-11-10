@@ -56,6 +56,8 @@ form of block 1: the French on the title frame only, Smith's English with the ke
 frame, a closing frame on computing clusters. Carlos asked to leave out the FDD frames "One parcel, many triangles,
 one each" and "One side, two angles, and a table of logarithms". The closing frame uses only the facts of the lecture
 deck `../clusters-deck/` that the coordinating session pinned: change them only together with that deck.
+On the course site since 2026-11-10 (AINIT-PAGE commit `a498851`): after a rebuild, copy the PDF and the handout
+there again under their site names (`README.md`, section "History of block 5").
 
 ```
 block5-computing-clusters.tex   the deck, 5 frames, 10 pages, a "Say" comment per frame

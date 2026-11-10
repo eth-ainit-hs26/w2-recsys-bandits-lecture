@@ -103,6 +103,22 @@ hardware page (docs.cscs.ch/alps/hardware): 8 chassis a cabinet, 8 blade slots a
 chassis, 2 nodes of 4 GH200 an EX254n blade, 24 cabinets, and the node layout of the five blades.
 `tools/check_port.py` lists each with its source.
 
+## On the course site
+
+Since 2026-11-10, on the Saturday 08:15 row and in the Materials list, group "Lecture slides": this deck since
+AINIT-PAGE commit `0f4cd90`, the cold intro before it since `a498851`.
+
+| Site file | Source here |
+|---|---|
+| `ainit-hs26-computing-clusters.pdf` | `block5-computing-clusters.pdf` |
+| `ainit-hs26-computing-clusters-handout.pdf` | `block5-computing-clusters-handout.pdf` |
+| `ainit-hs26-computing-clusters-cold-intro.pdf` | `../cold-intro-deck/block5-computing-clusters.pdf` |
+| `ainit-hs26-computing-clusters-cold-intro-handout.pdf` | `../cold-intro-deck/block5-computing-clusters-handout.pdf` |
+
+A live file is https://eth-ainit-hs26.github.io/AINIT-PAGE/slides/we2/<file>
+After a rebuild, copy the PDF over the same site file name, run `npm ci && npm run build` in `AINIT-PAGE`, push to
+`main`, then curl the live file and `cmp` it with the one here.
+
 ## Open items
 
 1. Eight frames are over the 70 words of the house rule (title and text, source line excluded): slide 2 (72
