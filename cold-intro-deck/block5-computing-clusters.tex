@@ -1,0 +1,145 @@
+% =====================================================================
+%  AI in Industry, HS26, weekend 2. THE COLD INTRO of block 5, computing clusters (Saturday 14 November 2026,
+%  08:15): "Dividing a computation, 1793", Gaspard de Prony's logarithm factory at the Bureau du cadastre in Paris.
+%  Ported on 2026-11-10 from the section "Dividing a computation, 1793" of the FDD deck
+%  (git_fdd/projects/weekend-07-large-scale/carlos-lectures/slides/w7-cost-slides.tex, lines 143 to 349), at
+%  Carlos's request, without its frames "One parcel, many triangles, one each" and "One side, two angles, and a table
+%  of logarithms", into the form of the block 1 cold intro (block1-nearest-neighbors.tex, commit 9d9379a): the
+%  original language on the title frame only, the quotation in English with its key sentence in lavender, no
+%  mapping frame, a closing frame on the theme of the block.
+%  The look is the Title sequence of the course cold intro (w1-lecture-material, cold-intro/intro-slides). The
+%  pictures are cut from two plates of the Encyclopedie (1765), the Cassini map of the principal triangles (1744) and
+%  a photograph of the Harvard computers (about 1890) by make_images_block5.py.
+%  Sources and what was checked: README.md, section "Block 5".
+%  Build FROM THIS DIRECTORY, three passes:  ../style/tools/build.sh block5-computing-clusters.tex
+% =====================================================================
+\documentclass[aspectratio=169]{beamer}
+\input{../style/ainit-preamble}
+\input{../style/ainit-course}
+\input{cold-intro-kit}
+
+% beamer takes the PDF title from \title, and there is no title page to print it on
+\title{Dividing a computation, 1793}
+\author{Carlos Cotrini}
+\hypersetup{pdftitle={Dividing a computation, 1793}, pdfauthor={Carlos Cotrini}}
+
+\newcommand{\srcprony}{Gaspard de Prony, \emph{Notice sur les grandes tables logarithmiques\dots},\\ 1824.
+  English: lecturer}
+\newcommand{\srcsmith}{Adam Smith, \emph{The Wealth of Nations}, 1776, Book I, chapter 1}
+\newcommand{\srcplatetwo}{Goussier and Defehrt, \emph{\'Epinglier}, plate II, \emph{Encyclop\'edie}, 1765, detail.
+  Smithsonian Libraries. Internet Archive, public domain}
+\newcommand{\srcplateone}{Goussier and Pr\'evost, \emph{\'Epinglier}, plate I, \emph{Encyclop\'edie}, 1765, detail.
+  Smithsonian Libraries. Internet Archive, public domain}
+\newcommand{\srcmap}{Maraldi and Cassini de Thury, map of the principal triangles of France, 1744, detail. BnF.
+  Wikimedia Commons, public domain}
+\newcommand{\srcroom}{The computers of the Harvard College Observatory, about 1890. Wikimedia Commons, public
+  domain}
+
+\begin{document}
+
+% ===== 0. The title =====
+% Say: Paris, 1793. Gaspard de Prony has been ordered to compute the largest tables of logarithms ever made. Thirty
+% years later he tells the Academy of Sciences how he did it. The whole sentence (FDD wording, 1824 notice): "Je
+% concus tout a coup l'idee d'appliquer la meme methode a l'immense travail dont je m'etais laisse imposer le
+% fardeau, et de fabriquer mes logarithmes comme on fabrique des epingles." In English: I suddenly conceived the
+% idea of applying the same method to the immense work whose burden I had let be laid on me, and of manufacturing
+% my logarithms as one manufactures pins. The same method: Adam Smith's, next frame.
+% The picture: the pin workshop of the Encyclopedie, plate II: on the left the pointers at their grindstones, in
+% the middle the straightener pulling the wire.
+\begin{frame}[plain,noframenumbering]
+  \tsbg{img/b5-title.jpg}
+  \tstext{8}{8}{120}{\fontsize{8.6}{10.4}\selectfont\color{pale}}{\tssp{Paris, 1793}}
+  \tstext{8}{55}{144}{\fontsize{20}{24}\selectfont\color{titlewhite}}
+    {\dots\ fabriquer mes logarithmes\\ comme on fabrique des \'epingles.}
+  \tstext{8}{74.4}{144}{\fontsize{11}{13}\selectfont\itshape\color{titlewhite}}
+    {\dots\ to manufacture my logarithms as one manufactures pins.}
+  \tscredit{8}{87.6}{72}{\srcprony}
+  \tscredit{84}{87.6}{70}{\srcplatetwo}
+\end{frame}
+
+% ===== 1. Adam Smith =====
+% Say: The Wealth of Nations, 1776, opens with the division of labour, and its example is a pin factory. Making a pin
+% takes about eighteen distinct operations. Smith saw a small manufactory where ten men made upwards of forty-eight
+% thousand pins a day, four thousand eight hundred each; working alone, "they certainly could not each of them have
+% made twenty, perhaps not one pin in a day". Same people, same tools: only the organisation changed. In 1820 and
+% 1824 Prony wrote that he found Smith's book in a bookshop, opened it at the first chapter and conceived the plan
+% of his tables (Roegel 2011, note 74).
+% The picture: the wire drawer of the same Encyclopedie article, plate I.
+\begin{frame}[plain,noframenumbering]
+  \tshalf{80}{img/b5-half-wire.jpg}
+  \tstext{8}{8}{64}{\fontsize{18}{21}\selectfont\color{titlewhite}}{Adam Smith}
+  \tstext{8}{16.6}{64}{\fontsize{10}{12}\selectfont\color{quiet}}{1723 to 1790}
+  \tstext{8}{27}{68}{\fontsize{12}{16}\selectfont\color{pale}}
+    {``One man draws out the wire; another straights it; a~third cuts it; a~fourth points it; a~fifth grinds it at
+     the top for receiving the head\dots\ {\color{lav}Those ten persons, therefore, could make among them upwards
+     of forty-eight thousand pins in a day.}''}
+  \tscredit{8}{87.6}{70}{\srcsmith}
+  \tscredit{84}{87.6}{70}{\srcplateone}
+\end{frame}
+
+% ===== 2. The task =====
+% Say: The law of 1 December 1790 replaces the old taxes with a single tax on land. To set it fairly, France needs
+% a cadastre: every parcel measured, its area computed. Prony directs the Bureau du cadastre from 5 October 1791.
+% Surveyors measure angles quickly and lengths slowly, so they measure land in triangles: one side and two angles,
+% and the rest is computed with tables of logarithms. The new instruments count angles in the new decimal division
+% of the circle, so the old tables no longer serve. At the end of 1793 Carnot and Prieur, of the Committee of Public
+% Safety, and Brunet order new tables from Prony, "the greatest and most imposing monument of computation ever made,
+% or even conceived" (Prony, letter to Arago): the sines, the logarithms of the sines and tangents, and the
+% logarithms of the numbers up to 200,000.
+% The picture: the principal triangles of the survey of France around Paris, from Rouen to Reims.
+\begin{frame}[plain,noframenumbering]
+  \tsbg{img/b5-bg-map.jpg}
+  \tstext{8}{42}{144}{\fontsize{16}{19}\selectfont\color{titlewhite}}{Every parcel in France}
+  \tstext{8}{49.6}{144}{\fontsize{9.6}{11.5}\selectfont\color{quiet}}{The French Revolution, 1790 to 1793}
+  \tstext{8}{57.4}{144}{\fontsize{11.5}{15}\selectfont\color{pale}}
+    {The Revolution taxes land, so the area of every parcel has to be computed. Land is measured in triangles,
+     computed with tables of logarithms.\par\vspace{2.2mm}
+     In 1793 Gaspard de Prony, director of the Bureau du cadastre in Paris, is ordered to compute new tables.}
+  \tscredit{84}{87.6}{70}{\srcmap}
+\end{frame}
+
+% ===== 3. The three tiers =====
+% Say: Prony divides the work into three tiers. The mathematicians (Legendre among them) choose formulas that many
+% people can work through at the same time. The analysts turn the formulas into the first values of each page and
+% check the pages that come back. The computers fill in each page by additions and subtractions alone, 900 to
+% 1,000 of them a day. A computer was a person: the word named a job. In 1824 Prony describes sheets of 100 lines:
+% the analysts compute the first line, the computers the other 99. Prony gave sixty or eighty computers in 1801 and
+% seventy or eighty in 1824; the payrolls show about twenty (Roegel 2011). Babbage (1832, section 244): those who
+% knew only the first two rules of arithmetic were usually the most correct. The second and third tiers each worked
+% in two sections that did the same work independently, one checking the other. The work began at the end of 1793
+% and was probably done by mid-1796, at the Palais Bourbon. The photograph is a later computing room: Harvard,
+% about 1890.
+\begin{frame}[plain,noframenumbering]
+  \tshalf{80}{img/b5-half-room.jpg}
+  \tstext{8}{8}{64}{\fontsize{18}{21}\selectfont\color{titlewhite}}{Three tiers}
+  \tstext{8}{16.6}{64}{\fontsize{10}{12}\selectfont\color{quiet}}{Bureau du cadastre, 1793 to 1796}
+  \tstext[1-]{8}{27}{68}{\fontsize{12}{16}\selectfont\color{pale}}
+    {Five or six mathematicians choose the formulas and pass them down.}
+  \tstext[2-]{8}{43}{68}{\fontsize{12}{16}\selectfont\color{pale}}
+    {Seven or eight analysts turn them into the first values of each page and pass the pages down.}
+  \tstext[3-]{8}{64.5}{68}{\fontsize{12}{16}\selectfont\color{pale}}
+    {About twenty {\color{lav}computers} fill in each page, using only additions and subtractions.}
+  \tscredit{84}{87.6}{70}{\srcroom}
+\end{frame}
+
+% ===== 4. Computing clusters =====
+% Say: The same idea, today, at another scale. C = 6ND: six operations per parameter and per training number, with
+% N = 70 x 10^9 parameters and D = 15 x 10^12 training numbers, gives 6.3 x 10^24. 990 x 10^12 operations per second
+% is the peak of one GH200; a real training run gets part of it. Apertus is the open language model of EPFL,
+% ETH Zurich and CSCS, trained on Alps.
+\begin{frame}[plain,noframenumbering]
+  \tsbg{img/b5-bg-close.jpg}
+  \tstext{8}{8}{120}{\fontsize{8.6}{10.4}\selectfont\color{pale}}{\tssp{Weekend 2}}
+  \tstext{8}{13.4}{144}{\fontsize{17}{20}\selectfont\color{titlewhite}}{Computing clusters}
+  \tstext[1-]{8}{31}{140}{\fontsize{12.5}{16.5}\selectfont\color{pale}}
+    {On a {\color{lav}computing cluster}, one computation is divided among many computers.}
+  \tstext[2-]{8}{48.3}{140}{\fontsize{12.5}{16.5}\selectfont\color{pale}}
+    {Alps, at CSCS in Lugano, has 10,752 GPUs (GH200).}
+  \tstext[3-]{8}{59.8}{140}{\fontsize{12.5}{16.5}\selectfont\color{pale}}
+    {One GH200 does up to 990\,\texttimes\,10\textsuperscript{12} operations per second.}
+  \tstext[4-]{8}{71.3}{140}{\fontsize{12.5}{16.5}\selectfont\color{titlewhite}}
+    {Training the language model Apertus-70B takes about 6.3\,\texttimes\,10\textsuperscript{24} operations.}
+  \tscredit{84}{87.6}{70}{\srcroom}
+\end{frame}
+
+\end{document}

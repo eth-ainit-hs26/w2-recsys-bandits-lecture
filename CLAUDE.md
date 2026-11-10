@@ -75,6 +75,8 @@ Specifically:
 │                               sequence of the course cold intro: "Birds with the same wings"
 │                               (Chunyu Kun, Zhanguo ce), 5 frames dictated by Carlos, pictures
 │                               cut from Huizong's Auspicious Cranes; own CLAUDE.md and README.md
+│                               Also the cold intro of the Saturday 08:15 block, "Dividing a
+│                               computation, 1793" (Prony's tables, from FDD weekend 7), 5 frames
 ├── clusters-deck/              The Saturday 08:15 block "Computing clusters" (2026-11-10): a port
 │                               into Codex plates of the first block of FDD weekend 7, "The cost
 │                               of computation and supercomputers", with Carlos's cuts; 21 frames;
@@ -243,6 +245,13 @@ The look is the dark Title sequence of the course cold intro (`w1-lecture-materi
 one exception to Codex plates. Every picture is cut by `make_images.py` from Emperor Huizong's *Auspicious Cranes*
 (1112, public domain). Build from inside the folder with `../style/tools/build.sh block1-nearest-neighbors.tex`;
 the folder's CLAUDE.md has the traps. Not on the course site; a push makes the PDF public on Pages.
+
+`cold-intro-deck/block5-computing-clusters.tex` is the cold intro of the Saturday 08:15 block, computing clusters:
+"Dividing a computation, 1793", FDD weekend 7's section of that name in the same form, 5 frames over 10 pages
+(Prony's "fabriquer mes logarithmes comme on fabrique des epingles", Adam Smith's pin factory, every parcel in
+France, the three tiers, and a closing frame "Computing clusters" with four facts of the lecture deck). Carlos asked
+on 2026-11-10 to leave out FDD's two frames on triangles and logarithm tables. On the course site with the lecture
+deck (`clusters-deck/README.md`, section "On the course site").
 
 ## The computing clusters deck (added 2026-11-10)
 

@@ -75,3 +75,97 @@ python3 ../style/tools/make_handout.py block1-nearest-neighbors.pdf block1-neare
 1. Not tried on the projector of HG D 7.2.
 2. Not on the course site. Publishing there waits for Carlos.
 3. The deck writes "neighbor", as the agenda does; the Video Store game writes "neighbour".
+
+# Block 5: Dividing a computation, 1793
+
+Weekend 2, Saturday 14 November 2026, 08:15, before the block on computing clusters (`../clusters-deck/`). Gaspard
+de Prony's tables of logarithms, computed at the Bureau du cadastre in Paris from 1793 to 1796. Ported on 2026-11-10
+from the FDD section "Dividing a computation, 1793"
+(`git_fdd/projects/weekend-07-large-scale/carlos-lectures/slides/w7-cost-slides.tex`, lines 143 to 349), without
+the frames "One parcel, many triangles, one each" and "One side, two angles, and a table of logarithms", which Carlos
+asked to leave out. Form of block 1 after its rebuild (commit `9d9379a`): the French on the title frame only, the
+quotation in English with its key sentence in lavender, no mapping frame, a closing frame on the block.
+
+## Files of block 5
+
+| File | Content |
+|---|---|
+| `block5-computing-clusters.tex` | The deck: 5 frames, 10 pages, a "Say" comment per frame |
+| `make_images_block5.py` | Cuts and grades the five `img/b5-*.jpg` from four originals and reproduces them byte for byte; URLs, sizes and SHA-1 in its docstring |
+| `img/` | `b5-title.jpg`, `b5-half-wire.jpg`, `b5-bg-map.jpg`, `b5-half-room.jpg`, `b5-bg-close.jpg` |
+| `block5-computing-clusters.pdf` | The deck |
+| `block5-computing-clusters-handout.pdf` | The last click of each frame, 5 pages |
+
+## Frames of block 5
+
+| Frame | Pages | Picture | Text |
+|---|---|---|---|
+| 0 | 1 | `b5-title`: the pin workshop, *Épinglier* plate II | Paris, 1793. "... fabriquer mes logarithmes comme on fabrique des épingles." "... to manufacture my logarithms as one manufactures pins." |
+| 1 | 2 | `b5-half-wire`, right half: the wire drawer, *Épinglier* plate I | Adam Smith, 1723 to 1790. "One man draws out the wire; another straights it; a third cuts it; a fourth points it; a fifth grinds it at the top for receiving the head... Those ten persons, therefore, could make among them upwards of forty-eight thousand pins in a day." The last sentence in lavender |
+| 2 | 3 | `b5-bg-map`: the principal triangles around Paris, map of 1744 | Every parcel in France. The French Revolution, 1790 to 1793. The Revolution taxes land, so the area of every parcel has to be computed. Land is measured in triangles, computed with tables of logarithms. In 1793 Gaspard de Prony, director of the Bureau du cadastre in Paris, is ordered to compute new tables. |
+| 3 | 4 to 6 | `b5-half-room`, right half: the Harvard computers, about 1890 | Three tiers. Bureau du cadastre, 1793 to 1796. One per click: five or six mathematicians choose the formulas and pass them down; seven or eight analysts turn them into the first values of each page and pass the pages down; about twenty computers fill in each page, using only additions and subtractions. "computers" in lavender |
+| 4 | 7 to 10 | `b5-bg-close`: the Harvard room, blurred and dark | Weekend 2. Computing clusters. One per click: on a computing cluster (lavender), one computation is divided among many computers; Alps, at CSCS in Lugano, has 10,752 GPUs (GH200); one GH200 does up to 990 x 10^12 operations per second; training the language model Apertus-70B takes about 6.3 x 10^24 operations |
+
+Words per page without the credits (pdftotext, glyph boxes taller than 8.5 pt): 26, 49, 53, 49, 55. Block 1 by the
+same count: 21, 58, 55, 58, 57.
+
+## Changes from the FDD wording
+
+1. Frame 0: Prony's French moved here from the FDD tiers frame and cut to its last clause; the whole sentence is in
+   the "Say" comment.
+2. Frame 1: the FDD bullets became Smith's own sentences. The FDD bullet "One workman making a whole pin: perhaps
+   twenty in a day, perhaps not one" misreads Smith, who wrote "could not each of them have made twenty, perhaps not
+   one pin in a day"; that sentence, the eighteen operations and "Same people, same tools" are in the "Say" comment.
+3. Plates: the FDD caption reads "Encyclopedie, 1762". The FDD picture (Wikimedia Commons, File:Defehrt epinglier
+   pl2.jpg, 1248 by 958) is plate II, the one on the title frame here. The volume of plates used here was printed in
+   1765: its title page reads "Troisieme livraison, 298 Planches" and "M. DCC. LXV", and its approval is dated
+   17 October 1765. Plate I, the wire drawer, now illustrates Smith.
+4. Frame 2: "replaces tax privilege with one tax on land" became "taxes land". "Land is measured in triangles,
+   because angles are quick and chains are slow" became "Land is measured in triangles, computed with tables of
+   logarithms": with the triangle frames left out, the tables have to appear here. The reason is in the "Say" comment.
+5. Frame 3: the FDD boxes ("Choose the formulas and the blocks", "Per block, one exact value and its differences",
+   "Add") became sentences: pages for blocks, "additions and subtractions" for "Add", as in Babbage and Roegel.
+6. Frame 4: new. Only the facts the coordinating session pinned from the lecture deck; "up to" added before
+   990 x 10^12, a peak rate.
+
+## Sources of block 5
+
+| Item | Source | Checked |
+|---|---|---|
+| French, frame 0 | Prony, *Notice sur les grandes tables logarithmiques et trigonométriques, adaptées au nouveau système métrique décimal*, read at the Académie royale des sciences on 7 June 1824 (Recueil des discours, Paris: Didot, 1824, pp. 33 to 42; also printed as pp. 1 to 12). Wording of the FDD deck, which cites "Notices, 1824, p. 5" | The 1824 print was not reached: Gallica answered with a Cloudflare challenge, HathiTrust with 403, the Google Books API with a quota error, and the Internet Archive full text search found nothing. C. J. D. Roberts' English translation, https://sites.google.com/site/babbagedifferenceengine/barondepronysdescriptionoftheconstructi , reads "to manufacture my logarithms as one manufactures pins". Peaucelle, *Le détail du calendrier de calcul des tables de Prony de 1791 à 1802* (2012), p. 21, https://locomat.loria.fr/cadastre/docs/peaucelle2012prony-calendrier.pdf , quotes "fabriquer les logarithmes comme on fabrique des épingles", citing Prony 1824, p. 35 |
+| English, frame 0 | Ours, credited "English: lecturer" | |
+| Smith, frame 1 | *An Inquiry into the Nature and Causes of the Wealth of Nations*, 1776, Book I, chapter I, "Of the Division of Labour". Project Gutenberg ebook 3300, https://www.gutenberg.org/cache/epub/3300/pg3300.txt | Matched word for word on 2026-11-10. The Gutenberg header does not name its edition; the 1776 print was not compared |
+| Smith's dates | 1723 to 1790 | Not looked up |
+| Frame 2 | Denis Roegel, *The great logarithmic and trigonometric tables of the French Cadastre: a preliminary investigation*, LOCOMAT, version of 11 January 2011, https://locomat.loria.fr/cadastre/analysis.pdf . Section 1.3: all taxes abolished by the law of 1 December 1790 and replaced by a single property tax; the cadastre of 1791; Prony director of the Bureau du cadastre from 5 October 1791; his report of 10 October 1791 on revising the triangles of the Cassini map; instruments converted to the decimal division of angles. Section 1.4: Carnot, Prieur and Brunet give Prony the task of new tables in 1793; the work at the Palais Bourbon, begun 1793, probably completed mid-1796 | Read 2026-11-10 |
+| Frame 3 | Babbage, *On the Economy of Machinery and Manufactures*, 1832, section 244, Project Gutenberg ebook 4238: five or six mathematicians, seven or eight persons, "nothing more than simple addition and subtraction". Roegel 2011, section 1.4.1: the three groups, the second hands calculation sheets to the third, the computers "had only to perform additions and subtractions", their number "probably never greater than 20 or 25". Prony 1824 in Roberts' translation: sheets of 100 lines, the first line from the second group, 900 to 1000 additions or subtractions a day | Read 2026-11-10. The counts differ between Prony's own texts: four or five geometricians in 1824, five or six in 1801 (in Roegel) and in Babbage; sixty or eighty computers in 1801, seventy or eighty in 1824 |
+| Frame 4 | Pinned by the coordinating session from `../clusters-deck/` and FDD `NUMBERS.md`: Alps, 2,688 nodes x 4 GH200 = 10,752; one GH200, 990 x 10^12 FLOP/s peak (NVIDIA datasheet); C = 6ND with N = 70 x 10^9 parameters and D = 15 x 10^12 training numbers | The two products recomputed |
+| Plates, frames 0 and 1 | *Épinglier*, plates II and I, *Encyclopédie*, Recueil de planches, troisième livraison, Paris 1765, Smithsonian Libraries copy, Internet Archive item `RecueildeplanchIVDide`. Signatures read on the scan: "Goussier Del." and "Defehrt Sculp." (plate II), "Goussier Del." and "Prevost Sculp." (plate I) | Public domain (1765). The same scan is on Wikimedia Commons as a PDF, licence "Public domain" in the Commons API |
+| Map, frame 2 | Maraldi and Cassini de Thury, *Nouvelle carte qui comprend les principaux triangles qui servent de fondement à la description géométrique de la France*, 1744, Bibliothèque nationale de France, btv1b53166738w; Wikimedia Commons, 11407 by 7325 | Commons API on 2026-11-10: "Public domain" |
+| Photograph, frames 3 and 4 | Wikimedia Commons, File:Astronomer Edward Charles Pickering's Harvard computers.jpg, 1920 by 1502; a chart on the wall reads "Dec 1889" | Commons API on 2026-11-10: "Public domain". A later computing room: no picture of Prony's computers was looked for |
+
+## Build of block 5
+
+From this folder:
+
+```bash
+python3 -I make_images_block5.py /path/to/originals     # only to remake img/b5-*; the docstring has the URLs
+../style/tools/build.sh block5-computing-clusters.tex
+../style/tools/check.sh block5-computing-clusters.pdf
+python3 tools/check_overlays_any.py block5-computing-clusters.pdf
+python3 ../style/tools/make_handout.py block5-computing-clusters.pdf block5-computing-clusters-handout.pdf "Dividing a computation, 1793"
+```
+
+`build.sh` prints 10 pages, `log errors: 0` and no missing character. `check.sh` prints 0 em dashes, 0 en dashes,
+CSCS as the only capitals, no build metadata, and Futura as the only font.
+
+## History of block 5
+
+1. 2026-11-10, first build, ported from FDD as above.
+
+## Open items of block 5
+
+1. Prony's French: "mes logarithmes" (FDD, and Roberts' "my logarithms") or "les logarithmes" (Peaucelle). Settled
+   only by the 1824 print.
+2. The first tier: "five or six" (Prony 1801, Babbage 1832) on the slide; Prony 1824 writes "four or five".
+3. The Harvard photograph stands for Prony's room; the credit names it.
+4. Not tried on the projector of HG D 7.2. Not on the course site.
