@@ -115,8 +115,10 @@ chips read "Computing clusters, cold intro", "Handout", "Computing clusters", "H
 from the agenda, and the Materials list shows them under "Slides and visualizations".
 Since AINIT-PAGE `5ab848e` (2026-11-11) both are on the Friday 16:00 row, "Large-scale computing", followed by Matchmaker
 on a Grid and the case LinkedIn's ads: chips "Large-scale computing, cold intro" (14), "Computing clusters" and
-"Handout" (15), "Matchmaker on a Grid" (16), "Business case, LinkedIn's ads" and "Handout" (17). The cold intro's
-handout is off the site since the same commit (Carlos: "drop the handouts for all the cold intros").
+"Handout" (15), "Matchmaker on a Grid" (16), "Business case, LinkedIn's ads" (17), its handout removed in AINIT-PAGE
+`9d5e19e` (Carlos: "Remove also the handouts for the business cases"). The cold intro's handout is off the site since
+`5ab848e` (Carlos: "drop the handouts for all the cold intros"). This deck's handout is the only handout left on
+weekend 2.
 
 | Site file | Source here |
 |---|---|

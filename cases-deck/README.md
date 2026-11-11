@@ -326,6 +326,8 @@ Carlos, 2026-11-06: "the slides with the business cases are not up. Publish them
 serves copies from `public/slides/we2/`. Until 2026-11-09 (commit `70fcdd4`) it had one PDF per case; since that day
 (commit `2b27782`, "for each block, put in one single deck all the slides with all the business cases") one deck per
 block on its Friday row, and the weekend deck with its handout in the Materials list, group "Business cases".
+Since AINIT-PAGE `9d5e19e` (2026-11-11, Carlos: "Remove also the handouts for the business cases") no handout of a case
+deck is on the site: the two rows of handouts in the table below describe the site before that commit.
 
 | Site file | Source here | Where |
 |---|---|---|
