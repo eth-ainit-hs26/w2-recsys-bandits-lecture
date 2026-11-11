@@ -282,7 +282,8 @@ matrix factorization (one number at a time, gradient descent, predicting unknown
 links to its game on the course site and its Colab notebook. The worked examples are the games' own (Vera and Kai,
 Sara and The Intouchables, The Martian's second number, three hidden MovieLens ratings), computed by
 `lecture-notes/tools/notes_numbers.py` from copies of the `w2-cx-private` data that it checks against that checkout.
-Not on the course site yet. `lecture-notes/CLAUDE.md` has the build and the TikZ gotchas.
+On the course site since 2026-11-11 (AINIT-PAGE `8bf143b`): in weekend 2's Materials list and in the weekend's ZIP.
+`lecture-notes/CLAUDE.md` has the build and the TikZ gotchas.
 
 ## The cheat sheet (added 2026-11-11)
 

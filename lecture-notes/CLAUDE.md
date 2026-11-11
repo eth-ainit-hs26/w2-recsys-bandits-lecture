@@ -62,7 +62,10 @@ examples). A number written in the prose of the .tex must be added to `EXPECTED`
 ## Publication
 
 - The PDF is in this public repository, so a push also serves it from GitHub Pages.
-- It is not on the course site (AINIT-PAGE) as of 2026-11-11: that waits for Carlos's yes.
+- On the course site since 2026-11-11 (AINIT-PAGE `8bf143b`), with Carlos's request that day for one ZIP of the
+  weekend: `public/slides/we2/ainit-hs26-lecture-notes-nearest-neighbors-and-matrix-factorization.pdf`, in weekend
+  2's Materials list (group "Lecture notes") and item 10 of the weekend's ZIP. After a rebuild, copy the PDF over
+  that file, push AINIT-PAGE, and the next deploy rebuilds the ZIP.
 
 ## Maintenance contract
 

@@ -73,6 +73,8 @@ list (`src/data/weekends.ts`). The live copy:
 https://eth-ainit-hs26.github.io/AINIT-PAGE/slides/we2/ainit-hs26-cheat-sheet.pdf
 After a change here, copy the new PDF over that file with the recipe of `w1-lecture-material/CLAUDE.md`, section
 Publishing: clone AINIT-PAGE, copy, `npm ci && npm run build`, push, then curl the live file and `cmp` it with this one.
+Since 2026-11-11 (AINIT-PAGE `8bf143b`) it is also item 01 of weekend 2's ZIP, which every deploy rebuilds from
+that copy.
 
 ## Maintenance contract
 

@@ -334,6 +334,7 @@ block on its Friday row, and the weekend deck with its handout in the Materials 
 | `ainit-hs26-business-cases-bandits.pdf` | `block3-bandits.pdf` | Friday 14:00, "Cases: Spotify's home page, Amazon Payments" |
 | `ainit-hs26-business-cases-parallelized-mf.pdf` | `block4-parallelized-mf.pdf` | Friday 16:00, "Case: LinkedIn's ads" |
 | `ainit-hs26-business-cases.pdf`, `ainit-hs26-business-cases-handout.pdf` | `weekend2-cases.pdf`, `weekend2-cases-handout.pdf` | Materials list |
+| `ainit-hs26-business-cases-<block>-handout.pdf`, the four blocks | `block<N>-<name>-handout.pdf` | only in the weekend's ZIP, folder Handouts (since 2026-11-11, AINIT-PAGE `8bf143b`) |
 
 The four block decks are also in the Materials list, under the names of their blocks. The six one-case site files
 (`ainit-hs26-case-etsy.pdf` and the others) were removed on 2026-11-09. LinkedIn's ads (gradient descent at scale)
