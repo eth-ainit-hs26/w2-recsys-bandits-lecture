@@ -64,8 +64,15 @@ capitals, no build metadata, and the fonts EB Garamond and Kefa III.
 ## State
 
 2026-11-11: built, one page, 0 log errors, the check clean; 30 cards in 14 groups. Committed and pushed to `main`.
-A push publishes the repository on GitHub Pages, so the PDF is reachable there. Not on the course site
-(AINIT-PAGE): that needs Carlos's yes.
+A push publishes the repository on GitHub Pages, so the PDF is reachable there.
+
+On the course site since 2026-11-11, at Carlos's yes that day (AINIT-PAGE commit `ab95b28`): the copy
+`public/slides/we2/ainit-hs26-cheat-sheet.pdf`, linked by the button "Semester cheat sheet (PDF)" beside the intro
+deck on the home page (`src/pages/HomePage.tsx`) and by the group "Cheat sheet" at the top of weekend 2's Materials
+list (`src/data/weekends.ts`). The live copy:
+https://eth-ainit-hs26.github.io/AINIT-PAGE/slides/we2/ainit-hs26-cheat-sheet.pdf
+After a change here, copy the new PDF over that file with the recipe of `w1-lecture-material/CLAUDE.md`, section
+Publishing: clone AINIT-PAGE, copy, `npm ci && npm run build`, push, then curl the live file and `cmp` it with this one.
 
 ## Maintenance contract
 

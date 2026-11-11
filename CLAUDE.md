@@ -288,8 +288,9 @@ Not on the course site yet. `lecture-notes/CLAUDE.md` has the build and the TikZ
 concepts" and "an orientation guide for the participants on when to use each technology": the three weekends as
 branches, 30 cards in 14 groups, each card with what it is, "Use it when" and "In industry". The concepts are the
 Syllabus rows of the master spreadsheet and the course site; every named case has its source in
-`cheat-sheet/SOURCES.md`. It lives here because it was built during weekend 2; it covers all three weekends. Not on
-the course site yet. `cheat-sheet/CLAUDE.md` has the build and the layout.
+`cheat-sheet/SOURCES.md`. It lives here because it was built during weekend 2; it covers all three weekends. On the
+course site since 2026-11-11 (AINIT-PAGE `ab95b28`): a button beside the intro deck on the home page and a group at
+the top of weekend 2's Materials. `cheat-sheet/CLAUDE.md` has the build, the layout and the way to republish.
 
 ## When in doubt
 
