@@ -213,15 +213,16 @@ CSCS as the only capitals, no build metadata, and Futura as the only font.
 3. The Harvard photograph stands for Prony's room; the credit names it.
 4. Not tried on the projector of HG D 7.2.
 
-# Block 3: Estimating chances from the past, three drafts
+# Block 3: Estimating chances from the past
 
 Weekend 2, Friday 13 November 2026, 14:00, before the bandits (the game "Once Upon a Mirror"). Three drafts built on
 2026-11-11 from Carlos's shortlist of round 5 of the candidates (`research_notes/Weekend 2 cold intros/estimate.md`,
 C1, C2 and C8, folder `git_ainit/research_notes`, outside this repository): "The Fox and the Lion's Cave. It's very
 good. Graunt's Bills is also very good. And then The Stupidest Man also. Please make three parallel cold intros".
 Each takes the form of block 1 (his dictation of 2026-11-11): 8 frames, 16 pages. Frames 0, 6 and 7 are the same in
-the three, apart from the subtitle, the picture and the third statement of frame 6. None is chosen yet, and none is
-on the course site.
+the three, apart from the subtitle, the picture and the third statement of frame 6. Carlos chose GRAUNT the same
+evening; it is on the course site (section "On the course site of block 3"). THE FOX and BERNOULLI stay here as
+unchosen drafts, off the course site.
 
 ## Files of block 3
 
@@ -313,16 +314,30 @@ python3 ../style/tools/make_handout.py block3-bandits-fox.pdf block3-bandits-fox
 
 `build.sh` prints `log errors: 0` and no missing character for the three. The fox sets its Greek in Palatino.
 
+## On the course site of block 3
+
+GRAUNT since 2026-11-11 (AINIT-PAGE commit `9e509ca`), on the Friday 14:00 row before the Mirror, chips "Bandits,
+cold intro" and "Handout", number 11 of weekend 2 that day; the Mirror and every item after it moved up by one
+(the Saturday cold intro to 16, computing clusters to 17).
+
+| Site file | Source here |
+|---|---|
+| `ainit-hs26-bandits-cold-intro.pdf` | `block3-bandits-graunt.pdf` |
+| `ainit-hs26-bandits-cold-intro-handout.pdf` | `block3-bandits-graunt-handout.pdf` |
+
+The recipe after a rebuild is the one of block 1 (section "On the course site"): copy both over the same site file
+names, `npm ci && npm run build` in `AINIT-PAGE`, push to `main`, curl the live files and `cmp` them with these.
+
 ## History of block 3
 
 1. 2026-11-11, round 5 of the candidates, `estimate.md`, 9 stories in which a chance is estimated from past counts.
 2. The same evening Carlos shortlisted C1, C2 and C8 and asked for three parallel cold intros. Three agents built
    them at the same time from one brief with the texts; after the review, line breaks moved to the ends of
-   sentences.
+   sentences (commit `5bb67bd`).
+3. 2026-11-11, asked which draft goes on the course site, Carlos answered "Graunt": published at AINIT-PAGE commit
+   `9e509ca`, section "On the course site of block 3" above. The deck keeps its file name.
 
 ## Open items of block 3
 
-1. Carlos chooses a draft. The chosen deck may then be renamed `block3-bandits.tex` with its script and pictures; the
-   two others stay as alternatives or go.
-2. Not on the course site; a push makes the three PDFs public on the Pages of this repository.
-3. Not tried on the projector of HG D 7.2.
+1. Not tried on the projector of HG D 7.2.
+2. THE FOX and BERNOULLI are unchosen drafts; a push keeps their PDFs public on the Pages of this repository.

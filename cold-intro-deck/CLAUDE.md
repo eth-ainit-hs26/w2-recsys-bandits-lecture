@@ -4,10 +4,11 @@ Beamer, lualatex, three passes, from this folder. Two decks. `block1-nearest-nei
 representations" (the story of Chunyu Kun, "birds with the same wings"), the cold intro of weekend 2, shown before
 the Friday 08:15 block (the inner product and nearest neighbors), built on 2026-11-10 and reworked on 2026-11-11.
 `block5-computing-clusters.tex`, "Dividing a computation, 1793", shown before the
-Saturday 08:15 block (computing clusters), built on 2026-11-10: section "Block 5" below. And three drafts of the cold
-intro of the Friday 14:00 bandits block, "Estimating chances from the past", built on 2026-11-11 so that Carlos can
-choose one: `block3-bandits-fox.tex`, `block3-bandits-graunt.tex`, `block3-bandits-bernoulli.tex`, section "Block 3
-drafts" below. `README.md` has the frames, the sources, the history and the open items of each.
+Saturday 08:15 block (computing clusters), built on 2026-11-10: section "Block 5" below. And the cold intro of the
+Friday 14:00 bandits block, "Estimating chances from the past": `block3-bandits-graunt.tex`, which Carlos chose on
+2026-11-11 from three drafts built that day; the two others, `block3-bandits-fox.tex` and
+`block3-bandits-bernoulli.tex`, stay as unchosen drafts: section "Block 3" below. `README.md` has the frames, the
+sources, the history and the open items of each.
 
 The 8 frames are the ones Carlos dictated on 2026-11-11, his second dictation, after he said he did not understand
 the story: a title that names the topic (the first line of the story as a title had left him "a bit lost"), the
@@ -19,8 +20,8 @@ terms. Change the wording of the quotations only on his say. Frame 7 names the u
 of Etsy and Airbnb belong to their case slides.
 On the course site since 2026-11-11, the Friday 08:15 row: the 5-frame version from AINIT-PAGE commit `dc80aeb`, the
 8-frame rework since `70f1db5`. After every rebuild, copy the PDF and the handout there again under their site
-names (`README.md`, section "On the course site"); the weekend 2 page numbers them from the agenda (02 for this deck,
-15 for block 5 on 2026-11-11, AINIT-PAGE `9e0be17`) and its ZIP takes them at the site's build.
+names (`README.md`, section "On the course site"); the weekend 2 page numbers them from the agenda (02 for this deck;
+since AINIT-PAGE `9e509ca`, 11 for block 3 and 16 for block 5) and its ZIP takes them at the site's build.
 
 The look is the Title sequence of the course cold intro (`w1-lecture-material/cold-intro/intro-slides/`, chosen by
 Carlos on 2026-10-14): a picture on every frame, Futura, lavender only for the two highlighted sentences of the
@@ -38,7 +39,7 @@ tools/check_overlays_any.py    the no-jump check for dark pages
 block1-nearest-neighbors.pdf, block1-nearest-neighbors-handout.pdf    the deliverables, rebuild and recommit together
 block5-*, make_images_block5.py, img/b5-*.jpg    the cold intro of block 5, section "Block 5" below
 block3-bandits-{fox,graunt,bernoulli}.*, make_images_block3_*.py, img/b3f-*, img/b3g-*, img/b3b-*
-                               the three drafts of the cold intro of block 3, section "Block 3 drafts" below
+                               the cold intro of block 3 (graunt) and two unchosen drafts, section "Block 3" below
 ```
 
 ## Traps
@@ -97,14 +98,17 @@ Traps of block 5:
 6. **Superscripts** (`10\textsuperscript{12}`) lower the first baseline of a statement by about 0.3 mm. The closing
    statements keep block 1's rhythm: next top = previous top + 5.8 mm per line + 5.7 mm.
 
-## Block 3 drafts: Estimating chances from the past
+## Block 3: Estimating chances from the past
 
 Built on 2026-11-11 from Carlos's shortlist of round 5 (`git_ainit/research_notes/Weekend 2 cold intros/estimate.md`,
 C1, C2, C8), three parallel drafts in the form of block 1, 8 frames and 16 pages each: THE FOX (Aesop, the old lion
 and the fox), GRAUNT (the Bills of Mortality, 1662), BERNOULLI (*Ars Conjectandi*, 1713, the stupidest man and the
-urn). None is chosen and none is on the course site. Frames 6 ("The estimate") and 7 ("Estimating chances today")
-are the same in the three, apart from the third statement of frame 6 in BERNOULLI: a change to them goes into all
-three decks. Frame 7 names the two cases of the block (`../cases-deck/block3-bandits.tex`) without their numbers.
+urn). Carlos chose GRAUNT the same evening. It is on the course site since AINIT-PAGE `9e509ca`: the Friday 14:00 row
+before the Mirror, number 11, as `ainit-hs26-bandits-cold-intro.pdf` and its handout. After a rebuild, copy both
+there again (`README.md`, section "On the course site of block 3"). THE FOX and BERNOULLI are kept as built in commit
+`5bb67bd`, off the course site; later changes go into GRAUNT only. Frames 6 ("The estimate") and 7 ("Estimating
+chances today") are the same in the three, apart from the third statement of frame 6 in BERNOULLI. Frame 7 names the
+two cases of the block (`../cases-deck/block3-bandits.tex`) without their numbers.
 
 ```
 block3-bandits-<name>.tex          the deck, 8 frames, a "Say" comment per frame (<name>: fox, graunt, bernoulli)

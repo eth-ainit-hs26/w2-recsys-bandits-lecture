@@ -78,8 +78,9 @@ Specifically:
 │                               cut from Huizong's Auspicious Cranes; own CLAUDE.md and README.md
 │                               Also the cold intro of the Saturday 08:15 block, "Dividing a
 │                               computation, 1793" (Prony's tables, from FDD weekend 7), 5 frames,
-│                               and three drafts of the cold intro of the Friday 14:00 bandits
-│                               block, "Estimating chances from the past" (2026-11-11)
+│                               and the cold intro of the Friday 14:00 bandits block,
+│                               "Estimating chances from the past" (Graunt, chosen from three
+│                               drafts on 2026-11-11)
 ├── clusters-deck/              The Saturday 08:15 block "Computing clusters" (2026-11-10): a port
 │                               into Codex plates of the first block of FDD weekend 7, "The cost
 │                               of computation and supercomputers", with Carlos's cuts; 21 frames;
@@ -271,8 +272,10 @@ deck (`clusters-deck/README.md`, section "On the course site").
 drafts of the cold intro of the Friday 14:00 bandits block, "Estimating chances from the past", built on 2026-11-11
 from Carlos's shortlist ("Please make three parallel cold intros"): Aesop's fox at the sick lion's cave, Graunt's
 Bills of Mortality (1662) and Bernoulli's stupidest man and urn (*Ars Conjectandi*, 1713), each in the form of block
-1, 8 frames over 16 pages, ending in the estimate (taps divided by showings) and its uses today. None is chosen and
-none is on the course site; `cold-intro-deck/README.md`, section "Block 3", has the frames and the sources.
+1, 8 frames over 16 pages, ending in the estimate (taps divided by showings) and its uses today. Carlos chose
+Graunt the same evening: on the course site since AINIT-PAGE `9e509ca` (Friday 14:00 row, number 11). The fox and
+Bernoulli stay as unchosen drafts. `cold-intro-deck/README.md`, section "Block 3", has the frames, the sources and
+the site file names.
 
 ## The computing clusters deck (added 2026-11-10)
 
