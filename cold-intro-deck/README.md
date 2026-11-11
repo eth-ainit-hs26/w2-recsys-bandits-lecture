@@ -85,7 +85,9 @@ replaces it only on Carlos's say; its title then goes into the label too.
 
 A live file is https://eth-ainit-hs26.github.io/AINIT-PAGE/slides/we2/<file>
 After a rebuild, copy both over the same site file names, run `npm ci && npm run build` in `AINIT-PAGE`, push to
-`main`, then curl the live files and `cmp` them with the ones here.
+`main`, then curl the live files and `cmp` them with the ones here. Since AINIT-PAGE commit `8bf143b` the weekend 2
+ZIP, `ainit-hs26-weekend-2.zip`, holds both as item "Nearest neighbors, cold intro"; `npm run build` remakes it
+from the files in `public/`.
 
 ## History
 
