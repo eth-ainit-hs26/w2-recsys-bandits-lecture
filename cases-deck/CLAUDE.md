@@ -114,8 +114,8 @@ Build and check, from this folder: the commands in README.md, section "Build and
   the old sub-headings of `tools/cases_numbers.py`: two or more hyphens between spaces count as a dash, and the old
   headings pass only because they were already there. The blocks added on 2026-11-06 use `# == name ==`.
 - **This repository is public and every push to main publishes it on GitHub Pages**, the deck included. The
-  course site (AINIT-PAGE) serves its own copies of the four block decks, their handouts (in the weekend's ZIP
-  only) and the weekend deck (README.md): after a rebuild, copy them there again (README.md, section "On the course
+  course site (AINIT-PAGE) serves its own copies of the four block decks, their handouts (on the agenda after
+  their decks since AINIT-PAGE `9e0be17`) and the weekend deck (README.md): after a rebuild, copy them there again (README.md, section "On the course
   site").
 
 ## Maintenance contract

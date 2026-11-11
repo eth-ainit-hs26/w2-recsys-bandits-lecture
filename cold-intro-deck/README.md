@@ -75,7 +75,8 @@ python3 ../style/tools/make_handout.py block1-nearest-neighbors.pdf block1-neare
 
 Since 2026-11-11 (AINIT-PAGE commit `dc80aeb`), on the Friday 08:15 row before the Video Store game, chips
 `Cold intro` and `Cold intro handout`, and in the Materials list, group "Lecture slides", with the label "cold intro:
-Searching through representations". The 8-frame rework is there since AINIT-PAGE commit `70f1db5` (2026-11-11, his
+Searching through representations". Since AINIT-PAGE `9e0be17` the chips read "Nearest neighbors, cold intro" and
+"Handout", numbered 02 from the agenda that day, as in the Materials list under "Slides and visualizations". The 8-frame rework is there since AINIT-PAGE commit `70f1db5` (2026-11-11, his
 "Yes, replace it"); before, from `dc80aeb`, the 5-frame version of commit `9d9379a`.
 
 | Site file | Source here |
@@ -86,8 +87,8 @@ Searching through representations". The 8-frame rework is there since AINIT-PAGE
 A live file is https://eth-ainit-hs26.github.io/AINIT-PAGE/slides/we2/<file>
 After a rebuild, copy both over the same site file names, run `npm ci && npm run build` in `AINIT-PAGE`, push to
 `main`, then curl the live files and `cmp` them with the ones here. Since AINIT-PAGE commit `8bf143b` the weekend 2
-ZIP, `ainit-hs26-weekend-2.zip`, holds both as item "Nearest neighbors, cold intro"; `npm run build` remakes it
-from the files in `public/`.
+ZIP, `ainit-hs26-weekend-2.zip`, holds both, numbered as on the page; `npm run build` remakes it from the files in
+`public/`.
 
 ## History
 
@@ -104,6 +105,8 @@ from the files in `public/`.
    the other five are unchanged byte for byte. Commit `f8389a5`.
 5. 2026-11-11, the rework replaced the 5-frame version on the course site at his "Yes, replace it": AINIT-PAGE
    commit `70f1db5`, the same file names, the new title in the Materials label, and the weekend 2 ZIP.
+6. 2026-11-11, the course site numbers the decks and games of weekend 2 from the agenda (AINIT-PAGE `9e0be17`):
+   this deck is 02, its chips "Nearest neighbors, cold intro" and "Handout".
 
 ## Open items
 
@@ -199,6 +202,8 @@ CSCS as the only capitals, no build metadata, and Futura as the only font.
    please publish them on the website"): AINIT-PAGE commit `a498851`, the Saturday 08:15 row and the Lecture slides
    list, as `ainit-hs26-computing-clusters-cold-intro.pdf` and `ainit-hs26-computing-clusters-cold-intro-handout.pdf`.
    After a rebuild, copy both there again (`../clusters-deck/README.md`, section "On the course site", has the recipe).
+3. 2026-11-11, the chips read "Computing clusters, cold intro" and "Handout", number 15 of weekend 2 that day
+   (AINIT-PAGE `9e0be17`, numbers from the agenda).
 
 ## Open items of block 5
 

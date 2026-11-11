@@ -329,14 +329,16 @@ block on its Friday row, and the weekend deck with its handout in the Materials 
 
 | Site file | Source here | Where |
 |---|---|---|
-| `ainit-hs26-business-cases-nearest-neighbors.pdf` | `block1-nearest-neighbors.pdf` | Friday 08:15, "Cases: Etsy, Airbnb" |
-| `ainit-hs26-business-cases-matrix-factorization.pdf` | `block2-matrix-factorization.pdf` | Friday 11:00, "Case: Spotify" |
-| `ainit-hs26-business-cases-bandits.pdf` | `block3-bandits.pdf` | Friday 14:00, "Cases: Spotify's home page, Amazon Payments" |
-| `ainit-hs26-business-cases-parallelized-mf.pdf` | `block4-parallelized-mf.pdf` | Friday 16:00, "Case: LinkedIn's ads" |
-| `ainit-hs26-business-cases.pdf`, `ainit-hs26-business-cases-handout.pdf` | `weekend2-cases.pdf`, `weekend2-cases-handout.pdf` | Materials list |
-| `ainit-hs26-business-cases-<block>-handout.pdf`, the four blocks | `block<N>-<name>-handout.pdf` | only in the weekend's ZIP, folder Handouts (since 2026-11-11, AINIT-PAGE `8bf143b`) |
+| `ainit-hs26-business-cases-nearest-neighbors.pdf` | `block1-nearest-neighbors.pdf` | Friday 08:15, "Business cases, Etsy and Airbnb" |
+| `ainit-hs26-business-cases-matrix-factorization.pdf` | `block2-matrix-factorization.pdf` | Friday 11:00, "Business case, Spotify" |
+| `ainit-hs26-business-cases-bandits.pdf` | `block3-bandits.pdf` | Friday 14:00, "Business cases, Spotify's home page and Amazon Payments" |
+| `ainit-hs26-business-cases-parallelized-mf.pdf` | `block4-parallelized-mf.pdf` | Friday 16:00, "Business case, LinkedIn's ads" |
+| `ainit-hs26-business-cases.pdf`, `ainit-hs26-business-cases-handout.pdf` | `weekend2-cases.pdf`, `weekend2-cases-handout.pdf` | Materials list, group "Business cases", without a number (`download.extras`) |
+| `ainit-hs26-business-cases-<block>-handout.pdf`, the four blocks | `block<N>-<name>-handout.pdf` | the chip "Handout" right after its deck (since 2026-11-11, AINIT-PAGE `9e0be17`), and the ZIP's folder Handouts |
 
-The four block decks are also in the Materials list, under the names of their blocks. The six one-case site files
+Since AINIT-PAGE `9e0be17` the page numbers the four block decks from the agenda, 04, 09, 12 and 14 on 2026-11-11,
+on their chips, in the Materials list under "Slides and visualizations" and in the weekend's ZIP; a deck or game
+added before one of them shifts its number. The six one-case site files
 (`ainit-hs26-case-etsy.pdf` and the others) were removed on 2026-11-09. LinkedIn's ads (gradient descent at scale)
 is on the 16:00 row, "Parallelized matrix factorization", a choice Carlos can swap to 11:00. A live file is
 https://eth-ainit-hs26.github.io/AINIT-PAGE/slides/we2/<file>

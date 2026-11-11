@@ -17,7 +17,8 @@ terms. Change the wording of the quotations only on his say. Frame 7 names the u
 of Etsy and Airbnb belong to their case slides.
 On the course site since 2026-11-11, the Friday 08:15 row: the 5-frame version from AINIT-PAGE commit `dc80aeb`, the
 8-frame rework since `70f1db5`. After every rebuild, copy the PDF and the handout there again under their site
-names (`README.md`, section "On the course site"); the weekend 2 ZIP takes them at the site's build.
+names (`README.md`, section "On the course site"); the weekend 2 page numbers them from the agenda (02 for this deck,
+15 for block 5 on 2026-11-11, AINIT-PAGE `9e0be17`) and its ZIP takes them at the site's build.
 
 The look is the Title sequence of the course cold intro (`w1-lecture-material/cold-intro/intro-slides/`, chosen by
 Carlos on 2026-10-14): a picture on every frame, Futura, lavender only for the two highlighted sentences of the

@@ -106,7 +106,9 @@ chassis, 2 nodes of 4 GH200 an EX254n blade, 24 cabinets, and the node layout of
 ## On the course site
 
 Since 2026-11-10, on the Saturday 08:15 row and in the Materials list, group "Lecture slides": this deck since
-AINIT-PAGE commit `0f4cd90`, the cold intro before it since `a498851`.
+AINIT-PAGE commit `0f4cd90`, the cold intro before it since `a498851`. Since 2026-11-11 (AINIT-PAGE `9e0be17`) the
+chips read "Computing clusters, cold intro", "Handout", "Computing clusters", "Handout", numbered 15 and 16 that day
+from the agenda, and the Materials list shows them under "Slides and visualizations".
 
 | Site file | Source here |
 |---|---|
