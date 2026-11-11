@@ -1,0 +1,241 @@
+% ===== cheat-sheet.tex: AI in Industry, HS26. The semester on one A3 page, drawn as a mind map =====
+% Carlos, 2026-11-11: "produce a cheat sheet that, if possible, acts as a mind map of all the concepts ... that
+% are being covered in the semester, and that acts as an orientation guide for the participants on when to use
+% each technology and what is the main use and application in industry."
+%
+% The concepts are the lecture rows of the master spreadsheet's Syllabus tab and of the course site's
+% src/data/weekends.ts (both read 2026-11-11), in the words of the course's decks. Every named company, product
+% and year on the page has its source in SOURCES.md, and no example is older than November 2021.
+%
+% The look is the course's Codex plates (../style/CLAUDE.md): the colours, the type and the hatching below are
+% copied from ../style/ainit-preamble.tex. The page is a plain article in A3 landscape, because the preamble is
+% a beamer theme for 160 x 90 mm frames.
+%
+% Build and check from this folder:
+%   ../style/tools/build.sh cheat-sheet.tex
+%   ../style/tools/check.sh cheat-sheet.pdf
+\documentclass{article}
+\usepackage[paperwidth=420mm, paperheight=297mm, margin=0mm]{geometry}
+\usepackage{fontspec}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usetikzlibrary{calc, patterns.meta, backgrounds}
+\pagestyle{empty}
+\setlength{\parindent}{0pt}
+
+% ----- type: copied from ../style/ainit-preamble.tex -----
+\setmainfont{EBGaramond}[
+  Extension      = .otf,
+  UprightFont    = *-Medium,
+  ItalicFont     = *-MediumItalic,
+  BoldFont       = *-SemiBold,
+  BoldItalicFont = *-SemiBoldItalic,
+  Ligatures      = TeX,
+  Numbers        = Lining,
+  Scale          = 1.08]
+\providecommand{\geezfontpath}{/System/Library/Fonts/Supplemental/}
+\newfontfamily\geezlightfont[Path=\geezfontpath, RawFeature={instance=Light}]{KefaIII.ttf}
+
+% ----- colours: copied from ../style/ainit-preamble.tex -----
+\definecolor{paper}{HTML}{F9F4E3}
+\definecolor{ink}{HTML}{241F1A}
+\definecolor{muted}{HTML}{5E5448}
+\definecolor{brand}{HTML}{58409A}
+\definecolor{accent2}{HTML}{8F5A06}
+\colorlet{ruling}{ink!40!paper}
+\colorlet{ruledark}{ink!62!paper}
+\colorlet{nib}{ink!88!paper}
+\pagecolor{paper}
+\color{ink}
+
+% ----- the drawing kit of this page -----
+\tikzset{
+  cx page/.style={remember picture, overlay, shift={(current page.north west)}, x=1mm, y=-1mm},
+  hatch fine/.style={pattern={Lines[angle=45, distance=0.62mm, line width=0.36pt]}, pattern color=brand},
+  arm/.style={draw=brand, line width=1.1pt, line join=miter},
+  tree/.style={draw=nib, line width=0.5pt, line join=miter},
+  card/.style={draw=nib, line width=0.5pt, line join=miter, fill=paper, anchor=north west,
+    inner xsep=1.8mm, inner ysep=1.5mm, align=flush left, text=ink,
+    font=\fontsize{8.4}{10.1}\selectfont},
+  group/.style={anchor=north west, inner xsep=0mm, inner ysep=0.5mm, text=ink, text height=2.75mm, text depth=0.85mm,
+    font=\fontsize{10.5}{12}\selectfont\bfseries\itshape},
+}
+\newcommand{\lab}[1]{{\itshape\color{muted}#1}\enspace}
+
+% ----- the tree of one column -----
+% \cxcolumn{spine x}{group x}{card x}{card text width}{start y}{spine top y}: the spine runs down the column,
+% a group sits on it with a hatched square, and its cards hang off it on short level branches.
+\newcommand{\cxgroupgap}{3.9}
+\newcommand{\cxcardgap}{1.9}
+\newcommand{\cxcolumn}[6]{%
+  \coordinate (sx) at (#1,0);
+  \coordinate (gx) at (#2,0);
+  \coordinate (cx) at (#3,0);
+  \gdef\cxtw{#4}%
+  \coordinate (cxstart) at (#3,#5);
+  \gdef\cxprev{cxstart}%
+  \gdef\cxtop{#6}}
+% \cxgroup{node}{label}
+\newcommand{\cxgroup}[2]{%
+  \path (gx |- \cxprev.south) ++(0,\cxgroupgap) node[group] (#1) {#2};
+  \gdef\cxprev{#1}}
+% \cxcard{node}{name}{what it is}{use it when}{in industry}; an empty field is left out
+\newcommand{\cxcard}[5]{%
+  \path (cx |- \cxprev.south) ++(0,\cxcardgap) node[card, text width=\cxtw mm] (#1)
+    {{\color{brand}\bfseries #2}\enspace #3%
+     \if\relax\detokenize{#4}\relax\else\par\vspace{0.5mm}\lab{Use it when}#4\fi
+     \if\relax\detokenize{#5}\relax\else\par\vspace{0.5mm}\lab{In industry}#5\fi};
+  \begin{scope}[on background layer]\draw[tree] (sx |- #1.west) -- (#1.west);\end{scope}
+  \gdef\cxprev{#1}\gdef\cxlast{#1}}
+% \cxspine: the spine of the column, from its top to the branch of the last card
+\newcommand{\cxspine}{%
+  \begin{scope}[on background layer]\draw[tree] (sx |- 0,\cxtop) -- (sx |- \cxlast.west);\end{scope}}
+% \cxmark{group node}: the hatched square where a group sits on the spine
+\newcommand{\cxmark}[1]{%
+  \path (sx |- #1.west) coordinate (cxm);
+  \fill[paper] ($(cxm)+(-1.45,-1.45)$) rectangle ($(cxm)+(1.45,1.45)$);
+  \fill[hatch fine] ($(cxm)+(-1.45,-1.45)$) rectangle ($(cxm)+(1.45,1.45)$);
+  \draw[brand, line width=0.55pt, line join=miter] ($(cxm)+(-1.45,-1.45)$) rectangle ($(cxm)+(1.45,1.45)$);}
+
+% ----- the head of one weekend -----
+% \cxhead{spine x}{text x}{numeral}{Weekend N, dates}{title}{what it is for}{project}
+\newcommand{\cxhead}[7]{%
+  \draw[brand, line width=1.5pt, line join=miter] (#1-6,43) rectangle (#1+6,55);
+  \draw[brand, line width=0.35pt] (#1-4.6,44.4) rectangle (#1+4.6,53.6);
+  \node[text=brand, inner sep=0, font=\fontsize{23}{23}\selectfont] at (#1,49.2) {{\geezlightfont #3}};
+  \node[anchor=base west, inner sep=0, text=muted, font=\fontsize{9.5}{11}\selectfont\itshape] at (#2,46.4) {#4};
+  \node[anchor=base west, inner sep=0, text=ink, font=\fontsize{14.5}{16}\selectfont\bfseries] at (#2,53.8) {#5};
+  \node[anchor=base west, inner sep=0, text=ink, font=\fontsize{10}{12}\selectfont\itshape] at (#2,59.9) {#6};
+  \node[anchor=base west, inner sep=0, text=ink, font=\fontsize{9.5}{11}\selectfont] at (#2,65.1) {\lab{Project}#7};}
+
+\begin{document}
+\null
+\begin{tikzpicture}[cx page]
+
+% ===== the leaf: a fine double ruled block, pricking dots in the outer margin =====
+\begin{scope}[on background layer]
+  \draw[ruling, line width=0.9pt] (10,10) rectangle (410,287);
+  \draw[ruling, line width=0.4pt] (11.6,11.6) rectangle (408.4,285.4);
+  \foreach \i in {0,...,24} {\fill[ruling] (5.2,{10+11.5417*\i}) circle (0.5);}
+\end{scope}
+
+% ===== the root and its three arms =====
+\node[anchor=base, inner sep=0, text=ink, font=\fontsize{30}{32}\selectfont\bfseries] at (210,27.2) {AI in Industry};
+\draw[ruledark, line width=0.9pt] (183,31.2) -- (237,31.2);
+\draw[ruling, line width=0.35pt] (183,32.5) -- (237,32.5);
+\draw[arm] (210,32.5) -- (210,37.6);
+\draw[arm] (20,43) -- (20,37.6) -- (327.2,37.6) -- (327.2,43);
+\draw[arm] (173.6,37.6) -- (173.6,43);
+
+% ===== the three heads =====
+\cxhead{20}{29.6}{፩}{Weekend 1, 16 and 17 October}{Large language models}
+  {Tasks in words: answer, write, summarize, act}{LLM marketing agent}
+\cxhead{173.6}{183.2}{፪}{Weekend 2, 13 and 14 November}{Representation learning}
+  {Matching: which product for which customer}{Recommender for online retail}
+\cxhead{327.2}{336.8}{፫}{Weekend 3, 11 and 12 December}{Reinforcement learning}
+  {Decisions in sequence, rewards later}{RL vehicle routing}
+% the second column of weekends 1 and 2 branches off under the head
+\draw[tree] (20,69) -- (93.8,69);
+\draw[tree] (173.6,69) -- (247.4,69);
+
+% ===== weekend 1, first column =====
+\cxcolumn{20}{25}{26}{57.2}{69}{55}
+\cxgroup{g11}{Foundations}
+\cxcard{lm}{Language model}{A transformer gives each possible next word a chance; one is drawn, then the next.}
+  {the input and the output are text.}{chat assistants, drafting, summaries, translation.}
+\cxcard{emb}{Embedding}{A text as a row of numbers: similar meanings, similar rows.}
+  {comparing or searching texts by meaning.}{search by meaning; the search step of RAG.}
+\cxgroup{g12}{Prompting and retrieval}
+\cxcard{pe}{Prompt engineering}{A brief with role, task, examples and format; chain or tree of thought for reasoning in steps.}
+  {starting any task: it trains nothing.}{customer replies, marketing texts, sorting messages.}
+\cxcard{rag}{RAG}{Retrieval-augmented generation: search your own documents, then answer from the pages found.}
+  {answers must rest on your documents and cite them.}{DoorDash's support bot answers couriers from its help articles (2024).}
+\cxgroup{g13}{Prompt optimization}
+\cxcard{opro}{OPRO}{Optimization by prompting: an LLM reads earlier prompts with their scores and writes better ones.}
+  {you have a score and examples to compute it on.}{tuning a prompt to a metric, with no retraining.}
+\cxcard{gepa}{GEPA}{An LLM reads why a prompt failed and rewrites it; every prompt that is best on some example is kept.}
+  {examples are few and each run is costly.}{Databricks: an open model with its prompts beat costlier models at extracting data from documents (2025).}
+\cxspine
+\cxmark{g11}\cxmark{g12}\cxmark{g13}
+
+% ===== weekend 1, second column =====
+\cxcolumn{93.8}{98.8}{99.8}{57.2}{69}{69}
+\cxgroup{g14}{Training}
+\cxcard{sft}{Supervised fine-tuning}{Train the model further on examples of good answers written by people.}
+  {a prompt cannot give the manner or format you need.}{chat assistants: InstructGPT (OpenAI, 2022).}
+\cxcard{rlhf}{Human feedback (RLHF)}{People rank answers, a scorer learns their taste, the model is nudged toward high scores.}
+  {a good answer is a matter of taste.}{ChatGPT (OpenAI, 2022).}
+\cxcard{rlvr}{Verifiable rewards (RLVR)}{A program checks each answer; right answers become more likely.}
+  {a program can check the answers: maths, code.}{reasoning models such as DeepSeek-R1 (2025).}
+\cxgroup{g15}{Agents}
+\cxcard{harness}{Harness}{Software around the model: the model picks a tool, the harness runs it and returns the result, in a loop.}
+  {the task needs actions in files, databases or the web.}{coding agents, deep research, support bots that act.}
+\cxcard{plan}{Planning strategies}{Try possible steps in a search tree before acting: Monte Carlo tree search, LATS; UCB picks the branch.}
+  {a long task punishes an early wrong step.}{AlphaDev found faster sorting code by tree search, now in a standard C++ library (DeepMind, 2023).}
+\cxgroup{g16}{Production}
+\cxcard{mlops}{MLOps}{Machine learning operations: one pipeline from data to training, evaluation, deployment and monitoring.}
+  {a model goes live and must stay reproducible.}{Uber's Michelangelo, one platform for all its teams (2024).}
+\cxspine
+\cxmark{g14}\cxmark{g15}\cxmark{g16}
+
+% ===== weekend 2, first column =====
+\cxcolumn{173.6}{178.6}{179.6}{57.2}{69}{55}
+\cxgroup{g21}{Similarity}
+\cxcard{ip}{Inner product}{Multiply the matching numbers of two rows and add: one score. Cosine similarity: the same on rows scaled to length one.}
+  {scoring a customer against a product.}{the score inside search and recommenders.}
+\cxcard{nn}{Nearest neighbors}{Predict from the most similar customers or products.}
+  {you need a fast shortlist, or ``customers like you''.}{the first shortlist of search at Etsy (2024) and Airbnb (2025).}
+\cxgroup{g22}{Learned profiles}
+\cxcard{mp}{Matrix product}{Every customer's row times every product's column: all the scores at once.}
+  {scoring every customer against every product.}{what GPUs compute fastest; inside recommenders and LLMs.}
+\cxcard{mf}{Matrix factorization}{A few learned numbers per customer and per product; their inner products fill in the missing ratings.}
+  {there are many customers and products, few ratings each.}{audiobook recommendations at Spotify, with the numbers learned by networks (2024).}
+\cxcard{gd}{Gradient descent}{Change every number a small step that lowers the error; repeat.}
+  {a model has many numbers to learn.}{trains recommenders, neural networks and LLMs.}
+\cxspine
+\cxmark{g21}\cxmark{g22}
+
+% ===== weekend 2, second column =====
+\cxcolumn{247.4}{252.4}{253.4}{57.2}{69}{69}
+\cxgroup{g23}{Bandits}
+\cxcard{mab}{Multi-armed bandit}{Show one option, learn from the click, choose again: explore or exploit.}
+  {choices repeat, feedback is fast and the best option is unknown.}{which offer, page or content to show.}
+\cxcard{rnd}{Random}{Pick an option at random each time.}
+  {you need a baseline, or a fair test.}{the random split of visitors in an A/B test.}
+\cxcard{ete}{Explore then exploit}{Try every option for a while, then keep the best.}
+  {the best option does not change.}{an A/B test, then the winner for everyone.}
+\cxcard{eg}{Epsilon-greedy}{The best option so far; with chance epsilon, a random one.}
+  {you want a simple rule that never stops exploring.}{the mix of music and podcasts on Spotify's home page (2025).}
+\cxcard{ucb}{UCB}{Upper confidence bound: the highest estimate plus a bonus for uncertainty.}
+  {every try is costly.}{Amazon tested it on the application pages of Amazon Payments (2026).}
+\cxgroup{g24}{Scale}
+\cxcard{pmf}{Parallelized matrix factorization}{Split customers, products and ratings over many computers that work at once.}
+  {the data or the model do not fit one computer.}{LinkedIn trains its ranking models on many GPUs at once (2024).}
+\cxcard{hpc}{Computing clusters}{Thousands of GPUs joined by fast links; a run costs GPU hours, energy and money.}
+  {training or serving large models.}{Apertus, the Swiss open LLM, trained on Alps at CSCS (2025).}
+\cxspine
+\cxmark{g23}\cxmark{g24}
+
+% ===== weekend 3 =====
+\cxcolumn{327.2}{332.2}{333.2}{65.2}{69}{55}
+\cxgroup{g31}{Problem}
+\cxcard{mdp}{Markov decision process}{States, actions, rewards and the chances of the next state; a policy says what to do in each state.}
+  {each decision changes the next situation.}{maintenance, pricing, stock, delivery routes, robots.}
+\cxgroup{g32}{Exploration}
+\cxcard{eg3}{Epsilon-greedy}{The bandit rule of weekend 2, used in every state.}
+  {you learn while you act.}{}
+\cxgroup{g33}{Values}
+\cxcard{bell}{Bellman equation}{The value of an action: its reward now plus the value of the best next action.}
+  {the rules and their chances are known.}{planning maintenance and stock with known odds.}
+\cxcard{rm}{Robbins-Monro}{Learn an average from noisy samples: move the guess a small step toward each one.}
+  {every observation is noisy.}{the update inside SARSA, Q-learning and stochastic gradient descent.}
+\cxgroup{g34}{Learning from experience}
+\cxcard{sarsa}{SARSA and Q-learning}{Learn the value of each action from your own steps, with no model of the world.}
+  {there is no model, only experience or a simulator.}{Lyft matches riders and drivers by future earnings learned from live trips (2024).}
+\cxcard{rf}{REINFORCE}{Make the actions of well-paid episodes more likely: learn the policy itself.}
+  {actions are many, or the policy is the goal.}{the family that trains chat and reasoning models of weekend 1.}
+\cxspine
+\cxmark{g31}\cxmark{g32}\cxmark{g33}\cxmark{g34}
+
+\end{tikzpicture}
+\end{document}

@@ -85,6 +85,9 @@ Specifically:
 │                               inner product, nearest neighbors, the matrix product and matrix
 │                               factorization, four pages linking the games; every number from
 │                               tools/notes_numbers.py; own CLAUDE.md and README.md
+├── cheat-sheet/                The semester on one A3 page (2026-11-11): a mind map of the three
+│                               weekends, each concept with what it is, when to use it and its use
+│                               in industry; own CLAUDE.md and SOURCES.md
 ├── original-decks/             Original PDFs from before the rebuild
 │   ├── w2_bandits.pdf
 │   └── w2_recsys.pdf
@@ -278,6 +281,15 @@ links to its game on the course site and its Colab notebook. The worked examples
 Sara and The Intouchables, The Martian's second number, three hidden MovieLens ratings), computed by
 `lecture-notes/tools/notes_numbers.py` from copies of the `w2-cx-private` data that it checks against that checkout.
 Not on the course site yet. `lecture-notes/CLAUDE.md` has the build and the TikZ gotchas.
+
+## The cheat sheet (added 2026-11-11)
+
+`cheat-sheet/cheat-sheet.pdf` is the semester on one A3 landscape page, asked for as "a mind map of all the
+concepts" and "an orientation guide for the participants on when to use each technology": the three weekends as
+branches, 30 cards in 14 groups, each card with what it is, "Use it when" and "In industry". The concepts are the
+Syllabus rows of the master spreadsheet and the course site; every named case has its source in
+`cheat-sheet/SOURCES.md`. It lives here because it was built during weekend 2; it covers all three weekends. Not on
+the course site yet. `cheat-sheet/CLAUDE.md` has the build and the layout.
 
 ## When in doubt
 
