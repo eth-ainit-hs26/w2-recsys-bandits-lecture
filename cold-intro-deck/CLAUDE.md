@@ -1,31 +1,36 @@
 # CLAUDE.md : cold-intro-deck, the cold intros of weekend 2
 
-Beamer, lualatex, three passes, from this folder. Two decks. `block1-nearest-neighbors.tex`, "Birds with
-the same wings", the cold intro of weekend 2, shown before the Friday 08:15 block (the inner product and nearest
-neighbors), built on 2026-11-10. `block5-computing-clusters.tex`, "Dividing a computation, 1793", shown before the
+Beamer, lualatex, three passes, from this folder. Two decks. `block1-nearest-neighbors.tex`, "Searching through
+representations" (the story of Chunyu Kun, "birds with the same wings"), the cold intro of weekend 2, shown before
+the Friday 08:15 block (the inner product and nearest neighbors), built on 2026-11-10 and reworked on 2026-11-11.
+`block5-computing-clusters.tex`, "Dividing a computation, 1793", shown before the
 Saturday 08:15 block (computing clusters), built on 2026-11-10: section "Block 5" below. `README.md` has the frames,
 the sources, the history and the open items of each.
 
-The frames are the ones Carlos dictated on 2026-11-10, after the first build: the title frame (the Chinese with the
-English under it, the one frame he called beautiful), a context frame (the book, the court, the people), the king's
-question and Kun's answer as his English text, one paragraph per frame, the key sentence in lavender, and a closing
-frame on representation learning, the theme of the weekend. The quotations carry no Chinese and there is no
-mapping of story words to course terms. Change the wording of the quotations only on his say.
-On the course site since 2026-11-11 (AINIT-PAGE commit `dc80aeb`, the Friday 08:15 row): after a rebuild, copy the
-PDF and the handout there again under their site names (`README.md`, section "On the course site").
+The 8 frames are the ones Carlos dictated on 2026-11-11, his second dictation, after he said he did not understand
+the story: a title that names the topic (the first line of the story as a title had left him "a bit lost"), the
+setting and the challenge in plain words with no citation, the surprise (the first line in Chinese and English, on
+the look of the old title frame he called beautiful), the king's question, Kun's answer, what Kun says next with an
+explanation under it, representation learning, and four uses of it today (Etsy, Airbnb, RAG, LLMs). His rule:
+citations alone confuse, and recounts alone lose the charm, so mix them. There is no mapping of story words to course
+terms. Change the wording of the quotations only on his say. Frame 7 names the uses without numbers: the numbers
+of Etsy and Airbnb belong to their case slides.
+The course site has the 5-frame version of 2026-11-10 (AINIT-PAGE commit `dc80aeb`, the Friday 08:15 row). The
+rework goes there only on his say; from then on, copy the PDF and the handout there again under their site names
+after every rebuild (`README.md`, section "On the course site").
 
 The look is the Title sequence of the course cold intro (`w1-lecture-material/cold-intro/intro-slides/`, chosen by
-Carlos on 2026-10-14): a picture on every frame, Futura, lavender only for the highlighted sentence and the term of
-the closing frame. Carlos rejected a Codex plates cold intro as looking "like a technical report", and a struck or
+Carlos on 2026-10-14): a picture on every frame, Futura, lavender only for the two highlighted sentences of the
+quotations and the term "embedding". Carlos rejected a Codex plates cold intro as looking "like a technical report", and a struck or
 muted row in a mapping as unaesthetic. Keep both out.
 
 ## Layout
 
 ```
-block1-nearest-neighbors.tex   the deck, 5 frames, a "Say" comment per frame
+block1-nearest-neighbors.tex   the deck, 8 frames, 16 pages, a "Say" comment per frame
 cold-intro-kit.tex             the macros (a reduced copy of intro-kit.tex, plus \tshalf, and \tsrow, unused since the rebuild)
 make_images.py                 cuts and grades img/ from the original painting (URL and SHA-1 in its docstring)
-img/                           the five pictures, committed so that a build needs no network
+img/                           the seven pictures of block 1, committed so that a build needs no network
 tools/check_overlays_any.py    the no-jump check for dark pages
 block1-nearest-neighbors.pdf, block1-nearest-neighbors-handout.pdf    the deliverables, rebuild and recommit together
 block5-*, make_images_block5.py, img/b5-*.jpg    the cold intro of block 5, section "Block 5" below

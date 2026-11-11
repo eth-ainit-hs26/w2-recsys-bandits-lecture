@@ -7,8 +7,8 @@ Get the original (9079 by 1846 pixels, 6,274,394 bytes, SHA-1 df2c9dd312a6d4d91e
     curl -L -A "Mozilla/5.0" -o Songhuizong5.jpg https://upload.wikimedia.org/wikipedia/commons/6/67/Songhuizong5.jpg
 
 The painting is Emperor Huizong's Auspicious Cranes (1112), the right part of the scroll; the left part is his
-calligraphy and the colophons. Every frame is one view of the painting: three fill the page (1920 by 1080 pixels)
-and two are the picture half of a split screen (960 by 1080). The scan is dark, so the levels are lifted, then the
+calligraphy and the colophons. Every frame is one view of the painting: five fill the page (1920 by 1080 pixels)
+and two are the picture half of a split screen (960 by 1080); the two closing frames share one. The scan is dark, so the levels are lifted, then the
 saturation is set to 96 percent with a warm cast in the shadows. The page is darkened where the type sits, with
 the gradient baked into the file, so that a projector shows what the PDF shows. The fades follow the Title
 sequence of the course cold intro (w1-lecture-material, cold-intro/intro-slides/make_images.py)."""
@@ -56,21 +56,30 @@ def crop(x, y, w, ratio=9 / 16):
 # 1180; the ridge runs at y 1290 to 1330 and the eaves end at x 6420 and 8230, y 1540.
 HALF = (960, 1080)
 JOBS = [
-    # 0. the whole painting: the flock bright, the standing pair and the roof sunk in the dark under the first line
+    # 0. the title: the whole painting, the flock bright, the standing pair and the roof sunk in the dark under the
+    #    title
     ("bg-title", crop(5990, 40, 2650),
      fade("down", 0.50, 0.72, 0.92) + fade("up", 0.0, 0.14, 0.40) + foot(), (W, H)),
-    # 1. the king: the left half of the palace roof, the crane on its left ridge end, cranes flying above.
+    # 1. the setting: the two standing cranes facing each other on the ridge ends, the words under them on the roof
+    ("bg-pair", crop(6720, 900, 1290),
+     fade("down", 0.40, 0.52, 0.92) + foot(), (W, H)),
+    # 2. the surprise: the left part of the flock, closer, the first line of the story under it. The window starts
+    #    right of the collector's seal in the top left corner, and the dark starts higher than on the title, since
+    #    the cranes are larger here
+    ("bg-arrive", crop(6140, 60, 1400),
+     fade("down", 0.44, 0.64, 0.95) + foot(), (W, H)),
+    # 3. the king: the left half of the palace roof, the crane on its left ridge end, cranes flying above.
     #    The left half of a split screen, its right edge sinking into the ground of the page
     ("half-court", crop(6300, 480, 1200, 9 / 8),
      fade("right", 0.80, 1.0, 0.85, *HALF) + fade("down", 0.84, 1.0, 0.62, *HALF), HALF),
-    # 2. the answer: the right half of the flock and the crane on the right ridge end. The right half of a split
+    # 4. the answer: the right half of the flock and the crane on the right ridge end. The right half of a split
     #    screen, its left edge sinking into the ground of the page
     ("half-flock", crop(7290, 25, 1350, 9 / 8),
      fade("left", 0.80, 1.0, 0.85, *HALF) + fade("down", 0.84, 1.0, 0.62, *HALF), HALF),
-    # 3. the kind: the two standing cranes facing each other on the ridge ends, the words under them on the roof
-    ("bg-pair", crop(6720, 900, 1290),
-     fade("down", 0.40, 0.52, 0.92) + foot(), (W, H)),
-    # 4. the mapping: the flock, out of focus and almost gone in the dark
+    # 5. what Kun says next: the right part of the flock, his words and their explanation under it
+    ("bg-kind", crop(7100, 25, 1540),
+     fade("down", 0.40, 0.50, 0.92) + foot(), (W, H)),
+    # 6 and 7. representation learning and its uses: the flock, out of focus and almost gone in the dark
     ("bg-map", crop(6260, 25, 2150),
      ["-blur", "0x6"] + darken(80) + foot(), (W, H)),
 ]

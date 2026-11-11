@@ -1,14 +1,15 @@
 % =====================================================================
 %  AI in Industry, HS26, weekend 2. THE COLD INTRO, before block 1, the inner product and nearest neighbors
-%  (Friday 13 November 2026, 08:15): "Birds with the same wings", Chunyu Kun at the court of King Xuan of Qi,
-%  Zhanguo ce, Qi 3. Carlos chose the story on 2026-11-10 from the fourth round of candidates
-%  (research_notes/Weekend 2 cold intros/lookalikes.md, L5) and dictated the frames the same day: the title, the
-%  context, the king's question and Kun's answer in English, one paragraph each, the birds and the beasts
-%  highlighted, and a closing frame on representation learning.
+%  (Friday 13 November 2026, 08:15): "Searching through representations", the story of Chunyu Kun at the court of
+%  King Xuan of Qi, Zhanguo ce, Qi 3, "birds with the same wings". Carlos chose the story on 2026-11-10 from the
+%  fourth round of candidates (research_notes/Weekend 2 cold intros/lookalikes.md, L5). The frames are the ones he
+%  dictated on 2026-11-11: a title, the setting and the challenge in plain words, the surprise, the king's
+%  question, Kun's answer, what Kun says next with its explanation, representation learning, and four uses of it
+%  today.
 %  The look is the Title sequence of the course cold intro (w1-lecture-material, cold-intro/intro-slides): every
 %  frame a picture and a few lines of type. Every picture is cut from one painting, Emperor Huizong's Auspicious
 %  Cranes (1112), by make_images.py.
-%  The Chinese of frame 0 is the text of zh.wikisource, 戰國策/卷10, with its notes removed. The English is ours:
+%  The Chinese of frame 2 is the text of zh.wikisource, 戰國策/卷10, with its notes removed. The English is ours:
 %  the gloss of lookalikes.md, the words Carlos chose.
 %  Build FROM THIS DIRECTORY, three passes:  ../style/tools/build.sh block1-nearest-neighbors.tex
 % =====================================================================
@@ -18,24 +19,58 @@
 \input{cold-intro-kit}
 
 % beamer takes the PDF title from \title, and there is no title page to print it on
-\title{Birds with the same wings}
+\title{Searching through representations}
 \author{Carlos Cotrini}
-\hypersetup{pdftitle={Birds with the same wings}, pdfauthor={Carlos Cotrini}}
+\hypersetup{pdftitle={Searching through representations}, pdfauthor={Carlos Cotrini}}
 
 \newcommand{\srctext}{\emph{Zhanguo ce} (Strategies of the Warring States), Qi 3.\\ English: lecturer}
 \newcommand{\srcpaint}{Emperor Huizong of Song, \emph{Auspicious Cranes}, 1112, detail. Liaoning Provincial
   Museum. Wikimedia Commons, public domain}
 
+% \tsapp[c]{y}{name}{text}: one use of embeddings on frame 7, the name at x = 8 and the text at x = 40, both
+% anchored at their top on y
+\newcommand{\tsapp}[4][1-]{%
+  \tstext[#1]{8}{#2}{30}{\fontsize{12.5}{16.5}\selectfont\color{titlewhite}}{#3}%
+  \tstext[#1]{40}{#2}{112}{\fontsize{12.5}{16.5}\selectfont\color{pale}}{#4}}
+
 \begin{document}
 
 % ===== 0. The title =====
-% Say: The state of Qi, in the fourth century BC. In one day, Chunyu Kun presents seven men to King Xuan.
+% Say: Searching through representations. First, a story from ancient China.
 % The pictures are details of one painting. Emperor Huizong of Song painted the red-crowned cranes that circled over
 % the gate of his palace in Bianliang, today Kaifeng, on 22 February 1112: twenty cranes, two of them standing on the
 % roof.
 \begin{frame}[plain,noframenumbering]
   \tsbg{img/bg-title.jpg}
-  \tstext{8}{8}{120}{\fontsize{8.6}{10.4}\selectfont\color{pale}}{\tssp{The state of Qi, fourth century BC}}
+  \tstext{8}{8}{120}{\fontsize{8.6}{10.4}\selectfont\color{pale}}{\tssp{AI in Industry, weekend 2}}
+  \tstext{8}{62.6}{144}{\fontsize{20}{24}\selectfont\color{titlewhite}}{Searching through representations}
+  \tstext{8}{73.4}{144}{\fontsize{11}{13}\selectfont\itshape\color{titlewhite}}{A story from ancient China}
+  \tscredit{84}{87.6}{70}{\srcpaint}
+\end{frame}
+
+% ===== 1. The setting =====
+% Say: The story is in the Zhanguo ce, the Strategies of the Warring States: anecdotes of the politics and wars of
+% the Chinese states from 490 to 221 BC, edited by Liu Xiang (77 to 6 BC) from the manuscripts of the imperial
+% library. King Xuan of Qi, king from 319 to 301 BC, gave 76 scholars, Chunyu Kun among them, houses and the rank of
+% senior officers, to debate rather than govern; the scholars of Jixia, at his capital, numbered in the hundreds
+% (Shiji 46). Kun was known for his wit and was sent several times as an envoy (Shiji 126).
+% [click] Let the room guess.
+\begin{frame}[plain,noframenumbering]
+  \tsbg{img/bg-pair.jpg}
+  \tstext{8}{46.6}{144}{\fontsize{16}{19}\selectfont\color{titlewhite}}{The court of King Xuan}
+  \tstext{8}{54.2}{144}{\fontsize{9.6}{11.5}\selectfont\color{quiet}}{The state of Qi, fourth century BC}
+  \tstext{8}{61.4}{144}{\fontsize{11.5}{15}\selectfont\color{pale}}
+    {King Xuan gathers scholars at his court. Good scholars are rare. Chunyu Kun, a witty advisor, brings him new
+     ones.}
+  \tstext[2-]{8}{74.2}{144}{\fontsize{11.5}{15}\selectfont\color{titlewhite}}
+    {How long would it take to find seven good scholars?}
+  \tscredit{84}{87.6}{70}{\srcpaint}
+\end{frame}
+
+% ===== 2. The surprise =====
+% Say: One day. The first line of the story: in one day, Chunyu Kun presented seven men to King Xuan.
+\begin{frame}[plain,noframenumbering]
+  \tsbg{img/bg-arrive.jpg}
   \tstext{8}{63}{144}{\cjkfont\fontsize{20}{24}\selectfont\color{titlewhite}}{淳于髡一日而見七人於宣王。}
   \tstext{8}{73.4}{144}{\fontsize{11}{13}\selectfont\itshape\color{titlewhite}}
     {In one day, Chunyu Kun presented seven men to King Xuan.}
@@ -43,25 +78,7 @@
   \tscredit{84}{87.6}{70}{\srcpaint}
 \end{frame}
 
-% ===== 1. The context =====
-% Say: The Zhanguo ce, Strategies of the Warring States: anecdotes of the politics and wars of the Chinese states from
-% 490 to 221 BC, edited by Liu Xiang (77 to 6 BC) from the manuscripts of the imperial library. King Xuan of Qi,
-% king from 319 to 301 BC, gave 76 scholars, Chunyu Kun among them, houses and the rank of senior officers, to debate
-% rather than govern; the scholars of Jixia, at his capital, numbered in the hundreds (Shiji 46). Kun was known for
-% his wit and was sent several times as an envoy (Shiji 126).
-\begin{frame}[plain,noframenumbering]
-  \tsbg{img/bg-pair.jpg}
-  \tstext{8}{47}{144}{\fontsize{16}{19}\selectfont\color{titlewhite}}{Strategies of the Warring States}
-  \tstext{8}{54.6}{144}{\fontsize{9.6}{11.5}\selectfont\color{quiet}}
-    {\emph{Zhanguo ce} \cjk{戰國策}, edited by Liu Xiang in the 1st century BC}
-  \tstext{8}{62.4}{144}{\fontsize{11.5}{15}\selectfont\color{pale}}
-    {Stories of the politics and wars of the Chinese states, 5th to 3rd century BC.\par\vspace{2.2mm}
-     King Xuan of Qi gathered hundreds of scholars in his capital. One of them, Chunyu Kun, known for his wit,
-     presented new scholars to the king.}
-  \tscredit{84}{87.6}{70}{\srcpaint}
-\end{frame}
-
-% ===== 2. The king =====
+% ===== 3. The king =====
 % Say: King Xuan doubts. Scholars are rare: one in a thousand li already counts as a crowd, one sage in a hundred
 % generations as a queue. A li is a Chinese measure of distance.
 \begin{frame}[plain,noframenumbering]
@@ -76,7 +93,7 @@
   \tscredit{6}{87.6}{72}{\srcpaint}
 \end{frame}
 
-% ===== 3. The answer =====
+% ===== 4. The answer =====
 % Say: Not so. Birds with the same wings live together, beasts with the same feet walk together. Chaihu and jiegeng
 % are two plants whose roots are used in traditional Chinese medicine: in the marshes you will not find one in
 % generations, on the north slopes of two mountains you load them by the cartful.
@@ -92,9 +109,24 @@
   \tscredit{84}{87.6}{70}{\srcpaint}
 \end{frame}
 
-% ===== 4. Representation learning =====
-% Say: Birds with the same wings live together. Representation learning organizes data the same way. Carlos, on
-% 2026-11-10: embeddings are "one of the main drivers for AI technologies nowadays".
+% ===== 5. What Kun says next =====
+% Say: The end of the story. Kun counts himself among the worthy: asking him for scholars is as easy as drawing water
+% from a river or making fire with a fire-drill, and he will bring more. [click] To find more of a kind, look next
+% to one you already know. That is the idea of this block: nearest neighbors.
+\begin{frame}[plain,noframenumbering]
+  \tsbg{img/bg-kind.jpg}
+  \tstext{8}{45}{144}{\fontsize{11.5}{15}\selectfont\color{pale}}
+    {``{\color{lav}Things each have their kind, and I, Kun, am of the kind of the worthy.} Your Majesty seeking
+     scholars from me is like drawing water from a river or taking fire from a fire-drill. I will present more; why
+     only seven scholars?''}
+  \tstext[2-]{8}{64.4}{144}{\fontsize{12.5}{16.5}\selectfont\color{titlewhite}}
+    {Kun is himself a scholar, so scholars surround him.\\ To find more of a kind, look next to one you already know.}
+  \tscredit{8}{87.6}{72}{\srctext}
+  \tscredit{84}{87.6}{70}{\srcpaint}
+\end{frame}
+
+% ===== 6. Representation learning =====
+% Say: Birds with the same wings live together. Representation learning organizes data the same way.
 \begin{frame}[plain,noframenumbering]
   \tsbg{img/bg-map.jpg}
   \tstext{8}{8}{120}{\fontsize{8.6}{10.4}\selectfont\color{pale}}{\tssp{Weekend 2}}
@@ -106,8 +138,29 @@
      most characteristic features.}
   \tstext[3-]{8}{59.8}{140}{\fontsize{12.5}{16.5}\selectfont\color{pale}}
     {Data points that belong together get similar embeddings.}
-  \tstext[4-]{8}{71.3}{140}{\fontsize{12.5}{16.5}\selectfont\color{titlewhite}}
-    {Embeddings are one of the main drivers of AI today.}
+  \tscredit{84}{87.6}{70}{\srcpaint}
+\end{frame}
+
+% ===== 7. Representation learning today =====
+% Say: Four uses, one per click. Etsy and Airbnb are the two cases at the end of this block (Jha and others, IEEE
+% FMLDS 2024; Abdool and others, arXiv preprint 2026, and Airbnb's blog 2025): one network turns each search into an
+% embedding, another turns each item or home into one, and the nearest items or homes join the shortlist. RAG, from
+% weekend 1: the document chunks nearest to the prompt are inserted into the prompt. An LLM turns the text so far
+% into one list of numbers; the score of each token is the inner product of that list with the token's embedding,
+% and the highest scores are the likeliest next tokens (Vaswani and others 2017, section 3.4). Carlos: "My idea is to
+% show how representation learning is one of the main drivers of AI today" (2026-11-11).
+\begin{frame}[plain,noframenumbering]
+  \tsbg{img/bg-map.jpg}
+  \tstext{8}{8}{120}{\fontsize{8.6}{10.4}\selectfont\color{pale}}{\tssp{Weekend 2}}
+  \tstext{8}{13.4}{144}{\fontsize{17}{20}\selectfont\color{titlewhite}}{Representation learning today}
+  \tstext{8}{29}{140}{\fontsize{12.5}{16.5}\selectfont\color{pale}}
+    {Each side gets an embedding, and the most similar are matched.}
+  \tsapp[1-]{39.6}{Etsy}{a shopper's search with items for sale}
+  \tsapp[2-]{47.1}{Airbnb}{a guest's search with homes}
+  \tsapp[3-]{54.6}{RAG systems}{a user's prompt with a company's documents}
+  \tsapp[4-]{62.1}{LLMs}{the text so far with the most suitable next token}
+  \tstext[5-]{8}{72.6}{140}{\fontsize{12.5}{16.5}\selectfont\color{titlewhite}}
+    {Representation learning is one of the main drivers of AI today.}
   \tscredit{84}{87.6}{70}{\srcpaint}
 \end{frame}
 

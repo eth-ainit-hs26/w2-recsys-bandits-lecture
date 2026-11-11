@@ -1,50 +1,58 @@
-# Cold intro of weekend 2: Birds with the same wings
+# Cold intro of weekend 2: Searching through representations
 
-Weekend 2, Friday 13 November 2026, 08:15, before the inner product and nearest neighbors. Chunyu Kun at the
-court of King Xuan of Qi, *Zhanguo ce*, Qi 3. Chosen by Carlos on 2026-11-10 from round 4 of the candidates,
-`research_notes/Weekend 2 cold intros/lookalikes.md`, L5 (folder `git_ainit/research_notes`, outside this
-repository). The same day he dictated the frames: the title frame of the first build, a context frame, the king's
-question and Kun's answer in his English (one paragraph each, Kun's stopping at "by the cartful", the birds and the
-beasts highlighted), and a closing frame on representation learning. Look: the Title sequence of the course cold
-intro, `w1-lecture-material/cold-intro/intro-slides/`.
+Weekend 2, Friday 13 November 2026, 08:15, before the inner product and nearest neighbors. The story of Chunyu Kun
+at the court of King Xuan of Qi, *Zhanguo ce*, Qi 3, "birds with the same wings". Chosen by Carlos on 2026-11-10
+from round 4 of the candidates, `research_notes/Weekend 2 cold intros/lookalikes.md`, L5 (folder
+`git_ainit/research_notes`, outside this repository). The frames are the ones he dictated on 2026-11-11, his second
+dictation: a title that names the topic, the setting and the challenge in plain words, the surprise, the king's
+question, Kun's answer, what Kun says next with its explanation, representation learning, and four uses of it
+today. His rule: citations alone confuse, and recounts alone lose the charm of the citations, so the deck mixes
+them. Look: the Title sequence of the course cold intro, `w1-lecture-material/cold-intro/intro-slides/`.
 
 ## Files
 
 | File | Content |
 |---|---|
-| `block1-nearest-neighbors.tex` | The deck: 5 frames, 8 pages, a "Say" comment per frame |
-| `cold-intro-kit.tex` | The macros: full page picture, half page picture, text, credit, mapping row (unused since the rebuild) |
+| `block1-nearest-neighbors.tex` | The deck: 8 frames, 16 pages, a "Say" comment per frame; `\tsapp` sets a row of frame 7 |
+| `cold-intro-kit.tex` | The macros: full page picture, half page picture, text, credit, mapping row (unused since the rebuild of 2026-11-10) |
 | `make_images.py` | Cuts and grades `img/` from the original painting; reproduces `img/` byte for byte |
-| `img/` | `bg-title.jpg`, `bg-pair.jpg`, `half-court.jpg`, `half-flock.jpg`, `bg-map.jpg` |
+| `img/` | `bg-title.jpg`, `bg-pair.jpg`, `bg-arrive.jpg`, `half-court.jpg`, `half-flock.jpg`, `bg-kind.jpg`, `bg-map.jpg` |
 | `tools/check_overlays_any.py` | The no-jump check for dark pages, copied from w1-lecture-material |
 | `block1-nearest-neighbors.pdf` | The deck |
-| `block1-nearest-neighbors-handout.pdf` | The last click of each frame, 5 pages |
+| `block1-nearest-neighbors-handout.pdf` | The last click of each frame, 8 pages |
 
 ## Frames
 
 | Frame | Pages | Picture | Text |
 |---|---|---|---|
-| 0 | 1 | `bg-title`: the whole painting | The state of Qi, fourth century BC. 淳于髡一日而見七人於宣王。 In one day, Chunyu Kun presented seven men to King Xuan. |
-| 1 | 2 | `bg-pair`: the two cranes on the ridge ends | Strategies of the Warring States. *Zhanguo ce* 戰國策, edited by Liu Xiang in the 1st century BC. Stories of the politics and wars of the Chinese states, 5th to 3rd century BC. King Xuan of Qi gathered hundreds of scholars in his capital. One of them, Chunyu Kun, known for his wit, presented new scholars to the king. |
-| 2 | 3 | `half-court`, left half: the palace roof, the crane on its left ridge end | King Xuan of Qi, reigned 319 to 301 BC. "Come. I have heard ... are scholars not plentiful, then?" |
-| 3 | 4 | `half-flock`, right half: the flock, the crane on the right ridge end | Chunyu Kun, c. 386 to 310 BC. "Not so. Birds with the same wings ... you load them by the cartful." The birds and the beasts sentence in lavender |
-| 4 | 5 to 8 | `bg-map`: the flock, blurred and dark | Weekend 2. Representation learning. Four statements, one per click: similar data points cluster together; each data point gets a representation, its embedding, a list of numbers with its most characteristic features; data points that belong together get similar embeddings; embeddings are one of the main drivers of AI today |
+| 0 | 1 | `bg-title`: the whole painting | AI in Industry, weekend 2. Searching through representations. A story from ancient China. |
+| 1 | 2, 3 | `bg-pair`: the two cranes on the ridge ends | The court of King Xuan. The state of Qi, fourth century BC. King Xuan gathers scholars at his court. Good scholars are rare. Chunyu Kun, a witty advisor, brings him new ones. On the click: How long would it take to find seven good scholars? |
+| 2 | 4 | `bg-arrive`: the left part of the flock, closer | 淳于髡一日而見七人於宣王。 In one day, Chunyu Kun presented seven men to King Xuan. |
+| 3 | 5 | `half-court`, left half: the palace roof, the crane on its left ridge end | King Xuan of Qi, reigned 319 to 301 BC. "Come. I have heard ... are scholars not plentiful, then?" |
+| 4 | 6 | `half-flock`, right half: the flock, the crane on the right ridge end | Chunyu Kun, c. 386 to 310 BC. "Not so. Birds with the same wings ... you load them by the cartful." The birds and the beasts sentence in lavender |
+| 5 | 7, 8 | `bg-kind`: the right part of the flock | "Things each have their kind ... why only seven scholars?", its first sentence in lavender. On the click: Kun is himself a scholar, so scholars surround him. To find more of a kind, look next to one you already know. |
+| 6 | 9 to 11 | `bg-map`: the flock, blurred and dark | Weekend 2. Representation learning. Three statements, one per click: similar data points cluster together; each data point gets a representation, its embedding, a list of numbers with its most characteristic features; data points that belong together get similar embeddings |
+| 7 | 12 to 16 | `bg-map` | Weekend 2. Representation learning today. Each side gets an embedding, and the most similar are matched. One row per click: Etsy, a shopper's search with items for sale; Airbnb, a guest's search with homes; RAG systems, a user's prompt with a company's documents; LLMs, the text so far with the most suitable next token. Last: Representation learning is one of the main drivers of AI today. |
 
-English words per page without the credits: 20, 60, 55, 55, 57. The two quotations are Carlos's text of
-2026-11-10, which is the gloss of `lookalikes.md`; a script compared them with the PDF, letter for letter.
+English words per frame, on its last page, without the credits: 13, 42, 11, 55, 55, 64, 41, 60 (pdftotext splits
+the letterspaced "Weekend 2" into letters; count it as two words). The three quotations are Carlos's text, which is
+the gloss of `lookalikes.md`; a script compared them with the PDF, letter for letter, on 2026-11-11.
 
 ## Sources
 
 | Item | Source | Checked |
 |---|---|---|
-| Chinese text, frame 0 | 戰國策, 齊策三, zh.wikisource 戰國策/卷10, https://zh.wikisource.org/wiki/戰國策/卷10, notes in angle brackets removed | A substring of the quotation in `lookalikes.md`, which was matched against that page on 2026-11-09 |
+| Chinese text, frame 2 | 戰國策, 齊策三, zh.wikisource 戰國策/卷10, https://zh.wikisource.org/wiki/戰國策/卷10, notes in angle brackets removed | A substring of the quotation in `lookalikes.md`, which was matched against that page on 2026-11-09 |
 | English | Ours, credited "English: lecturer": the gloss of `lookalikes.md`, chosen by Carlos | Scholars for 士; the mountain names 睪黍 and 梁父 left in Chinese, as in the gloss |
-| The book, frame 1 | en.wikipedia, Zhan Guo Ce: anecdotes of political manipulation and warfare in the Warring States period, 5th to 3rd centuries BC (490 to 221 BC); edited by Liu Xiang from manuscripts of the imperial library. en.wikipedia, Liu Xiang (scholar): 77 to 6 BC, edited the Zhanguoce | Read 2026-11-10 |
+| The book, "Say" of frame 1 | en.wikipedia, Zhan Guo Ce: anecdotes of political manipulation and warfare in the Warring States period, 5th to 3rd centuries BC (490 to 221 BC); edited by Liu Xiang from manuscripts of the imperial library. en.wikipedia, Liu Xiang (scholar): 77 to 6 BC, edited the Zhanguoce | Read 2026-11-10 |
 | King Xuan's scholars, frame 1 | Shiji 46 (史記, 田敬仲完世家), zh.wikisource 史記/卷046: 宣王喜文學游說之士，自如騶衍、淳于髡 ... 七十六人，皆賜列第，為上大夫，不治而議論。是以齊稷下學士復盛，且數百千人。 | Read 2026-11-10 |
-| Chunyu Kun, frames 1 and 3 | en.wikipedia, Chunyu Kun: a wit, sent several times as an envoy, "able to present scholars for promotion and introduce foreign advisers to the king". zh.wikipedia 淳于髡: c. 386 to 310 BC | Read 2026-11-10 |
-| King Xuan of Qi, frame 2 | en.wikipedia, King Xuan of Qi: king of Qi from 319 to 301 BC | Read 2026-11-10 |
+| Chunyu Kun, frames 1 and 4 | en.wikipedia, Chunyu Kun: a wit, sent several times as an envoy, "able to present scholars for promotion and introduce foreign advisers to the king". zh.wikipedia 淳于髡: c. 386 to 310 BC | Read 2026-11-10 |
+| King Xuan of Qi, frame 3 | en.wikipedia, King Xuan of Qi: king of Qi from 319 to 301 BC | Read 2026-11-10 |
 | "Say" lines | en.wikipedia, Li (unit): a traditional Chinese unit of distance. en.wikipedia, Bupleurum chinense (柴胡) and Platycodon (桔梗): roots used in traditional Chinese medicine | Read 2026-11-10 |
-| Frame 4 | Carlos's words of 2026-11-10, condensed | |
+| Frames 6 and 7, the statements | Carlos's words of 2026-11-10 and 2026-11-11, condensed | |
+| Frame 7, Etsy and Airbnb | The two cases of this block, `../cases-deck/` (Jha and others (Etsy), IEEE FMLDS 2024; Abdool and others (Airbnb), arXiv preprint 2026, and Airbnb's blog 2025): one network turns each search into an embedding, another each item or home, and the nearest items or homes join the shortlist. No number of the cases is on this frame | The case deck's README.md has the sources |
+| Frame 7, RAG | Retrieval-augmented generation: the document chunks nearest to the prompt are inserted into the prompt (weekend 1) | |
+| Frame 7, LLMs | Vaswani and others, *Attention Is All You Need*, NeurIPS 2017, section 3.4: "the usual learned linear transformation and softmax function" turn the decoder output into next-token probabilities, with one weight matrix shared with the embedding layers. So each token's score is the inner product of the decoder output with that token's embedding | arXiv 1706.03762v7, read 2026-11-11 |
 | Painting | Emperor Huizong of Song, *Auspicious Cranes* (瑞鶴圖), 1112, Liaoning Provincial Museum. Wikimedia Commons, File:Songhuizong5.jpg | Commons API on 2026-11-10: 9079 by 1846, artist Emperor Huizong of Song, date 1112, licence "Public domain" |
 | Painting, facts in "Say" | zh.wikipedia 瑞鶴圖: 20 red-crowned cranes flying and standing over the Xuande Gate of Bianliang; the 16th day of the first month of Zhenghe 2, 22 February 1112 in the Gregorian calendar | Read 2026-11-10 |
 | Not verified | The medium of the painting | Not stated on the slides |
@@ -58,7 +66,7 @@ python3 -I make_images.py /path/to/Songhuizong5.jpg     # only to remake img/; t
 ../style/tools/build.sh block1-nearest-neighbors.tex
 ../style/tools/check.sh block1-nearest-neighbors.pdf
 python3 tools/check_overlays_any.py block1-nearest-neighbors.pdf
-python3 ../style/tools/make_handout.py block1-nearest-neighbors.pdf block1-nearest-neighbors-handout.pdf "Birds with the same wings"
+python3 ../style/tools/make_handout.py block1-nearest-neighbors.pdf block1-nearest-neighbors-handout.pdf "Searching through representations"
 ```
 
 `build.sh` prints `log errors: 0` and no missing character. `check.sh` lists Futura and Songti TC as the fonts.
@@ -66,7 +74,9 @@ python3 ../style/tools/make_handout.py block1-nearest-neighbors.pdf block1-neare
 ## On the course site
 
 Since 2026-11-11 (AINIT-PAGE commit `dc80aeb`), on the Friday 08:15 row before the Video Store game, chips
-`Cold intro` and `Cold intro handout`, and in the Materials list, group "Lecture slides".
+`Cold intro` and `Cold intro handout`, and in the Materials list, group "Lecture slides", with the label "cold intro:
+Birds with the same wings". The site has the 5-frame version of commit `9d9379a`. The 8-frame rework of 2026-11-11
+replaces it only on Carlos's say; its title then goes into the label too.
 
 | Site file | Source here |
 |---|---|
@@ -85,11 +95,17 @@ After a rebuild, copy both over the same site file names, run `npm ci && npm run
    English only, the closing frame on representation learning; the mapping is gone.
 3. 2026-11-11, published on the course site at Carlos's instruction ("Publish them please"): AINIT-PAGE commit
    `dc80aeb`, section "On the course site" above.
+4. 2026-11-11, reworked to his second dictation, after he said he did not understand the story: the title
+   "Searching through representations" (the first line of the story as a title had left him "a bit lost"), the
+   setting and the challenge in plain words, the surprise on the old title look, what Kun says next with an
+   explanation, and the four uses of representation learning today. Two new pictures, `bg-arrive` and `bg-kind`;
+   the other five are unchanged byte for byte.
 
 ## Open items
 
 1. Not tried on the projector of HG D 7.2.
 2. The deck writes "neighbor", as the agenda does; the Video Store game writes "neighbour".
+3. The course site still has the 5-frame version (section "On the course site").
 
 # Block 5: Dividing a computation, 1793
 

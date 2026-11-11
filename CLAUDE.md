@@ -72,8 +72,9 @@ Specifically:
 │                               per Friday block (block1-*.tex to block4-*.tex), all six in
 │                               weekend2-cases.tex; rules in PRINCIPLES.md
 ├── cold-intro-deck/            The cold intro of weekend 2 (2026-11-10), in the dark Title
-│                               sequence of the course cold intro: "Birds with the same wings"
-│                               (Chunyu Kun, Zhanguo ce), 5 frames dictated by Carlos, pictures
+│                               sequence of the course cold intro: "Searching through
+│                               representations" (Chunyu Kun, Zhanguo ce, "birds with the same
+│                               wings"), 8 frames dictated by Carlos on 2026-11-11, pictures
 │                               cut from Huizong's Auspicious Cranes; own CLAUDE.md and README.md
 │                               Also the cold intro of the Saturday 08:15 block, "Dividing a
 │                               computation, 1793" (Prony's tables, from FDD weekend 7), 5 frames
@@ -242,18 +243,20 @@ order of the blocks.
 ## The cold intro deck (added 2026-11-10)
 
 `cold-intro-deck/block1-nearest-neighbors.tex` is the cold intro of weekend 2, shown before the Friday 08:15 block,
-the inner product and nearest neighbors: Chunyu Kun answers King Xuan of Qi, "birds with the same wings live
-together" (*Zhanguo ce*, Qi 3), 5 frames over 8 pages. Carlos chose the story on 2026-11-10 from four rounds of
-candidates (`git_ainit/research_notes/Weekend 2 cold intros/`) and dictated the frames the same day: the title frame,
-a context frame, the king's question and Kun's answer in his English with the key sentence highlighted, and a closing
-frame on representation learning. The first build (commit `0beb06a`: the Chinese on every frame and a mapping of the
-story's words to the block) is replaced.
+the inner product and nearest neighbors: "Searching through representations", the story of Chunyu Kun, who answers
+King Xuan of Qi that "birds with the same wings live together" (*Zhanguo ce*, Qi 3), 8 frames over 16 pages.
+Carlos chose the story on 2026-11-10 from four rounds of candidates (`git_ainit/research_notes/Weekend 2 cold
+intros/`). The frames are his second dictation, of 2026-11-11: the title, the setting and the challenge in plain
+words, the surprise (the first line in Chinese and English), the king's question, Kun's answer, what Kun says next
+with an explanation, representation learning, and four uses of it today (Etsy, Airbnb, RAG, LLMs). Two earlier
+versions are replaced: the first build (commit `0beb06a`, with a mapping of the story's words to the block) and the
+5 frames of his first dictation (commit `9d9379a`).
 The look is the dark Title sequence of the course cold intro (`w1-lecture-material/cold-intro/intro-slides/`), the
 one exception to Codex plates. Every picture is cut by `make_images.py` from Emperor Huizong's *Auspicious Cranes*
 (1112, public domain). Build from inside the folder with `../style/tools/build.sh block1-nearest-neighbors.tex`;
 the folder's CLAUDE.md has the traps. On the course site since 2026-11-11 (AINIT-PAGE commit `dc80aeb`, the Friday
-08:15 row and the Materials list; `cold-intro-deck/README.md`, section "On the course site"). A push also makes the
-PDF public on Pages.
+08:15 row and the Materials list; `cold-intro-deck/README.md`, section "On the course site"), in its 5-frame
+version: the 8-frame rework replaces it there only on Carlos's say. A push also makes the PDF public on Pages.
 
 `cold-intro-deck/block5-computing-clusters.tex` is the cold intro of the Saturday 08:15 block, computing clusters:
 "Dividing a computation, 1793", FDD weekend 7's section of that name in the same form, 5 frames over 10 pages
