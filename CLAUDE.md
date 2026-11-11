@@ -81,6 +81,10 @@ Specifically:
 │                               into Codex plates of the first block of FDD weekend 7, "The cost
 │                               of computation and supercomputers", with Carlos's cuts; 21 frames;
 │                               own CLAUDE.md and README.md
+├── lecture-notes/              Lecture notes of the Friday 08:15 to 12:00 blocks (2026-11-11): the
+│                               inner product, nearest neighbors, the matrix product and matrix
+│                               factorization, four pages linking the games; every number from
+│                               tools/notes_numbers.py; own CLAUDE.md and README.md
 ├── original-decks/             Original PDFs from before the rebuild
 │   ├── w2_bandits.pdf
 │   └── w2_recsys.pdf
@@ -264,6 +268,16 @@ speeds; 6ND on Apertus-70B; dollars and gigawatt hours. Every number is FDD's or
 HPE and CSCS (`clusters-deck/tools/check_port.py`). Build from inside the folder with
 `../style/tools/build.sh block5-computing-clusters.tex`. Its README.md maps every frame to FDD's slide numbers and
 lists the slides not ported.
+
+## The lecture notes (added 2026-11-11)
+
+`lecture-notes/nearest-neighbors-and-matrix-factorization.pdf` holds the notes of the Friday blocks 08:15 to 12:00,
+asked for "terse and to the point": the inner product, the nearest neighbor classifier, the matrix product and
+matrix factorization (one number at a time, gradient descent, predicting unknown ratings), each section ending in
+links to its game on the course site and its Colab notebook. The worked examples are the games' own (Vera and Kai,
+Sara and The Intouchables, The Martian's second number, three hidden MovieLens ratings), computed by
+`lecture-notes/tools/notes_numbers.py` from copies of the `w2-cx-private` data that it checks against that checkout.
+Not on the course site yet. `lecture-notes/CLAUDE.md` has the build and the TikZ gotchas.
 
 ## When in doubt
 
