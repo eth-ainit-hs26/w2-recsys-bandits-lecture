@@ -255,8 +255,8 @@ The look is the dark Title sequence of the course cold intro (`w1-lecture-materi
 one exception to Codex plates. Every picture is cut by `make_images.py` from Emperor Huizong's *Auspicious Cranes*
 (1112, public domain). Build from inside the folder with `../style/tools/build.sh block1-nearest-neighbors.tex`;
 the folder's CLAUDE.md has the traps. On the course site since 2026-11-11 (AINIT-PAGE commit `dc80aeb`, the Friday
-08:15 row and the Materials list; `cold-intro-deck/README.md`, section "On the course site"), in its 5-frame
-version: the 8-frame rework replaces it there only on Carlos's say. A push also makes the PDF public on Pages.
+08:15 row and the Materials list; `cold-intro-deck/README.md`, section "On the course site"), the 8-frame rework
+since AINIT-PAGE commit `70f1db5`. A push also makes the PDF public on Pages.
 
 `cold-intro-deck/block5-computing-clusters.tex` is the cold intro of the Saturday 08:15 block, computing clusters:
 "Dividing a computation, 1793", FDD weekend 7's section of that name in the same form, 5 frames over 10 pages

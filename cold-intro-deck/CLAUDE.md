@@ -15,9 +15,9 @@ explanation under it, representation learning, and four uses of it today (Etsy, 
 citations alone confuse, and recounts alone lose the charm, so mix them. There is no mapping of story words to course
 terms. Change the wording of the quotations only on his say. Frame 7 names the uses without numbers: the numbers
 of Etsy and Airbnb belong to their case slides.
-The course site has the 5-frame version of 2026-11-10 (AINIT-PAGE commit `dc80aeb`, the Friday 08:15 row). The
-rework goes there only on his say; from then on, copy the PDF and the handout there again under their site names
-after every rebuild (`README.md`, section "On the course site").
+On the course site since 2026-11-11, the Friday 08:15 row: the 5-frame version from AINIT-PAGE commit `dc80aeb`, the
+8-frame rework since `70f1db5`. After every rebuild, copy the PDF and the handout there again under their site
+names (`README.md`, section "On the course site"); the weekend 2 ZIP takes them at the site's build.
 
 The look is the Title sequence of the course cold intro (`w1-lecture-material/cold-intro/intro-slides/`, chosen by
 Carlos on 2026-10-14): a picture on every frame, Futura, lavender only for the two highlighted sentences of the

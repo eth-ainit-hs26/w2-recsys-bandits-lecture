@@ -75,8 +75,8 @@ python3 ../style/tools/make_handout.py block1-nearest-neighbors.pdf block1-neare
 
 Since 2026-11-11 (AINIT-PAGE commit `dc80aeb`), on the Friday 08:15 row before the Video Store game, chips
 `Cold intro` and `Cold intro handout`, and in the Materials list, group "Lecture slides", with the label "cold intro:
-Birds with the same wings". The site has the 5-frame version of commit `9d9379a`. The 8-frame rework of 2026-11-11
-replaces it only on Carlos's say; its title then goes into the label too.
+Searching through representations". The 8-frame rework is there since AINIT-PAGE commit `70f1db5` (2026-11-11, his
+"Yes, replace it"); before, from `dc80aeb`, the 5-frame version of commit `9d9379a`.
 
 | Site file | Source here |
 |---|---|
@@ -101,13 +101,14 @@ from the files in `public/`.
    "Searching through representations" (the first line of the story as a title had left him "a bit lost"), the
    setting and the challenge in plain words, the surprise on the old title look, what Kun says next with an
    explanation, and the four uses of representation learning today. Two new pictures, `bg-arrive` and `bg-kind`;
-   the other five are unchanged byte for byte.
+   the other five are unchanged byte for byte. Commit `f8389a5`.
+5. 2026-11-11, the rework replaced the 5-frame version on the course site at his "Yes, replace it": AINIT-PAGE
+   commit `70f1db5`, the same file names, the new title in the Materials label, and the weekend 2 ZIP.
 
 ## Open items
 
 1. Not tried on the projector of HG D 7.2.
 2. The deck writes "neighbor", as the agenda does; the Video Store game writes "neighbour".
-3. The course site still has the 5-frame version (section "On the course site").
 
 # Block 5: Dividing a computation, 1793
 
