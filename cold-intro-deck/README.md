@@ -212,3 +212,117 @@ CSCS as the only capitals, no build metadata, and Futura as the only font.
 2. The first tier: "five or six" (Prony 1801, Babbage 1832) on the slide; Prony 1824 writes "four or five".
 3. The Harvard photograph stands for Prony's room; the credit names it.
 4. Not tried on the projector of HG D 7.2.
+
+# Block 3: Estimating chances from the past, three drafts
+
+Weekend 2, Friday 13 November 2026, 14:00, before the bandits (the game "Once Upon a Mirror"). Three drafts built on
+2026-11-11 from Carlos's shortlist of round 5 of the candidates (`research_notes/Weekend 2 cold intros/estimate.md`,
+C1, C2 and C8, folder `git_ainit/research_notes`, outside this repository): "The Fox and the Lion's Cave. It's very
+good. Graunt's Bills is also very good. And then The Stupidest Man also. Please make three parallel cold intros".
+Each takes the form of block 1 (his dictation of 2026-11-11): 8 frames, 16 pages. Frames 0, 6 and 7 are the same in
+the three, apart from the subtitle, the picture and the third statement of frame 6. None is chosen yet, and none is
+on the course site.
+
+## Files of block 3
+
+| File | Content |
+|---|---|
+| `block3-bandits-fox.tex` | THE FOX (C1): Aesop, *The old lion and the fox*, Chambry 196 |
+| `block3-bandits-graunt.tex` | GRAUNT (C2): John Graunt, *Natural and Political Observations ... upon the Bills of Mortality*, London, 1662 |
+| `block3-bandits-bernoulli.tex` | BERNOULLI (C8): Jakob Bernoulli, *Ars Conjectandi*, Basel, 1713, part IV, chapter 4 |
+| `make_images_block3_fox.py`, `make_images_block3_graunt.py`, `make_images_block3_bernoulli.py` | Cut and grade `img/b3f-*.jpg`, `img/b3g-*.jpg` and `img/b3b-*.jpg` (7 each) from the originals in their docstrings (URL, size, SHA-1, licence), byte for byte |
+| `block3-bandits-<name>.pdf`, `block3-bandits-<name>-handout.pdf` | The decks, 16 pages each, and their handouts, 8 pages |
+
+## Frames of block 3
+
+Shared:
+
+| Frame | Pages | Text |
+|---|---|---|
+| 0 | 1 | AI in Industry, weekend 2. Estimating chances from the past. A fable from ancient Greece; A book from London, 1662; A book from Basel, 1713 |
+| 6 | 9 to 11 | Weekend 2. The estimate. One statement per click: We estimate the chance of an event from how often it happened before. For a product shown to a customer, the estimate (lavender) of a tap is the number of taps divided by the number of showings. The more showings, the closer the estimate tends to get to the true chance (BERNOULLI: This afternoon, every customer and product is an urn like Bernoulli's: an orange ball is a tap, a white ball no tap) |
+| 7 | 12 to 16 | Weekend 2. Estimating chances today. Each option gets an estimate of its chance from the past, and the most promising is shown. One row per click: Spotify, mixes of music and podcasts for the home page; Amazon Payments, images and taglines for a page; Online shops, products for a customer; News sites, headlines for a story. Last: Such estimates decide much of what we are shown online. |
+
+THE FOX (pictures: Gustave Dore, *Le Lion malade et le Renard*, Warsaw edition of 1876; Oudry and Chedel, the same
+fable, 1755; Wenceslaus Hollar, *The sick lion*, in Ogilby's Aesop, 1668):
+
+| Frame | Pages | Picture | Text |
+|---|---|---|---|
+| 0 | 1 | `b3f-title`: Dore, the animals at the cave | as above |
+| 1 | 2, 3 | `b3f-bg-cave`: Oudry, the lion among the bones | The lion's cave. Ancient Greece, a fable of Aesop. An old lion can no longer hunt. He lies down in his cave and lets it be known that he is ill. The animals come to visit him, one after another. On the click: The fox cannot see inside the cave. How can she tell what happens to the visitors? |
+| 2 | 4 | `b3f-bg-distance`: Hollar, the fox outside the cave | καὶ στᾶσα ἄποθεν τοῦ σπηλαίου ἐπυνθάνετο αὐτοῦ πῶς ἔχοι. She stood at a distance from the cave and asked him how he was. The Greek in Palatino |
+| 3 | 5 | `b3f-half-lion`, left half: Hollar, the lion | The lion, too old to hunt. "Badly," he said, and he asked her why she did not come in. |
+| 4 | 6 | `b3f-half-fox`, right half: Oudry, the fox and the tracks | The fox, at a distance from the cave. "But I would have come in, if I did not see the tracks of many going in, and of none coming out." From "if" in lavender |
+| 5 | 7, 8 | `b3f-bg-inside`: Dore, the lion in the cave | "So sensible people foresee dangers from the evidence and escape them." The middle in lavender. On the click: The fox cannot see inside the cave. She counts what happened before: many went in, none came out. From the past, she estimates her own chance of coming out. |
+| 6, 7 | 9 to 16 | `b3f-bg-close`: Dore, blurred and dark | as above |
+
+GRAUNT (pictures: Claude de Jongh, *View of London Bridge*, 1632; the weekly bill of 5 to 12 September 1665; the first
+edition of 1662, its folded Table of Casualties, its title page and its page 17):
+
+| Frame | Pages | Picture | Text |
+|---|---|---|---|
+| 0 | 1 | `b3g-title`: de Jongh, the bridge | as above |
+| 1 | 2, 3 | `b3g-bill`: "The Diseases and Casualties this Week", 1665 | The Bills of Mortality. London, seventeenth century. Every week, the parish clerks of London print the burials of the week and what each person died of. Londoners read these bills in fear of the plague and of many other diseases. On the click: How afraid should a Londoner be of each disease? |
+| 2 | 4 | `b3g-table`: the Table of Casualties, 1662 | I shall onely set down how many died of each. John Graunt, a haberdasher of London, 1662 |
+| 3 | 5 | `b3g-half-title`, left half: the title page, 1662 | John Graunt, 1620 to 1674, haberdasher. "Now having (I know not by what accident) engaged my thoughts upon the Bills of Mortality, and so far succeeded therein, as to have reduced several great confused Volumes into a few perspicuous Tables..." The tables in lavender |
+| 4 | 6 | `b3g-half-counts`, right half: page 17, the two tables | Of 229250 deaths, twenty years of bills: Drowned 829, Sodainly 454, Grief 279, Lunatique 158, Murthered 86, Head-Ach 51, Frighted 22, Excessive drinking 2. "That not one in two thousand are Murthered in London." in lavender |
+| 5 | 7, 8 | `b3g-bridge`: de Jongh, the houses on the bridge | "Whereas many persons live in great fear, and apprehension of some of the more formidable, and notorious diseases... I shall onely set down how many died of each: that the respective numbers, being compared with the Total 229250, those persons may the better understand the hazard they are in." The last clause in lavender. On the click: Graunt divides each count by all the deaths. From the past, every Londoner can estimate the hazard of each disease. |
+| 6, 7 | 9 to 16 | `b3g-bg-close`: de Jongh, blurred and dark | as above |
+
+BERNOULLI (pictures: Emanuel Buechel, *Prospect des Grossen Muensters und Rheinbruecke zu Basel*, etching, 1761; the
+portrait of Jakob Bernoulli by his brother Niklaus, 1687; the title page and page 226 of the book, 1713):
+
+| Frame | Pages | Picture | Text |
+|---|---|---|---|
+| 0 | 1 | `b3b-title`: Buechel, the Minster above the Rhine | as above |
+| 1 | 2, 3 | `b3b-bg-towers`: Buechel, the Minster's towers | A professor in Basel. Switzerland, around 1690. Jakob Bernoulli teaches mathematics in Basel. The chances of a die can be counted before the throw: one face in six. But nobody can count in advance the chance that a man dies within ten years, or that it rains tomorrow. On the click: How could anyone know such a chance? |
+| 2 | 4 | `b3b-bg-bridge`: Buechel, the Rhine bridge | Quod a priori elicere non datur, saltem a posteriori ... eruere licebit. What we cannot find out beforehand, we may at least find out afterwards. |
+| 3 | 5 | `b3b-half-portrait`, left half: the portrait | Jakob Bernoulli, 1655 to 1705. "Suppose that of three hundred men of the age and constitution of Titius, two hundred died within ten years. Then you can conclude, safely enough, that there are twice as many cases in which Titius pays his debt to nature within ten years as cases in which he lives longer." From "there are" in lavender |
+| 4 | 6 | `b3b-half-titlepage`, right half: the title page | Ars Conjectandi, The Art of Conjecturing, 1713. "One or two experiments are not enough; a great number is needed. Even the most stupid person, by some instinct of nature, on his own and without any instruction (which is truly astonishing), knows that the more observations are taken, the smaller the danger of missing the mark." The last clause in lavender |
+| 5 | 7, 8 | `b3b-bg-urn`: page 226, which prints the urn | "Suppose that, without your knowledge, three thousand white pebbles and two thousand black ones are hidden in an urn. You draw one pebble after another, putting each back, and observe how often a white one and how often a black one comes out." From "observe" in lavender. On the click: After many draws, black comes out about two times in five. Everyone knows it by instinct; Bernoulli spent twenty years on the proof. |
+| 6, 7 | 9 to 16 | `b3b-bg-close`: Buechel, blurred and dark | as above |
+
+Words per frame without the credits (pdftotext, glyph boxes taller than 8.5 pt): THE FOX 13, 56, 23, 19, 30, 40, 54,
+62; GRAUNT 13, 49, 17, 40, 34, 69, 54, 62; BERNOULLI 13, 55, 25, 55, 55, 66, 62, 62. A script of each building agent
+compared every quotation and statement with the brief, letter for letter.
+
+## Sources of block 3
+
+| Item | Source | Checked |
+|---|---|---|
+| THE FOX, Greek | Aesop, Λέων γηράσας καὶ ἀλώπηξ, Chambry 196 (Perry 142), el.wikisource, from Chambry's edition | Matched on 2026-11-11 (`estimate.md`, C1). The English is ours, credited "English: lecturer" |
+| THE FOX, "Say" of frame 5 | Horace, *Epistles* I.1, 73 to 75 (The Latin Library); La Fontaine, *Fables* VI.14 (fr.wikisource, edition of 1874) | Matched on 2026-11-11 (`estimate.md`, C1) |
+| GRAUNT, every quotation and count | Ed Stephan's transcription: http://www.edstephan.org/Graunt/0.html (the dedication), 00.html (the index), 2.html (chapter 2), 3.html (chapter 3) | Matched by script on 2026-11-11. The line of frame 4 is entry 13 of the book's index: "That not one in two thousand are Murthered in London, with the Reasons thereof, p. 21" |
+| GRAUNT, the tables of the book | The folded Table of Casualties prints 827 drowned and 21 frighted; chapter 2 and page 17 print 829 and 22. The slides follow chapter 2 and page 17; the crop of frame 2 leaves out those rows | Seen on the scans on 2026-11-11 |
+| BERNOULLI, Latin | *Ars Conjectandi*, 1713, part IV, chapter 4, Internet Archive `jacobibernoulli00bern`, its OCR cleaned by hand | Matched on 2026-11-11 (`estimate.md`, C8). The English is ours; Sung's English (1966) is protected and stays out |
+| BERNOULLI, German | Haussner's translation (Ostwalds Klassiker 107 and 108, 1899): the urn and the twenty years | Read on 2026-11-11 |
+| Frame 6 | The game, `w2-cx-private/03_bandits/03_mirror_game.html`: the estimate is taps / showings; "The more dots, the closer it tends to get to p"; "Cinderella's urn for the mattress: 2 orange balls and 3 white balls", the 2 to 3 of Bernoulli's urn | Read on 2026-11-11 |
+| Frame 7 | The two cases of this block, `../cases-deck/block3-bandits.tex`: Spotify's home page (Feijer and others, CONSEQUENCES workshop at RecSys 2025) and Amazon Payments (John and Gozluklu, AWS Machine Learning Blog, 2026). Online shops and news sites name no company. No numbers on the frame | |
+| Pictures | The docstrings of the three `make_images_block3_*.py` | Commons API or Internet Archive metadata, 2026-11-11: public domain, every artist dead before 1956 |
+
+## Build of block 3
+
+From this folder, for each of `fox`, `graunt` and `bernoulli`:
+
+```bash
+python3 -I make_images_block3_fox.py /path/to/originals     # only to remake img/b3f-*; the docstring has the URLs
+../style/tools/build.sh block3-bandits-fox.tex
+python3 tools/check_overlays_any.py block3-bandits-fox.pdf
+python3 ../style/tools/make_handout.py block3-bandits-fox.pdf block3-bandits-fox-handout.pdf "Estimating chances from the past"
+```
+
+`build.sh` prints `log errors: 0` and no missing character for the three. The fox sets its Greek in Palatino.
+
+## History of block 3
+
+1. 2026-11-11, round 5 of the candidates, `estimate.md`, 9 stories in which a chance is estimated from past counts.
+2. The same evening Carlos shortlisted C1, C2 and C8 and asked for three parallel cold intros. Three agents built
+   them at the same time from one brief with the texts; after the review, line breaks moved to the ends of
+   sentences.
+
+## Open items of block 3
+
+1. Carlos chooses a draft. The chosen deck may then be renamed `block3-bandits.tex` with its script and pictures; the
+   two others stay as alternatives or go.
+2. Not on the course site; a push makes the three PDFs public on the Pages of this repository.
+3. Not tried on the projector of HG D 7.2.

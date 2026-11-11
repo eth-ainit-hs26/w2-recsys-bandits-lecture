@@ -4,8 +4,10 @@ Beamer, lualatex, three passes, from this folder. Two decks. `block1-nearest-nei
 representations" (the story of Chunyu Kun, "birds with the same wings"), the cold intro of weekend 2, shown before
 the Friday 08:15 block (the inner product and nearest neighbors), built on 2026-11-10 and reworked on 2026-11-11.
 `block5-computing-clusters.tex`, "Dividing a computation, 1793", shown before the
-Saturday 08:15 block (computing clusters), built on 2026-11-10: section "Block 5" below. `README.md` has the frames,
-the sources, the history and the open items of each.
+Saturday 08:15 block (computing clusters), built on 2026-11-10: section "Block 5" below. And three drafts of the cold
+intro of the Friday 14:00 bandits block, "Estimating chances from the past", built on 2026-11-11 so that Carlos can
+choose one: `block3-bandits-fox.tex`, `block3-bandits-graunt.tex`, `block3-bandits-bernoulli.tex`, section "Block 3
+drafts" below. `README.md` has the frames, the sources, the history and the open items of each.
 
 The 8 frames are the ones Carlos dictated on 2026-11-11, his second dictation, after he said he did not understand
 the story: a title that names the topic (the first line of the story as a title had left him "a bit lost"), the
@@ -35,6 +37,8 @@ img/                           the seven pictures of block 1, committed so that 
 tools/check_overlays_any.py    the no-jump check for dark pages
 block1-nearest-neighbors.pdf, block1-nearest-neighbors-handout.pdf    the deliverables, rebuild and recommit together
 block5-*, make_images_block5.py, img/b5-*.jpg    the cold intro of block 5, section "Block 5" below
+block3-bandits-{fox,graunt,bernoulli}.*, make_images_block3_*.py, img/b3f-*, img/b3g-*, img/b3b-*
+                               the three drafts of the cold intro of block 3, section "Block 3 drafts" below
 ```
 
 ## Traps
@@ -92,6 +96,36 @@ Traps of block 5:
    faded from 0.35 to 0.46): it has four lines of text. Move the fade in `make_images_block5.py` with the text.
 6. **Superscripts** (`10\textsuperscript{12}`) lower the first baseline of a statement by about 0.3 mm. The closing
    statements keep block 1's rhythm: next top = previous top + 5.8 mm per line + 5.7 mm.
+
+## Block 3 drafts: Estimating chances from the past
+
+Built on 2026-11-11 from Carlos's shortlist of round 5 (`git_ainit/research_notes/Weekend 2 cold intros/estimate.md`,
+C1, C2, C8), three parallel drafts in the form of block 1, 8 frames and 16 pages each: THE FOX (Aesop, the old lion
+and the fox), GRAUNT (the Bills of Mortality, 1662), BERNOULLI (*Ars Conjectandi*, 1713, the stupidest man and the
+urn). None is chosen and none is on the course site. Frames 6 ("The estimate") and 7 ("Estimating chances today")
+are the same in the three, apart from the third statement of frame 6 in BERNOULLI: a change to them goes into all
+three decks. Frame 7 names the two cases of the block (`../cases-deck/block3-bandits.tex`) without their numbers.
+
+```
+block3-bandits-<name>.tex          the deck, 8 frames, a "Say" comment per frame (<name>: fox, graunt, bernoulli)
+make_images_block3_<name>.py       cuts and grades img/b3f-*, img/b3g-*, img/b3b-* (7 each) from the originals in
+                                   its docstring (URL, size, SHA-1, licence); ORIGDIR stays outside the repository
+block3-bandits-<name>.pdf, -handout.pdf    the deliverables, rebuild and recommit together
+```
+
+Traps of block 3:
+
+1. **Futura has no polytonic Greek.** THE FOX loads Palatino by name for its Greek line. Check the log for
+   `Missing character` after any change of font.
+2. **Graunt's two tables disagree.** The folded Table of Casualties of 1662 prints 827 drowned and 21 frighted;
+   chapter 2 and page 17 print 829 and 22. The slides follow chapter 2 and page 17, and the crop of frame 2 leaves
+   those rows out.
+3. **Wikimedia Commons answers HTTP 429** when several sessions query it at once: wait as long as its Retry-After
+   asks.
+4. **pdftoppm at 100 dpi shows a light pixel row** at the bottom of the split frames: the 90 mm page is 354.3 pixels
+   there. At 1920 by 1080 the row is dark, in block 1 too.
+5. **The line breaks of the long statements are set by hand** (`\\` at the end of a sentence or clause), so that no
+   word stands alone on a line. Change a statement, and check its breaks.
 
 ## Maintenance contract
 

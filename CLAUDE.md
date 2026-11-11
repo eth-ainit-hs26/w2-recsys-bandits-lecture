@@ -77,7 +77,9 @@ Specifically:
 │                               wings"), 8 frames dictated by Carlos on 2026-11-11, pictures
 │                               cut from Huizong's Auspicious Cranes; own CLAUDE.md and README.md
 │                               Also the cold intro of the Saturday 08:15 block, "Dividing a
-│                               computation, 1793" (Prony's tables, from FDD weekend 7), 5 frames
+│                               computation, 1793" (Prony's tables, from FDD weekend 7), 5 frames,
+│                               and three drafts of the cold intro of the Friday 14:00 bandits
+│                               block, "Estimating chances from the past" (2026-11-11)
 ├── clusters-deck/              The Saturday 08:15 block "Computing clusters" (2026-11-10): a port
 │                               into Codex plates of the first block of FDD weekend 7, "The cost
 │                               of computation and supercomputers", with Carlos's cuts; 21 frames;
@@ -264,6 +266,13 @@ since AINIT-PAGE commit `70f1db5`. A push also makes the PDF public on Pages.
 France, the three tiers, and a closing frame "Computing clusters" with four facts of the lecture deck). Carlos asked
 on 2026-11-10 to leave out FDD's two frames on triangles and logarithm tables. On the course site with the lecture
 deck (`clusters-deck/README.md`, section "On the course site").
+
+`cold-intro-deck/block3-bandits-fox.tex`, `block3-bandits-graunt.tex` and `block3-bandits-bernoulli.tex` are three
+drafts of the cold intro of the Friday 14:00 bandits block, "Estimating chances from the past", built on 2026-11-11
+from Carlos's shortlist ("Please make three parallel cold intros"): Aesop's fox at the sick lion's cave, Graunt's
+Bills of Mortality (1662) and Bernoulli's stupidest man and urn (*Ars Conjectandi*, 1713), each in the form of block
+1, 8 frames over 16 pages, ending in the estimate (taps divided by showings) and its uses today. None is chosen and
+none is on the course site; `cold-intro-deck/README.md`, section "Block 3", has the frames and the sources.
 
 ## The computing clusters deck (added 2026-11-10)
 

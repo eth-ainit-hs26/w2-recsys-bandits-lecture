@@ -1,0 +1,188 @@
+% =====================================================================
+%  AI in Industry, HS26, weekend 2. BERNOULLI, a draft of THE COLD INTRO of block 3, the bandits block (Friday
+%  13 November 2026, 14:00, the game "Once Upon a Mirror"): "Estimating chances from the past", Jakob Bernoulli,
+%  Ars Conjectandi (Basel, 1713), part IV, chapter 4. One of three drafts built on 2026-11-11 from Carlos's
+%  shortlist (THE FOX, GRAUNT, BERNOULLI), so that he can choose; this is candidate C8 of
+%  git_ainit/research_notes/Weekend 2 cold intros/estimate.md.
+%  The form is the one of block1-nearest-neighbors.tex, which Carlos dictated on 2026-11-11, frame by frame: a
+%  title that names the topic, the setting and the challenge in plain words with a question to the room, the
+%  surprise in the original language and in English, two quotation frames beside a half page picture, the urn
+%  with its meaning on a click, the estimate, and its uses today. No mapping of story words to course terms.
+%  The look is the Title sequence of the course cold intro (w1-lecture-material, cold-intro/intro-slides).
+%  Sources. The Latin is the 1713 print, read on the scan of the Smithsonian Libraries copy at the Internet
+%  Archive (item jacobibernoulli00bern; its OCR prints the long s as f): part IV, chapter 4, pages 224 to 227.
+%  The English is ours, credited "English: lecturer"; the English of Sung (1966) is protected and stays out.
+%  The pictures (an etching of Basel by Emanuel Buechel, 1761; the portrait by Niklaus Bernoulli, 1687; the title
+%  page and page 226 of the book) are cut and graded by make_images_block3_bernoulli.py, whose docstring has the
+%  originals, their pages and their licences.
+%  Build FROM THIS DIRECTORY, three passes:  ../style/tools/build.sh block3-bandits-bernoulli.tex
+% =====================================================================
+\documentclass[aspectratio=169]{beamer}
+\input{../style/ainit-preamble}
+\input{../style/ainit-course}
+\input{cold-intro-kit}
+
+% beamer takes the PDF title from \title, and there is no title page to print it on
+\title{Estimating chances from the past}
+\author{Carlos Cotrini}
+\hypersetup{pdftitle={Estimating chances from the past}, pdfauthor={Carlos Cotrini}}
+
+\newcommand{\srctext}{Jakob Bernoulli, \emph{Ars Conjectandi}, Basel, 1713, part IV, chapter 4.\\ English: lecturer}
+% the same credit broken after "1713," for the 64 mm column of frame 3, where the first line would not fit
+\newcommand{\srctextnarrow}{Jakob Bernoulli, \emph{Ars Conjectandi}, Basel, 1713,\\ part IV, chapter 4. English:
+  lecturer}
+\newcommand{\srcview}{Emanuel Büchel, \emph{Prospect des Grossen Münsters\dots}, 1761, detail. Zentralbibliothek
+  Zürich. Wikimedia Commons, public domain}
+\newcommand{\srcportrait}{Niklaus Bernoulli, portrait of Jakob Bernoulli, 1687, detail. Alte Aula of the University
+  of Basel. Wikimedia Commons, public domain}
+\newcommand{\srctitlepage}{Jakob Bernoulli, \emph{Ars Conjectandi}, title page, Basel, 1713, detail. Fondazione
+  Mansutti, Milan. Wikimedia Commons, public domain}
+\newcommand{\srcpage}{Jakob Bernoulli, \emph{Ars Conjectandi}, Basel, 1713, page 226, detail. Smithsonian
+  Libraries. Internet Archive, public domain}
+
+% \tsapp[c]{y}{name}{text}: one use on frame 7, the name at x = 8 and the text at x = 52, both anchored at their
+% top on y; the name column is wider than block 1's, so that "Amazon Payments" stays on one line
+\newcommand{\tsapp}[4][1-]{%
+  \tstext[#1]{8}{#2}{42}{\fontsize{12.5}{16.5}\selectfont\color{titlewhite}}{#3}%
+  \tstext[#1]{52}{#2}{100}{\fontsize{12.5}{16.5}\selectfont\color{pale}}{#4}}
+
+\begin{document}
+
+% ===== 0. The title =====
+% Say: Estimating chances from the past. First, a book from Basel, 1713.
+% The pictures of Basel are details of one etching after a drawing by Emanuel Büchel, published by David
+% Herrliberger in 1761 in his topography of the Swiss Confederation: the Minster on its terrace above the Rhine, and
+% the Rhine bridge.
+\begin{frame}[plain,noframenumbering]
+  \tsbg{img/b3b-title.jpg}
+  \tstext{8}{8}{120}{\fontsize{8.6}{10.4}\selectfont\color{pale}}{\tssp{AI in Industry, weekend 2}}
+  \tstext{8}{62.6}{144}{\fontsize{20}{24}\selectfont\color{titlewhite}}{Estimating chances from the past}
+  \tstext{8}{73.4}{144}{\fontsize{11}{13}\selectfont\itshape\color{titlewhite}}{A book from Basel, 1713}
+  \tscredit{84}{87.6}{70}{\srcview}
+\end{frame}
+
+% ===== 1. The setting =====
+% Say: Jakob Bernoulli, professor of mathematics at Basel from 1687 to his death in 1705. In chapter 4 he writes that
+% the cases of a die are known and equally possible, and asks who could ever count the diseases that can kill a man,
+% or foretell the weather.
+% [click] Let the room guess.
+% The picture: the two towers of the Minster, from the same etching.
+\begin{frame}[plain,noframenumbering]
+  \tsbg{img/b3b-bg-towers.jpg}
+  \tstext{8}{42}{144}{\fontsize{16}{19}\selectfont\color{titlewhite}}{A professor in Basel}
+  \tstext{8}{49.6}{144}{\fontsize{9.6}{11.5}\selectfont\color{quiet}}{Switzerland, around 1690}
+  \tstext{8}{57.4}{144}{\fontsize{11.5}{15}\selectfont\color{pale}}
+    {Jakob Bernoulli teaches mathematics in Basel. The chances of a die can be counted before the throw: one face in
+     six. But nobody can count in advance the chance that a man dies within ten years, or that it rains tomorrow.}
+  \tstext[2-]{8}{75.5}{144}{\fontsize{11.5}{15}\selectfont\color{titlewhite}}
+    {How could anyone know such a chance?}
+  \tscredit{84}{87.6}{70}{\srcview}
+\end{frame}
+
+% ===== 2. The surprise =====
+% Say: The whole sentence: what we cannot find out beforehand, we may at least find out afterwards, from the outcome
+% observed many times in similar cases; for each thing can be presumed to happen and not happen in as many cases as
+% it was found to happen and not happen before, in a similar state of things.
+% The picture: the Rhine bridge, from the same etching.
+\begin{frame}[plain,noframenumbering]
+  \tsbg{img/b3b-bg-bridge.jpg}
+  \tstext{8}{55}{144}{\fontsize{20}{24}\selectfont\color{titlewhite}}
+    {Quod a priori elicere non datur,\\ saltem a posteriori \dots\ eruere licebit.}
+  \tstext{8}{74.4}{144}{\fontsize{11}{13}\selectfont\itshape\color{titlewhite}}
+    {What we cannot find out beforehand, we may at least find out afterwards.}
+  \tscredit{8}{87.6}{72}{\srctext}
+  \tscredit{84}{87.6}{70}{\srcview}
+\end{frame}
+
+% ===== 3. Titius =====
+% Say: Titius is the placeholder name of Roman law, a John Doe. Bernoulli goes on with the weather: whoever noted for
+% many years how often it was fair and how often it rained could estimate the chance of rain the same way.
+% The portrait is by his brother Niklaus Bernoulli, 1687.
+\begin{frame}[plain,noframenumbering]
+  \tshalf{0}{img/b3b-half-portrait.jpg}
+  \tstext{88}{8}{64}{\fontsize{18}{21}\selectfont\color{titlewhite}}{Jakob Bernoulli}
+  \tstext{88}{16.6}{64}{\fontsize{10}{12}\selectfont\color{quiet}}{1655 to 1705}
+  \tstext{88}{27}{64}{\fontsize{12}{16}\selectfont\color{pale}}
+    {``Suppose that of three hundred men of the age and constitution of Titius, two hundred died within ten years.
+     Then you can conclude, safely enough, that {\color{lav}there are twice as many cases in which Titius pays his
+     debt to nature within ten years as cases in which he lives longer.}''}
+  \tscredit{88}{87.6}{64}{\srctextnarrow}
+  \tscredit{6}{87.6}{72}{\srcportrait}
+\end{frame}
+
+% ===== 4. The stupidest man =====
+% Say: The book appeared in 1713, eight years after his death, published by his nephew Nicolaus Bernoulli.
+\begin{frame}[plain,noframenumbering]
+  \tshalf{80}{img/b3b-half-titlepage.jpg}
+  \tstext{8}{8}{64}{\fontsize{18}{21}\selectfont\color{titlewhite}}{Ars Conjectandi}
+  \tstext{8}{16.6}{64}{\fontsize{10}{12}\selectfont\color{quiet}}{The Art of Conjecturing, 1713}
+  \tstext{8}{27}{68}{\fontsize{11.5}{16}\selectfont\color{pale}}
+    {``One or two experiments are not enough; a great number is needed. Even the most stupid person, by some
+     instinct of nature, on his own and without any instruction (which is truly astonishing), knows that
+     {\color{lav}the more observations are taken, the smaller the danger of missing the mark.}''}
+  \tscredit{8}{87.6}{70}{\srctext}
+  \tscredit{84}{87.6}{70}{\srctitlepage}
+\end{frame}
+
+% ===== 5. The urn =====
+% Say: Bernoulli asks whether, after enough draws, it becomes morally certain that white and black come out as three
+% to two, and proves that it does (chapter 5). "This, then, is the problem that I have decided to publish here, after
+% I have kept it to myself for twenty years" (Hoc igitur est illud Problema ... postquam jam per vicennium pressi).
+% [click] His urn returns this afternoon.
+% The picture: page 226 of the book, which opens with the urn: "no in urna quadam te inscio reconditos esse ter mille
+% calculos albos & bis mille nigros".
+\begin{frame}[plain,noframenumbering]
+  \tsbg{img/b3b-bg-urn.jpg}
+  \tstext{8}{42}{144}{\fontsize{11.5}{15}\selectfont\color{pale}}
+    {``Suppose that, without your knowledge, three thousand white pebbles and two thousand black ones are hidden in
+     an urn. You draw one pebble after another, putting each back, and {\color{lav}observe how often a white one and
+     how often a black one comes out.}''}
+  \tstext[2-]{8}{66.4}{144}{\fontsize{12.5}{16.5}\selectfont\color{titlewhite}}
+    {After many draws, black comes out about two times in five.\\ Everyone knows it by instinct; Bernoulli spent
+     twenty years on the proof.}
+  \tscredit{8}{87.6}{72}{\srctext}
+  \tscredit{84}{87.6}{70}{\srcpage}
+\end{frame}
+
+% ===== 6. The estimate =====
+% Say: The mirror of this afternoon estimates the chance that a customer taps a product: taps divided by showings.
+% The game says it this way: "The more dots, the closer it tends to get to p." The game's first urn, Cinderella's
+% urn for the mattress, holds 2 orange balls and 3 white balls, the same 2 to 3 as Bernoulli's 2000 black and 3000
+% white pebbles.
+\begin{frame}[plain,noframenumbering]
+  \tsbg{img/b3b-bg-close.jpg}
+  \tstext{8}{8}{120}{\fontsize{8.6}{10.4}\selectfont\color{pale}}{\tssp{Weekend 2}}
+  \tstext{8}{13.4}{144}{\fontsize{17}{20}\selectfont\color{titlewhite}}{The estimate}
+  \tstext[1-]{8}{31}{140}{\fontsize{12.5}{16.5}\selectfont\color{pale}}
+    {We estimate the chance of an event\\ from how often it happened before.}
+  \tstext[2-]{8}{48.3}{140}{\fontsize{12.5}{16.5}\selectfont\color{pale}}
+    {For a product shown to a customer, the {\color{lav}estimate} of a tap is the number of taps divided by the
+     number of showings.}
+  \tstext[3-]{8}{65.6}{140}{\fontsize{12.5}{16.5}\selectfont\color{pale}}
+    {This afternoon, every customer and product is an urn like Bernoulli's: an orange ball is a tap, a white ball
+     no tap.}
+  \tscredit{84}{87.6}{70}{\srcview}
+\end{frame}
+
+% ===== 7. Estimating chances today =====
+% Say: Spotify's home page and Amazon Payments are the two business cases at the end of this block
+% (../cases-deck/block3-bandits.tex): Feijer and others (Spotify), CONSEQUENCES workshop at RecSys 2025, a network
+% estimates the chance of a stream for each mix; John and Gozluklu (Amazon), AWS Machine Learning Blog, 2026, a UCB
+% score, an estimate plus a bonus, for each image and tagline. Online shops and news sites rank products and
+% headlines by estimated chances of a purchase or a click. Their numbers belong to the case slides.
+\begin{frame}[plain,noframenumbering]
+  \tsbg{img/b3b-bg-close.jpg}
+  \tstext{8}{8}{120}{\fontsize{8.6}{10.4}\selectfont\color{pale}}{\tssp{Weekend 2}}
+  \tstext{8}{13.4}{144}{\fontsize{17}{20}\selectfont\color{titlewhite}}{Estimating chances today}
+  \tstext{8}{27}{140}{\fontsize{12.5}{16.5}\selectfont\color{pale}}
+    {Each option gets an estimate of its chance from the past,\\ and the most promising is shown.}
+  \tsapp[1-]{43.2}{Spotify}{mixes of music and podcasts for the home page}
+  \tsapp[2-]{50}{Amazon Payments}{images and taglines for a page}
+  \tsapp[3-]{56.8}{Online shops}{products for a customer}
+  \tsapp[4-]{63.6}{News sites}{headlines for a story}
+  \tstext[5-]{8}{72.8}{140}{\fontsize{12.5}{16.5}\selectfont\color{titlewhite}}
+    {Such estimates decide much of what we are shown online.}
+  \tscredit{84}{87.6}{70}{\srcview}
+\end{frame}
+
+\end{document}
