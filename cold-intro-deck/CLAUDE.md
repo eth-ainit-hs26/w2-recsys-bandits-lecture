@@ -3,8 +3,9 @@
 Beamer, lualatex, three passes, from this folder. Two decks. `block1-nearest-neighbors.tex`, "Searching through
 representations" (the story of Chunyu Kun, "birds with the same wings"), the cold intro of weekend 2, shown before
 the Friday 08:15 block (the inner product and nearest neighbors), built on 2026-11-10 and reworked on 2026-11-11.
-`block5-computing-clusters.tex`, "Dividing a computation, 1793", shown before the
-Saturday 08:15 block (computing clusters), built on 2026-11-10: section "Block 5" below. And the cold intro of the
+`block5-computing-clusters.tex`, "Dividing a computation, 1793", shown at the start of the
+Friday 16:00 block "Large-scale computing" (computing clusters and parallelized matrix factorization, merged by Carlos
+on 2026-11-11; the Saturday 08:15 block "Computing clusters" before), built on 2026-11-10: section "Block 5" below. And the cold intro of the
 Friday 14:00 bandits block, "Estimating chances from the past": `block3-bandits-graunt.tex`, which Carlos chose on
 2026-11-11 from three drafts built that day; the two others, `block3-bandits-fox.tex` and
 `block3-bandits-bernoulli.tex`, stay as unchosen drafts: section "Block 3" below. `README.md` has the frames, the
@@ -19,9 +20,11 @@ citations alone confuse, and recounts alone lose the charm, so mix them. There i
 terms. Change the wording of the quotations only on his say. Frame 7 names the uses without numbers: the numbers
 of Etsy and Airbnb belong to their case slides.
 On the course site since 2026-11-11, the Friday 08:15 row: the 5-frame version from AINIT-PAGE commit `dc80aeb`, the
-8-frame rework since `70f1db5`. After every rebuild, copy the PDF and the handout there again under their site
-names (`README.md`, section "On the course site"); the weekend 2 page numbers them from the agenda (02 for this deck;
-since AINIT-PAGE `9e509ca`, 11 for block 3 and 16 for block 5) and its ZIP takes them at the site's build.
+8-frame rework since `70f1db5`. After every rebuild, copy the PDF there again under its site
+name (`README.md`, section "On the course site"); the weekend 2 page numbers the cold intros from the agenda (02 for
+this deck, 11 for block 3, 14 for block 5 since AINIT-PAGE `5ab848e`) and its ZIP takes them at the site's build. No cold
+intro has a handout on the site since AINIT-PAGE `5ab848e` (Carlos, 2026-11-11: "drop the handouts for all the cold
+intros"): the handouts built here stay in this folder.
 
 The look is the Title sequence of the course cold intro (`w1-lecture-material/cold-intro/intro-slides/`, chosen by
 Carlos on 2026-10-14): a picture on every frame, Futura, lavender only for the two highlighted sentences of the
@@ -69,8 +72,9 @@ form of block 1: the French on the title frame only, Smith's English with the ke
 frame, a closing frame on computing clusters. Carlos asked to leave out the FDD frames "One parcel, many triangles,
 one each" and "One side, two angles, and a table of logarithms". The closing frame uses only the facts of the lecture
 deck `../clusters-deck/` that the coordinating session pinned: change them only together with that deck.
-On the course site since 2026-11-10 (AINIT-PAGE commit `a498851`): after a rebuild, copy the PDF and the handout
-there again under their site names (`README.md`, section "History of block 5").
+On the course site since 2026-11-10 (AINIT-PAGE commit `a498851`), since AINIT-PAGE `5ab848e` the first item of the Friday
+16:00 row "Large-scale computing": after a rebuild, copy the PDF there again under its site name (`README.md`, section
+"History of block 5").
 
 ```
 block5-computing-clusters.tex   the deck, 5 frames, 10 pages, a "Say" comment per frame
@@ -104,8 +108,8 @@ Built on 2026-11-11 from Carlos's shortlist of round 5 (`git_ainit/research_note
 C1, C2, C8), three parallel drafts in the form of block 1, 8 frames and 16 pages each: THE FOX (Aesop, the old lion
 and the fox), GRAUNT (the Bills of Mortality, 1662), BERNOULLI (*Ars Conjectandi*, 1713, the stupidest man and the
 urn). Carlos chose GRAUNT the same evening. It is on the course site since AINIT-PAGE `9e509ca`: the Friday 14:00 row
-before the Mirror, number 11, as `ainit-hs26-bandits-cold-intro.pdf` and its handout. After a rebuild, copy both
-there again (`README.md`, section "On the course site of block 3"). THE FOX and BERNOULLI are kept as built in commit
+before the Mirror, number 11, as `ainit-hs26-bandits-cold-intro.pdf` (its handout off the site since AINIT-PAGE
+`5ab848e`). After a rebuild, copy the PDF there again (`README.md`, section "On the course site of block 3"). THE FOX and BERNOULLI are kept as built in commit
 `5bb67bd`, off the course site; later changes go into GRAUNT only. Frames 6 ("The estimate") and 7 ("Estimating
 chances today") are the same in the three, apart from the third statement of frame 6 in BERNOULLI. Frame 7 names the
 two cases of the block (`../cases-deck/block3-bandits.tex`) without their numbers.

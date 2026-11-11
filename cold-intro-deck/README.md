@@ -82,12 +82,13 @@ Searching through representations". Since AINIT-PAGE `9e0be17` the chips read "N
 | Site file | Source here |
 |---|---|
 | `ainit-hs26-nearest-neighbors-cold-intro.pdf` | `block1-nearest-neighbors.pdf` |
-| `ainit-hs26-nearest-neighbors-cold-intro-handout.pdf` | `block1-nearest-neighbors-handout.pdf` |
 
+The handout, `ainit-hs26-nearest-neighbors-cold-intro-handout.pdf`, is off the site since 2026-11-11 (AINIT-PAGE
+`5ab848e`, Carlos: "drop the handouts for all the cold intros"), as are the handouts of the other cold intros.
 A live file is https://eth-ainit-hs26.github.io/AINIT-PAGE/slides/we2/<file>
-After a rebuild, copy both over the same site file names, run `npm ci && npm run build` in `AINIT-PAGE`, push to
-`main`, then curl the live files and `cmp` them with the ones here. Since AINIT-PAGE commit `8bf143b` the weekend 2
-ZIP, `ainit-hs26-weekend-2.zip`, holds both, numbered as on the page; `npm run build` remakes it from the files in
+After a rebuild, copy the PDF over the same site file name, run `npm ci && npm run build` in `AINIT-PAGE`, push to
+`main`, then curl the live file and `cmp` it with the one here. Since AINIT-PAGE commit `8bf143b` the weekend 2
+ZIP, `ainit-hs26-weekend-2.zip`, holds it, numbered as on the page; `npm run build` remakes it from the files in
 `public/`.
 
 ## History
@@ -201,9 +202,15 @@ CSCS as the only capitals, no build metadata, and Futura as the only font.
 2. 2026-11-10, committed (`8417c6d`) and published on the course site at Carlos's instruction ("Once you are done,
    please publish them on the website"): AINIT-PAGE commit `a498851`, the Saturday 08:15 row and the Lecture slides
    list, as `ainit-hs26-computing-clusters-cold-intro.pdf` and `ainit-hs26-computing-clusters-cold-intro-handout.pdf`.
-   After a rebuild, copy both there again (`../clusters-deck/README.md`, section "On the course site", has the recipe).
+   After a rebuild, copy the PDF there again (`../clusters-deck/README.md`, section "On the course site", has the
+   recipe).
 3. 2026-11-11, the chips read "Computing clusters, cold intro" and "Handout", number 15 of weekend 2 that day
    (AINIT-PAGE `9e0be17`, numbers from the agenda).
+4. 2026-11-11, Carlos: "computing clusters is now merged with parallelized matrix factorization, and it's going to be
+   called large-scale computing", and "drop the handouts for all the cold intros". AINIT-PAGE `5ab848e`: this cold intro
+   opens the Friday 16:00 row "Large-scale computing", chip "Large-scale computing, cold intro", number 14, without
+   its handout. The deck itself is unchanged: its closing frame "Computing clusters" leads into the lecture deck of
+   that name, the next item of the row.
 
 ## Open items of block 5
 
@@ -323,10 +330,10 @@ cold intro" and "Handout", number 11 of weekend 2 that day; the Mirror and every
 | Site file | Source here |
 |---|---|
 | `ainit-hs26-bandits-cold-intro.pdf` | `block3-bandits-graunt.pdf` |
-| `ainit-hs26-bandits-cold-intro-handout.pdf` | `block3-bandits-graunt-handout.pdf` |
 
-The recipe after a rebuild is the one of block 1 (section "On the course site"): copy both over the same site file
-names, `npm ci && npm run build` in `AINIT-PAGE`, push to `main`, curl the live files and `cmp` them with these.
+The handout, `ainit-hs26-bandits-cold-intro-handout.pdf`, is off the site since AINIT-PAGE `5ab848e` (2026-11-11).
+The recipe after a rebuild is the one of block 1 (section "On the course site"): copy the PDF over the same site file
+name, `npm ci && npm run build` in `AINIT-PAGE`, push to `main`, curl the live file and `cmp` it with this one.
 
 ## History of block 3
 

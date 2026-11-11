@@ -133,13 +133,12 @@ Details cut from a slide go into the `% Say:` talk track above its frame.
 
 ## The blocks and their games
 
-| Block, Friday 13 November 2026 (agenda of 2026-11-06) | Game (`w2-cx-private`) | Cases, in its block deck |
+| Block, Friday 13 November 2026 (agenda of 2026-11-06, the 16:00 block merged and renamed on 2026-11-11) | Game (`w2-cx-private`) | Cases, in its block deck |
 |---|---|---|
 | 08:15 the inner product and nearest neighbors | Once Upon a Video Store, `01_nearest_neighbours/` | Etsy, Airbnb: `block1-nearest-neighbors.tex` |
 | 10:00 and 11:00 matrix product and matrix factorization | Once Upon a Matchmaker, `02_matrix_factorization/`: part one at 10:00; parts two and three and the optional part at 11:00 | Spotify: `block2-matrix-factorization.tex` |
 | 14:00 bandits | Once Upon a Mirror, `03_bandits/`: mirrors show one ad each morning, a tap is a click | Spotify's home page, Amazon Payments: `block3-bandits.tex` |
-| 16:00 parallelized matrix factorization | Matchmaker on a Grid, `02_matrix_factorization/grid-sketch/` | LinkedIn's ads (gradient descent at scale): `block4-parallelized-mf.tex` |
-| Saturday 08:15 computing clusters | | open |
+| 16:00 large-scale computing: computing clusters (`../clusters-deck/`, the Saturday 08:15 block until 2026-11-11), then parallelized matrix factorization | Matchmaker on a Grid, `02_matrix_factorization/grid-sketch/` | LinkedIn's ads (gradient descent at scale): `block4-parallelized-mf.tex` |
 
 The course site carries each block deck on its block's row since 2026-11-09, and before that each case since
 2026-11-06 (README.md, section "On the course site").

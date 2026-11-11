@@ -76,12 +76,16 @@ Specifically:
 │                               representations" (Chunyu Kun, Zhanguo ce, "birds with the same
 │                               wings"), 8 frames dictated by Carlos on 2026-11-11, pictures
 │                               cut from Huizong's Auspicious Cranes; own CLAUDE.md and README.md
-│                               Also the cold intro of the Saturday 08:15 block, "Dividing a
+│                               Also the cold intro of computing clusters, "Dividing a
 │                               computation, 1793" (Prony's tables, from FDD weekend 7), 5 frames,
+│                               since 2026-11-11 the opening of the Friday 16:00 block
+│                               "Large-scale computing",
 │                               and the cold intro of the Friday 14:00 bandits block,
 │                               "Estimating chances from the past" (Graunt, chosen from three
 │                               drafts on 2026-11-11)
-├── clusters-deck/              The Saturday 08:15 block "Computing clusters" (2026-11-10): a port
+├── clusters-deck/              "Computing clusters" (2026-11-10), the Saturday 08:15 block until
+│                               2026-11-11, since then part of the Friday 16:00 block
+│                               "Large-scale computing": a port
 │                               into Codex plates of the first block of FDD weekend 7, "The cost
 │                               of computation and supercomputers", with Carlos's cuts; 21 frames;
 │                               own CLAUDE.md and README.md
@@ -261,12 +265,16 @@ the folder's CLAUDE.md has the traps. On the course site since 2026-11-11 (AINIT
 08:15 row and the Materials list; `cold-intro-deck/README.md`, section "On the course site"), the 8-frame rework
 since AINIT-PAGE commit `70f1db5`. A push also makes the PDF public on Pages.
 
-`cold-intro-deck/block5-computing-clusters.tex` is the cold intro of the Saturday 08:15 block, computing clusters:
+`cold-intro-deck/block5-computing-clusters.tex` is the cold intro of computing clusters, since 2026-11-11 the opening
+of the Friday 16:00 block "Large-scale computing" (the Saturday 08:15 block before):
 "Dividing a computation, 1793", FDD weekend 7's section of that name in the same form, 5 frames over 10 pages
 (Prony's "fabriquer mes logarithmes comme on fabrique des epingles", Adam Smith's pin factory, every parcel in
 France, the three tiers, and a closing frame "Computing clusters" with four facts of the lecture deck). Carlos asked
 on 2026-11-10 to leave out FDD's two frames on triangles and logarithm tables. On the course site with the lecture
 deck (`clusters-deck/README.md`, section "On the course site").
+
+Since 2026-11-11 (AINIT-PAGE `5ab848e`, Carlos: "drop the handouts for all the cold intros") the course site carries no
+handout of any cold intro, of weekend 1 or 2; the handouts built here stay in the repository.
 
 `cold-intro-deck/block3-bandits-fox.tex`, `block3-bandits-graunt.tex` and `block3-bandits-bernoulli.tex` are three
 drafts of the cold intro of the Friday 14:00 bandits block, "Estimating chances from the past", built on 2026-11-11
@@ -279,7 +287,9 @@ the site file names.
 
 ## The computing clusters deck (added 2026-11-10)
 
-`clusters-deck/block5-computing-clusters.tex` is the Saturday 08:15 block, "Computing clusters": a port into Codex
+`clusters-deck/block5-computing-clusters.tex` is "Computing clusters", the Saturday 08:15 block until 2026-11-11, when
+Carlos merged it with parallelized matrix factorization into the Friday 16:00 block "Large-scale computing" (its title
+page reads Friday 13 November 2026 since then): a port into Codex
 plates of the first block of FDD weekend 7, "The cost of computation and supercomputers" (git_fdd,
 `w7-cost-slides.tex`, commit `b296f78`), with the cuts and changes Carlos dictated on 2026-11-10. Five sections, 21
 frames: a FLOP and the GH200; Alps, drawn from a cabinet to one blade, and the blade types of its platform; CSCS,

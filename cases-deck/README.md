@@ -32,7 +32,7 @@ cases of each deck and writes `tools/expected-<deck>.txt`.
 | `block1-nearest-neighbors.tex` | 08:15 the inner product and nearest neighbors | Etsy, Airbnb | 21 (11) |
 | `block2-matrix-factorization.tex` | 10:00 and 11:00 matrix product and matrix factorization | Spotify | 8 (5) |
 | `block3-bandits.tex` | 14:00 bandits | Spotify's home page, Amazon Payments | 17 (9) |
-| `block4-parallelized-mf.tex` | 16:00 parallelized matrix factorization | LinkedIn's ads | 9 (5) |
+| `block4-parallelized-mf.tex` | 16:00 large-scale computing (parallelized matrix factorization until 2026-11-11) | LinkedIn's ads | 9 (5) |
 
 The same day the six one-case decks (`etsy.tex`, `spotify.tex`, `airbnb.tex`, `spotify-home.tex`, `amazon.tex`,
 `linkedin.tex`, their PDFs, handouts and expected files) were removed; commit `43e6adb` has them. The weekend deck
@@ -336,11 +336,14 @@ block on its Friday row, and the weekend deck with its handout in the Materials 
 | `ainit-hs26-business-cases.pdf`, `ainit-hs26-business-cases-handout.pdf` | `weekend2-cases.pdf`, `weekend2-cases-handout.pdf` | Materials list, group "Business cases", without a number (`download.extras`) |
 | `ainit-hs26-business-cases-<block>-handout.pdf`, the four blocks | `block<N>-<name>-handout.pdf` | the chip "Handout" right after its deck (since 2026-11-11, AINIT-PAGE `9e0be17`), and the ZIP's folder Handouts |
 
-Since AINIT-PAGE `9e0be17` the page numbers the four block decks from the agenda, 04, 09, 12 and 14 on 2026-11-11,
+Since AINIT-PAGE `9e0be17` the page numbers the four block decks from the agenda, 04, 09, 12 and 14 on 2026-11-11
+(04, 09, 13 and 17 since AINIT-PAGE `5ab848e`),
 on their chips, in the Materials list under "Slides and visualizations" and in the weekend's ZIP; a deck or game
 added before one of them shifts its number. The six one-case site files
 (`ainit-hs26-case-etsy.pdf` and the others) were removed on 2026-11-09. LinkedIn's ads (gradient descent at scale)
-is on the 16:00 row, "Parallelized matrix factorization", a choice Carlos can swap to 11:00. A live file is
+is on the 16:00 row, the last item of the block "Large-scale computing" since AINIT-PAGE `5ab848e` (2026-11-11, Carlos
+merged computing clusters with parallelized matrix factorization); the subtitle of `block4-parallelized-mf.tex` names
+that block since the same day. A live file is
 https://eth-ainit-hs26.github.io/AINIT-PAGE/slides/we2/<file>
 After a rebuild, copy the PDF over the same site file name, run `npm ci && npm run build` in `AINIT-PAGE`, push to
 `main`, then curl the live file and `cmp` it with the one here. The block handouts are not published.

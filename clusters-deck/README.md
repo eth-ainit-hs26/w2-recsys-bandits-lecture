@@ -1,4 +1,8 @@
-# Computing clusters, the Saturday 08:15 block of weekend 2
+# Computing clusters, in the Friday 16:00 block "Large-scale computing" of weekend 2
+
+The Saturday 08:15 block of weekend 2 until 2026-11-11, when Carlos merged it with parallelized matrix factorization:
+"computing clusters is now merged with parallelized matrix factorization, and it's going to be called large-scale
+computing". The title page reads Friday 13 November 2026 since then.
 
 A port into Codex plates of the first block of FDD weekend 7, "The cost of computation and supercomputers"
 (`git_fdd/projects/weekend-07-large-scale/carlos-lectures/slides/w7-cost-slides.tex`, commit `b296f78`), with the
@@ -109,16 +113,19 @@ Since 2026-11-10, on the Saturday 08:15 row and in the Materials list, group "Le
 AINIT-PAGE commit `0f4cd90`, the cold intro before it since `a498851`. Since 2026-11-11 (AINIT-PAGE `9e0be17`) the
 chips read "Computing clusters, cold intro", "Handout", "Computing clusters", "Handout", numbered 15 and 16 that day
 from the agenda, and the Materials list shows them under "Slides and visualizations".
+Since AINIT-PAGE `5ab848e` (2026-11-11) both are on the Friday 16:00 row, "Large-scale computing", followed by Matchmaker
+on a Grid and the case LinkedIn's ads: chips "Large-scale computing, cold intro" (14), "Computing clusters" and
+"Handout" (15), "Matchmaker on a Grid" (16), "Business case, LinkedIn's ads" and "Handout" (17). The cold intro's
+handout is off the site since the same commit (Carlos: "drop the handouts for all the cold intros").
 
 | Site file | Source here |
 |---|---|
 | `ainit-hs26-computing-clusters.pdf` | `block5-computing-clusters.pdf` |
 | `ainit-hs26-computing-clusters-handout.pdf` | `block5-computing-clusters-handout.pdf` |
 | `ainit-hs26-computing-clusters-cold-intro.pdf` | `../cold-intro-deck/block5-computing-clusters.pdf` |
-| `ainit-hs26-computing-clusters-cold-intro-handout.pdf` | `../cold-intro-deck/block5-computing-clusters-handout.pdf` |
 
 A live file is https://eth-ainit-hs26.github.io/AINIT-PAGE/slides/we2/<file>
-After a rebuild, copy the PDF over the same site file name, run `npm ci && npm run build` in `AINIT-PAGE`, push to
+After a rebuild, copy the PDF and its handout over the same site file names, run `npm ci && npm run build` in `AINIT-PAGE`, push to
 `main`, then curl the live file and `cmp` it with the one here.
 
 ## Open items
