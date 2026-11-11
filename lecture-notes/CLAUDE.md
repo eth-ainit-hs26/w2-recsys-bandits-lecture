@@ -40,7 +40,11 @@ examples). A number written in the prose of the .tex must be added to `EXPECTED`
 - The notation is the games' notation (`01_nearest_neighbours/source/game/NOTATION.md` and
   `02_matrix_factorization/source/game/NOTATION.md` in `w2-cx-private`): ratings from -2 to 2, stars minus 3; the textbook cross, Q above PQ and P on its left; the loss
   `(prediction - rating)^2` with the prediction on the left; part two's nudge of 0.01, its slope nabla and
-  `w <- w - alpha nabla` with alpha 0.1; gradient descent with alpha 0.2 in the optional part.
+  `w <- w - alpha nabla` with alpha 0.02; gradient descent with alpha 0.02 in the optional part.
+- The loss of a guess is the total of the known ratings' losses since 2026-11-11, as in the games (Carlos that day:
+  "replace ... the average loss with the total loss so that we stay consistent with the literature"); until then the
+  average. Part three's run takes alpha 3/117 on the total, the same steps as alpha 3 on the average of its 117 known
+  ratings. `FORBIDDEN` in the tool fails the PDF check while "average" is left in the notes.
 - Part three's ratings are MovieLens ml-latest-small, cited in a footnote (Harper and Konstan, ACM TiiS 2015).
 - The layout follows the "write dry" rule of Carlos's global CLAUDE.md for documents: black on white, one font,
   plain boxes and lines, a definition per item. The Codex plates deck style is for decks and is not used here.

@@ -132,30 +132,30 @@ columns of $Q$ are embeddings; their numbers have no names.
 
 \term{Loss.} Of one rating: $(\text{prediction} - \text{rating})^2$.
 
-\term{Average loss.} The average of the losses of the known ratings. Matrix factorization looks for the $P$ and $Q$
-with the smallest average loss.
+\term{Total loss.} The sum of the losses of the known ratings. Matrix factorization looks for the $P$ and $Q$ with
+the smallest total loss.
 
 Example: three customers, two films, $k = 2$, a first guess of $P$ and $Q$:
 \begin{center}
 \input{generated/board-first-guess.tex}
 \end{center}
-Average loss: $(25 + 9 + 9 + 4 + 1 + 16)/6 = 64/6 = 10.67$.
+Total loss: $25 + 9 + 9 + 4 + 1 + 16 = 64$.
 
 \subsection{One number at a time}
 
 For one number $w$ of $P$ or $Q$:
 \begin{enumerate}
-\item Before: the average loss.
-\item After: the average loss with $w$ changed to $w + 0.01$.
+\item Before: the total loss.
+\item After: the total loss with $w$ changed to $w + 0.01$.
 \item Slope: $\nabla = (\text{after} - \text{before})/0.01$.
-\item Update: $w \leftarrow w - \alpha \nabla$, with the step size $\alpha = 0.1$.
+\item Update: $w \leftarrow w - \alpha \nabla$, with the step size $\alpha = 0.02$.
 \end{enumerate}
 A negative slope moves $w$ up, a positive slope moves it down. A round updates every number once, the numbers of
-$P$ first. Rounds repeat until the average loss is below $0.0001$.
+$P$ first. Rounds repeat until the total loss is below $0.001$.
 
-Example: The Martian's second number, $w = -1$. Before: $10.667$. After, with $w = -0.99$: $10.620$. Slope:
-$\nabla = -0.047/0.01 = -4.7$. Update: $w \leftarrow -1 - 0.1 \times (-4.7) = -0.53$; the average loss falls to
-$8.78$. After $99$ rounds the average loss is below $0.0001$ and every prediction is within $0.02$ of its rating.
+Example: The Martian's second number, $w = -1$. Before: $64.00$. After, with $w = -0.99$: $63.72$. Slope:
+$\nabla = -0.28/0.01 = -28$. Update: $w \leftarrow -1 - 0.02 \times (-28) = -0.44$; the total loss falls to
+$50.86$. After $77$ rounds the total loss is below $0.001$ and every prediction is within $0.03$ of its rating.
 
 Game: \PartTwo. Notebook: \NotebookMF, part 2.
 
@@ -165,29 +165,29 @@ Game: \PartTwo. Notebook: \NotebookMF, part 2.
 $2 \times \text{partner} \times (\text{prediction} - \text{rating})$, where the partner is the number that $w$
 multiplies in that prediction. A rating whose prediction does not contain $w$ gives $0$.
 
-\term{Slope of the average loss.} The average of the slope rule over the known ratings. The slope measured with a
-change of $0.01$ is close to it.
+\term{Slope of the total loss.} The sum of the slope rule over the known ratings. The slope measured with a change
+of $0.01$ is close to it.
 
 \term{Gradient.} The slopes of all numbers of $P$ and $Q$.
 
 \term{Gradient descent.} Every number moves at once, $w \leftarrow w - \alpha \times \text{slope}$, again and again
-until the average loss stops falling.
+until the total loss stops falling.
 
-Example: from the first guess above, with $\alpha = 0.2$, one step takes the average loss from $10.67$ to $1.97$,
-and $52$ steps take it below $0.0001$.
+Example: from the first guess above, with $\alpha = 0.02$, one step takes the total loss from $64$ to $19.68$, and
+$118$ steps take it below $0.0001$.
 
 Game: \Optional. Notebook: \NotebookOpt, parts 3 and 4.
 
 \subsection{Predicting unknown ratings}
 
-The average loss uses the known ratings only. After the descent, $PQ$ has an entry for every customer and every
+The total loss uses the known ratings only. After the descent, $PQ$ has an entry for every customer and every
 film; for an unknown rating, that entry is the prediction.
 
 Example: real ratings from MovieLens\footnote{MovieLens ml-latest-small, GroupLens Research, University of
 Minnesota. F.~Maxwell Harper and Joseph A.~Konstan, The MovieLens Datasets: History and Context, ACM Transactions on
 Interactive Intelligent Systems 5(4), 2015.}, $10$ users and $12$ films, each rating the number of stars minus 3,
-three ratings hidden. Gradient descent with $k = 2$, $\alpha = 3$ and $200$ steps takes the average loss of the
-$117$ known ratings from $1.84$ to $0.25$. The hidden ratings and their predictions:
+three ratings hidden. Gradient descent with $k = 2$, $\alpha = 3/117$ and $200$ steps takes the total loss of the
+$117$ known ratings from $215.17$ to $29.35$. The hidden ratings and their predictions:
 \begin{center}
 \input{generated/hidden-ratings.tex}
 \end{center}

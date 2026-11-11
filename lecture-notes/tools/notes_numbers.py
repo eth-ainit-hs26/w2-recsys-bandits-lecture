@@ -14,6 +14,8 @@ The data below are copies. All of them are invented for the games, except part t
                           (generated there from MovieLens ml-latest-small by tools/s5_movielens.py)
 When w2-cx-private is checked out beside this repository (../../w2-cx-private), every copy is compared with it.
 The descent of part two repeats MF.Z.run (nudge-math.js); gradient descent repeats MF.T.run (table-math.js).
+The loss of a guess is the TOTAL of its ratings' losses since 2026-11-11, as in the games (Carlos that day: "replace
+... the average loss with the total loss so that we stay consistent with the literature"); until then the average.
 """
 import json
 import re
@@ -48,16 +50,17 @@ FILMS2 = ["Paddington", "The Martian"]
 R2 = [[2, 1], [-1, 2], [1, -2]]
 P2 = [[-1, -2], [-2, 0], [2, 2]]
 Q2_COLUMNS = [[-1, 2], [-2, -1]]
-EPS, ALPHA, TOL = 0.01, 0.1, 0.0001     # part two (MF.S2)
-ALPHA_GD = 0.2                          # gradient descent of the optional game (MF.S4)
+EPS, ALPHA, TOL = 0.01, 0.02, 0.001     # part two (MF.S2)
+ALPHA_GD, TOL_GD = 0.02, 0.0001         # gradient descent of the optional game (MF.S4)
 
-# Matchmaker, part three: the run on real ratings with three hidden (MF.S5.runs[0]).
+# Matchmaker, part three: the run on real ratings with three hidden (MF.S5.runs[0]). Its step size on the total is
+# alpha_average, 3, divided by the 117 known ratings: the same steps as alpha 3 on the average loss.
 PART_THREE = {
-    "users": 10, "films": 12, "k": 2, "alpha": 3, "steps": 200, "known": 117,
-    "start": 1.8390872940170933, "end": 0.25086536262392417, "within_half": 81,
+    "users": 10, "films": 12, "k": 2, "alpha_average": 3, "alpha": 3 / 117, "steps": 200, "known": 117,
+    "start": 215.17321339999992, "end": 29.35124742699913, "within_half": 81,
     "hidden": [  # film, MovieLens user, stars, prediction
-        ("Independence Day", 64, 3.0, 0.672352306013165),
-        ("Braveheart", 28, 3.5, 0.6227970952582049),
+        ("Independence Day", 64, 3.0, 0.6723523060131651),
+        ("Braveheart", 28, 3.5, 0.622797095258205),
         ("Seven", 239, 5.0, 1.9847636790449537),
     ],
 }
@@ -74,10 +77,9 @@ def product(P, Q_columns):
     return [[inner(row, col) for col in Q_columns] for row in P]
 
 
-def average_loss(P, Qc, R):
+def total_loss(P, Qc, R):
     pred = product(P, Qc)
-    losses = [(pred[i][j] - R[i][j]) ** 2 for i in range(len(R)) for j in range(len(R[0]))]
-    return sum(losses) / len(losses)
+    return sum((pred[i][j] - R[i][j]) ** 2 for i in range(len(R)) for j in range(len(R[0])))
 
 
 def places(P, Qc):
@@ -90,9 +92,9 @@ def nudge(P, Qc, R, which, r, k):
     """Part two's move of one number: (before, after, new value)."""
     M = P if which == "P" else Qc
     x = M[r][k]
-    before = average_loss(P, Qc, R)
+    before = total_loss(P, Qc, R)
     M[r][k] = x + EPS
-    after = average_loss(P, Qc, R)
+    after = total_loss(P, Qc, R)
     M[r][k] = x
     return before, after, x - ALPHA * (after - before) / EPS
 
@@ -100,7 +102,7 @@ def nudge(P, Qc, R, which, r, k):
 def rounds_until(P, Qc, R, tol=TOL, most=400):
     P, Qc = [r[:] for r in P], [c[:] for c in Qc]
     n = 0
-    while average_loss(P, Qc, R) >= tol and n < most:
+    while total_loss(P, Qc, R) >= tol and n < most:
         for which, r, k in places(P, Qc):
             (P if which == "P" else Qc)[r][k] = nudge(P, Qc, R, which, r, k)[2]
         n += 1
@@ -108,35 +110,30 @@ def rounds_until(P, Qc, R, tol=TOL, most=400):
 
 
 def gradient_step(P, Qc, R, alpha):
-    """All numbers at once: each moves against the slope of the average loss (MF.T.step)."""
-    n = len(R) * len(R[0])
+    """All numbers at once: each moves against the slope of the total loss (MF.T.step)."""
     gP = [[0.0] * len(P[0]) for _ in P]
     gQ = [[0.0] * len(Qc[0]) for _ in Qc]
     for i in range(len(R)):
         for j in range(len(R[0])):
             miss = inner(P[i], Qc[j]) - R[i][j]          # prediction minus rating
             for k in range(len(P[0])):
-                gP[i][k] += 2 * Qc[j][k] * miss / n
-                gQ[j][k] += 2 * P[i][k] * miss / n
+                gP[i][k] += 2 * Qc[j][k] * miss
+                gQ[j][k] += 2 * P[i][k] * miss
     newP = [[P[i][k] - alpha * gP[i][k] for k in range(len(P[0]))] for i in range(len(P))]
     newQ = [[Qc[j][k] - alpha * gQ[j][k] for k in range(len(Qc[0]))] for j in range(len(Qc))]
     return newP, newQ, gP, gQ
 
 
-def gradient_descent(P, Qc, R, alpha, tol=TOL, most=1000):
-    losses = [average_loss(P, Qc, R)]
+def gradient_descent(P, Qc, R, alpha, tol=TOL_GD, most=1000):
+    losses = [total_loss(P, Qc, R)]
     while losses[-1] >= tol and len(losses) - 1 < most:
         P, Qc, _, _ = gradient_step(P, Qc, R, alpha)
-        losses.append(average_loss(P, Qc, R))
+        losses.append(total_loss(P, Qc, R))
     return losses, P, Qc
 
 
 def r2(x):
     return f"{x:.2f}"
-
-
-def r3(x):
-    return f"{x:.3f}"
 
 
 # THE NUMBERS
@@ -181,48 +178,56 @@ pred2 = product(P2, Q2_COLUMNS)
 loss2 = [[(pred2[i][j] - R2[i][j]) ** 2 for j in range(2)] for i in range(3)]
 assert pred2 == [[-3, 4], [2, 4], [2, -6]] and loss2 == [[25, 9], [9, 4], [1, 16]]
 assert sum(map(sum, loss2)) == 64
-N["average"] = r2(64 / 6)                                                   # 10.67
+N["total"] = " + ".join(str(x) for row in loss2 for x in row) + " = %d" % sum(map(sum, loss2))
+assert N["total"] == "25 + 9 + 9 + 4 + 1 + 16 = 64"
+assert total_loss(P2, Q2_COLUMNS, R2) == 64
 
-# One small change: The Martian's second number (part two, scene One small change).
+# One small change: The Martian's second number (part two, scene One small change). The game works the chain on the
+# totals rounded to 2 decimals (chainOf in sec2.js), so nabla has 0 decimals.
 before, after, new = nudge(P2, Q2_COLUMNS, R2, "Q", 1, 1)
-N["before"], N["after"] = r3(before), r3(after)                             # 10.667, 10.620
-shown_change = round(after, 3) - round(before, 3)                           # the game rounds to 3 decimals
-N["change"] = r3(shown_change)                                              # -0.047
-N["nabla"] = f"{shown_change / EPS:.1f}"                                    # -4.7
-N["new"] = r2(-1 - ALPHA * float(N["nabla"]))                               # -0.53
+assert before == 64 and abs(after - 63.7208) < 1e-9 and abs(new + 0.4416) < 1e-9, (before, after, new)
+N["before"], N["after"] = r2(before), r2(after)                             # 64.00, 63.72
+shown_change = round(round(after, 2) - round(before, 2), 2)
+N["change"] = r2(shown_change)                                              # -0.28
+N["nabla"] = f"{shown_change / EPS:.0f}"                                    # -28
+N["new"] = r2(-1 - ALPHA * float(N["nabla"]))                               # -0.44
 assert r2(new) == N["new"], (new, N["new"])
 moved = [c[:] for c in Q2_COLUMNS]
 moved[1][1] = new
-N["after move"] = r2(average_loss(P2, moved, R2))                           # 8.78
+N["after move"] = r2(total_loss(P2, moved, R2))                             # 50.86
 assert (N["before"], N["after"], N["change"], N["nabla"], N["new"], N["after move"]) == \
-    ("10.667", "10.620", "-0.047", "-4.7", "-0.53", "8.78")
+    ("64.00", "63.72", "-0.28", "-28", "-0.44", "50.86")
 
-# Again and again: rounds from the guess after that move (MF.Z.run from G1 in sec2.js).
+# Again and again: rounds from the guess after that move (MF.Z.run from G1 in sec2.js), until the total is below
+# 0.001. The game rounds the largest miss up to 2 decimals (runOff in sec2.js).
 n_rounds, P_end, Q_end = rounds_until(P2, moved, R2)
-assert n_rounds == 99, n_rounds
+assert n_rounds == 77, n_rounds
 gap = max(abs(inner(P_end[i], Q_end[j]) - R2[i][j]) for i in range(3) for j in range(2))
-assert gap < 0.02, gap
 N["rounds"] = str(n_rounds)
+N["gap"] = r2(-(-round(gap * 100, 9) // 1) / 100)                           # 0.0219 rounded up: 0.03
+assert N["gap"] == "0.03", gap
 
 # Gradient descent from the first guess (the optional game, scene Many films).
 losses, _, _ = gradient_descent(P2, Q2_COLUMNS, R2, ALPHA_GD)
-N["gd one step"] = r2(losses[1])                                            # 1.97
-N["gd steps"] = str(len(losses) - 1)                                        # 52
-assert (N["gd one step"], N["gd steps"]) == ("1.97", "52"), (losses[1], len(losses) - 1)
-# The slope rule: 2 x partner x (prediction minus rating), averaged over the ratings. On Paddington's column alone
-# (the optional game, scene Every rating has a say) Paddington's numbers get 2/3 and 8, Ida's 10/3 and -20/3.
+N["gd one step"] = r2(losses[1])                                            # 19.68
+N["gd steps"] = str(len(losses) - 1)                                        # 118
+assert (N["gd one step"], N["gd steps"]) == ("19.68", "118"), (losses[1], len(losses) - 1)
+assert all(losses[s + 1] < losses[s] for s in range(len(losses) - 1))
+# The slope rule: 2 x partner x (prediction minus rating), summed over the ratings. On Paddington's column alone
+# (the optional game, scene Every rating has a say) Paddington's numbers get 2 and 24, Ida's 10 and -20.
 _, _, gP, gQ = gradient_step(P2, Q2_COLUMNS[:1], [[r[0]] for r in R2], ALPHA_GD)
-assert abs(gQ[0][0] - 2 / 3) < 1e-12 and abs(gQ[0][1] - 8) < 1e-12
-assert abs(gP[0][0] - 10 / 3) < 1e-12 and abs(gP[0][1] + 20 / 3) < 1e-12
+assert gQ[0] == [2, 24] and gP == [[10, -20], [-6, 12], [-2, 4]], (gQ, gP)
 _, _, gP, gQ = gradient_step(P2, Q2_COLUMNS, R2, ALPHA_GD)
-# The hop of 0.01 measures nearly the same slope as the rule (The Martian's second number).
+# The hop of 0.01 measures the rule plus 0.01 times the sum of the partners' squares (The Martian's second number:
+# -28 + 0.01 x 8 = -27.92).
 rule = gQ[1][1]
-assert abs(rule - (after - before) / EPS) < 0.02, (rule, (after - before) / EPS)
+assert rule == -28 and abs((after - before) / EPS - (rule + EPS * sum(row[1] ** 2 for row in P2))) < 1e-9, rule
 
 # Part three.
 T = PART_THREE
-assert T["users"] * T["films"] - len(T["hidden"]) == T["known"]
-N["p3 start"], N["p3 end"] = r2(T["start"]), r2(T["end"])                   # 1.84, 0.25
+assert T["users"] * T["films"] - len(T["hidden"]) == T["known"] and T["alpha"] == T["alpha_average"] / T["known"]
+N["p3 alpha"] = "%d/%d" % (T["alpha_average"], T["known"])                  # 3/117
+N["p3 start"], N["p3 end"] = r2(T["start"]), r2(T["end"])                   # 215.17, 29.35
 for film, user, stars, pred in T["hidden"]:
     N[f"p3 {film}"] = (r2(pred), f"{stars - SHIFT:g}")
 
@@ -245,12 +250,15 @@ def compare_with_private():
     assert mf["RATINGS2"] == R2
     assert [mf["START2"][c.lower()] for c in CUSTOMERS2] == P2
     assert [mf["START2"][f] for f in ("paddington", "martian")] == Q2_COLUMNS
-    assert (mf["EPS3"], mf["TOL3"]) == (EPS, TOL)
+    assert mf["EPS3"] == EPS and (mf["ALPHA4"], mf["TOL4"]) == (ALPHA_GD, TOL_GD)
+    core = (PRIVATE / "02_matrix_factorization/source/game/core.js").read_text()
+    s2 = re.search(r"var S2 = \{.*?\n  \};", core, re.S).group(0)
+    assert re.search(r"\n    eps: 0\.01,\n    alpha: 0\.02,\n    tol: 0\.001,\n", s2), "MF.S2's eps, alpha or tol changed"
     js = (PRIVATE / "02_matrix_factorization/source/game/s5-data.js").read_text()
     s5 = json.loads(re.search(r"var S5 = (\{.*?\});\n", js, re.S).group(1))
     run = s5["runs"][0]
-    assert (run["users"], run["films"], run["k"], run["alpha"], run["steps"]) == \
-        (T["users"], T["films"], T["k"], T["alpha"], T["steps"])
+    assert (run["users"], run["films"], run["k"], run["alpha"], run["alpha_average"], run["steps"]) == \
+        (T["users"], T["films"], T["k"], T["alpha"], T["alpha_average"], T["steps"])
     assert (run["start"], run["end"]["loss"], run["end"]["within_half"]) == (T["start"], T["end"], T["within_half"])
     assert s5["shift"] == SHIFT
     for (i, j), pred, (film, user, stars, mine) in zip(run["hidden"], run["end"]["hidden"], T["hidden"]):
@@ -372,9 +380,16 @@ def hidden_table():
 
 
 EXPECTED = [  # strings the PDF must contain (a minus sign is read as a hyphen, a times sign as x)
-    "4 + 1 + 2 = 7", "64/6 = 10.67", "10.667", "10.620", "-0.047/0.01 = -4.7", "-1 - 0.1 x (-4.7) = -0.53",
-    "8.78", "99 rounds", "1.97", "52 steps", "1.84", "0.25",
+    "4 + 1 + 2 = 7",
+    "Total loss: %s" % N["total"],
+    "alpha = %s" % ALPHA, "below %s" % TOL,
+    "Before: %s" % N["before"], "w = -0.99: %s" % N["after"],
+    "%s/0.01 = %s" % (N["change"], N["nabla"]), "-1 - %s x (%s) = %s" % (ALPHA, N["nabla"], N["new"]),
+    "falls to %s" % N["after move"], "After %s rounds" % N["rounds"], "within %s of its rating" % N["gap"],
+    "from 64 to %s" % N["gd one step"], "%s steps take it below 0.0001" % N["gd steps"],
+    "alpha = %s" % N["p3 alpha"], "from %s to %s" % (N["p3 start"], N["p3 end"]),
 ]
+FORBIDDEN = ["average", "10.67"]   # the loss was the average until 2026-11-11
 
 
 def check_pdf(pdf):
@@ -382,10 +397,12 @@ def check_pdf(pdf):
                           check=True).stdout
     dashes = [c for c in text if c in (chr(8211), chr(8212))]
     assert not dashes, f"{len(dashes)} en or em dashes in the PDF"
-    flat = re.sub(r"\s+", " ", text.replace(chr(8722), "-").replace(chr(215), "x"))
+    flat = re.sub(r"\s+", " ", text.replace(chr(8722), "-").replace(chr(215), "x").replace(chr(945), "alpha"))
     missing = [s for s in EXPECTED if s not in flat]
     assert not missing, f"not in the PDF: {missing}"
-    print(f"{pdf}: no dashes, all {len(EXPECTED)} expected strings present")
+    found = [s for s in FORBIDDEN if s.lower() in flat.lower()]
+    assert not found, f"still in the PDF: {found}"
+    print(f"{pdf}: no dashes, all {len(EXPECTED)} expected strings present, none of {FORBIDDEN}")
 
 
 def main():
