@@ -11,6 +11,8 @@ English under it, the one frame he called beautiful), a context frame (the book,
 question and Kun's answer as his English text, one paragraph per frame, the key sentence in lavender, and a closing
 frame on representation learning, the theme of the weekend. The quotations carry no Chinese and there is no
 mapping of story words to course terms. Change the wording of the quotations only on his say.
+On the course site since 2026-11-11 (AINIT-PAGE commit `dc80aeb`, the Friday 08:15 row): after a rebuild, copy the
+PDF and the handout there again under their site names (`README.md`, section "On the course site").
 
 The look is the Title sequence of the course cold intro (`w1-lecture-material/cold-intro/intro-slides/`, chosen by
 Carlos on 2026-10-14): a picture on every frame, Futura, lavender only for the highlighted sentence and the term of

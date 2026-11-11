@@ -63,18 +63,33 @@ python3 ../style/tools/make_handout.py block1-nearest-neighbors.pdf block1-neare
 
 `build.sh` prints `log errors: 0` and no missing character. `check.sh` lists Futura and Songti TC as the fonts.
 
+## On the course site
+
+Since 2026-11-11 (AINIT-PAGE commit `dc80aeb`), on the Friday 08:15 row before the Video Store game, chips
+`Cold intro` and `Cold intro handout`, and in the Materials list, group "Lecture slides".
+
+| Site file | Source here |
+|---|---|
+| `ainit-hs26-nearest-neighbors-cold-intro.pdf` | `block1-nearest-neighbors.pdf` |
+| `ainit-hs26-nearest-neighbors-cold-intro-handout.pdf` | `block1-nearest-neighbors-handout.pdf` |
+
+A live file is https://eth-ainit-hs26.github.io/AINIT-PAGE/slides/we2/<file>
+After a rebuild, copy both over the same site file names, run `npm ci && npm run build` in `AINIT-PAGE`, push to
+`main`, then curl the live files and `cmp` them with the ones here.
+
 ## History
 
 1. 2026-11-10, first build (commit `0beb06a`): the Chinese with our English under it on every frame, and a last
    frame that mapped the story's words to the block (birds to customers, the same wings to similar ratings).
-2. 2026-11-10, rebuild to Carlos's dictated frames: the context frame, the two quotations in English only, the
-   closing frame on representation learning; the mapping is gone.
+2. 2026-11-10, rebuild to Carlos's dictated frames (commit `9d9379a`): the context frame, the two quotations in
+   English only, the closing frame on representation learning; the mapping is gone.
+3. 2026-11-11, published on the course site at Carlos's instruction ("Publish them please"): AINIT-PAGE commit
+   `dc80aeb`, section "On the course site" above.
 
 ## Open items
 
 1. Not tried on the projector of HG D 7.2.
-2. Not on the course site. Publishing there waits for Carlos.
-3. The deck writes "neighbor", as the agenda does; the Video Store game writes "neighbour".
+2. The deck writes "neighbor", as the agenda does; the Video Store game writes "neighbour".
 
 # Block 5: Dividing a computation, 1793
 
