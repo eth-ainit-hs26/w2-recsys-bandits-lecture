@@ -60,6 +60,12 @@ worked examples). A number written in the prose of the .tex must be added to `EX
 - The data and the worked examples are those of the games on the course site: Once Upon a Video Store
   (`w2-cx-private/01_nearest_neighbours`) and the Matchmaker's parts one, two, three and the optional part
   (`w2-cx-private/02_matrix_factorization`). The tool's docstring names the file behind each copy.
+- Since 2026-11-12 the games are Once Upon a Matchmaker (part one), Once Upon a Streaming Service (part two, with
+  part three's whole picture as its second half since w2-cx-private `1e1048f`) and its optional part; the notes name
+  and link them so. Part one tells a matchmaking story since w2-cx-private `57cac74` (four ladies, five gentlemen,
+  three questions), and section 3 of the morning notes, the matrix product, still uses part one's earlier example:
+  `notes_numbers.py` stops at its comparison with w2-cx-private (`KeyError: 'sara'` in `compare_with_private`) until
+  that section is ported. The PDF checks alone ran on 2026-11-12 with that comparison skipped.
 - The notation is the games' notation (`01_nearest_neighbours/source/game/NOTATION.md` and
   `02_matrix_factorization/source/game/NOTATION.md` in `w2-cx-private`): ratings from -2 to 2, stars minus 3; the textbook cross, Q above PQ and P on its left; the loss
   `(prediction - rating)^2` with the prediction on the left; part two's nudge of 0.01, its slope nabla and
@@ -86,6 +92,8 @@ worked examples). A number written in the prose of the .tex must be added to `EX
 
 ## Gotchas
 
+- The links table at the end of the morning notes is `\small` with `\scriptsize` addresses and a 0.5 em gap, as in
+  the afternoon notes; the longer game names of 2026-11-12 overflowed it with `\footnotesize` addresses.
 - Film names above a TikZ matrix: every head gets `text width=\headwidth`, where `\headwidth` is the width of the
   longest word of the figure's film names (set with `\settowidth` on a one-column tabular of the words), so the
   film columns are equally wide and no name is hyphenated. A `\strut` on the last line, `anchor=south` and
