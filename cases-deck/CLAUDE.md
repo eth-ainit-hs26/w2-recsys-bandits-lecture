@@ -38,6 +38,8 @@ Payments) and `block4-parallelized-mf.tex` (LinkedIn's ads). The six one-case de
 course site has had the cases since 2026-11-06 (Carlos: "the slides with the business cases are not up. Publish
 them"): since 2026-11-09 the four block decks, each on its Friday row, and the weekend deck with its handout in its
 Materials list (README.md, section "On the course site", has the file table). `cases.pdf` stays unpublished.
+Since AINIT-PAGE `c01c44e` (2026-11-12) the decks of blocks 1, 3 and 4 are on the site only after their cold intros,
+in one PDF per block (`../cold-intro-and-cases/`), and the deck of block 2 is the first chip of its row.
 
 ## Files
 

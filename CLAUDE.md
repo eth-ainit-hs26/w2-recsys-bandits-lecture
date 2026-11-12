@@ -83,6 +83,10 @@ Specifically:
 │                               and the cold intro of the Friday 14:00 bandits block,
 │                               "Estimating chances from the past" (Graunt, chosen from three
 │                               drafts on 2026-11-11)
+├── cold-intro-and-cases/       One PDF per block that has a cold intro (2026-11-12): the cold intro,
+│                               then the block's business cases, made by merge.py from the built
+│                               decks; the first chip of the Friday 08:15, 14:00 and 16:00 rows;
+│                               own CLAUDE.md and README.md
 ├── clusters-deck/              "Computing clusters" (2026-11-10), the Saturday 08:15 block until
 │                               2026-11-11, since then part of the Friday 16:00 block
 │                               "Large-scale computing": a port
@@ -320,6 +324,16 @@ Syllabus rows of the master spreadsheet and the course site; every named case ha
 `cheat-sheet/SOURCES.md`. It lives here because it was built during weekend 2; it covers all three weekends. On the
 course site since 2026-11-11 (AINIT-PAGE `ab95b28`): a button beside the intro deck on the home page and a group at
 the top of weekend 2's Materials. `cheat-sheet/CLAUDE.md` has the build, the layout and the way to republish.
+
+## The cold intro and cases PDFs (added 2026-11-12)
+
+`cold-intro-and-cases/` holds one PDF per Friday block that has a cold intro: the cold intro, then the block's business
+cases, concatenated page by page by `merge.py` (pypdf) from the decks of `cold-intro-deck/` and `cases-deck/`. Carlos,
+2026-11-12: "always put the cold intro with the business on top at the beginning before the rest of the material ...
+make that for each block the first chip". On the course site since AINIT-PAGE `c01c44e` as "Nearest neighbors" (02),
+"Bandits" (09) and "Large-scale computing" (11); the separate cold intro and case files of those blocks are off the
+site, and the Friday 11:00 row opens with its case deck, "Business case, Spotify" (05). After a rebuild of any of the
+six decks, run `python3 -I merge.py` there and copy its output to the site (`cold-intro-and-cases/README.md`).
 
 ## When in doubt
 

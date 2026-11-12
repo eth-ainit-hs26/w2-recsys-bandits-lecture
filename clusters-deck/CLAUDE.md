@@ -2,9 +2,10 @@
 
 Beamer, lualatex, three passes, from this folder. One deck: `block5-computing-clusters.tex`, "Computing clusters",
 the Saturday 14 November 2026 08:15 block of AINIT HS26 until 2026-11-11, when Carlos merged computing clusters with
-parallelized matrix factorization: since then the second item of the Friday 13 November 16:00 block "Large-scale
-computing", after its cold intro and before Matchmaker on a Grid and the case LinkedIn's ads (AINIT-PAGE `5ab848e`; the
-title page reads Friday 13 November 2026). Built on 2026-11-10 as a port into Codex plates of the
+parallelized matrix factorization: since then an item of the Friday 13 November 16:00 block "Large-scale
+computing" (AINIT-PAGE `5ab848e`; the title page reads Friday 13 November 2026), since AINIT-PAGE `c01c44e`
+(2026-11-12) after the block's opening PDF (its cold intro, then the case LinkedIn's ads, `../cold-intro-and-cases/`)
+and before Matchmaker on a Grid. Built on 2026-11-10 as a port into Codex plates of the
 first block of FDD weekend 7, "The cost of computation and supercomputers"
 (`/Users/carloscotrini/Documents/git_fdd/projects/weekend-07-large-scale/carlos-lectures/slides/w7-cost-slides.tex`,
 commit `b296f78`), with the cuts and changes Carlos dictated that day. `README.md` has the frame map against FDD's

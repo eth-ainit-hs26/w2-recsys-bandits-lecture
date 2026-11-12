@@ -350,6 +350,15 @@ https://eth-ainit-hs26.github.io/AINIT-PAGE/slides/we2/<file>
 After a rebuild, copy the PDF over the same site file name, run `npm ci && npm run build` in `AINIT-PAGE`, push to
 `main`, then curl the live file and `cmp` it with the one here. The block handouts are not published.
 
+Since AINIT-PAGE `c01c44e` (2026-11-12, Carlos, 2026-11-12: "always put the cold intro with the business on top at the beginning before the rest of the material ... make that for each block the first chip") the decks of
+blocks 1, 3 and 4 are on the site only after their cold intros, one PDF per block made by
+`../cold-intro-and-cases/merge.py`: the chips "Nearest neighbors" (02, after the cheat sheet), "Bandits" (09) and
+"Large-scale computing" (11), each first on its row; `ainit-hs26-business-cases-nearest-neighbors.pdf`,
+`-bandits.pdf` and `-parallelized-mf.pdf` are gone, so the first, third and fourth rows of the table describe the
+site before that commit. The deck of block 2 is the first chip of the 11:00 row since the same commit, "Business
+case, Spotify", number 05. After a rebuild of a block 1, 3 or 4 deck, run the script and copy its output
+(`../cold-intro-and-cases/README.md`).
+
 ## Frames
 
 | # | Slot | Title | Technique | On the slide |

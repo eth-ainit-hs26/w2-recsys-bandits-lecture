@@ -81,13 +81,19 @@ Searching through representations". Since AINIT-PAGE `9e0be17` the chips read "N
 
 | Site file | Source here |
 |---|---|
-| `ainit-hs26-nearest-neighbors-cold-intro.pdf` | `block1-nearest-neighbors.pdf` |
+| `ainit-hs26-nearest-neighbors-cold-intro.pdf` (until 2026-11-12) | `block1-nearest-neighbors.pdf` |
+| `ainit-hs26-nearest-neighbors-cold-intro-and-cases.pdf` (since 2026-11-12) | `../cold-intro-and-cases/block1-nearest-neighbors.pdf`: this deck, then the cases Etsy and Airbnb |
+
+Since AINIT-PAGE `c01c44e` (2026-11-12) the deck is on the site only as the first part of the chip "Nearest neighbors",
+number 02, after the cheat sheet (Carlos, 2026-11-12: "always put the cold intro with the business on top at the beginning before the rest of the material ... make that for each block the first chip"; "they become now
+together number two, and I want you to call it nearest neighbors"). After a rebuild, run `python3 -I merge.py` in
+`../cold-intro-and-cases/` and copy its output (`../cold-intro-and-cases/README.md`).
 
 The handout, `ainit-hs26-nearest-neighbors-cold-intro-handout.pdf`, is off the site since 2026-11-11 (AINIT-PAGE
 `5ab848e`, Carlos: "drop the handouts for all the cold intros"), as are the handouts of the other cold intros.
 A live file is https://eth-ainit-hs26.github.io/AINIT-PAGE/slides/we2/<file>
-After a rebuild, copy the PDF over the same site file name, run `npm ci && npm run build` in `AINIT-PAGE`, push to
-`main`, then curl the live file and `cmp` it with the one here. Since AINIT-PAGE commit `8bf143b` the weekend 2
+After a rebuild, merge it again (above), copy the output over its site file name, run `npm ci && npm run build` in `AINIT-PAGE`, push to
+`main`, then curl the live file and `cmp` it with the merged one. Since AINIT-PAGE commit `8bf143b` the weekend 2
 ZIP, `ainit-hs26-weekend-2.zip`, holds it, numbered as on the page; `npm run build` remakes it from the files in
 `public/`.
 
@@ -211,6 +217,10 @@ CSCS as the only capitals, no build metadata, and Futura as the only font.
    opens the Friday 16:00 row "Large-scale computing", chip "Large-scale computing, cold intro", number 14, without
    its handout. The deck itself is unchanged: its closing frame "Computing clusters" leads into the lecture deck of
    that name, the next item of the row.
+5. 2026-11-12, Carlos, 2026-11-12: "always put the cold intro with the business on top at the beginning before the rest of the material ... make that for each block the first chip": since AINIT-PAGE `c01c44e` the deck is on the site only as the first part of
+   `ainit-hs26-large-scale-computing-cold-intro-and-cases.pdf`, the chip "Large-scale computing", number 11, the first
+   chip of the 16:00 row, with the case LinkedIn's ads after it (`../cold-intro-and-cases/`); the separate site file
+   is gone. After a rebuild, merge it again.
 
 ## Open items of block 5
 
@@ -329,7 +339,11 @@ cold intro" and "Handout", number 11 of weekend 2 that day; the Mirror and every
 
 | Site file | Source here |
 |---|---|
-| `ainit-hs26-bandits-cold-intro.pdf` | `block3-bandits-graunt.pdf` |
+| `ainit-hs26-bandits-cold-intro.pdf` (until 2026-11-12) | `block3-bandits-graunt.pdf` |
+| `ainit-hs26-bandits-cold-intro-and-cases.pdf` (since 2026-11-12) | `../cold-intro-and-cases/block3-bandits.pdf`: GRAUNT, then the cases Spotify's home page and Amazon Payments |
+
+Since AINIT-PAGE `c01c44e` (2026-11-12) GRAUNT is on the site only as the first part of the chip "Bandits", number 09,
+the first chip of the 14:00 row; after a rebuild, merge it again (`../cold-intro-and-cases/`).
 
 The handout, `ainit-hs26-bandits-cold-intro-handout.pdf`, is off the site since AINIT-PAGE `5ab848e` (2026-11-11).
 The recipe after a rebuild is the one of block 1 (section "On the course site"): copy the PDF over the same site file
