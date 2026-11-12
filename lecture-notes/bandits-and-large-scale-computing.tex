@@ -24,7 +24,7 @@
 \newcommand{\term}[1]{\textbf{#1}}
 \newsavebox{\besidebox}
 \newcommand{\beside}[2]{\par\noindent\sbox{\besidebox}{#1}\usebox{\besidebox}\hfill
-  \begin{minipage}[c]{\dimexpr\textwidth-\wd\besidebox-1.5em\relax}#2\end{minipage}\par}
+  \begin{minipage}[c]{\dimexpr\textwidth-\wd\besidebox-1.5em\relax}\raggedright#2\end{minipage}\par}
 \newcommand{\Mirror}{\href{https://eth-ainit-hs26.github.io/AINIT-PAGE/viz/we2/mirror/}{Once Upon a Mirror}}
 \newcommand{\Grid}{\href{https://eth-ainit-hs26.github.io/AINIT-PAGE/viz/we2/matchmaker-grid/}{Matchmaker on a Grid}}
 \newcommand{\Clusters}{\href{https://eth-ainit-hs26.github.io/AINIT-PAGE/slides/we2/ainit-hs26-computing-clusters.pdf}{Computing clusters}}
@@ -42,8 +42,8 @@ Lecture notes. AI in Industry, ETH Zurich, weekend 2, Friday 13 November 2026, 1
 
 \section{Multi-armed bandits}
 
-\term{Multi-armed bandit.} A series of choices among the same options. Each choice brings a reward by chance, and
-only the chosen option's reward is seen. Goal: the most rewards over all the choices.
+\term{Multi-armed bandit.} Repeated choices among the same options; each choice brings a reward by chance, only the
+chosen option's reward is seen, and the goal is the largest total reward.
 
 \term{The game.} Each morning a magic mirror shows its owner one ad from the Mirror Shop; a tap on the ad is a click.
 A season is 100 mornings. Goal: as many taps as possible.
@@ -51,16 +51,12 @@ A season is 100 mornings. Goal: as many taps as possible.
 \term{Probability $p$.} How likely a customer is to tap a product; hidden from the mirror. Showing an ad is drawing a
 ball from the customer's urn for that product, orange for a tap: Cinderella's urn for the mattress holds 2 orange
 balls of 5, $p = 2/5 = 0.4$.
-\begin{center}
-\input{generated/bandits-probabilities.tex}
-\end{center}
+\par\smallskip\noindent\input{generated/bandits-probabilities.tex}\par\smallskip
 
-\term{Estimate $\hat p$.} Of a product: its taps divided by its showings, the average of its 1s (taps) and 0s (no
-taps). The more showings, the closer it tends to get to $p$. The board has one row per product and one dot per
-showing: $\bullet$ a tap, $\circ$ no tap.
+\term{Estimate $\hat p$.} Of a product: its taps divided by its showings, the average of its 1s (taps) and 0s;
+it tends to $p$ as the showings grow. The board: a dot per showing, $\bullet$ a tap, $\circ$ no tap.
 
-\term{Rate.} Of a season: taps divided by mornings. The rate so far, after each morning: the taps so far divided by
-the mornings so far.
+\term{Rate.} Taps divided by mornings, of a season or so far, after each morning.
 
 \term{The Queen's mirror.} It knows every $p$ and shows the product with the highest $p$ every morning: an imagined
 reference, the best rate a mirror could reach.
@@ -76,21 +72,21 @@ Game: \Mirror, section 1. Notebook: \NbOne.
 
 \section{Random}
 
-\term{Random.} Each morning, a card from a hat: every product has the same chance, 1 in 5. Random never looks at the
-estimates.
+\term{Random.} Each morning, a card from a hat: every product has the same chance, 1 in 5.
 
-\term{Race season.} The season on which the game plays every mirror: the same mornings, the same Cinderella.
-Random: 31 taps, rate $0.31$. The Queen's mirror, the vacuum every morning: 60 taps, rate $0.6$.
+\term{Race season.} One season at Cinderella's, the same mornings for every mirror. Random: 31 taps, rate $0.31$.
+The Queen's mirror, the vacuum every morning: 60 taps, rate $0.6$.
 
 Game: \Mirror, section 2. Notebook: \NbTwo.
 
+\needspace{9\baselineskip}
 \section{Estimate then exploit}
 
 \term{Estimate then exploit} with $n$:
 \begin{enumerate}
 \item Initialize.
 \item Test: on each of the next $n$ mornings, a card from the hat.
-\item Highest estimate: after the test, the product with the highest estimate; a tie is broken at random.
+\item Highest estimate: after the test, the product with the highest, a tie broken at random.
 \item Exploit: show it on every remaining morning.
 \end{enumerate}
 
@@ -101,10 +97,9 @@ after, 47 in all.}
 
 \term{Choosing $n$.} A large $n$ wastes mornings on products the customer rarely taps; with a small $n$, a weaker
 product can have the highest estimate. The best $n$ depends on the probabilities, which the mirror does not know.
-The challenge round, the average rate over 10,000 seasons for every $n$ from 0 to 95, the best $n$ within $0.005$ of
-the highest: Ready for the ball, Cinderella (silk gloves 0.6, tiara 0.9, evening bag 0.6, ball gown 0.95, lipstick
-0.6), best $n$ 19 to 34; Long hair, Rapunzel (ribbon 0.95; scissors, cap, razor and haircut voucher 0.02 each), best
-$n$ 1 to 6.
+Challenge round, average rate over 10,000 seasons, best $n$ within $0.005$ of the highest: Cinderella, ball gown
+0.95, tiara 0.9, three products at 0.6: best $n$ 19 to 34. Rapunzel, ribbon 0.95, four products at 0.02: best $n$ 1
+to 6.
 
 Game: \Mirror, section 3. Notebook: \NbThree.
 
@@ -114,9 +109,9 @@ Game: \Mirror, section 3. Notebook: \NbThree.
 \begin{enumerate}
 \item Initialize.
 \item Spin the roulette. With $\varepsilon = 0.2$, one spin in five stops on the small slice.
-\item Sample: on the small slice, a card from the hat, every product with the same chance, the best one too; on the
-  large slice, the product with the highest estimate, a tie broken at random.
-\item Update: tap or no tap, the estimate of the product shown changes. Steps 2 to 4 repeat every morning.
+\item Sample: on the small slice, a card from the hat, the best product included; on the large slice, the product
+  with the highest estimate, a tie broken at random.
+\item Update: the shown product's estimate changes. Steps 2 to 4 repeat every morning.
 \end{enumerate}
 
 Example: the race season with $\varepsilon = 0.2$. The needle stopped on the hat 16 times in 95 spins. From morning
@@ -127,31 +122,26 @@ Game: \Mirror, section 4. Notebook: \NbFour.
 
 \section{UCB}
 
-\term{Exploration bonus.} Of a product with $n$ dots: $1/\sqrt{n}$. The fewer dots, the bigger the bonus.
-
-\term{UCB.} Upper confidence bound:
+\term{UCB.} Upper confidence bound; exploration bonus $1/\sqrt{n}$ for $n$ dots, bigger with fewer dots:
 \begin{enumerate}
 \item Initialize: each product's first estimate and first bonus.
-\item Show the highest: the product with the highest estimate + bonus; a tie is broken at random.
+\item Show the highest: the product with the highest estimate + bonus, a tie broken at random.
 \item Update: tap or no tap, its estimate and its bonus change.
 \item Repeat every morning, to the end of the season.
 \end{enumerate}
 
-\needspace{9\baselineskip}
-Example: the race season after 10 mornings; in the game the estimate is the dark bar, the bonus the light bar.
-\begin{center}
-\input{generated/bandits-ucb.tex}
-\end{center}
-The highest estimate + bonus: the vacuum, 1.25. The mirror shows it on morning 11. Taps in the season: 52.
+\needspace{8\baselineskip}
+\beside{\input{generated/bandits-ucb.tex}}{Example: the race season after 10 mornings. In the game, the estimate is
+the dark bar, the bonus the light bar. The highest estimate + bonus: the vacuum, 1.25, shown on morning 11. Taps in
+the season: 52.}
 
-\term{The real UCB.} The product with the highest $\hat p + \sqrt{2 \ln t / n}$, $t$ the mornings so far, $\ln$ the
-natural logarithm. With high confidence, $p$ is below this number: an upper confidence bound. Its bonus grows slowly
-with $t$, so a product left aside long enough comes back. The game's bonus $1/\sqrt{n}$ leaves $t$ out.
+\term{The real UCB.} The product with the highest $\hat p + \sqrt{2 \ln t / n}$, $t$ the mornings so
+far, $\ln$ the natural logarithm. With high confidence, $p$ is below this number: an upper confidence bound.
 
 \needspace{7\baselineskip}
-\term{All the mirrors.}
-\beside{\input{generated/bandits-race.tex}}{Taps in the race season, every mirror on the same 100 mornings. At
-Rapunzel's the ladder, $p = 0.8$, stands far above her other products. Another season gives other numbers.}
+\beside{\input{generated/bandits-race.tex}}{\term{All the mirrors.} Taps in the race season, every mirror on the
+same 100 mornings, at Cinderella's and at Rapunzel's. Rapunzel's ladder, $p = 0.8$, stands far above her other
+products. Another season gives other numbers.}
 
 Game: \Mirror, section 5. Notebook: \NbFive.
 
@@ -161,52 +151,46 @@ Game: \Mirror, section 5. Notebook: \NbFive.
 is 2 FLOPs. FLOPs count work; FLOP/s, operations per second, measure speed.
 
 \term{GH200.} A module of NVIDIA: Grace, an ARM CPU, and Hopper, the GPU that does the arithmetic, with 96 GB of
-HBM3 memory. Rate: $990 \times 10^{12}$ FLOP/s at 16 bits per number. A human computer of 1949: 1,000 additions a
-day.
-
-\term{Socket and node.} A socket is one processor module, here one GH200. A node is one independent computer, here 4
-GH200 with one operating system and one address space.
+HBM3 memory. Rate: $990 \times 10^{12}$ FLOP/s at 16 bits per number.
 
 \term{Alps.} The machine of CSCS, the Swiss National Supercomputing Centre in Lugano, an HPE Cray EX254n: 24 cabinets
-of 8 chassis, 7 blades in each chassis, 2 nodes on each blade. 2,688 nodes $\times$ 4 GH200 $=$ 10,752 sockets,
-$10.6 \times 10^{18}$ FLOP/s together. Apertus, the open language model of EPFL, ETH Zurich and CSCS, was
-trained on Alps.
+of 8 chassis, 7 blades in each chassis, 2 nodes on each blade. A node is one computer, with one operating system, of
+4 GH200, one in each socket. 2,688 nodes $\times$ 4 GH200 $=$ 10,752 sockets, $10.6 \times 10^{18}$ FLOP/s together.
+Apertus, the open language model of EPFL, ETH Zurich and CSCS, was trained on Alps.
 
 \term{Capacity and bandwidth.} Capacity: how much fits, 96 GB on a GH200. Bandwidth: how fast it moves, 4 TB/s from
 the HBM3 memory. $990 \times 10^{12}$ FLOP/s divided by $4.023 \times 10^{12}$ bytes/s is 246 FLOP per byte: unless a
-computation reuses each byte about that many times, the arithmetic units wait. A large matrix multiply does; many
-other operations do not.
+computation reuses each byte about that many times, the arithmetic units wait. A large matrix multiply does.
 
 \term{Links.} The GPU to its HBM3 memory, 4,023 GB/s; Grace to Hopper, 900 GB/s; socket to socket inside a node,
 150 GB/s; between nodes, 25 GB/s per GPU. Each step down costs about a factor of five; end to end, 161 times. The
 data stays at the fast end, and the slow links are crossed as rarely as possible.
 
-\term{Watt and kilowatt hour.} A watt is a rate of energy, a kilowatt hour an amount: rate $\times$ time $=$ amount,
-as FLOP/s $\times$ seconds $=$ FLOP. Alps caps each GH200 at about 660 W: one hour takes 0.66 kWh, 5.3 Rappen at 8
-Rappen per kWh (assumed). All 10,752 modules: 7.1 MW, about 570 francs an hour.
+\term{Watt and kilowatt hour.} A watt is a rate of energy, a kilowatt hour an amount. Alps caps each GH200 at about
+660 W: one hour takes 0.66 kWh, 5.3 Rappen at 8 Rappen per kWh (assumed). All 10,752 modules: 7.1 MW, about 570
+francs an hour.
 
 \term{Training cost.} $C = 6ND$ FLOP for a model of $N$ parameters trained on $D$ training numbers; the 6 is a rule
 of thumb. $N = D = 10^6$: $C = 6 \times 10^{12}$ FLOP, 120 seconds on a laptop at $50 \times 10^9$ FLOP/s.
 Apertus-70B, $N = 70 \times 10^9$, $D = 15 \times 10^{12}$: $C = 6.30 \times 10^{24}$ FLOP.
 
-\term{The Apertus-70B run.} Over 6 million GPU hours on up to 4,096 GPUs: 61 days of 4,096 GPUs flat out. The run
-spanned about 91 days, 2,747 GPUs on average. Energy: 6 million GPU hours $\times$ 660 W $=$ 3.96 GWh, 0.32 million
-francs at 8 Rappen per kWh. At a cloud rate of \$2.50 per GPU hour: \$15.0 million.
+\term{The Apertus-70B run.} Over 6 million GPU hours: 61 days of 4,096 GPUs flat out; the run spanned about 91
+days, 2,747 GPUs on average. 6 million GPU hours $\times$ 660 W $=$ 3.96 GWh, 0.32 million
+francs at 8 Rappen per kWh. At \$2.50 per GPU hour in a cloud: \$15.0 million.
 
 Slides: \Clusters.
 
 \section{Matrix factorization on a grid of computers}
 
-\term{The job.} \Grid: 6 customers and 6 films, two guessed numbers each. Gradient descent keeps 132 numbers: 36
-ratings, 24 guessed numbers (12 of the customers, 12 of the films), 36 predictions and 36 losses. Each of 15
-computers has room for 21 numbers: neither the ratings (36) nor the guessed numbers (24) fit in one, and together the
-computers have 315 places.
+\term{The job.} 6 customers and 6 films with invented ratings, two guessed numbers each. Gradient descent keeps 132 numbers: 36 ratings,
+24 guessed numbers, 36 predictions, 36 losses. 15 computers of 21 places each, 315 in all: neither the
+ratings nor the guessed numbers fit in one.
 
 \term{Blocks and slices.} The 4 predictions of 2 customers and 2 films need only the two rows of those customers and
 the two columns of those films, 8 of the 24 guessed numbers. The ratings, cut every 2 customers and every 2 films:
-nine blocks of 4 ratings, one on each of the computers C11 to C33. The customers' numbers, cut into 3 slices of 2
-customers: A1 to A3. The films' numbers, cut into 3 slices of 2 films: B1 to B3. A C computer holds 4 ratings, 4 + 4
-copies, 4 predictions, 4 losses and their sum: 21 numbers.
+nine blocks of 4, one on each of C11 to C33. The customers' numbers in 3 slices, on A1 to A3; the films' numbers in
+3 slices, on B1 to B3. A C computer holds 4 ratings, 4 + 4 copies, 4 predictions, 4 losses and their sum: 21
+numbers.
 
 \needspace{12\baselineskip}
 \begin{center}
@@ -218,17 +202,16 @@ copies, 4 predictions, 4 losses and their sum: 21 numbers.
 \item Every A computer sends a copy of its numbers to the 3 C computers of its row.
 \item Every B computer sends a copy of its numbers to the 3 C computers of its column.
 \item Every C computer multiplies its two copies: its 4 predictions.
-\item Every C computer computes its 4 losses and their sum. The nine sums add up to the total loss.
-\item What-if: one number of an A or B computer changes by 0.01. Only the C computers of its row or column use it;
-  they recompute their sums, and the nine sums give the total loss after.
+\item Every C computer computes its 4 losses and their sum; the nine sums make the total loss.
+\item What-if: one number of an A or B computer changes by 0.01; only the C computers of its row or column
+  recompute their sums, and the nine sums give the total loss after.
 \item Slope: (total loss after $-$ total loss before)$/0.01$.
-\item Update: the number moves to number $- \alpha \times$ slope, with $\alpha = 0.014$.
-\item Rounds: every number of A and B does its what-if at the same guess, then all move at once.
+\item Update: the number moves to number $- \alpha \times \text{slope}$, with $\alpha = 0.014$.
+\item Rounds: all numbers of A and B do their what-ifs at the same guess, then move at once.
 \end{enumerate}
 
-Example: the first guess, above, has total loss 387. The Intouchables' first number, on B2, from $-1$ to $-0.99$:
-only C12, C22 and C32 recompute, their sums 5 to 4.9005, 54 to 53.8005 and 21 to 21.0405, and the total loss goes
-from 387 to 386.7415. Slope: $(386.7415 - 387)/0.01 = -25.85$. Update: $-1 - 0.014 \times (-25.85) = -0.64$. The
+Example: the first guess, above, total loss 387. The Intouchables' first number, on B2, from $-1$ to $-0.99$: only
+C12, C22 and C32 recompute, their sums 5 to 4.9005, 54 to 53.8005 and 21 to 21.0405; total loss 386.7415. Slope: $(386.7415 - 387)/0.01 = -25.85$. Update: $-1 - 0.014 \times (-25.85) = -0.64$. The
 total loss is below 1 after round 30 and below 0.01 after round 51; it stops falling after round 78, at 0.0028, every
 prediction within 0.022 of its rating.
 
@@ -236,25 +219,19 @@ Game: \Grid.
 
 \section{Games, notebooks and slides}
 
-Game, visualization and slides, on the course site:
+{\raggedright Game, visualization and slides, on the course site. Notebooks, in the public repository
+\mbox{\url{https://github.com/eth-ainit-hs26/w2-cx-public}}; each link opens one in Colab:\par}
 
 {\small
-\begin{tabular}{@{}l@{\hspace{0.6em}}l@{}}
+\begin{tabular}{@{}l@{\hspace{0.5em}}l@{}}
 Once Upon a Mirror & {\scriptsize\url{https://eth-ainit-hs26.github.io/AINIT-PAGE/viz/we2/mirror/}} \\
 Matchmaker on a Grid & {\scriptsize\url{https://eth-ainit-hs26.github.io/AINIT-PAGE/viz/we2/matchmaker-grid/}} \\
-Computing clusters & {\scriptsize\url{https://eth-ainit-hs26.github.io/AINIT-PAGE/slides/we2/ainit-hs26-computing-clusters.pdf}} \\
-\end{tabular}\par}
-
-Notebooks, in the public repository \url{https://github.com/eth-ainit-hs26/w2-cx-public}. Each link opens a
-notebook in Colab:
-
-{\small
-\begin{tabular}{@{}l@{\hspace{1.2em}}l@{}}
+Computing clusters & {\scriptsize\url{https://eth-ainit-hs26.github.io/AINIT-PAGE/slides/we2/ainit-hs26-computing-clusters.pdf}} \\[3pt]
 1, the estimate & \href{https://colab.research.google.com/github/eth-ainit-hs26/w2-cx-public/blob/main/03_cx_bandits_1_estimates_student.ipynb}{student}, \href{https://colab.research.google.com/github/eth-ainit-hs26/w2-cx-public/blob/main/03_cx_bandits_1_estimates_solutions.ipynb}{solutions} \\
 2, the random mirror & \href{https://colab.research.google.com/github/eth-ainit-hs26/w2-cx-public/blob/main/03_cx_bandits_2_random_student.ipynb}{student}, \href{https://colab.research.google.com/github/eth-ainit-hs26/w2-cx-public/blob/main/03_cx_bandits_2_random_solutions.ipynb}{solutions} \\
 3, estimate then exploit & \href{https://colab.research.google.com/github/eth-ainit-hs26/w2-cx-public/blob/main/03_cx_bandits_3_estimate_then_exploit_student.ipynb}{student}, \href{https://colab.research.google.com/github/eth-ainit-hs26/w2-cx-public/blob/main/03_cx_bandits_3_estimate_then_exploit_solutions.ipynb}{solutions} \\
 4, epsilon-greedy & \href{https://colab.research.google.com/github/eth-ainit-hs26/w2-cx-public/blob/main/03_cx_bandits_4_epsilon_greedy_student.ipynb}{student}, \href{https://colab.research.google.com/github/eth-ainit-hs26/w2-cx-public/blob/main/03_cx_bandits_4_epsilon_greedy_solutions.ipynb}{solutions} \\
-5, UCB & \href{https://colab.research.google.com/github/eth-ainit-hs26/w2-cx-public/blob/main/03_cx_bandits_5_ucb_student.ipynb}{student}, \href{https://colab.research.google.com/github/eth-ainit-hs26/w2-cx-public/blob/main/03_cx_bandits_5_ucb_solutions.ipynb}{solutions} \\
+5, UCB & \href{https://colab.research.google.com/github/eth-ainit-hs26/w2-cx-public/blob/main/03_cx_bandits_5_ucb_student.ipynb}{student}, \href{https://colab.research.google.com/github/eth-ainit-hs26/w2-cx-public/blob/main/03_cx_bandits_5_ucb_solutions.ipynb}{solutions}
 \end{tabular}\par}
 
 \end{document}

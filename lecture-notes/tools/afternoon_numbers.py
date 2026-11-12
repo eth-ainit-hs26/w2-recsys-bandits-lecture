@@ -84,7 +84,6 @@ BS = 2                                                   # a block: 2 customers 
 DECK_NUMBERS = {
     "gh200 rate": ("990 \\times 10^{12}$ FLOP/s", "One computer, then and now"),
     "bits": ("16 bits per number", "One computer, then and now"),
-    "clerk": ("1,000 additions a day", "One computer, then and now"),
     "cap": ("660 W on Alps", "One computer, then and now"),
     "hbm": ("96 GB of HBM3 at 4 TB/s", "A GH200 is a CPU and a GPU on one module"),
     "grace hopper": ("Between them 900 GB/s", "A GH200 is a CPU and a GPU on one module"),
@@ -533,12 +532,14 @@ def ete_board():
 
 
 def ucb_table():
-    lines = [r"\begin{tabular}{|l|l|c|c|c|}", r"\hline",
-             r"Product & Showings & Estimate & Bonus & Estimate + bonus \\ \hline"]
+    """The board of UCB after UCB_AT mornings; the estimate's fraction gives the taps and the showings."""
+    lines = [r"\begin{tabular}{|l|c|c|c|}", r"\hline",
+             r"Product & Estimate & Bonus & \begin{tabular}[b]{@{}c@{}}Estimate\\ + bonus\end{tabular} \\ \hline"]
     for k, (r, x) in enumerate(zip(UCB_ROWS, UCB_BOARD)):
+        assert (x["t"], x["n"]) == (sum(r), len(r))
         bonus = r"$1/\sqrt{%d} = %s$" % (x["n"], dec(x["b"])) if x["n"] > 1 else r"$1/\sqrt{1} = 1$"
-        lines.append("%s & %s & $%d/%d = %s$ & %s & %s \\\\ \\hline" % (
-            PRODUCTS[k], dots(r), x["t"], x["n"], dec(x["e"]), bonus, num(dec(x["s"]))))
+        lines.append("%s & $%d/%d = %s$ & %s & %s \\\\ \\hline" % (
+            PRODUCTS[k], x["t"], x["n"], dec(x["e"]), bonus, num(dec(x["s"]))))
     lines.append(r"\end{tabular}")
     write("bandits-ucb.tex", "\n".join(lines) + "\n")
 
@@ -556,20 +557,20 @@ def race_table():
 def grid_figure():
     """The grid of slide 3 of Matchmaker on a Grid: A computers on the left, B computers on top, C computers where
     they meet, each C with the sum of its 4 losses at the first guess."""
-    cw, ch, aw, bh = 3.4, 0.85, 2.4, 1.2                                # cm
+    cw, ch, aw, bh = 3.2, 0.55, 2.8, 1.2                                # cm
     out = [r"\begin{tikzpicture}[x=1cm, y=1cm, every node/.style={font=\small, align=center, inner sep=2pt}]"]
     cust, films = GRID["customers"], GRID["films"]
     for b in range(3):
         x = aw + 0.3 + b * (cw + 0.2) + cw / 2
         out.append(r"\node[draw, text width=%.2fcm, minimum height=%.2fcm] at (%.2f, 0) {B%d\\ "
-                   r"{\footnotesize %s\\ %s}};" % (cw - 0.2, bh, x, b + 1, films[2 * b], films[2 * b + 1]))
+                   r"{\footnotesize %s\\ %s\strut}};" % (cw - 0.2, bh, x, b + 1, films[2 * b], films[2 * b + 1]))
     for a in range(3):
         y = -(bh / 2 + 0.2 + ch / 2) - a * (ch + 0.15)
-        out.append(r"\node[draw, text width=%.2fcm, minimum height=%.2fcm] at (%.2f, %.2f) {A%d\\ "
+        out.append(r"\node[draw, text width=%.2fcm, minimum height=%.2fcm] at (%.2f, %.2f) {A%d: "
                    r"{\footnotesize %s, %s}};" % (aw - 0.2, ch, aw / 2, y, a + 1, cust[2 * a], cust[2 * a + 1]))
         for b in range(3):
             x = aw + 0.3 + b * (cw + 0.2) + cw / 2
-            out.append(r"\node[draw, text width=%.2fcm, minimum height=%.2fcm] at (%.2f, %.2f) {C%d%d\\ sum %d};"
+            out.append(r"\node[draw, text width=%.2fcm, minimum height=%.2fcm] at (%.2f, %.2f) {C%d%d: sum %d};"
                        % (cw - 0.2, ch, x, y, a + 1, b + 1, SUMS0[a][b]))
     out.append(r"\node at (%.2f, 0) {total loss\\ %d};" % (aw / 2, L0))
     out.append(r"\end{tikzpicture}")
@@ -578,15 +579,27 @@ def grid_figure():
 
 # THE PDF
 
+BALL, HAIR = dict(COLLECTIONS["Ready for the ball"][1]), dict(COLLECTIONS["Long hair"][1])
+assert sorted(BALL.values()) == [0.6, 0.6, 0.6, 0.9, 0.95] and sorted(HAIR.values()) == [0.02] * 4 + [0.95]
 EXPECTED = [  # strings the PDF must contain (a minus sign is read as a hyphen, a times sign as x)
     "2/5 = 0.4",
-    "Random: %d taps" % TAPS["Cinderella"]["random"], "%d taps, rate 0.6" % TAPS["Cinderella"]["queen"],
+    "Random: %d taps, rate %s" % (TAPS["Cinderella"]["random"], dec(TAPS["Cinderella"]["random"] / SEASON)),
+    "%d taps, rate %s" % (TAPS["Cinderella"]["queen"], dec(TAPS["Cinderella"]["queen"] / SEASON)),
+    "1 in %d" % K, "ladder, p = %s" % dec(RAP[1]),
+    "mornings 1 to %d. The vacuum leads with %s; the mirror shows it on mornings %d to %d" % (
+        TEST, dec(ETE_EST[0]), TEST + 1, SEASON),
+    "over {:,} seasons, best n within {}".format(AVG_S, NEAR),
+    "satnav %d. Taps: %d" % (EG_SHOWN[4], TAPS["Cinderella"]["eg"]),
+    "after %d mornings" % UCB_AT, "Taps in the season: %d" % TAPS["Cinderella"]["ucb"],
+    "keeps %d numbers: %d ratings, %d guessed numbers, %d predictions, %d losses" % (JOB, NR, NG, NR, NR),
+    "%d computers of %d places each, %d in all" % (POOL, ROOM, POOL * ROOM),
+    "with alpha = %s" % G_ALPHA,
     "Taps: %d in the test, %d after, %d in all" % (N["ete test taps"], N["ete after taps"],
                                                    TAPS["Cinderella"]["ete"]),
     "best n %s" % N["ball near"], "best n %s" % N["hair near"],
-    ", ".join("%s %s" % (name.lower(), dec(q)) for name, q in COLLECTIONS["Ready for the ball"][1]),
-    "ribbon %s; scissors, cap, razor and haircut voucher %s each" % (
-        dec(COLLECTIONS["Long hair"][1][2][1]), dec(COLLECTIONS["Long hair"][1][0][1])),
+    "ball gown %s, tiara %s, three products at %s" % (dec(BALL["Ball gown"]), dec(BALL["Tiara"]),
+                                                      dec(BALL["Silk gloves"])),
+    "ribbon %s, four products at %s" % (dec(HAIR["Ribbon"]), dec(HAIR["Scissors"])),
     "%d times in %d spins" % (HATS, SPINS), "From morning %d on" % (LOCK + 1),
     "vacuum %d, ladder %d, blower %d, mattress %d, satnav %d" % tuple(EG_SHOWN),
     "the vacuum, %s" % dec(UCB_BOARD[0]["s"]), "on morning %d" % (UCB_AT + 1),
@@ -601,8 +614,9 @@ FORBIDDEN = ["average loss", "10.75"]   # the loss of matrix factorization is th
 
 
 def check_pdf(pdf):
-    text = subprocess.run(["pdftotext", "-layout", str(pdf), "-"], capture_output=True, text=True,
-                          check=True).stdout
+    # Two extractions: -layout keeps the lines of a table, -raw (content order) keeps a text set beside a table whole.
+    text = "\n".join(subprocess.run(["pdftotext"] + mode + [str(pdf), "-"], capture_output=True, text=True,
+                                    check=True).stdout for mode in (["-layout"], ["-raw"]))
     dashes = [c for c in text if c in (chr(8211), chr(8212))]
     assert not dashes, "%d en or em dashes in the PDF" % len(dashes)
     flat = re.sub(r"\s+", " ", text.replace(chr(8722), "-").replace(chr(215), "x").replace(chr(945), "alpha"))
