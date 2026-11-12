@@ -68,13 +68,14 @@ A push publishes the repository on GitHub Pages, so the PDF is reachable there.
 
 On the course site since 2026-11-11, at Carlos's yes that day (AINIT-PAGE commit `ab95b28`): the copy
 `public/slides/we2/ainit-hs26-cheat-sheet.pdf`, linked by the button "Semester cheat sheet (PDF)" beside the intro
-deck on the home page (`src/pages/HomePage.tsx`) and, since AINIT-PAGE `9e0be17`, by the first chip of weekend 2's Friday
-08:15 row, "01 Semester cheat sheet", the first entry of its Materials list too (`src/data/weekends.ts`). The live copy:
+deck on the home page (`src/pages/HomePage.tsx`) and by the group "Cheat sheet" of weekend 2's Materials list, "The
+semester on one page, all three weekends", without a number (`resources` and `download.extras` of weekend 2 in
+`src/data/weekends.ts`). From 2026-11-11 until AINIT-PAGE `6c59082` (2026-11-12) it was also number 01 of weekend 2's
+ZIP (since `8bf143b`) and the first chip of its Friday 08:15 row, "01 Semester cheat sheet" (since `9e0be17`); then
+Carlos: "Drop the cheat sheet from the agenda of weekend 2. We'll keep it on the website." The live copy:
 https://eth-ainit-hs26.github.io/AINIT-PAGE/slides/we2/ainit-hs26-cheat-sheet.pdf
 After a change here, copy the new PDF over that file with the recipe of `w1-lecture-material/CLAUDE.md`, section
 Publishing: clone AINIT-PAGE, copy, `npm ci && npm run build`, push, then curl the live file and `cmp` it with this one.
-Since 2026-11-11 (AINIT-PAGE `8bf143b`) it is also number 01 of weekend 2's ZIP, which every deploy rebuilds from
-that copy; saved from weekend 2's page, it is named "01 Semester cheat sheet.pdf".
 
 ## Maintenance contract
 

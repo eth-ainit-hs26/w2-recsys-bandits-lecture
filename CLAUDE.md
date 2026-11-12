@@ -333,17 +333,21 @@ concepts" and "an orientation guide for the participants on when to use each tec
 branches, 30 cards in 14 groups, each card with what it is, "Use it when" and "In industry". The concepts are the
 Syllabus rows of the master spreadsheet and the course site; every named case has its source in
 `cheat-sheet/SOURCES.md`. It lives here because it was built during weekend 2; it covers all three weekends. On the
-course site since 2026-11-11 (AINIT-PAGE `ab95b28`): a button beside the intro deck on the home page and a group at
-the top of weekend 2's Materials. `cheat-sheet/CLAUDE.md` has the build, the layout and the way to republish.
+course site since 2026-11-11 (AINIT-PAGE `ab95b28`): a button beside the intro deck on the home page and the group
+"Cheat sheet" of weekend 2's Materials. From AINIT-PAGE `9e0be17` (2026-11-11) it was also number 01 of weekend 2's
+agenda and ZIP; since `6c59082` (2026-11-12, Carlos: "Drop the cheat sheet from the agenda of weekend 2. We'll keep it
+on the website.") it is off the agenda and out of the ZIP, in the Materials list without a number.
+`cheat-sheet/CLAUDE.md` has the build, the layout and the way to republish.
 
 ## The cold intro and cases PDFs (added 2026-11-12)
 
 `cold-intro-and-cases/` holds one PDF per Friday block that has a cold intro: the cold intro, then the block's business
 cases, concatenated page by page by `merge.py` (pypdf) from the decks of `cold-intro-deck/` and `cases-deck/`. Carlos,
 2026-11-12: "always put the cold intro with the business on top at the beginning before the rest of the material ...
-make that for each block the first chip". On the course site since AINIT-PAGE `c01c44e` as "Nearest neighbors" (02),
-"Bandits" (08) and "Large-scale computing" (10) (numbers since AINIT-PAGE `c5283fe`, when Matchmaker parts two and three became one game); the separate cold intro and case files of
-those blocks are off the site, and the Friday 11:00 row opens with its case deck, "Business case, Spotify" (05). After a rebuild of any of the
+make that for each block the first chip". On the course site since AINIT-PAGE `c01c44e` as "Nearest neighbors" (01),
+"Bandits" (07) and "Large-scale computing" (10) (numbers since AINIT-PAGE `6c59082`, when the cheat sheet left the
+agenda; a TA's game, "Urn Games" at 15:00, AINIT-PAGE `35366ab`, is 09); the separate cold intro and case files of
+those blocks are off the site, and the Friday 11:00 row opens with its case deck, "Business case, Spotify" (04). After a rebuild of any of the
 six decks, run `python3 -I merge.py` there and copy its output to the site (`cold-intro-and-cases/README.md`). Since
 AINIT-PAGE `5c1a936` (the same day) the 16:00 PDF ends with the clusters deck, 143 pages, site file
 `ainit-hs26-large-scale-computing.pdf`, and the weekend has 11 numbers (the Grid is 11). `merge.py` points every

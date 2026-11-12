@@ -10,7 +10,7 @@ AINIT-PAGE `5c1a936`.
 
 | File | Pages | Cold intro | Business cases | Site file (`AINIT-PAGE/public/slides/we2/`) | Chip |
 |---|---|---|---|---|---|
-| `block1-nearest-neighbors.pdf` | 37 = 16 + 21 | `../cold-intro-deck/block1-nearest-neighbors.pdf` | `../cases-deck/block1-nearest-neighbors.pdf` (Etsy, Airbnb) | `ainit-hs26-nearest-neighbors-cold-intro-and-cases.pdf` | Friday 08:15, "Nearest neighbors", after the cheat sheet |
+| `block1-nearest-neighbors.pdf` | 37 = 16 + 21 | `../cold-intro-deck/block1-nearest-neighbors.pdf` | `../cases-deck/block1-nearest-neighbors.pdf` (Etsy, Airbnb) | `ainit-hs26-nearest-neighbors-cold-intro-and-cases.pdf` | Friday 08:15, "Nearest neighbors", first (after the cheat sheet until AINIT-PAGE `6c59082`) |
 | `block3-bandits.pdf` | 33 = 16 + 17 | `../cold-intro-deck/block3-bandits-graunt.pdf` | `../cases-deck/block3-bandits.pdf` (Spotify's home page, Amazon Payments) | `ainit-hs26-bandits-cold-intro-and-cases.pdf` | Friday 14:00, "Bandits", first |
 | `block4-large-scale-computing.pdf` | 143 = 10 + 9 + 124 | `../cold-intro-deck/block5-computing-clusters.pdf` | `../cases-deck/block4-parallelized-mf.pdf` (LinkedIn's ads), then the clusters deck `../clusters-deck/block5-computing-clusters.pdf` | `ainit-hs26-large-scale-computing.pdf` (until `5c1a936`: `ainit-hs26-large-scale-computing-cold-intro-and-cases.pdf`, without the clusters deck) | Friday 16:00, "Large-scale computing", first; then "Handout", `ainit-hs26-large-scale-computing-handout.pdf`, a copy of `../clusters-deck/block5-computing-clusters-handout.pdf` |
 

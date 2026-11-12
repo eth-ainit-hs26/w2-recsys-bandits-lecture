@@ -85,7 +85,8 @@ Searching through representations". Since AINIT-PAGE `9e0be17` the chips read "N
 | `ainit-hs26-nearest-neighbors-cold-intro-and-cases.pdf` (since 2026-11-12) | `../cold-intro-and-cases/block1-nearest-neighbors.pdf`: this deck, then the cases Etsy and Airbnb |
 
 Since AINIT-PAGE `c01c44e` (2026-11-12) the deck is on the site only as the first part of the chip "Nearest neighbors",
-number 02, after the cheat sheet (Carlos, 2026-11-12: "always put the cold intro with the business on top at the beginning before the rest of the material ... make that for each block the first chip"; "they become now
+number 02 after the cheat sheet until AINIT-PAGE `6c59082`, which took the cheat sheet off the agenda, and number 01
+since (Carlos, 2026-11-12: "always put the cold intro with the business on top at the beginning before the rest of the material ... make that for each block the first chip"; "they become now
 together number two, and I want you to call it nearest neighbors"). After a rebuild, run `python3 -I merge.py` in
 `../cold-intro-and-cases/` and copy its output (`../cold-intro-and-cases/README.md`).
 
@@ -345,7 +346,7 @@ cold intro" and "Handout", number 11 of weekend 2 that day; the Mirror and every
 | `ainit-hs26-bandits-cold-intro.pdf` (until 2026-11-12) | `block3-bandits-graunt.pdf` |
 | `ainit-hs26-bandits-cold-intro-and-cases.pdf` (since 2026-11-12) | `../cold-intro-and-cases/block3-bandits.pdf`: GRAUNT, then the cases Spotify's home page and Amazon Payments |
 
-Since AINIT-PAGE `c01c44e` (2026-11-12) GRAUNT is on the site only as the first part of the chip "Bandits", number 08 since AINIT-PAGE `c5283fe` (09 before),
+Since AINIT-PAGE `c01c44e` (2026-11-12) GRAUNT is on the site only as the first part of the chip "Bandits", number 07 since AINIT-PAGE `6c59082` (09 until `c5283fe`, 08 until `6c59082`),
 the first chip of the 14:00 row; after a rebuild, merge it again (`../cold-intro-and-cases/`).
 
 The handout, `ainit-hs26-bandits-cold-intro-handout.pdf`, is off the site since AINIT-PAGE `5ab848e` (2026-11-11).
