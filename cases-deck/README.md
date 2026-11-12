@@ -35,6 +35,10 @@ nothing moves between clicks, all 14, 5, 9, 3 and 31 strings found, every citati
 longer among the fonts, and pdftotext finds no Ethiopic character in the five decks, their handouts and the merged
 PDFs of blocks 1 and 3. The merged PDFs were remade with `../cold-intro-and-cases/merge.py`.
 
+On the course site since AINIT-PAGE `e7ea6bf` (same file names): the three opening PDFs of the 08:15, 14:00 and 16:00
+rows, the Spotify case of 11:00 and "All six cases". The live files and the weekend ZIP's 01, 04, 07 and 10 were
+compared byte for byte with the files here after the deploy.
+
 ## Links to the sources, 2026-11-12
 
 Carlos, 2026-11-12: "Please put hyperlinks in the citations of the business cases so that if a participant is curious,
