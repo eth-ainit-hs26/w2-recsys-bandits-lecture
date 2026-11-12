@@ -218,7 +218,7 @@ CSCS as the only capitals, no build metadata, and Futura as the only font.
    its handout. The deck itself is unchanged: its closing frame "Computing clusters" leads into the lecture deck of
    that name, the next item of the row.
 5. 2026-11-12, Carlos, 2026-11-12: "always put the cold intro with the business on top at the beginning before the rest of the material ... make that for each block the first chip": since AINIT-PAGE `c01c44e` the deck is on the site only as the first part of
-   `ainit-hs26-large-scale-computing-cold-intro-and-cases.pdf`, the chip "Large-scale computing", number 11, the first
+   `ainit-hs26-large-scale-computing-cold-intro-and-cases.pdf`, the chip "Large-scale computing", number 10 since AINIT-PAGE `c5283fe` (11 before), the first
    chip of the 16:00 row, with the case LinkedIn's ads after it (`../cold-intro-and-cases/`); the separate site file
    is gone. After a rebuild, merge it again.
 
@@ -342,7 +342,7 @@ cold intro" and "Handout", number 11 of weekend 2 that day; the Mirror and every
 | `ainit-hs26-bandits-cold-intro.pdf` (until 2026-11-12) | `block3-bandits-graunt.pdf` |
 | `ainit-hs26-bandits-cold-intro-and-cases.pdf` (since 2026-11-12) | `../cold-intro-and-cases/block3-bandits.pdf`: GRAUNT, then the cases Spotify's home page and Amazon Payments |
 
-Since AINIT-PAGE `c01c44e` (2026-11-12) GRAUNT is on the site only as the first part of the chip "Bandits", number 09,
+Since AINIT-PAGE `c01c44e` (2026-11-12) GRAUNT is on the site only as the first part of the chip "Bandits", number 08 since AINIT-PAGE `c5283fe` (09 before),
 the first chip of the 14:00 row; after a rebuild, merge it again (`../cold-intro-and-cases/`).
 
 The handout, `ainit-hs26-bandits-cold-intro-handout.pdf`, is off the site since AINIT-PAGE `5ab848e` (2026-11-11).

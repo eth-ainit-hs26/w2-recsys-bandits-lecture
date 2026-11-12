@@ -352,8 +352,8 @@ After a rebuild, copy the PDF over the same site file name, run `npm ci && npm r
 
 Since AINIT-PAGE `c01c44e` (2026-11-12, Carlos, 2026-11-12: "always put the cold intro with the business on top at the beginning before the rest of the material ... make that for each block the first chip") the decks of
 blocks 1, 3 and 4 are on the site only after their cold intros, one PDF per block made by
-`../cold-intro-and-cases/merge.py`: the chips "Nearest neighbors" (02, after the cheat sheet), "Bandits" (09) and
-"Large-scale computing" (11), each first on its row; `ainit-hs26-business-cases-nearest-neighbors.pdf`,
+`../cold-intro-and-cases/merge.py`: the chips "Nearest neighbors" (02, after the cheat sheet), "Bandits" (08) and
+"Large-scale computing" (10), each first on its row (numbers since AINIT-PAGE `c5283fe`, when Matchmaker parts two and three became one game); `ainit-hs26-business-cases-nearest-neighbors.pdf`,
 `-bandits.pdf` and `-parallelized-mf.pdf` are gone, so the first, third and fourth rows of the table describe the
 site before that commit. The deck of block 2 is the first chip of the 11:00 row since the same commit, "Business
 case, Spotify", number 05. After a rebuild of a block 1, 3 or 4 deck, run the script and copy its output

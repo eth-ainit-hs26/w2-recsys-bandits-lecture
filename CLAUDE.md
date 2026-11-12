@@ -339,8 +339,8 @@ the top of weekend 2's Materials. `cheat-sheet/CLAUDE.md` has the build, the lay
 cases, concatenated page by page by `merge.py` (pypdf) from the decks of `cold-intro-deck/` and `cases-deck/`. Carlos,
 2026-11-12: "always put the cold intro with the business on top at the beginning before the rest of the material ...
 make that for each block the first chip". On the course site since AINIT-PAGE `c01c44e` as "Nearest neighbors" (02),
-"Bandits" (09) and "Large-scale computing" (11); the separate cold intro and case files of those blocks are off the
-site, and the Friday 11:00 row opens with its case deck, "Business case, Spotify" (05). After a rebuild of any of the
+"Bandits" (08) and "Large-scale computing" (10) (numbers since AINIT-PAGE `c5283fe`, when Matchmaker parts two and three became one game); the separate cold intro and case files of
+those blocks are off the site, and the Friday 11:00 row opens with its case deck, "Business case, Spotify" (05). After a rebuild of any of the
 six decks, run `python3 -I merge.py` there and copy its output to the site (`cold-intro-and-cases/README.md`).
 
 ## When in doubt

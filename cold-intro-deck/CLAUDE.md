@@ -26,8 +26,8 @@ this deck, 11 for block 3, 14 for block 5 since AINIT-PAGE `5ab848e`) and its ZI
 intro has a handout on the site since AINIT-PAGE `5ab848e` (Carlos, 2026-11-11: "drop the handouts for all the cold
 intros"): the handouts built here stay in this folder. Since AINIT-PAGE `c01c44e` (2026-11-12) the site shows each
 cold intro only as the first part of its block's opening PDF, the cold intro then the block's business cases, made by
-`../cold-intro-and-cases/merge.py`: "Nearest neighbors" (02), "Bandits" (09), "Large-scale computing" (11), each the
-first chip of its row after the cheat sheet. After a rebuild of a cold intro, run that script and copy its output.
+`../cold-intro-and-cases/merge.py`: "Nearest neighbors" (02), "Bandits" (08), "Large-scale computing" (10), each the
+first chip of its row after the cheat sheet (numbers since AINIT-PAGE `c5283fe`, when Matchmaker parts two and three became one game). After a rebuild of a cold intro, run that script and copy its output.
 
 The look is the Title sequence of the course cold intro (`w1-lecture-material/cold-intro/intro-slides/`, chosen by
 Carlos on 2026-10-14): a picture on every frame, Futura, lavender only for the two highlighted sentences of the

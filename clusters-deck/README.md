@@ -128,8 +128,8 @@ weekend 2.
 | `ainit-hs26-large-scale-computing-cold-intro-and-cases.pdf` (since 2026-11-12) | `../cold-intro-and-cases/block4-large-scale-computing.pdf`: the cold intro, then the case LinkedIn's ads |
 
 Since AINIT-PAGE `c01c44e` (2026-11-12) the 16:00 row reads, in Carlos's order ("merge large-scale computing cold
-intro with business case, LinkedIn ads, then computing clusters in that order"): "Large-scale computing" (11, the cold
-intro and the case in one PDF), "Computing clusters" and "Handout" (12), "Matchmaker on a Grid" (13).
+intro with business case, LinkedIn ads, then computing clusters in that order"): "Large-scale computing" (10, the cold
+intro and the case in one PDF), "Computing clusters" and "Handout" (11), "Matchmaker on a Grid" (12) (numbers since AINIT-PAGE `c5283fe`, when Matchmaker parts two and three became one game).
 
 A live file is https://eth-ainit-hs26.github.io/AINIT-PAGE/slides/we2/<file>
 After a rebuild, copy the PDF and its handout over the same site file names, run `npm ci && npm run build` in `AINIT-PAGE`, push to
