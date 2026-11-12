@@ -221,6 +221,9 @@ CSCS as the only capitals, no build metadata, and Futura as the only font.
    `ainit-hs26-large-scale-computing-cold-intro-and-cases.pdf`, the chip "Large-scale computing", number 10 since AINIT-PAGE `c5283fe` (11 before), the first
    chip of the 16:00 row, with the case LinkedIn's ads after it (`../cold-intro-and-cases/`); the separate site file
    is gone. After a rebuild, merge it again.
+6. 2026-11-12, Carlos: "Notice the slides on large-scale computing and computing clusters. Merge them, I meant". Since
+   AINIT-PAGE `5c1a936` the same PDF ends with the clusters deck, site file `ainit-hs26-large-scale-computing.pdf`,
+   still the chip "Large-scale computing", number 10.
 
 ## Open items of block 5
 

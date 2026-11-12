@@ -84,9 +84,9 @@ Specifically:
 │                               "Estimating chances from the past" (Graunt, chosen from three
 │                               drafts on 2026-11-11)
 ├── cold-intro-and-cases/       One PDF per block that has a cold intro (2026-11-12): the cold intro,
-│                               then the block's business cases, made by merge.py from the built
-│                               decks; the first chip of the Friday 08:15, 14:00 and 16:00 rows;
-│                               own CLAUDE.md and README.md
+│                               then the block's business cases (16:00: then the clusters deck),
+│                               made by merge.py from the built decks; the first chip of the
+│                               Friday 08:15, 14:00 and 16:00 rows; own CLAUDE.md and README.md
 ├── clusters-deck/              "Computing clusters" (2026-11-10), the Saturday 08:15 block until
 │                               2026-11-11, since then part of the Friday 16:00 block
 │                               "Large-scale computing": a port
@@ -303,7 +303,10 @@ nodes and sockets; capacity and bandwidth; watts, kilowatt hours and the bill; t
 speeds; 6ND on Apertus-70B; dollars and gigawatt hours. Every number is FDD's or a platform fact checked against
 HPE and CSCS (`clusters-deck/tools/check_port.py`). Build from inside the folder with
 `../style/tools/build.sh block5-computing-clusters.tex`. Its README.md maps every frame to FDD's slide numbers and
-lists the slides not ported.
+lists the slides not ported. Since AINIT-PAGE `5c1a936` (2026-11-12, Carlos: "Notice the slides on large-scale
+computing and computing clusters. Merge them, I meant") the course site serves it only inside the 16:00 block's PDF,
+after the cold intro and the case LinkedIn's ads (`cold-intro-and-cases/block4-large-scale-computing.pdf`), with its
+handout as that PDF's handout.
 
 ## The lecture notes (added 2026-11-11)
 
@@ -341,7 +344,11 @@ cases, concatenated page by page by `merge.py` (pypdf) from the decks of `cold-i
 make that for each block the first chip". On the course site since AINIT-PAGE `c01c44e` as "Nearest neighbors" (02),
 "Bandits" (08) and "Large-scale computing" (10) (numbers since AINIT-PAGE `c5283fe`, when Matchmaker parts two and three became one game); the separate cold intro and case files of
 those blocks are off the site, and the Friday 11:00 row opens with its case deck, "Business case, Spotify" (05). After a rebuild of any of the
-six decks, run `python3 -I merge.py` there and copy its output to the site (`cold-intro-and-cases/README.md`).
+six decks, run `python3 -I merge.py` there and copy its output to the site (`cold-intro-and-cases/README.md`). Since
+AINIT-PAGE `5c1a936` (the same day) the 16:00 PDF ends with the clusters deck, 143 pages, site file
+`ainit-hs26-large-scale-computing.pdf`, and the weekend has 11 numbers (the Grid is 11). `merge.py` points every
+internal link at its own deck's page since then: Beamer's link targets ("Navigation2") repeat across decks, and the
+section links of the case decks had jumped into the cold intros in the files of `c01c44e`.
 
 ## When in doubt
 

@@ -122,18 +122,24 @@ weekend 2.
 
 | Site file | Source here |
 |---|---|
-| `ainit-hs26-computing-clusters.pdf` | `block5-computing-clusters.pdf` |
-| `ainit-hs26-computing-clusters-handout.pdf` | `block5-computing-clusters-handout.pdf` |
-| `ainit-hs26-computing-clusters-cold-intro.pdf` (until 2026-11-12) | `../cold-intro-deck/block5-computing-clusters.pdf` |
-| `ainit-hs26-large-scale-computing-cold-intro-and-cases.pdf` (since 2026-11-12) | `../cold-intro-and-cases/block4-large-scale-computing.pdf`: the cold intro, then the case LinkedIn's ads |
+| `ainit-hs26-computing-clusters.pdf` (until AINIT-PAGE `5c1a936`, 2026-11-12) | `block5-computing-clusters.pdf` |
+| `ainit-hs26-computing-clusters-handout.pdf` (until `5c1a936`) | `block5-computing-clusters-handout.pdf` |
+| `ainit-hs26-computing-clusters-cold-intro.pdf` (until `c01c44e`, 2026-11-12) | `../cold-intro-deck/block5-computing-clusters.pdf` |
+| `ainit-hs26-large-scale-computing-cold-intro-and-cases.pdf` (from `c01c44e` until `5c1a936`) | `../cold-intro-and-cases/block4-large-scale-computing.pdf` of that day: the cold intro, then the case LinkedIn's ads |
+| `ainit-hs26-large-scale-computing.pdf` (since `5c1a936`) | `../cold-intro-and-cases/block4-large-scale-computing.pdf`: the cold intro, the case LinkedIn's ads, then this deck, 143 pages |
+| `ainit-hs26-large-scale-computing-handout.pdf` (since `5c1a936`) | `block5-computing-clusters-handout.pdf` |
 
 Since AINIT-PAGE `c01c44e` (2026-11-12) the 16:00 row reads, in Carlos's order ("merge large-scale computing cold
 intro with business case, LinkedIn ads, then computing clusters in that order"): "Large-scale computing" (10, the cold
 intro and the case in one PDF), "Computing clusters" and "Handout" (11), "Matchmaker on a Grid" (12) (numbers since AINIT-PAGE `c5283fe`, when Matchmaker parts two and three became one game).
+Since AINIT-PAGE `5c1a936` (the same day, Carlos: "Notice the slides on large-scale computing and computing clusters.
+Merge them, I meant") the row reads "Large-scale computing" and "Handout" (10: the cold intro, the case and this deck
+in one PDF, and this deck's handout), then "Matchmaker on a Grid" (11).
 
 A live file is https://eth-ainit-hs26.github.io/AINIT-PAGE/slides/we2/<file>
-After a rebuild, copy the PDF and its handout over the same site file names, run `npm ci && npm run build` in `AINIT-PAGE`, push to
-`main`, then curl the live file and `cmp` it with the one here.
+After a rebuild, run `python3 -I merge.py` in `../cold-intro-and-cases/`, copy its `block4-large-scale-computing.pdf`
+and this deck's handout over the two site files of `5c1a936`, run `npm ci && npm run build` in `AINIT-PAGE`, push to
+`main`, then curl the live files and `cmp` them with the ones here.
 
 ## Open items
 

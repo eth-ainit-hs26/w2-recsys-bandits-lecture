@@ -5,7 +5,9 @@ the Saturday 14 November 2026 08:15 block of AINIT HS26 until 2026-11-11, when C
 parallelized matrix factorization: since then an item of the Friday 13 November 16:00 block "Large-scale
 computing" (AINIT-PAGE `5ab848e`; the title page reads Friday 13 November 2026), since AINIT-PAGE `c01c44e`
 (2026-11-12) after the block's opening PDF (its cold intro, then the case LinkedIn's ads, `../cold-intro-and-cases/`)
-and before Matchmaker on a Grid. Built on 2026-11-10 as a port into Codex plates of the
+and before Matchmaker on a Grid, and since AINIT-PAGE `5c1a936` (the same day, Carlos: "Notice the slides on
+large-scale computing and computing clusters. Merge them, I meant") the last part of that PDF: the site serves this
+deck only inside `ainit-hs26-large-scale-computing.pdf`, and its handout as `ainit-hs26-large-scale-computing-handout.pdf`. Built on 2026-11-10 as a port into Codex plates of the
 first block of FDD weekend 7, "The cost of computation and supercomputers"
 (`/Users/carloscotrini/Documents/git_fdd/projects/weekend-07-large-scale/carlos-lectures/slides/w7-cost-slides.tex`,
 commit `b296f78`), with the cuts and changes Carlos dictated that day. `README.md` has the frame map against FDD's
@@ -56,7 +58,8 @@ change: the checks find no overlap of text.
 7. **The write hooks** reject Unicode dashes, a double hyphen used as a dash and the contrastive negations named
    in the House style of `git_ainit/CLAUDE.md`. TikZ paths use `to`.
 8. **This repository is public and a push to main publishes it on GitHub Pages**, the PDFs included. The course
-   site serves its own copies (README.md, section "On the course site"): after a rebuild, copy them there again.
+   site serves its own copies (README.md, section "On the course site"): after a rebuild, run
+   `../cold-intro-and-cases/merge.py`, then copy the merged PDF and this deck's handout there again.
 
 ## Maintenance contract
 

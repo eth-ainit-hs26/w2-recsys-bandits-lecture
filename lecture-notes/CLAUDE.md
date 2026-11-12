@@ -93,7 +93,10 @@ worked examples). A number written in the prose of the .tex must be added to `EX
 ## Gotchas
 
 - The links table at the end of the morning notes is `\small` with `\scriptsize` addresses and a 0.5 em gap, as in
-  the afternoon notes; the longer game names of 2026-11-12 overflowed it with `\footnotesize` addresses.
+  the afternoon notes; the longer game names of 2026-11-12 overflowed it with `\footnotesize` addresses. The afternoon
+  notes link the slides of the 16:00 block, "Large-scale computing", `ainit-hs26-large-scale-computing.pdf` (the cold
+  intro, the case and the clusters deck in one PDF since AINIT-PAGE `5c1a936`); that row ran 10 pt too wide, so the
+  table prints its three course site addresses without `https://` (`\href` with `\nolinkurl`), the links keep it.
 - Film names above a TikZ matrix: every head gets `text width=\headwidth`, where `\headwidth` is the width of the
   longest word of the figure's film names (set with `\settowidth` on a one-column tabular of the words), so the
   film columns are equally wide and no name is hyphenated. A `\strut` on the last line, `anchor=south` and
