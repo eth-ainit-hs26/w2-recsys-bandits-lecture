@@ -19,6 +19,22 @@ all) the same day. The same evening he rejected the cases of version 1 as old: "
   `weekend2-cases-handout.pdf`, 27 pages. Section "The weekend deck" below.
 - `PRINCIPLES.md`: the lessons of the case decks and the rules for the next ones (bandits, advertising).
 
+## Standard numbers, 2026-11-12
+
+Carlos, 2026-11-12: "Replace all Ge'ez numerals in the business case slides with standard numbers please". The style
+draws 1 to 5 in Ge'ez on the divider page of a section, in balloons and in numbered lists, and prints the year in
+Ge'ez after the date on the title page. The last block of `cases-kit.tex` overrides it for the case decks: the divider
+pages show 1 to 5 in EB Garamond, as the style draws 6 and more, balloons and lists show digits, and the title pages
+show the date alone, which already ends in 2026. `../style/` is unchanged, so the other decks of this repository keep
+their Ge'ez numerals; in `../cold-intro-and-cases/block4-large-scale-computing.pdf` the pages of the clusters deck
+(20 to 143) still have them.
+
+State on 2026-11-12: the five decks keep their pages (21, 8, 17, 9, 52), and only the title page and the divider pages
+differ from the builds before (pixel comparison at 40 dpi); 0 log errors, 0 em and en dashes, no build metadata,
+nothing moves between clicks, all 14, 5, 9, 3 and 31 strings found, every citation with its link. Kefa III is no
+longer among the fonts, and pdftotext finds no Ethiopic character in the five decks, their handouts and the merged
+PDFs of blocks 1 and 3. The merged PDFs were remade with `../cold-intro-and-cases/merge.py`.
+
 ## Links to the sources, 2026-11-12
 
 Carlos, 2026-11-12: "Please put hyperlinks in the citations of the business cases so that if a participant is curious,

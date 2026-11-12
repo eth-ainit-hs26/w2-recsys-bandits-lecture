@@ -256,6 +256,9 @@ Since 2026-11-12 (Carlos: "put hyperlinks in the citations of the business cases
 they can click and find the paper") the source line of every case frame is a link to the paper or post behind its
 numbers (`\weblink`; arXiv for the papers), checked by `cases-deck/tools/check_links.py` in the decks and in the
 merged PDFs of `cold-intro-and-cases/`; `cases-deck/README.md`, section "Links to the sources", has the table.
+Since 2026-11-12 (Carlos: "Replace all Ge'ez numerals in the business case slides with standard numbers") the case
+decks show digits on their divider pages and the date alone on their title pages: the last block of
+`cases-deck/cases-kit.tex` overrides the style there. `style/` and the other decks keep their Ge'ez numerals.
 
 ## The cold intro deck (added 2026-11-10)
 

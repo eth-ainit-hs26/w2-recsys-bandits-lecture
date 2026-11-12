@@ -113,3 +113,14 @@
 \newcommand{\scellwin}[4]{%
   \node[score cell, draw=brand, line width=1.1pt, text=brand, font=\normalsize\bfseries, visible on=<#1>]
     at (#2,#3) {#4};}
+
+% ===== Added 2026-11-12: standard numbers in place of Ge'ez numerals =====
+% Carlos, 2026-11-12: "Replace all Ge'ez numerals in the business case slides with standard numbers".
+% The style (../style/ainit-preamble.tex) draws 1 to 5 in Ge'ez on the section pages, in the balloons and
+% in numbered lists, and prints the year in Ge'ez after the date on the title page. In the case decks the
+% section pages show the digit in EB Garamond (the style's own form from 6 on), balloons and lists show
+% digits, and the title page has no Ge'ez year: its date already ends in 2026.
+\renewcommand{\geezNumeral}[1]{\number#1}
+\renewcommand{\geezlight}[1]{#1}
+\renewcommand{\cxnum}[1]{\number#1}
+\let\geezYear\undefined
