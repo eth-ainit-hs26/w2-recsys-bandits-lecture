@@ -23,6 +23,11 @@ page of the file lands elsewhere than on the page its own deck meant.
 
 1. **pypdf prints "Annotation sizes differ: 1 vs. 0"** once per page that holds a link. The links are copied: each
    merged page has the same link annotations as its source page (checked on 2026-11-12, 69 links in the 16:00 PDF).
+   Since 2026-11-12 the source line of every case frame is a link to its paper or post (`../cases-deck/README.md`,
+   section "Links to the sources"), so the warning also comes from the case pages, with the number of their links.
+   `merge.py` rewrites only internal links (GoTo); after a merge,
+   `python3 ../cases-deck/tools/check_links.py block1-nearest-neighbors.pdf block3-bandits.pdf block4-large-scale-computing.pdf`
+   checks that every source line kept its link (21, 14 and 7 citations on 2026-11-12).
 2. **The decks' own bookmarks and page labels are dropped.** Beamer labels its pages, and the second deck's labels
    would start again at 1 in the middle of the file. The output has one bookmark per deck and no labels, so a viewer
    counts 1 to N. The page numbers printed on the case frames are the case deck's own.

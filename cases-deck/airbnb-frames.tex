@@ -20,7 +20,11 @@
 %   python3 tools/cases_numbers.py
 %   ../style/tools/build.sh block1-nearest-neighbors.tex
 %   python3 tools/check_numbers.py block1-nearest-neighbors.pdf tools/expected-block1-nearest-neighbors.txt
-\newcommand{\absource}{Abdool and others (Airbnb), arXiv preprint 2026; Airbnb's blog 2025.}
+% The source line is a link (\weblink, violet) to the free full text whose numbers the slides quote: the arXiv
+% version read in full for a paper (the line still names the published venue), the post itself for a blog
+% (Carlos, 2026-11-12: "put hyperlinks in the citations of the business cases").
+\newcommand{\absource}{\weblink{https://arxiv.org/abs/2601.06873}{Abdool and others (Airbnb), arXiv preprint 2026};
+  \weblink{https://airbnb.tech/ai-ml/embedding-based-retrieval-for-airbnb-search/}{Airbnb's blog 2025}.}
 
 % ===== Frame 1. The first stage of Airbnb's search =====
 % Say: Airbnb, the online marketplace for places to stay. A popular location can have around a hundred

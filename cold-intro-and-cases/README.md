@@ -18,7 +18,11 @@ Build, from this folder, after a rebuild of any of the six decks:
 
 ```bash
 python3 -I merge.py
+python3 ../cases-deck/tools/check_links.py block1-nearest-neighbors.pdf block3-bandits.pdf block4-large-scale-computing.pdf
 ```
+
+The second command checks that the source line of every case page still links to its paper or post (since
+2026-11-12, `../cases-deck/README.md`, section "Links to the sources").
 
 Then copy each PDF over its site file, push AINIT-PAGE, curl the live file and `cmp` it with the one here. A live
 file is https://eth-ainit-hs26.github.io/AINIT-PAGE/slides/we2/<site file>

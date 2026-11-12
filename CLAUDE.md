@@ -252,6 +252,10 @@ block, put in one single deck all the slides with all the business cases"): a ca
 `block2-matrix-factorization.tex`: Spotify; `block3-bandits.tex`: Spotify's home page, Amazon Payments;
 `block4-parallelized-mf.tex`: LinkedIn's ads), the six one-case decks were removed, and the weekend deck follows the
 order of the blocks.
+Since 2026-11-12 (Carlos: "put hyperlinks in the citations of the business cases so that if a participant is curious,
+they can click and find the paper") the source line of every case frame is a link to the paper or post behind its
+numbers (`\weblink`; arXiv for the papers), checked by `cases-deck/tools/check_links.py` in the decks and in the
+merged PDFs of `cold-intro-and-cases/`; `cases-deck/README.md`, section "Links to the sources", has the table.
 
 ## The cold intro deck (added 2026-11-10)
 

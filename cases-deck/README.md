@@ -19,6 +19,37 @@ all) the same day. The same evening he rejected the cases of version 1 as old: "
   `weekend2-cases-handout.pdf`, 27 pages. Section "The weekend deck" below.
 - `PRINCIPLES.md`: the lessons of the case decks and the rules for the next ones (bandits, advertising).
 
+## Links to the sources, 2026-11-12
+
+Carlos, 2026-11-12: "Please put hyperlinks in the citations of the business cases so that if a participant is curious,
+they can click and find the paper that leads to the document where all these numbers are being produced." The source
+line of every case frame is a link (`\weblink` of the style, violet) to the free full text whose numbers the slides
+quote. The citation keeps the published venue; the link opens the arXiv version that `tools/cases_numbers.py` was read
+from, or the blog post itself. The macros are at the top of each `<case>-frames.tex`.
+
+| Case | Citation on the slides | Link |
+|---|---|---|
+| Etsy | Jha and others (Etsy), IEEE FMLDS 2024 | https://arxiv.org/abs/2306.04833 |
+| Airbnb | Abdool and others (Airbnb), arXiv preprint 2026 | https://arxiv.org/abs/2601.06873 |
+| Airbnb | Airbnb's blog 2025 | https://airbnb.tech/ai-ml/embedding-based-retrieval-for-airbnb-search/ |
+| Spotify | De Nadai and others (Spotify), WWW 2024 Companion | https://arxiv.org/abs/2403.05185 |
+| Spotify's home page | Feijer and others (Spotify), CONSEQUENCES workshop at RecSys 2025 | https://arxiv.org/abs/2509.05460 |
+| Amazon Payments | John and Gozluklu (Amazon), AWS Machine Learning Blog, 2026 | https://aws.amazon.com/blogs/machine-learning/uplifting-conversion-across-the-acquisition-funnel-with-personalization-using-contextual-bandits-on-aws/ |
+| LinkedIn's ads | Borisyuk and others (LinkedIn), KDD 2024 | https://arxiv.org/abs/2402.06859 |
+
+Checked on 2026-11-12: every address answered 200 to curl; for each arXiv paper the API's latest version is the one
+read (v2 for Etsy and LinkedIn, v1 for the others), and its comment names the venue for Etsy, Spotify and Spotify's
+home page; the two blog pages hold the sentences quoted in `tools/cases_numbers.py`. The publishers' pages (the DOIs
+in `tools/cases_numbers.py`) answered curl with 403 (ACM) and 202 (IEEE), and IEEE's full text needs a subscription.
+Etsy frame 4 has no citation (invented numbers only). `cases.pdf`, unpublished, has no links.
+
+`python3 tools/check_links.py <pdf> ...` reads the `\weblink` pairs of the frames files and fails when a page shows a
+citation without its link; it failed on every source page of the builds before this change. State on 2026-11-12:
+the five decks show the same text as before (pdftotext, layout mode) and the same pages (21, 8, 17, 9, 52); 0 log
+errors, 0 em and en dashes, no build metadata, nothing moves between clicks, all 14, 5, 9, 3 and 31 strings found;
+21, 6, 14, 7 and 48 citations shown, each with its link. The merged PDFs of `../cold-intro-and-cases/` keep them
+(21, 14 and 7).
+
 ## One deck per block, 2026-11-09
 
 Carlos, 2026-11-09: "Please reorganize the slides. I want that you don't make like each case a separate slide deck.
@@ -47,6 +78,7 @@ python3 tools/cases_numbers.py
 ../style/tools/check.sh block1-nearest-neighbors.pdf
 python3 ../style/tools/check_overlays.py block1-nearest-neighbors.pdf
 python3 tools/check_numbers.py block1-nearest-neighbors.pdf tools/expected-block1-nearest-neighbors.txt
+python3 tools/check_links.py block1-nearest-neighbors.pdf
 python3 ../style/tools/make_handout.py block1-nearest-neighbors.pdf block1-nearest-neighbors-handout.pdf
 ```
 

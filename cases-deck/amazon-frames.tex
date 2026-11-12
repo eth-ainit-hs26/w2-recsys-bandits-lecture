@@ -13,7 +13,11 @@
 %   python3 tools/cases_numbers.py
 %   ../style/tools/build.sh block3-bandits.tex
 %   python3 tools/check_numbers.py block3-bandits.pdf tools/expected-block3-bandits.txt
-\newcommand{\amsource}{John and Gozluklu (Amazon), AWS Machine Learning Blog, 2026.}
+% The source line is a link (\weblink, violet) to the free full text whose numbers the slides quote: the arXiv
+% version read in full for a paper (the line still names the published venue), the post itself for a blog
+% (Carlos, 2026-11-12: "put hyperlinks in the citations of the business cases").
+\newcommand{\amsource}{%
+  \weblink{https://aws.amazon.com/blogs/machine-learning/uplifting-conversion-across-the-acquisition-funnel-with-personalization-using-contextual-bandits-on-aws/}{John and Gozluklu (Amazon), AWS Machine Learning Blog, 2026}.}
 
 % ===== Frame 1. Which page for which visitor =====
 % Say: Amazon Payments invites customers to apply for one of its products; the post does not say which. The page

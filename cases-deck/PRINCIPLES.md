@@ -80,7 +80,7 @@ Details cut from a slide go into the `% Say:` talk track above its frame.
 - No sentence that repeats a diagram of the same slide.
 - One quote a slide at most.
 - A title never repeats a number shown large on the slide.
-- Short source line: "Jha and others (Etsy), IEEE FMLDS 2024."
+- Short source line: "Jha and others (Etsy), IEEE FMLDS 2024.", a link (section "Numbers and claims").
 - "relative change" beside every percentage from a test.
 - A measure says what it counts ("visits that end in a purchase"); a metric's name ("conversion rate") stays off the slide.
 - Body text at `\normalsize` holds about 70 characters on the full 130 mm line and 40 in a 64 mm column.
@@ -106,12 +106,18 @@ Details cut from a slide go into the `% Say:` talk track above its frame.
   every, popular, most), which source says what (paper or blog), how often something runs (daily, at each visit),
   what a test compared, hedges (may, currently, directional: a lift not claimed as significant) and advice that a
   slide or a talk track tells as done.
+- The source line is a link to the document behind its numbers: the source macro wraps the citation in
+  `\weblink{<url>}{<citation>}` (violet), to the free full text that was read: the arXiv version for a paper, while
+  the citation names the published venue; the post for a blog. Carlos, 2026-11-12: "put hyperlinks in the citations
+  of the business cases so that if a participant is curious, they can click and find the paper". ACM and IEEE pages
+  answer curl with 403 and 202, so a link to them cannot be checked by script.
 - A number, quotation or source goes only on the slides of the company it belongs to, whatever slide the request
   came up on. A comparison across cases goes on a slide only when Carlos asks for that comparison.
 
 ### Checks before sending
 
 - `build.sh`, `check.sh` (dashes, build words; it rejects "candidate"), `check_overlays.py`, `check_numbers.py`,
+  `check_links.py` (every source line carries its link; also on the merged PDFs of `../cold-intro-and-cases/`),
   `make_handout.py`.
 - Render every page at 150 dpi and read it: text past the frame, labels touching boxes, borders cut by labels.
 - Grep each `<case>-frames.tex` for the names of the other companies: they may appear in comments, never in the
@@ -158,12 +164,13 @@ python3 tools/cases_numbers.py
 ../style/tools/check.sh block1-nearest-neighbors.pdf
 python3 ../style/tools/check_overlays.py block1-nearest-neighbors.pdf
 python3 tools/check_numbers.py block1-nearest-neighbors.pdf tools/expected-block1-nearest-neighbors.txt
+python3 tools/check_links.py block1-nearest-neighbors.pdf
 python3 ../style/tools/make_handout.py block1-nearest-neighbors.pdf block1-nearest-neighbors-handout.pdf
 ```
 
 ## Adding a case
 
-1. Copy `airbnb-frames.tex` to `<case>-frames.tex`, then write the frames.
+1. Copy `airbnb-frames.tex` to `<case>-frames.tex`, then write the frames and the source macro with its `\weblink`.
 2. In `tools/cases_numbers.py`: a block with the numbers and their source sentences, `show("<case>", ...)` for
    every string the PDF must show, `"<case>"` in `deck_expect` and in its block's list in `BLOCK_DECKS`.
 3. In the block deck and in `weekend2-cases.tex`: `\section{<title>}` and `\input{<case>-frames}`, in the order of
