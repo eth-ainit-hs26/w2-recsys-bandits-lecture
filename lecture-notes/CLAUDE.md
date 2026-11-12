@@ -115,8 +115,11 @@ worked examples). A number written in the prose of the .tex must be added to `EX
 - On the course site since 2026-11-11 (AINIT-PAGE `8bf143b`), with Carlos's request that day for one ZIP of the
   weekend: `public/slides/we2/ainit-hs26-lecture-notes-nearest-neighbors-and-matrix-factorization.pdf`, since
   AINIT-PAGE `9e0be17` the last chip of the Friday 11:00 row, "10 Lecture notes, nearest neighbors and matrix
-  factorization" (the number comes from the agenda), the same in the Materials list and in the weekend's ZIP. After
-  a rebuild, copy the PDF over that file, push AINIT-PAGE, and the next deploy rebuilds the ZIP.
+  factorization" (the number comes from the agenda), the same in the Materials list and in the weekend's ZIP. Since
+  AINIT-PAGE `c01c44e` (2026-11-12, Carlos: "put that next to download all slides and visualizations") off the
+  agenda: a button beside the ZIP button, "Lecture notes, nearest neighbors and matrix factorization (PDF)", from
+  `download.notes` of weekend 2 in `src/data/weekends.ts`, without a number, still in the Materials list and the
+  ZIP. After a rebuild, copy the PDF over that file, push AINIT-PAGE, and the next deploy rebuilds the ZIP.
 - The afternoon notes: in this repository since 2026-11-12, not on the course site that day.
 
 ## Maintenance contract

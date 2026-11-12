@@ -96,7 +96,9 @@ Specifically:
 ├── lecture-notes/              Lecture notes of the Friday 08:15 to 12:00 blocks (2026-11-11): the
 │                               inner product, nearest neighbors, the matrix product and matrix
 │                               factorization, four pages linking the games; every number from
-│                               tools/notes_numbers.py; own CLAUDE.md and README.md
+│                               tools/notes_numbers.py; since 2026-11-12 also the 14:00 and 16:00
+│                               blocks (bandits, large-scale computing), four pages, numbers from
+│                               tools/afternoon_numbers.py; own CLAUDE.md and README.md
 ├── cheat-sheet/                The semester on one A3 page (2026-11-11): a mind map of the three
 │                               weekends, each concept with what it is, when to use it and its use
 │                               in industry; own CLAUDE.md and SOURCES.md
@@ -312,7 +314,13 @@ links to its game on the course site and its Colab notebook. The worked examples
 Sara and The Intouchables, The Martian's second number, three hidden MovieLens ratings), computed by
 `lecture-notes/tools/notes_numbers.py` from copies of the `w2-cx-private` data that it checks against that checkout.
 On the course site since 2026-11-11 (AINIT-PAGE `8bf143b`): the last chip of the Friday 11:00 row since `9e0be17`,
-number 10 of weekend 2 that day, in weekend 2's Materials list and in the weekend's ZIP.
+number 10 of weekend 2 that day, in weekend 2's Materials list and in the weekend's ZIP. Since AINIT-PAGE `c01c44e`
+(2026-11-12, Carlos: "put that next to download all slides and visualizations") a button beside the ZIP button,
+without a number, still in the Materials list and the ZIP.
+Since 2026-11-12 `lecture-notes/` also holds `bandits-and-large-scale-computing.tex` and its PDF: four pages for the
+Friday 14:00 and 16:00 blocks (the Mirror's strategies on the race season, computing clusters, matrix factorization
+on a grid of computers), every number from `lecture-notes/tools/afternoon_numbers.py` (commits `b270e63`, `f5448f3`).
+They are not on the course site yet.
 `lecture-notes/CLAUDE.md` has the build and the TikZ gotchas.
 
 ## The cheat sheet (added 2026-11-11)
